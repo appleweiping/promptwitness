@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "id": "order-assistant-v2",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You help {{ customer_name }} resolve orders in {{ locale }}."
+    },
+    {
+      "role": "user",
+      "content": "Check order {{ order_id }}."
+    }
+  ],
+  "tools": [
+    {
+      "name": "lookup_order",
+      "description": "Retrieve the current order record.",
+      "parameters": {
+        "order_id": {"type": "string"}
+      },
+      "required": ["order_id"]
+    }
+  ],
+  "metadata": {"owner": "support-platform", "revision": 2}
+}

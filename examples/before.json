@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "id": "order-assistant-v1",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You help {{ customer_name }} with orders."
+    },
+    {
+      "role": "user",
+      "content": "Check order {{ order_id }}."
+    }
+  ],
+  "tools": [
+    {
+      "name": "lookup_order",
+      "description": "Look up an order by identifier.",
+      "parameters": {
+        "include_history": {"type": "boolean"},
+        "order_id": {"type": "string"}
+      },
+      "required": ["order_id"]
+    }
+  ],
+  "metadata": {"owner": "support", "revision": 1}
+}
