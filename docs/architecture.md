@@ -8,15 +8,17 @@ accepting hidden network calls or model-specific behavior.
 
 1. `parser.py` accepts UTF-8 JSON, rejects unknown fields, and creates immutable
    `PromptDocument`, `Message`, and `ToolSpec` values.
-2. `variables.py` recognizes the deliberately small `{{ identifier }}` syntax.
+2. `adapters.py` converts documented provider subsets and returns loss warnings.
+3. `variables.py` recognizes the deliberately small `{{ identifier }}` syntax.
    It extracts or substitutes text without evaluating expressions.
-3. `validation.py` produces ordered `Finding` values. Policies choose accepted
+4. `validation.py` produces ordered `Finding` values. Policies choose accepted
    roles and optional checks; they do not mutate the document.
-4. `diff.py` compares ordered messages, global variable contracts, named tools,
-   and optionally metadata. It produces ordered `Change` values.
-5. `reporting.py` serializes typed reports. JSON is the machine contract;
-   Markdown and HTML are review views over exactly the same facts.
-6. `cli.py` maps report severities to stable process exit codes.
+5. `diff.py` compares aligned or positional messages, global variable contracts,
+   named tools, and optionally metadata. It produces ordered `Change` values.
+6. `policies.py` validates versioned validation/diff configuration.
+7. `reporting.py` serializes typed reports. JSON is the machine contract;
+   Markdown, HTML, and SARIF are views over exactly the same facts.
+8. `cli.py` maps report severities to stable process exit codes.
 
 ## Determinism
 
@@ -34,6 +36,18 @@ Structural equality follows JSON types rather than Python coercion: booleans are
 never equal to numbers. Integer and floating representations of the same finite
 JSON number (for example `1` and `1.0`) are treated as equal.
 
+Smart message alignment uses dynamic programming with deterministic tie-breaking.
+It evaluates a quadratic grid of message pairs; each pair's substitution score also
+computes text similarity, so message length affects runtime. The score rows are rolled,
+while a one-byte-per-cell direction matrix supports backtracking. This bounds auxiliary
+memory substantially below a full Python float matrix while preserving exact alignment
+decisions.
+
+Provider conversion never calls a network service. Unknown request-level settings
+are not smuggled into prompt semantics: represented fields are converted, ignored
+fields are named in warnings, and non-text content that cannot fit schema version 1
+is rejected.
+
 ## Compatibility model
 
 PromptWitness treats requirements imposed on existing callers or executors as
@@ -43,8 +57,8 @@ this category. Text changes are warnings by default because they may alter
 behavior without making rendering impossible.
 
 This is a local policy, not semantic versioning for every prompt system. Library
-callers can set message severities with `DiffOptions`; the CLI separately picks
-which severity fails a job.
+callers can set message severities with `DiffOptions`; a versioned policy can
+override any stable change kind; the CLI separately picks which severity fails a job.
 
 ## Trust boundaries
 

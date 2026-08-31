@@ -78,6 +78,8 @@ def test_added_message_severity_is_configurable() -> None:
         {"include_metadata": "false"},
         {"context_lines": True},
         {"context_lines": 1.5},
+        {"message_alignment": "smart"},
+        {"severity_overrides": {"message_added": "breaking"}},
     ],
 )
 def test_diff_options_reject_wrong_runtime_types(kwargs: dict[str, object]) -> None:

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from math import isfinite
 from pathlib import Path
 from typing import Any
 
@@ -25,6 +26,7 @@ def load_prompt(path: str | Path) -> PromptDocument:
         raw = json.loads(
             content,
             parse_constant=_reject_non_finite,
+            parse_float=_finite_float,
             object_pairs_hook=_unique_object,
         )
     except json.JSONDecodeError as error:
@@ -113,6 +115,13 @@ def _parse_tool(raw: Any, index: int) -> ToolSpec:
 
 def _reject_non_finite(value: str) -> None:
     raise PromptFormatError(f"non-finite JSON number {value!r} is not allowed")
+
+
+def _finite_float(value: str) -> float:
+    parsed = float(value)
+    if not isfinite(parsed):
+        raise PromptFormatError(f"JSON number {value!r} is outside the finite float range")
+    return parsed
 
 
 def _unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:

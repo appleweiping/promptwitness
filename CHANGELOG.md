@@ -4,6 +4,16 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-08-31
+
+### Added
+
+- Add loss-aware OpenAI, Anthropic, and LangChain prompt adapters and a `convert` command.
+- Add deterministic smart message alignment with memory-efficient backtracking.
+- Add strict versioned validation/diff policy files and per-change severity overrides.
+- Add SARIF 2.1.0 output with stable rule IDs and fingerprints.
+- Add provider/policy examples, documentation, and a reproducible synthetic benchmark.
+
 ## [0.1.0] - 2026-08-31
 
 ### Added

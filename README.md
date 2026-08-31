@@ -10,7 +10,10 @@ valid prompt is safe. The narrow goal is to catch changes such as “a new rende
 variable is now required” or “a tool parameter disappeared” before deployment.
 
 [![CI](https://github.com/appleweiping/promptwitness/actions/workflows/ci.yml/badge.svg)](https://github.com/appleweiping/promptwitness/actions/workflows/ci.yml)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-3776AB)](https://www.python.org/)
+[![CodeQL](https://github.com/appleweiping/promptwitness/actions/workflows/codeql.yml/badge.svg)](https://github.com/appleweiping/promptwitness/actions/workflows/codeql.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/appleweiping/promptwitness/badge)](https://scorecard.dev/viewer/?uri=github.com/appleweiping/promptwitness)
+[![Release](https://img.shields.io/github/v/release/appleweiping/promptwitness?sort=semver)](https://github.com/appleweiping/promptwitness/releases)
+[![Python](https://img.shields.io/badge/python-3.10--3.14-3776AB)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 ## What it catches
@@ -29,6 +32,10 @@ variable is now required” or “a tool parameter disappeared” before deploym
 The severities are an explicit compatibility policy, not universal truth.
 `DiffOptions` lets a caller tighten message-change handling, and the CLI's
 `--fail-on` chooses the CI threshold.
+
+Provider adapters convert documented subsets of OpenAI, Anthropic, and LangChain
+payloads into the same native model. Conversion is loss-aware: unsupported fields
+produce warnings, while multimodal or otherwise unrepresentable content fails.
 
 ## Install
 
@@ -80,6 +87,14 @@ promptwitness diff examples/before.json examples/after.json \
   --format html --output promptwitness-report.html --fail-on never
 ```
 
+For prompts with inserted or removed messages, opt into structural alignment to
+avoid positional cascade noise:
+
+```bash
+promptwitness diff examples/before.json examples/after.json \
+  --message-alignment smart
+```
+
 ## Prompt format
 
 Schema version 1 is intentionally small and portable:
@@ -115,14 +130,24 @@ See [the format reference](docs/prompt-format.md).
 ## CLI
 
 ```text
-promptwitness validate PROMPT [--require-system-first] [--allow-empty-content]
-                            [--no-secret-scan]
-                            [--format json|markdown|html] [--output PATH]
+promptwitness validate PROMPT [--require-system-first|--no-require-system-first]
+                            [--allow-empty-content|--no-allow-empty-content]
+                            [--secret-scan|--no-secret-scan] [--policy POLICY]
+                            [--from-format native|openai|anthropic|langchain|auto]
+                            [--format json|markdown|html|sarif] [--output PATH]
                             [--fail-on never|warning|breaking]
 
-promptwitness diff BEFORE AFTER [--ignore-metadata] [--context-lines N]
-                              [--format json|markdown|html] [--output PATH]
+promptwitness diff BEFORE AFTER [--include-metadata|--ignore-metadata]
+                              [--before-format native|openai|anthropic|langchain|auto]
+                              [--after-format native|openai|anthropic|langchain|auto]
+                              [--context-lines N]
+                              [--message-alignment positional|smart]
+                              [--policy POLICY]
+                              [--format json|markdown|html|sarif] [--output PATH]
                               [--fail-on never|warning|breaking]
+
+promptwitness convert PROVIDER.json [--from-format auto|native|openai|anthropic|langchain]
+                                  [--id PROMPT_ID] [--output native.json]
 ```
 
 Exit codes are stable and automation-friendly:
@@ -131,8 +156,31 @@ Exit codes are stable and automation-friendly:
 - `1`: the input or output could not be processed;
 - `2`: a valid report reached `--fail-on` (default: `breaking`).
 
-Use JSON for machines, Markdown for pull requests, and HTML for a portable
-visual review. All three formats are generated from the same typed report.
+Use JSON for machines, Markdown for pull requests, HTML for a portable visual
+review, and SARIF 2.1.0 for code-scanning interfaces. All formats are generated
+from the same typed report.
+
+## Provider adapters
+
+`promptwitness convert` produces deterministic native schema-version-1 JSON.
+`validate` and `diff` can also consume provider formats directly. Adapter warnings
+go to stderr and enumerate source fields that were not represented; they are never
+hidden inside a successful report. See [provider adapters](docs/provider-adapters.md)
+for the exact supported subsets and loss rules.
+
+## Policy files
+
+A versioned JSON policy can declare allowed roles, validation toggles, alignment,
+context lines, and a severity override for any stable `ChangeKind`. CLI flags take
+precedence where both are supplied.
+
+```bash
+promptwitness diff released.json current.json \
+  --policy examples/strict-policy.json --format sarif --output prompt.sarif
+```
+
+See [policy files](docs/policies.md). Keep policies in source control and review
+their changes together with prompt changes.
 
 ## Python API
 
@@ -169,11 +217,16 @@ flowchart LR
     A[Versioned JSON] --> B[Strict parser]
     B --> C[Typed prompt model]
     C --> D[Static validator]
-    C --> E[Structural diff]
+    C --> K[Deterministic message alignment]
+    K --> E[Structural diff]
+    L[Provider JSON] --> M[Loss-aware adapters]
+    M --> C
+    N[Versioned policy] --> D
+    N --> E
     E --> F[Compatibility policy]
     D --> G[Typed findings]
     F --> H[Typed changes]
-    G --> I[JSON / Markdown / HTML]
+    G --> I[JSON / Markdown / HTML / SARIF]
     H --> I
     I --> J[Human review or CI gate]
 ```
@@ -190,7 +243,7 @@ boundaries.
   run: |
     promptwitness validate prompts/current.json --format json
     promptwitness diff prompts/released.json prompts/current.json \
-      --format markdown --output prompt-diff.md
+      --policy prompt-policy.json --format sarif --output prompt-diff.sarif
 ```
 
 If warning-level review is mandatory, add `--fail-on warning`. For report-only
@@ -202,14 +255,20 @@ jobs, use `--fail-on never`.
   can flag harmless examples; it is not a secret scanner.
 - Variable parsing supports only `{{ identifier }}` with letters, digits,
   `_`, `.`, and `-`. It intentionally does not evaluate a template language.
-- Messages are compared by position because schema version 1 has no message
-  IDs. An insertion can therefore produce a noisy but explicit diff.
+- Positional message comparison remains available and is the default for backward
+  compatibility. Smart alignment uses content/role/name similarity but remains a
+  heuristic; review the explicit added, removed, and changed records.
+- Smart alignment evaluates a quadratic grid of message pairs and uses approximately
+  one byte per pair for backtracking. Each pair also runs text similarity, so very
+  long message contents add their own cost; use positional mode for large transcripts.
 - Tool schemas are compared structurally, not resolved through `$ref`, coercion,
   or model-provider extensions.
 - Compatibility does not predict model behavior. Evaluation data and human
   review remain necessary.
 - HTML output escapes report text and has no external resources, but should
   still be treated as an artifact derived from untrusted input.
+- `--output` refuses to overwrite any prompt or policy input, including through
+  resolved path aliases or existing hard links.
 
 Please report vulnerabilities privately using [SECURITY.md](SECURITY.md).
 
@@ -223,15 +282,14 @@ pytest
 python -m build
 ```
 
-The test suite uses branch coverage and enforces a 90% minimum. CI runs on
-Python 3.10, 3.11, 3.12, and 3.13.
+The test suite uses branch coverage and enforces a 90% minimum. A reproducible
+synthetic workload is available in [`benchmarks/`](benchmarks/README.md).
 
 ## Roadmap
 
-- stable message identifiers and alignment strategies in a future schema;
-- user-defined compatibility policies loaded from a reviewed config;
-- SARIF output for code-scanning interfaces;
-- provider adapters kept separate from the dependency-free core.
+- stable message identifiers in a future native schema;
+- optional JSON Schema resolution for tool contracts;
+- richer multimodal prompt modeling without silently flattening non-text content.
 
 Contributions are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md) and
 please include tests for every new compatibility rule.

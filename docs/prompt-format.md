@@ -44,3 +44,13 @@ JSON reports use `schema_version: 1` and `report_type: "validation"` or
 `"diff"`. Change and finding categories are lowercase stable enum values. New
 fields may be added compatibly; consumers should reject unknown schema versions
 but ignore unknown object fields within a known version when safe.
+
+SARIF output is a presentation of the same report, not a third native report type.
+Rule IDs use `promptwitness.diff.<change-kind>` or
+`promptwitness.validation.<finding-code>`. JSON Pointers are retained as logical
+locations and deterministic fingerprints let code-scanning systems match unchanged
+findings across runs.
+
+Provider payloads are not silently accepted by the native parser. Convert them with
+an explicit adapter or pass the corresponding CLI format; see
+[provider adapters](provider-adapters.md).

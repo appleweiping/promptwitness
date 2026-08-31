@@ -1,0 +1,25 @@
+{
+  "diff": {
+    "added_message_severity": "warning",
+    "content_change_severity": "breaking",
+    "context_lines": 2,
+    "include_metadata": true,
+    "message_alignment": "smart",
+    "severity_overrides": {
+      "tool_added": "warning"
+    }
+  },
+  "schema_version": 1,
+  "validation": {
+    "allow_empty_content": false,
+    "allowed_roles": [
+      "system",
+      "user",
+      "assistant",
+      "tool"
+    ],
+    "report_repeated_variables": true,
+    "require_system_first": true,
+    "scan_literal_secrets": true
+  }
+}

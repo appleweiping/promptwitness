@@ -150,6 +150,10 @@ def test_load_prompt_from_json(tmp_path: pytest.TempPathFactory) -> None:
             '{"schema_version":1,"id":"a","messages":[],"metadata":{"score":Infinity}}',
             "non-finite",
         ),
+        (
+            '{"schema_version":1,"id":"a","messages":[],"metadata":{"score":1e400}}',
+            "finite float range",
+        ),
     ],
 )
 def test_load_rejects_non_standard_or_ambiguous_json(
