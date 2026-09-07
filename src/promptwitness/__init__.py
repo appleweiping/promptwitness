@@ -9,6 +9,13 @@ from .adapters import (
     prompt_to_dict,
     render_prompt_json,
 )
+from .benchmark import (
+    BenchmarkCase,
+    BenchmarkReport,
+    BenchmarkResult,
+    evaluate_benchmark,
+    load_benchmark_cases,
+)
 from .diff import DiffOptions, MessageAlignment, compare_prompts
 from .execution import ExecutionReport, ExecutionRow, ScenarioExecutor
 from .long_context import (
@@ -59,6 +66,9 @@ __all__ = [
     "AdapterError",
     "AdapterFormat",
     "AdapterResult",
+    "BenchmarkCase",
+    "BenchmarkReport",
+    "BenchmarkResult",
     "Change",
     "ChangeKind",
     "DiffOptions",
@@ -100,8 +110,10 @@ __all__ = [
     "adapt_prompt",
     "compare_matrices",
     "compare_prompts",
+    "evaluate_benchmark",
     "evaluate_long_context",
     "load_adapted_prompt",
+    "load_benchmark_cases",
     "load_policy",
     "load_prompt",
     "load_traces",

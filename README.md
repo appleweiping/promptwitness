@@ -148,6 +148,11 @@ promptwitness diff BEFORE AFTER [--include-metadata|--ignore-metadata]
 
 promptwitness convert PROVIDER.json [--from-format auto|native|openai|anthropic|langchain]
                                   [--id PROMPT_ID] [--output native.json]
+
+promptwitness long-context CASES.json PREDICTIONS.json [--strict] [--output report.json]
+
+promptwitness benchmark CASES.json|CASES.jsonl PREDICTIONS.json
+                             [--task TASK ...] [--strict] [--output report.json]
 ```
 
 Exit codes are stable and automation-friendly:
@@ -159,6 +164,11 @@ Exit codes are stable and automation-friendly:
 Use JSON for machines, Markdown for pull requests, HTML for a portable visual
 review, and SARIF 2.1.0 for code-scanning interfaces. All formats are generated
 from the same typed report.
+
+Task-oriented benchmark fixtures are documented in
+[benchmark replay](docs/benchmark.md). They support per-task accuracy,
+expected-answer-safe prompt digests, and replayed predictions without coupling
+the core library to a specific model provider.
 
 ## Provider adapters
 

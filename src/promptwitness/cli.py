@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import NoReturn
 
 from .adapters import AdapterError, AdapterFormat, load_adapted_prompt, render_prompt_json
+from .benchmark import evaluate_benchmark, load_benchmark_cases
 from .diff import MessageAlignment, compare_prompts
 from .long_context import LongContextCase, evaluate_long_context
 from .matrix import Scenario, render_matrix, save_matrix
@@ -128,6 +129,19 @@ def build_parser() -> argparse.ArgumentParser:
     long_context.add_argument("--strict", action="store_true")
     long_context.add_argument("--output", type=Path)
     long_context.set_defaults(handler=_run_long_context)
+    benchmark = subparsers.add_parser(
+        "benchmark", help="score replayed answers for task-oriented benchmark cases"
+    )
+    benchmark.add_argument("cases", type=Path, help="JSON array or JSONL benchmark cases")
+    benchmark.add_argument(
+        "predictions", type=Path, help="JSON object mapping case IDs to answer strings"
+    )
+    benchmark.add_argument(
+        "--task", action="append", help="restrict scoring to one or more task names"
+    )
+    benchmark.add_argument("--strict", action="store_true")
+    benchmark.add_argument("--output", type=Path)
+    benchmark.set_defaults(handler=_run_benchmark)
     return parser
 
 
@@ -316,6 +330,36 @@ def _run_long_context(arguments: argparse.Namespace) -> int:
         strict=arguments.strict,
     )
     _emit(json.dumps(report.to_dict(), indent=2, sort_keys=True) + "\n", arguments.output)
+    return 0 if report.failed == 0 else 2
+
+
+def _run_benchmark(arguments: argparse.Namespace) -> int:
+    _ensure_distinct_output(arguments.output, arguments.cases, arguments.predictions)
+    try:
+        raw_predictions = json.loads(arguments.predictions.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as error:
+        raise ValueError(f"cannot load benchmark predictions: {error}") from error
+    if not isinstance(raw_predictions, dict) or not all(
+        isinstance(key, str) and isinstance(value, str) for key, value in raw_predictions.items()
+    ):
+        raise ValueError("predictions must map string case IDs to string answers")
+    cases = load_benchmark_cases(arguments.cases)
+    selected = tuple(arguments.task or ())
+    if selected:
+        allowed = set(selected)
+        unknown = sorted(allowed - {case.task for case in cases})
+        if unknown:
+            raise ValueError(f"unknown benchmark task(s): {', '.join(unknown)}")
+        cases = tuple(case for case in cases if case.task in allowed)
+        if not cases:
+            raise ValueError("task filter selected no benchmark cases")
+    report = evaluate_benchmark(
+        cases,
+        lambda case: raw_predictions.get(case.case_id, ""),
+        strict=arguments.strict,
+    )
+    rendered = json.dumps(report.to_dict(), indent=2, sort_keys=True) + "\n"
+    _emit(rendered, arguments.output)
     return 0 if report.failed == 0 else 2
 
 

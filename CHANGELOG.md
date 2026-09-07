@@ -15,6 +15,8 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   front/middle/back diagnostics.
 - Add a `promptwitness long-context` CLI gate for replaying recorded answers
   against serialized needle cases.
+- Add task-oriented benchmark case loading, per-task replay evaluation, and a
+  `promptwitness benchmark` CLI with expected-answer-safe digests.
 - Add an OpenAI-compatible long-context provider adapter that extracts common
   response shapes without leaking expected answers into prompts or digests.
 
