@@ -32,3 +32,10 @@ For gateways that support server-sent events, use
 malformed UTF-8/JSON or non-object chunks. Calling the provider aggregates text
 content deltas and includes the decoded `stream_chunks` so a replay fixture can
 audit the exact chunk sequence without retaining request headers or API keys.
+
+`ToolDispatcher` handles a provider response's `tool_calls` array under explicit
+call-count and result-size limits. Arguments are parsed as JSON objects, unknown
+tools and handler exceptions become per-call outcomes, and successful results
+can be converted to follow-up tool messages through `ToolBatch.messages()`.
+Only argument/result digests are required for audit storage; callers should
+apply their own authorization before registering side-effecting handlers.

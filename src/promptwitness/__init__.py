@@ -44,6 +44,7 @@ from .providers import (
     load_traces,
 )
 from .registry import PromptRegistry, PromptVersion, RenderedPrompt
+from .tools import ToolBatch, ToolDispatcher, ToolOutcome
 from .validation import ValidationPolicy, validate_prompt
 
 __all__ = [
@@ -77,6 +78,9 @@ __all__ = [
     "Scenario",
     "ScenarioExecutor",
     "Severity",
+    "ToolBatch",
+    "ToolDispatcher",
+    "ToolOutcome",
     "ToolSpec",
     "TraceEvent",
     "TraceRecorder",

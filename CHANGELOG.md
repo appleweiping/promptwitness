@@ -9,6 +9,8 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 - Add a dependency-free OpenAI-compatible HTTP provider with environment-based key handling.
 - Add an OpenAI-compatible SSE streaming provider with deterministic text aggregation
   and retained non-secret chunk audit data.
+- Add bounded local tool-call dispatch with per-call digests, isolated failures,
+  and provider-compatible tool messages.
 
 ### Added
 
