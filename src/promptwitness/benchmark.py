@@ -59,6 +59,109 @@ class BenchmarkCase:
 
 
 @dataclass(frozen=True, slots=True)
+class BenchmarkTask:
+    """Named collection of benchmark cases with optional task metadata."""
+
+    name: str
+    cases: tuple[BenchmarkCase, ...]
+    metadata: Mapping[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.name, str) or not self.name.strip():
+            raise ValueError("task name must be a non-empty string")
+        if not self.cases:
+            raise ValueError("benchmark task must contain at least one case")
+        if not all(isinstance(case, BenchmarkCase) for case in self.cases):
+            raise TypeError("benchmark task cases must be BenchmarkCase values")
+        if any(case.task != self.name for case in self.cases):
+            raise ValueError("benchmark case task must match its suite task name")
+        if len({case.case_id for case in self.cases}) != len(self.cases):
+            raise ValueError("benchmark task case IDs must be unique")
+        if not isinstance(self.metadata, Mapping):
+            raise TypeError("task metadata must be an object")
+        object.__setattr__(self, "metadata", MappingProxyType(dict(self.metadata)))
+
+
+@dataclass(frozen=True, slots=True)
+class BenchmarkSuite:
+    """Versioned multi-task benchmark collection."""
+
+    suite_id: str
+    tasks: tuple[BenchmarkTask, ...]
+    metadata: Mapping[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.suite_id, str) or not self.suite_id.strip():
+            raise ValueError("suite_id must be a non-empty string")
+        if not self.tasks:
+            raise ValueError("benchmark suite must contain at least one task")
+        if not all(isinstance(task, BenchmarkTask) for task in self.tasks):
+            raise TypeError("suite tasks must be BenchmarkTask values")
+        if len({task.name for task in self.tasks}) != len(self.tasks):
+            raise ValueError("benchmark suite task names must be unique")
+        case_ids = [case.case_id for task in self.tasks for case in task.cases]
+        if len(set(case_ids)) != len(case_ids):
+            raise ValueError("benchmark suite case IDs must be globally unique")
+        if not isinstance(self.metadata, Mapping):
+            raise TypeError("suite metadata must be an object")
+        object.__setattr__(self, "metadata", MappingProxyType(dict(self.metadata)))
+
+    @property
+    def cases(self) -> tuple[BenchmarkCase, ...]:
+        return tuple(case for task in self.tasks for case in task.cases)
+
+    @property
+    def digest(self) -> str:
+        """Digest task structure and prompts without embedding gold answers."""
+
+        return _digest(
+            {
+                "suite_id": self.suite_id,
+                "metadata": dict(self.metadata),
+                "tasks": [
+                    {
+                        "name": task.name,
+                        "metadata": dict(task.metadata),
+                        "cases": [
+                            {
+                                "case_id": case.case_id,
+                                "task": case.task,
+                                "prompt_digest": case.prompt_digest,
+                            }
+                            for case in task.cases
+                        ],
+                    }
+                    for task in self.tasks
+                ],
+            }
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "format": "promptwitness.benchmark-suite.v1",
+            "suite_id": self.suite_id,
+            "metadata": dict(self.metadata),
+            "tasks": [
+                {
+                    "name": task.name,
+                    "metadata": dict(task.metadata),
+                    "cases": [
+                        {
+                            "case_id": case.case_id,
+                            "task": case.task,
+                            "prompt": case.prompt,
+                            "expected": case.expected,
+                            "metadata": dict(case.metadata),
+                        }
+                        for case in task.cases
+                    ],
+                }
+                for task in self.tasks
+            ],
+        }
+
+
+@dataclass(frozen=True, slots=True)
 class BenchmarkResult:
     """One replay outcome retaining failure details."""
 
@@ -165,6 +268,69 @@ def load_benchmark_cases(path: str | Path) -> tuple[BenchmarkCase, ...]:
     if len({case.case_id for case in cases}) != len(cases):
         raise ValueError("benchmark case IDs must be unique")
     return tuple(cases)
+
+
+def load_benchmark_suite(path: str | Path) -> BenchmarkSuite:
+    """Load a strict multi-task benchmark suite from JSON."""
+
+    source = Path(path)
+    try:
+        value = json.loads(source.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as error:
+        raise ValueError(f"cannot load benchmark suite: {error}") from error
+    if not isinstance(value, Mapping):
+        raise ValueError("benchmark suite root must be an object")
+    required = {"format", "suite_id", "tasks"}
+    unknown = set(value) - (required | {"metadata"})
+    if unknown:
+        raise ValueError(f"benchmark suite has unknown fields: {', '.join(sorted(unknown))}")
+    if value.get("format") != "promptwitness.benchmark-suite.v1":
+        raise ValueError("unsupported benchmark suite format")
+    raw_tasks = value.get("tasks")
+    if not isinstance(raw_tasks, list):
+        raise ValueError("benchmark suite tasks must be an array")
+    tasks: list[BenchmarkTask] = []
+    for position, raw_task in enumerate(raw_tasks, 1):
+        if not isinstance(raw_task, Mapping):
+            raise ValueError(f"benchmark suite task {position} must be an object")
+        task_unknown = set(raw_task) - {"name", "metadata", "cases"}
+        if task_unknown:
+            raise ValueError(
+                f"benchmark suite task {position} has unknown fields: "
+                f"{', '.join(sorted(task_unknown))}"
+            )
+        name = raw_task.get("name")
+        raw_cases = raw_task.get("cases")
+        if not isinstance(name, str) or not isinstance(raw_cases, list):
+            raise ValueError(f"benchmark suite task {position} requires name and cases")
+        cases: list[BenchmarkCase] = []
+        for case_position, raw_case in enumerate(raw_cases, 1):
+            if not isinstance(raw_case, Mapping):
+                raise ValueError(
+                    f"benchmark suite task {position} case {case_position} must be an object"
+                )
+            try:
+                cases.append(
+                    BenchmarkCase(
+                        raw_case["case_id"],
+                        raw_case["task"],
+                        raw_case["prompt"],
+                        raw_case["expected"],
+                        raw_case.get("metadata", {}),
+                    )
+                )
+            except (KeyError, TypeError, ValueError) as error:
+                raise ValueError(
+                    f"invalid benchmark suite task {position} case {case_position}: {error}"
+                ) from error
+        try:
+            tasks.append(BenchmarkTask(name, tuple(cases), raw_task.get("metadata", {})))
+        except (TypeError, ValueError) as error:
+            raise ValueError(f"invalid benchmark suite task {position}: {error}") from error
+    try:
+        return BenchmarkSuite(value["suite_id"], tuple(tasks), value.get("metadata", {}))
+    except (KeyError, TypeError, ValueError) as error:
+        raise ValueError(f"invalid benchmark suite: {error}") from error
 
 
 def evaluate_benchmark(

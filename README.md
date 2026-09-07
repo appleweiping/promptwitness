@@ -153,6 +153,9 @@ promptwitness long-context CASES.json PREDICTIONS.json [--strict] [--output repo
 
 promptwitness benchmark CASES.json|CASES.jsonl PREDICTIONS.json
                              [--task TASK ...] [--strict] [--output report.json]
+
+promptwitness benchmark-suite SUITE.json PREDICTIONS.json
+                                   [--task TASK ...] [--strict] [--output report.json]
 ```
 
 Exit codes are stable and automation-friendly:
@@ -169,6 +172,8 @@ Task-oriented benchmark fixtures are documented in
 [benchmark replay](docs/benchmark.md). They support per-task accuracy,
 expected-answer-safe prompt digests, and replayed predictions without coupling
 the core library to a specific model provider.
+Versioned multi-task suite manifests and their deterministic replay gate are
+documented in [benchmark suites](docs/benchmark-suites.md).
 
 ## Provider adapters
 

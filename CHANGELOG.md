@@ -17,6 +17,8 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   against serialized needle cases.
 - Add task-oriented benchmark case loading, per-task replay evaluation, and a
   `promptwitness benchmark` CLI with expected-answer-safe digests.
+- Add strict versioned multi-task benchmark suites with globally unique case IDs,
+  suite digests, task selection, and a `promptwitness benchmark-suite` CLI gate.
 - Add an OpenAI-compatible long-context provider adapter that extracts common
   response shapes without leaking expected answers into prompts or digests.
 

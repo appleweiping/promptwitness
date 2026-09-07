@@ -13,8 +13,11 @@ from .benchmark import (
     BenchmarkCase,
     BenchmarkReport,
     BenchmarkResult,
+    BenchmarkSuite,
+    BenchmarkTask,
     evaluate_benchmark,
     load_benchmark_cases,
+    load_benchmark_suite,
 )
 from .diff import DiffOptions, MessageAlignment, compare_prompts
 from .execution import ExecutionReport, ExecutionRow, ScenarioExecutor
@@ -69,6 +72,8 @@ __all__ = [
     "BenchmarkCase",
     "BenchmarkReport",
     "BenchmarkResult",
+    "BenchmarkSuite",
+    "BenchmarkTask",
     "Change",
     "ChangeKind",
     "DiffOptions",
@@ -114,6 +119,7 @@ __all__ = [
     "evaluate_long_context",
     "load_adapted_prompt",
     "load_benchmark_cases",
+    "load_benchmark_suite",
     "load_policy",
     "load_prompt",
     "load_traces",
