@@ -55,6 +55,11 @@ task names. The command returns zero when replay completes without provider
 errors, two when a non-strict replay records a provider error, and one for
 malformed input.
 
+Use `--min-accuracy 0.80` for an overall CI gate and repeat
+`--min-task-accuracy task=0.75` for task-specific thresholds. The JSON report
+contains the normalized gate configuration and failure reasons; exit status `2`
+means the replay ran but a configured threshold failed.
+
 The Python API is equivalent:
 
 ```python
@@ -63,4 +68,3 @@ from promptwitness import evaluate_benchmark, load_benchmark_suite
 suite = load_benchmark_suite("suite.json")
 report = evaluate_benchmark(suite.cases, lambda case: answers[case.case_id])
 ```
-

@@ -6,10 +6,12 @@ import pytest
 
 from promptwitness import (
     BenchmarkCase,
+    BenchmarkGate,
     BenchmarkSuite,
     BenchmarkTask,
     load_benchmark_suite,
 )
+from promptwitness.benchmark import evaluate_benchmark
 from promptwitness.cli import main
 
 
@@ -164,3 +166,45 @@ def test_benchmark_suite_cli_filters_tasks_and_reports_identity(tmp_path) -> Non
     assert report["cases"] == 1
     assert report["selected_tasks"] == ["recall"]
     assert main(["benchmark-suite", str(suite_path), str(predictions), "--task", "missing"]) == 1
+
+
+def test_benchmark_gate_checks_overall_and_task_thresholds() -> None:
+    report = evaluate_benchmark(
+        (
+            BenchmarkCase("a", "facts", "p", "yes"),
+            BenchmarkCase("b", "facts", "p", "no"),
+        ),
+        lambda case: "yes" if case.case_id == "a" else "wrong",
+    )
+    gate = BenchmarkGate(0.5, {"facts": 0.5})
+    assert gate.failures(report) == ()
+    assert gate.to_dict(report)["passed"] is True
+    failing = BenchmarkGate(0.75, {"facts": 0.75})
+    assert len(failing.failures(report)) == 2
+    with pytest.raises(ValueError, match="between"):
+        BenchmarkGate(1.1)
+
+
+def test_benchmark_suite_cli_returns_gate_failure(tmp_path) -> None:  # type: ignore[no-untyped-def]
+    suite_path = tmp_path / "suite.json"
+    suite_path.write_text(json.dumps(_suite_payload()), encoding="utf-8")
+    predictions = tmp_path / "predictions.json"
+    predictions.write_text('{"recall-1":"Ada","summ-1":"wrong"}', encoding="utf-8")
+    output = tmp_path / "report.json"
+    assert (
+        main(
+            [
+                "benchmark-suite",
+                str(suite_path),
+                str(predictions),
+                "--min-accuracy",
+                "0.75",
+                "--min-task-accuracy",
+                "summarize=0.5",
+                "--output",
+                str(output),
+            ]
+        )
+        == 2
+    )
+    assert json.loads(output.read_text(encoding="utf-8"))["gate"]["passed"] is False

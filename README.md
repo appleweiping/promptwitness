@@ -174,6 +174,7 @@ expected-answer-safe prompt digests, and replayed predictions without coupling
 the core library to a specific model provider.
 Versioned multi-task suite manifests and their deterministic replay gate are
 documented in [benchmark suites](docs/benchmark-suites.md).
+Benchmark-suite accuracy gates can enforce overall and per-task thresholds in CI.
 For multi-provider replay comparisons over the same rendered scenarios, see
 [provider matrices](docs/provider-matrix.md).
 

@@ -11,6 +11,7 @@ from .adapters import (
 )
 from .benchmark import (
     BenchmarkCase,
+    BenchmarkGate,
     BenchmarkReport,
     BenchmarkResult,
     BenchmarkSuite,
@@ -77,6 +78,7 @@ __all__ = [
     "AdapterFormat",
     "AdapterResult",
     "BenchmarkCase",
+    "BenchmarkGate",
     "BenchmarkReport",
     "BenchmarkResult",
     "BenchmarkSuite",

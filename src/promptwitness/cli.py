@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import NoReturn
 
 from .adapters import AdapterError, AdapterFormat, load_adapted_prompt, render_prompt_json
-from .benchmark import evaluate_benchmark, load_benchmark_cases, load_benchmark_suite
+from .benchmark import BenchmarkGate, evaluate_benchmark, load_benchmark_cases, load_benchmark_suite
 from .diff import MessageAlignment, compare_prompts
 from .long_context import LongContextCase, evaluate_long_context
 from .matrix import Scenario, render_matrix, save_matrix
@@ -154,6 +154,14 @@ def build_parser() -> argparse.ArgumentParser:
         "--task", action="append", help="restrict scoring to one or more task names"
     )
     benchmark_suite.add_argument("--strict", action="store_true")
+    benchmark_suite.add_argument("--min-accuracy", type=float)
+    benchmark_suite.add_argument(
+        "--min-task-accuracy",
+        action="append",
+        default=[],
+        metavar="TASK=VALUE",
+        help="minimum accuracy for one task; repeat for multiple tasks",
+    )
     benchmark_suite.add_argument("--output", type=Path)
     benchmark_suite.set_defaults(handler=_run_benchmark_suite)
     provider_matrix = subparsers.add_parser(
@@ -419,8 +427,22 @@ def _run_benchmark_suite(arguments: argparse.Namespace) -> int:
     payload["suite_id"] = suite.suite_id
     payload["suite_digest"] = suite.digest
     payload["selected_tasks"] = list(selected) if selected else [task.name for task in suite.tasks]
+    task_gates: dict[str, float] = {}
+    for item in arguments.min_task_accuracy:
+        if "=" not in item:
+            raise ValueError("--min-task-accuracy expects TASK=VALUE")
+        name, raw_value = item.split("=", 1)
+        if not name.strip() or name in task_gates:
+            raise ValueError("task accuracy gate names must be unique non-empty tokens")
+        try:
+            task_gates[name] = float(raw_value)
+        except ValueError as error:
+            raise ValueError(f"invalid task accuracy gate {item!r}") from error
+    gate = BenchmarkGate(arguments.min_accuracy, task_gates)
+    gate_payload = gate.to_dict(report)
+    payload["gate"] = gate_payload
     _emit(json.dumps(payload, indent=2, sort_keys=True) + "\n", arguments.output)
-    return 0 if report.failed == 0 else 2
+    return 0 if report.failed == 0 and gate_payload["passed"] else 2
 
 
 def _run_provider_matrix(arguments: argparse.Namespace) -> int:

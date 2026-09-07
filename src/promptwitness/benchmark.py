@@ -228,6 +228,52 @@ class BenchmarkReport:
         }
 
 
+@dataclass(frozen=True, slots=True)
+class BenchmarkGate:
+    """Accuracy thresholds for reproducible benchmark CI gates."""
+
+    minimum_accuracy: float | None = None
+    minimum_task_accuracy: Mapping[str, float] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        if self.minimum_accuracy is not None and not 0 <= self.minimum_accuracy <= 1:
+            raise ValueError("minimum_accuracy must be between zero and one")
+        normalized = dict(self.minimum_task_accuracy)
+        if any(not isinstance(name, str) or not name.strip() for name in normalized):
+            raise ValueError("task gate names must be non-empty strings")
+        if any(
+            isinstance(value, bool) or not 0 <= float(value) <= 1 for value in normalized.values()
+        ):
+            raise ValueError("task accuracy gates must be between zero and one")
+        object.__setattr__(self, "minimum_task_accuracy", MappingProxyType(normalized))
+
+    def failures(self, report: BenchmarkReport) -> tuple[str, ...]:
+        """Return deterministic threshold failures without modifying the report."""
+
+        failures: list[str] = []
+        if self.minimum_accuracy is not None and (
+            report.accuracy is None or report.accuracy < self.minimum_accuracy
+        ):
+            failures.append(
+                f"overall accuracy {report.accuracy!r} is below {self.minimum_accuracy:.6f}"
+            )
+        by_task = report.by_task()
+        for task, threshold in sorted(self.minimum_task_accuracy.items()):
+            observed = by_task.get(task, {}).get("accuracy")
+            if observed is None or observed < threshold:
+                failures.append(f"task {task!r} accuracy {observed!r} is below {threshold:.6f}")
+        return tuple(failures)
+
+    def to_dict(self, report: BenchmarkReport) -> dict[str, Any]:
+        failures = self.failures(report)
+        return {
+            "minimum_accuracy": self.minimum_accuracy,
+            "minimum_task_accuracy": dict(self.minimum_task_accuracy),
+            "passed": not failures,
+            "failures": list(failures),
+        }
+
+
 def load_benchmark_cases(path: str | Path) -> tuple[BenchmarkCase, ...]:
     """Load strict JSON or JSONL benchmark cases with unique IDs."""
 
