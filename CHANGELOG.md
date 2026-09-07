@@ -11,6 +11,8 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   and retained non-secret chunk audit data.
 - Add bounded local tool-call dispatch with per-call digests, isolated failures,
   and provider-compatible tool messages.
+- Add deterministic needle-in-context long-context evaluation with depth and
+  front/middle/back diagnostics.
 
 ### Added
 

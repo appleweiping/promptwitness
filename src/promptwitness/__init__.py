@@ -11,6 +11,13 @@ from .adapters import (
 )
 from .diff import DiffOptions, MessageAlignment, compare_prompts
 from .execution import ExecutionReport, ExecutionRow, ScenarioExecutor
+from .long_context import (
+    LongContextCase,
+    LongContextReport,
+    LongContextResult,
+    evaluate_long_context,
+    make_needle_cases,
+)
 from .matrix import (
     MatrixArtifact,
     MatrixDiff,
@@ -59,6 +66,9 @@ __all__ = [
     "ExecutionRow",
     "Finding",
     "FindingCode",
+    "LongContextCase",
+    "LongContextReport",
+    "LongContextResult",
     "MatrixArtifact",
     "MatrixDiff",
     "Message",
@@ -89,10 +99,12 @@ __all__ = [
     "adapt_prompt",
     "compare_matrices",
     "compare_prompts",
+    "evaluate_long_context",
     "load_adapted_prompt",
     "load_policy",
     "load_prompt",
     "load_traces",
+    "make_needle_cases",
     "parse_policy",
     "parse_prompt",
     "prompt_to_dict",
