@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pytest
 
-from promptwitness import evaluate_long_context, make_needle_cases
+from promptwitness import evaluate_long_context, make_needle_cases, make_provider_answerer
 
 
 def test_needle_generation_is_deterministic_and_position_reported() -> None:
@@ -36,3 +36,19 @@ def test_long_context_failures_are_retained_or_fail_fast() -> None:
         evaluate_long_context(
             (case,), lambda _: (_ for _ in ()).throw(RuntimeError("offline")), strict=True
         )
+
+
+def test_provider_answerer_adapts_common_response_shapes_without_gold_leakage() -> None:
+    (case,) = make_needle_cases((("alpha", "beta"),), needle="Ada", query="name?", expected="Ada")
+    seen: list[object] = []
+
+    def provider(row):  # type: ignore[no-untyped-def]
+        seen.append(row)
+        return {"choices": [{"message": {"content": "Ada"}}]}
+
+    answerer = make_provider_answerer(provider)
+    assert answerer(case) == "Ada"
+    row = seen[0]
+    assert hasattr(row, "digest") and case.expected not in row.digest
+    with pytest.raises(ValueError, match="does not contain text"):
+        make_provider_answerer(lambda _row: {"choices": []})(case)

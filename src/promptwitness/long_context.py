@@ -9,6 +9,9 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import Any
 
+from .matrix import RenderedScenario
+from .models import Message
+
 
 def _digest(value: Any) -> str:
     return hashlib.sha256(
@@ -222,6 +225,54 @@ def evaluate_long_context(
                 )
             )
     return LongContextReport(tuple(results))
+
+
+def make_provider_answerer(
+    provider: Callable[[RenderedScenario], Any],
+) -> Callable[[LongContextCase], str]:
+    """Adapt an OpenAI-compatible provider callback to long-context cases.
+
+    The adapter sends only the rendered prompt as a user message and extracts
+    the common ``choices[0].message.content`` or ``output_text`` response
+    shapes. The expected answer is never included in the provider payload or
+    prompt digest, so a trace can be audited without leaking the gold label.
+    """
+
+    if not callable(provider):
+        raise TypeError("provider must be callable")
+
+    def answer(case: LongContextCase) -> str:
+        if not isinstance(case, LongContextCase):
+            raise TypeError("case must be a LongContextCase")
+        prompt_digest = _digest({"case_id": case.case_id, "prompt": case.prompt})
+        row = RenderedScenario(
+            case.case_id,
+            "promptwitness.long-context/v1",
+            (Message("user", case.prompt),),
+            (),
+            prompt_digest,
+            (),
+        )
+        response = provider(row)
+        if isinstance(response, str):
+            return response
+        if not isinstance(response, Mapping):
+            raise ValueError("provider response must be a string or JSON object")
+        output_text = response.get("output_text")
+        if isinstance(output_text, str):
+            return output_text
+        choices = response.get("choices")
+        if isinstance(choices, list) and choices:
+            first = choices[0]
+            if isinstance(first, Mapping):
+                message = first.get("message")
+                if isinstance(message, Mapping):
+                    content = message.get("content")
+                    if isinstance(content, str):
+                        return content
+        raise ValueError("provider response does not contain text content")
+
+    return answer
 
 
 def make_needle_cases(

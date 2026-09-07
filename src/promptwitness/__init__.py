@@ -17,6 +17,7 @@ from .long_context import (
     LongContextResult,
     evaluate_long_context,
     make_needle_cases,
+    make_provider_answerer,
 )
 from .matrix import (
     MatrixArtifact,
@@ -105,6 +106,7 @@ __all__ = [
     "load_prompt",
     "load_traces",
     "make_needle_cases",
+    "make_provider_answerer",
     "parse_policy",
     "parse_prompt",
     "prompt_to_dict",
