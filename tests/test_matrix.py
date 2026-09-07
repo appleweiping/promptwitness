@@ -1,6 +1,13 @@
 import pytest
 
-from promptwitness import Message, PromptDocument, Scenario, compare_matrices, render_matrix
+from promptwitness import (
+    Message,
+    PromptDocument,
+    Scenario,
+    compare_matrices,
+    render_matrix,
+    save_matrix,
+)
 
 
 def document() -> PromptDocument:
@@ -28,3 +35,16 @@ def test_scenario_validation_and_missing_values() -> None:
         Scenario("", {})
     with pytest.raises(ValueError, match="tags"):
         Scenario("a", {}, ("x", "x"))
+
+
+def test_matrix_artifact_round_trip_and_tamper_detection(tmp_path) -> None:
+    rows = render_matrix(document(), (Scenario("a", {"name": "Ada"}),))
+    path = tmp_path / "matrix.json"
+    artifact = save_matrix(rows, str(path))
+    assert artifact == artifact.load(str(path))
+    loaded = artifact.load(str(path))
+    assert loaded.rows[0].messages[0].content == "Hello Ada"
+    payload = path.read_text(encoding="utf-8").replace(artifact.digest, "0" * 64)
+    path.write_text(payload, encoding="utf-8")
+    with pytest.raises(ValueError, match="digest"):
+        artifact.load(str(path))

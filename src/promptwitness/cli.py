@@ -12,7 +12,7 @@ from typing import NoReturn
 
 from .adapters import AdapterError, AdapterFormat, load_adapted_prompt, render_prompt_json
 from .diff import MessageAlignment, compare_prompts
-from .matrix import Scenario, render_matrix
+from .matrix import Scenario, render_matrix, save_matrix
 from .models import DiffReport, Severity, ValidationReport
 from .parser import PromptFormatError
 from .policies import PolicyBundle, PolicyFormatError, load_policy
@@ -115,6 +115,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     matrix.add_argument("--allow-missing", action="store_true")
     matrix.add_argument("--output", type=Path)
+    matrix.add_argument("--artifact", type=Path, help="also save an authenticated matrix artifact")
     matrix.set_defaults(handler=_run_matrix)
     return parser
 
@@ -220,6 +221,9 @@ def _run_convert(arguments: argparse.Namespace) -> int:
 
 def _run_matrix(arguments: argparse.Namespace) -> int:
     _ensure_distinct_output(arguments.output, arguments.prompt, arguments.scenarios)
+    _ensure_distinct_output(
+        arguments.artifact, arguments.prompt, arguments.scenarios, arguments.output
+    )
     result = load_adapted_prompt(arguments.prompt, AdapterFormat(arguments.from_format))
     _emit_adapter_warnings(result.warnings)
     try:
@@ -236,6 +240,8 @@ def _run_matrix(arguments: argparse.Namespace) -> int:
     if len(scenarios) != len(raw):
         raise ValueError("scenario entries must be objects")
     rendered = render_matrix(result.document, scenarios, strict=not arguments.allow_missing)
+    if arguments.artifact is not None:
+        save_matrix(rendered, str(arguments.artifact))
     _emit(
         json.dumps(
             {

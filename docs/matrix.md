@@ -18,3 +18,9 @@ rows = render_matrix(
 `compare_matrices` reports added, removed, and changed scenario digests. Rendering
 is local and side-effect free; it never calls a provider or evaluates template
 expressions.
+
+Use `save_matrix(rows, path)` to write an authenticated artifact for CI or
+review. The artifact includes rendered messages, row digests, tags, and an
+inventory digest; `MatrixArtifact.load(path)` verifies both row content and the
+inventory before returning it. The CLI accepts `matrix ... --artifact PATH` for
+the same workflow.
