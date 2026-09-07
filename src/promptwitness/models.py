@@ -72,7 +72,8 @@ class FindingCode(str, Enum):
     INVALID_MESSAGE_NAME = "invalid_message_name"
     EMPTY_TOOL_DESCRIPTION = "empty_tool_description"
     INVALID_PARAMETER_SCHEMA = "invalid_parameter_schema"
-    SECRET_LITERAL = "secret_literal"
+    # Stable validation code identifier, not a credential.
+    SECRET_LITERAL = "secret_literal"  # nosec B105
 
 
 @dataclass(frozen=True, slots=True)

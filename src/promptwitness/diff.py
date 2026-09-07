@@ -137,7 +137,8 @@ def _compare_messages_smart(
     changes: list[Change] = []
     for old_index, new_index in _align_messages(before, after):
         if old_index is None:
-            assert new_index is not None
+            if new_index is None:
+                raise ValueError("message alignment omitted both sides")
             message = after[new_index]
             changes.append(
                 Change(
@@ -253,7 +254,7 @@ def _align_messages(
             alignment.append((None, new_index - 1))
             new_index -= 1
         else:  # pragma: no cover - matrix invariants make this unreachable
-            raise AssertionError("invalid message alignment state")
+            raise ValueError("invalid message alignment state")
     alignment.reverse()
     return tuple(alignment)
 
