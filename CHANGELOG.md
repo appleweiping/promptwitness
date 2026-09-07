@@ -8,6 +8,7 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 - Transactional SQLite prompt version registry with content digests, optimistic concurrency,
   review annotations, stored-version diffs, and deterministic variable replay.
+- Variable scenario rendering matrices with secret-safe digests and regression diffs.
 
 ## [0.2.0] - 2026-08-31
 

@@ -10,6 +10,7 @@ from .adapters import (
     render_prompt_json,
 )
 from .diff import DiffOptions, MessageAlignment, compare_prompts
+from .matrix import MatrixDiff, RenderedScenario, Scenario, compare_matrices, render_matrix
 from .models import (
     Change,
     ChangeKind,
@@ -37,6 +38,7 @@ __all__ = [
     "DiffReport",
     "Finding",
     "FindingCode",
+    "MatrixDiff",
     "Message",
     "MessageAlignment",
     "PolicyBundle",
@@ -46,11 +48,14 @@ __all__ = [
     "PromptRegistry",
     "PromptVersion",
     "RenderedPrompt",
+    "RenderedScenario",
+    "Scenario",
     "Severity",
     "ToolSpec",
     "ValidationPolicy",
     "ValidationReport",
     "adapt_prompt",
+    "compare_matrices",
     "compare_prompts",
     "load_adapted_prompt",
     "load_policy",
@@ -58,6 +63,7 @@ __all__ = [
     "parse_policy",
     "parse_prompt",
     "prompt_to_dict",
+    "render_matrix",
     "render_prompt_json",
     "validate_prompt",
 ]
