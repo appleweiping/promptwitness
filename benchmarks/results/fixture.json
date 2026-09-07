@@ -1,0 +1,13 @@
+{
+  "elapsed_seconds": 0.02146560000255704,
+  "kind": "fixture-real",
+  "peak_python_bytes": 30100,
+  "platform": "Windows-11-10.0.26200-SP0",
+  "prompt_id": "order-assistant-v1",
+  "python": "3.14.5",
+  "scenarios": 3,
+  "source": "examples/before.json",
+  "source_bytes": 572,
+  "source_sha256": "4c475912e48093d9f2971f2f1b17f9df440fed88ab8eb8fe466db2037c912fad",
+  "succeeded": 3
+}
