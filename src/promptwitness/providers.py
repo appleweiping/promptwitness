@@ -141,7 +141,7 @@ class OpenAICompatibleProvider:
             method="POST",
         )
         try:
-            with urllib.request.urlopen(request, timeout=self.timeout) as response:
+            with urllib.request.urlopen(request, timeout=self.timeout) as response:  # nosec B310 - endpoint scheme is restricted above
                 raw = response.read()
         except urllib.error.HTTPError as error:
             raise ValueError(f"provider returned HTTP {error.code}") from error
