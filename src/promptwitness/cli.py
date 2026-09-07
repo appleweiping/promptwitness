@@ -93,6 +93,11 @@ def build_parser() -> argparse.ArgumentParser:
     diff.set_defaults(include_metadata=None)
     diff.add_argument("--context-lines", type=_non_negative_int)
     diff.add_argument("--message-alignment", choices=[mode.value for mode in MessageAlignment])
+    diff.add_argument(
+        "--resolve-tool-refs",
+        action="store_true",
+        help="resolve local JSON Schema $ref pointers in tool parameters",
+    )
     _add_output_arguments(diff)
     diff.set_defaults(handler=_run_diff)
 
@@ -266,6 +271,7 @@ def _run_diff(arguments: argparse.Namespace) -> int:
             if arguments.message_alignment is None
             else MessageAlignment(arguments.message_alignment)
         ),
+        resolve_tool_refs=arguments.resolve_tool_refs,
     )
     report = compare_prompts(before.document, after.document, options)
     _emit(_render(report, arguments.format, artifact_uri=arguments.after.name), arguments.output)

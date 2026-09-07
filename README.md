@@ -310,7 +310,9 @@ synthetic workload is available in [`benchmarks/`](benchmarks/README.md).
 ## Roadmap
 
 - richer identifier-aware alignment across provider-native message schemas;
-- optional JSON Schema resolution for tool contracts;
+- optional JSON Schema resolution for tool contracts is available through
+  `--resolve-tool-refs`; broader provider-native schema support remains future
+  work;
 - richer multimodal prompt modeling without silently flattening non-text content.
 
 Contributions are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md) and

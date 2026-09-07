@@ -4,6 +4,9 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+- Add opt-in local JSON Schema `$ref` resolution for tool-parameter diffs,
+  with cycle and external-reference rejection.
+
 - Add optional stable native message identifiers and explicit ID-based diff
   alignment for reorder-safe prompt compatibility checks.
 

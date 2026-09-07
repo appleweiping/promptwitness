@@ -70,6 +70,7 @@ from .providers import (
     load_traces,
 )
 from .registry import PromptRegistry, PromptVersion, RenderedPrompt
+from .schemas import resolve_local_refs
 from .tools import ToolBatch, ToolDispatcher, ToolOutcome
 from .validation import ValidationPolicy, validate_prompt
 
@@ -144,6 +145,7 @@ __all__ = [
     "prompt_to_dict",
     "render_matrix",
     "render_prompt_json",
+    "resolve_local_refs",
     "save_matrix",
     "validate_prompt",
 ]

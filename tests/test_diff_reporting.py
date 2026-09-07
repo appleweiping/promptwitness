@@ -178,6 +178,39 @@ def test_json_boolean_is_not_equal_to_number() -> None:
     ]
 
 
+def test_local_tool_schema_refs_can_be_resolved_explicitly() -> None:
+    old_schema = {
+        "$defs": {"Code": {"type": "string", "minLength": 2}},
+        "$ref": "#/$defs/Code",
+    }
+    new_schema = {
+        "$defs": {"Code": {"type": "string", "minLength": 2}},
+        "$ref": "#/$defs/Code",
+    }
+    old = ToolSpec("lookup", "d", {"code": old_schema})
+    new = ToolSpec("lookup", "d", {"code": new_schema})
+    assert compare_prompts(prompt("a", tools=(old,)), prompt("b", tools=(new,))).breaking_count == 0
+    assert (
+        compare_prompts(
+            prompt("a", tools=(old,)),
+            prompt("b", tools=(new,)),
+            DiffOptions(resolve_tool_refs=True),
+        ).changes
+        == ()
+    )
+
+
+def test_schema_ref_resolver_rejects_external_missing_and_cyclic_refs() -> None:
+    from promptwitness.schemas import resolve_local_refs
+
+    with pytest.raises(ValueError, match="only local"):
+        resolve_local_refs({"$ref": "https://example.com/schema"})
+    with pytest.raises(ValueError, match="missing"):
+        resolve_local_refs({"$ref": "#/missing"})
+    with pytest.raises(ValueError, match="cyclic"):
+        resolve_local_refs({"$defs": {"x": {"$ref": "#/$defs/x"}}, "$ref": "#/$defs/x"})
+
+
 def test_report_paths_use_unambiguous_json_pointer_escaping() -> None:
     before_tool = ToolSpec("a/b~c", "d", {"x/y": {"type": "string"}})
     after_tool = ToolSpec("a/b~c", "d", {})

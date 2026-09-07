@@ -12,6 +12,7 @@ from typing import Any
 
 from .models import Change, ChangeKind, DiffReport, Message, PromptDocument, Severity, ToolSpec
 from .paths import json_pointer
+from .schemas import resolve_local_refs
 from .variables import inspect_variables
 
 
@@ -32,6 +33,7 @@ class DiffOptions:
     include_metadata: bool = True
     context_lines: int = 2
     message_alignment: MessageAlignment = MessageAlignment.POSITIONAL
+    resolve_tool_refs: bool = False
     severity_overrides: Mapping[ChangeKind, Severity] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
@@ -47,6 +49,8 @@ class DiffOptions:
             raise ValueError("context_lines must be non-negative")
         if not isinstance(self.message_alignment, MessageAlignment):
             raise TypeError("message_alignment must be a MessageAlignment")
+        if type(self.resolve_tool_refs) is not bool:
+            raise TypeError("resolve_tool_refs must be a boolean")
         if not isinstance(self.severity_overrides, Mapping):
             raise TypeError("severity_overrides must be a mapping")
         overrides: dict[ChangeKind, Severity] = {}
@@ -73,7 +77,7 @@ def compare_prompts(
     changes: list[Change] = []
     changes.extend(_compare_messages(before.messages, after.messages, active))
     changes.extend(_compare_variables(before, after))
-    changes.extend(_compare_tools(before.tool_map(), after.tool_map()))
+    changes.extend(_compare_tools(before.tool_map(), after.tool_map(), active))
     if active.include_metadata and not _json_equal(before.metadata, after.metadata):
         changes.append(
             Change(
@@ -353,7 +357,9 @@ def _compare_variables(before: PromptDocument, after: PromptDocument) -> list[Ch
     return changes
 
 
-def _compare_tools(before: dict[str, ToolSpec], after: dict[str, ToolSpec]) -> list[Change]:
+def _compare_tools(
+    before: dict[str, ToolSpec], after: dict[str, ToolSpec], options: DiffOptions
+) -> list[Change]:
     changes: list[Change] = []
     for name in sorted(before.keys() - after.keys()):
         changes.append(
@@ -378,11 +384,11 @@ def _compare_tools(before: dict[str, ToolSpec], after: dict[str, ToolSpec]) -> l
             )
         )
     for name in sorted(before.keys() & after.keys()):
-        changes.extend(_compare_tool(before[name], after[name]))
+        changes.extend(_compare_tool(before[name], after[name], options))
     return changes
 
 
-def _compare_tool(before: ToolSpec, after: ToolSpec) -> list[Change]:
+def _compare_tool(before: ToolSpec, after: ToolSpec, options: DiffOptions) -> list[Change]:
     path = ("tools", before.name)
     changes: list[Change] = []
     if before.description != after.description:
@@ -396,7 +402,16 @@ def _compare_tool(before: ToolSpec, after: ToolSpec) -> list[Change]:
                 after.description,
             )
         )
-    old_parameters, new_parameters = before.parameters, after.parameters
+    old_parameters = (
+        {name: resolve_local_refs(schema) for name, schema in before.parameters.items()}
+        if options.resolve_tool_refs
+        else before.parameters
+    )
+    new_parameters = (
+        {name: resolve_local_refs(schema) for name, schema in after.parameters.items()}
+        if options.resolve_tool_refs
+        else after.parameters
+    )
     for parameter in sorted(old_parameters.keys() - new_parameters.keys()):
         changes.append(
             Change(
