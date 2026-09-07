@@ -34,7 +34,14 @@ from .models import (
 )
 from .parser import PromptFormatError, load_prompt, parse_prompt
 from .policies import PolicyBundle, PolicyFormatError, load_policy, parse_policy
-from .providers import ProviderTrace, ReplayProvider, TraceEvent, TraceRecorder, load_traces
+from .providers import (
+    OpenAICompatibleProvider,
+    ProviderTrace,
+    ReplayProvider,
+    TraceEvent,
+    TraceRecorder,
+    load_traces,
+)
 from .registry import PromptRegistry, PromptVersion, RenderedPrompt
 from .validation import ValidationPolicy, validate_prompt
 
@@ -54,6 +61,7 @@ __all__ = [
     "MatrixDiff",
     "Message",
     "MessageAlignment",
+    "OpenAICompatibleProvider",
     "PolicyBundle",
     "PolicyFormatError",
     "PromptDocument",

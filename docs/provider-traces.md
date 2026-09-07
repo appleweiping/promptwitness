@@ -21,3 +21,7 @@ the traces available for review or replay.
 The trace file is an audit inventory, not a cryptographic signature from an
 external provider. Keep outputs and trace files under the same access controls as
 the original provider responses.
+
+For local OpenAI-compatible gateways, `OpenAICompatibleProvider` sends rendered
+messages using `urllib`, reads an optional bearer token from an environment
+variable, and never returns that token in the response object or trace.

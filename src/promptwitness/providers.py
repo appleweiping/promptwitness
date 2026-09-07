@@ -4,6 +4,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import urllib.error
+import urllib.request
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
@@ -72,6 +75,85 @@ class ReplayProvider:
         if row.digest not in self._responses:
             raise KeyError(f"no replay response for prompt digest {row.digest}")
         return self._responses[row.digest]
+
+
+class OpenAICompatibleProvider:
+    """Minimal JSON provider for OpenAI-compatible chat endpoints.
+
+    The API key is read from an environment variable for each call and is never
+    included in returned output or trace objects. The provider returns the
+    decoded response object so callers can preserve usage and model metadata.
+    """
+
+    def __init__(
+        self,
+        endpoint: str,
+        *,
+        api_key_env: str | None = None,
+        model: str | None = None,
+        timeout: float = 60.0,
+        headers: Mapping[str, str] | None = None,
+    ) -> None:
+        if not isinstance(endpoint, str) or not endpoint.startswith(("http://", "https://")):
+            raise ValueError("endpoint must be an absolute HTTP(S) URL")
+        if not isinstance(timeout, (int, float)) or isinstance(timeout, bool) or timeout <= 0:
+            raise ValueError("timeout must be a positive number")
+        if api_key_env is not None and (
+            not isinstance(api_key_env, str) or not api_key_env.strip()
+        ):
+            raise ValueError("api_key_env must be a non-empty string or None")
+        if model is not None and (not isinstance(model, str) or not model.strip()):
+            raise ValueError("model must be a non-empty string or None")
+        if headers is not None and not all(
+            isinstance(key, str) and isinstance(value, str) for key, value in headers.items()
+        ):
+            raise TypeError("headers must map strings to strings")
+        self.endpoint = endpoint
+        self.api_key_env = api_key_env
+        self.model = model
+        self.timeout = float(timeout)
+        self.headers = dict(headers or {})
+
+    def __call__(self, row: RenderedScenario) -> Any:
+        """Send a non-streaming chat request and return its JSON response."""
+        body: dict[str, Any] = {
+            "messages": [
+                {
+                    "role": message.role,
+                    **({"name": message.name} if message.name else {}),
+                    "content": message.content,
+                }
+                for message in row.messages
+            ],
+        }
+        if self.model is not None:
+            body["model"] = self.model
+        request_headers = {"Content-Type": "application/json", **self.headers}
+        if self.api_key_env is not None:
+            token = os.environ.get(self.api_key_env)
+            if not token:
+                raise ValueError(f"environment variable {self.api_key_env!r} is not set")
+            request_headers["Authorization"] = f"Bearer {token}"
+        request = urllib.request.Request(
+            self.endpoint,
+            data=json.dumps(body, ensure_ascii=False, allow_nan=False).encode("utf-8"),
+            headers=request_headers,
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=self.timeout) as response:
+                raw = response.read()
+        except urllib.error.HTTPError as error:
+            raise ValueError(f"provider returned HTTP {error.code}") from error
+        except (urllib.error.URLError, TimeoutError, OSError) as error:
+            raise ValueError(f"provider request failed: {type(error).__name__}") from error
+        try:
+            payload = json.loads(raw.decode("utf-8"))
+        except (UnicodeError, json.JSONDecodeError) as error:
+            raise ValueError("provider returned invalid JSON") from error
+        if not isinstance(payload, Mapping):
+            raise ValueError("provider response must be a JSON object")
+        return dict(payload)
 
 
 class TraceRecorder:
