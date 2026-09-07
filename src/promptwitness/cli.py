@@ -16,8 +16,9 @@ from .diff import MessageAlignment, compare_prompts
 from .long_context import LongContextCase, evaluate_long_context
 from .matrix import Scenario, render_matrix, save_matrix
 from .models import DiffReport, Severity, ValidationReport
-from .parser import PromptFormatError
+from .parser import PromptFormatError, load_prompt
 from .policies import PolicyBundle, PolicyFormatError, load_policy
+from .provider_matrix import ProviderMatrix, load_replay_providers
 from .reporting import render_html, render_json, render_markdown, render_sarif
 from .validation import validate_prompt
 
@@ -155,6 +156,17 @@ def build_parser() -> argparse.ArgumentParser:
     benchmark_suite.add_argument("--strict", action="store_true")
     benchmark_suite.add_argument("--output", type=Path)
     benchmark_suite.set_defaults(handler=_run_benchmark_suite)
+    provider_matrix = subparsers.add_parser(
+        "provider-matrix", help="replay several named providers over one scenario matrix"
+    )
+    provider_matrix.add_argument("prompt", type=Path)
+    provider_matrix.add_argument("scenarios", type=Path)
+    provider_matrix.add_argument("providers", type=Path)
+    provider_matrix.add_argument("--workers", type=_positive_int, default=1)
+    provider_matrix.add_argument("--scenario-workers", type=_positive_int, default=1)
+    provider_matrix.add_argument("--allow-missing", action="store_true")
+    provider_matrix.add_argument("--output", type=Path)
+    provider_matrix.set_defaults(handler=_run_provider_matrix)
     return parser
 
 
@@ -411,6 +423,38 @@ def _run_benchmark_suite(arguments: argparse.Namespace) -> int:
     return 0 if report.failed == 0 else 2
 
 
+def _run_provider_matrix(arguments: argparse.Namespace) -> int:
+    _ensure_distinct_output(
+        arguments.output, arguments.prompt, arguments.scenarios, arguments.providers
+    )
+    document = load_prompt(arguments.prompt)
+    try:
+        raw = json.loads(arguments.scenarios.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as error:
+        raise ValueError(f"cannot load provider-matrix scenarios: {error}") from error
+    if not isinstance(raw, list):
+        raise ValueError("provider-matrix scenarios must be a JSON array")
+    scenarios: list[Scenario] = []
+    for position, item in enumerate(raw, start=1):
+        if not isinstance(item, dict):
+            raise ValueError(f"provider-matrix scenario {position} must be an object")
+        try:
+            scenarios.append(
+                Scenario(item["id"], item.get("values", {}), tuple(item.get("tags", ())))
+            )
+        except (KeyError, TypeError, ValueError) as error:
+            raise ValueError(f"invalid provider-matrix scenario {position}: {error}") from error
+    report = ProviderMatrix(load_replay_providers(arguments.providers)).run(
+        document,
+        scenarios,
+        workers=arguments.workers,
+        scenario_workers=arguments.scenario_workers,
+        strict=not arguments.allow_missing,
+    )
+    _emit(json.dumps(report.to_dict(), indent=2, sort_keys=True) + "\n", arguments.output)
+    return 0 if all(run.report.complete for run in report.runs) else 2
+
+
 def _render(
     report: DiffReport | ValidationReport,
     output_format: str,
@@ -469,6 +513,13 @@ def _non_negative_int(value: str) -> int:
     parsed = int(value)
     if parsed < 0:
         raise argparse.ArgumentTypeError("must be non-negative")
+    return parsed
+
+
+def _positive_int(value: str) -> int:
+    parsed = int(value)
+    if parsed < 1:
+        raise argparse.ArgumentTypeError("must be positive")
     return parsed
 
 

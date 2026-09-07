@@ -19,6 +19,8 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   `promptwitness benchmark` CLI with expected-answer-safe digests.
 - Add strict versioned multi-task benchmark suites with globally unique case IDs,
   suite digests, task selection, and a `promptwitness benchmark-suite` CLI gate.
+- Add replay-provider matrices with ordered concurrent execution, output-digest
+  agreement diagnostics, strict provider manifests, and a `provider-matrix` CLI.
 - Add an OpenAI-compatible long-context provider adapter that extracts common
   response shapes without leaking expected answers into prompts or digests.
 

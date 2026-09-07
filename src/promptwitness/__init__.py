@@ -52,6 +52,13 @@ from .models import (
 )
 from .parser import PromptFormatError, load_prompt, parse_prompt
 from .policies import PolicyBundle, PolicyFormatError, load_policy, parse_policy
+from .provider_matrix import (
+    ProviderMatrix,
+    ProviderMatrixReport,
+    ProviderRun,
+    ProviderSpec,
+    load_replay_providers,
+)
 from .providers import (
     OpenAICompatibleProvider,
     OpenAICompatibleStreamingProvider,
@@ -97,6 +104,10 @@ __all__ = [
     "PromptFormatError",
     "PromptRegistry",
     "PromptVersion",
+    "ProviderMatrix",
+    "ProviderMatrixReport",
+    "ProviderRun",
+    "ProviderSpec",
     "ProviderTrace",
     "RenderedPrompt",
     "RenderedScenario",
@@ -122,6 +133,7 @@ __all__ = [
     "load_benchmark_suite",
     "load_policy",
     "load_prompt",
+    "load_replay_providers",
     "load_traces",
     "make_needle_cases",
     "make_provider_answerer",
