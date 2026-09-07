@@ -25,6 +25,17 @@ inventory digest; `MatrixArtifact.load(path)` verifies both row content and the
 inventory before returning it. The CLI accepts `matrix ... --artifact PATH` for
 the same workflow.
 
+Authenticated artifacts can be compared without re-rendering prompts:
+
+```bash
+promptwitness matrix-diff before-matrix.json after-matrix.json \
+  --output matrix-diff.json
+```
+
+The command verifies both artifacts, rejects different prompt IDs, reports
+added/removed/changed scenario digests, and exits with status 2 when any
+scenario changed. This makes matrix rendering a CI-compatible regression gate.
+
 `ScenarioExecutor` adds an explicit provider boundary for local or remote LLM
 adapters. It executes rendered rows in stable input order, supports bounded
 retries and workers, stores only output digests plus provider outputs, and

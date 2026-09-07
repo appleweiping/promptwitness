@@ -118,6 +118,27 @@ def test_matrix_renders_scenarios(tmp_path: Path) -> None:
     assert payload["rows"][0]["messages"][0]["content"] == "Hello Ada"
 
 
+def test_matrix_diff_cli_reports_scenario_changes(tmp_path: Path) -> None:
+    prompt_before = tmp_path / "before-prompt.json"
+    prompt_after = tmp_path / "after-prompt.json"
+    write_prompt(prompt_before, content="Hello {{name}}")
+    write_prompt(prompt_after, content="Hi {{name}}")
+    after_payload = json.loads(prompt_after.read_text(encoding="utf-8"))
+    after_payload["id"] = "before-prompt"
+    prompt_after.write_text(json.dumps(after_payload), encoding="utf-8")
+    scenarios = tmp_path / "scenarios.json"
+    scenarios.write_text(json.dumps([{"id": "a", "values": {"name": "Ada"}}]), encoding="utf-8")
+    before = tmp_path / "before-matrix.json"
+    after = tmp_path / "after-matrix.json"
+    assert main(["matrix", str(prompt_before), str(scenarios), "--artifact", str(before)]) == 0
+    assert main(["matrix", str(prompt_after), str(scenarios), "--artifact", str(after)]) == 0
+    output = tmp_path / "matrix-diff.json"
+    assert main(["matrix-diff", str(before), str(after), "--output", str(output)]) == 2
+    payload = json.loads(output.read_text(encoding="utf-8"))
+    assert payload["changed"] is True
+    assert payload["scenarios"][0]["scenario_id"] == "a"
+
+
 def test_long_context_cli_scores_recorded_predictions(tmp_path: Path) -> None:
     cases = tmp_path / "cases.json"
     cases.write_text(

@@ -14,7 +14,7 @@ from .adapters import AdapterError, AdapterFormat, load_adapted_prompt, render_p
 from .benchmark import BenchmarkGate, evaluate_benchmark, load_benchmark_cases, load_benchmark_suite
 from .diff import MessageAlignment, compare_prompts
 from .long_context import LongContextCase, evaluate_long_context
-from .matrix import Scenario, render_matrix, save_matrix
+from .matrix import MatrixArtifact, Scenario, compare_matrices, render_matrix, save_matrix
 from .models import DiffReport, Severity, ValidationReport
 from .parser import PromptFormatError, load_prompt
 from .policies import PolicyBundle, PolicyFormatError, load_policy
@@ -120,6 +120,13 @@ def build_parser() -> argparse.ArgumentParser:
     matrix.add_argument("--output", type=Path)
     matrix.add_argument("--artifact", type=Path, help="also save an authenticated matrix artifact")
     matrix.set_defaults(handler=_run_matrix)
+    matrix_diff = subparsers.add_parser(
+        "matrix-diff", help="compare two authenticated rendered scenario matrices"
+    )
+    matrix_diff.add_argument("before", type=Path)
+    matrix_diff.add_argument("after", type=Path)
+    matrix_diff.add_argument("--output", type=Path)
+    matrix_diff.set_defaults(handler=_run_matrix_diff)
     long_context = subparsers.add_parser(
         "long-context", help="score recorded answers for long-context needle cases"
     )
@@ -325,6 +332,33 @@ def _run_matrix(arguments: argparse.Namespace) -> int:
         arguments.output,
     )
     return 0
+
+
+def _run_matrix_diff(arguments: argparse.Namespace) -> int:
+    _ensure_distinct_output(arguments.output, arguments.before, arguments.after)
+    before = MatrixArtifact.load(str(arguments.before))
+    after = MatrixArtifact.load(str(arguments.after))
+    if before.prompt_id != after.prompt_id:
+        raise ValueError("matrix artifacts must use the same prompt ID")
+    differences = compare_matrices(before.rows, after.rows)
+    payload = {
+        "schema_version": 1,
+        "prompt_id": before.prompt_id,
+        "before_digest": before.digest,
+        "after_digest": after.digest,
+        "changed": any(item.changed for item in differences),
+        "scenarios": [
+            {
+                "scenario_id": item.scenario_id,
+                "before_digest": item.before_digest,
+                "after_digest": item.after_digest,
+                "changed": item.changed,
+            }
+            for item in differences
+        ],
+    }
+    _emit(json.dumps(payload, indent=2, sort_keys=True) + "\n", arguments.output)
+    return 2 if payload["changed"] else 0
 
 
 def _run_long_context(arguments: argparse.Namespace) -> int:
