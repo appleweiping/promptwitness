@@ -7,6 +7,8 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 - Add replayable provider wrappers and secret-safe request/tool/response event traces.
 - Authenticate provider-trace loading and reject tampered outputs or event inventories.
 - Add a dependency-free OpenAI-compatible HTTP provider with environment-based key handling.
+- Add an OpenAI-compatible SSE streaming provider with deterministic text aggregation
+  and retained non-secret chunk audit data.
 
 ### Added
 

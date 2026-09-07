@@ -36,6 +36,7 @@ from .parser import PromptFormatError, load_prompt, parse_prompt
 from .policies import PolicyBundle, PolicyFormatError, load_policy, parse_policy
 from .providers import (
     OpenAICompatibleProvider,
+    OpenAICompatibleStreamingProvider,
     ProviderTrace,
     ReplayProvider,
     TraceEvent,
@@ -62,6 +63,7 @@ __all__ = [
     "Message",
     "MessageAlignment",
     "OpenAICompatibleProvider",
+    "OpenAICompatibleStreamingProvider",
     "PolicyBundle",
     "PolicyFormatError",
     "PromptDocument",

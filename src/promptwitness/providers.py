@@ -7,7 +7,7 @@ import json
 import os
 import urllib.error
 import urllib.request
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Iterator, Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -154,6 +154,103 @@ class OpenAICompatibleProvider:
         if not isinstance(payload, Mapping):
             raise ValueError("provider response must be a JSON object")
         return dict(payload)
+
+
+class OpenAICompatibleStreamingProvider(OpenAICompatibleProvider):
+    """OpenAI-compatible provider for newline-delimited server-sent events.
+
+    ``stream`` yields decoded JSON chunks in wire order and stops at the
+    standard ``data: [DONE]`` sentinel. Calling the provider aggregates text
+    deltas into the same small response shape used by replay fixtures while
+    retaining the raw chunks under ``stream_chunks`` for audit consumers.
+    The implementation deliberately uses only the standard library so a
+    provider can be exercised in tests without an SDK or model dependency.
+    """
+
+    def stream(self, row: RenderedScenario) -> Iterator[Mapping[str, Any]]:
+        """Yield one JSON object for each non-empty SSE data event."""
+        body: dict[str, Any] = {
+            "messages": [
+                {
+                    "role": message.role,
+                    **({"name": message.name} if message.name else {}),
+                    "content": message.content,
+                }
+                for message in row.messages
+            ],
+            "stream": True,
+        }
+        if self.model is not None:
+            body["model"] = self.model
+        request_headers = {"Content-Type": "application/json", **self.headers}
+        if self.api_key_env is not None:
+            token = os.environ.get(self.api_key_env)
+            if not token:
+                raise ValueError(f"environment variable {self.api_key_env!r} is not set")
+            request_headers["Authorization"] = f"Bearer {token}"
+        request = urllib.request.Request(
+            self.endpoint,
+            data=json.dumps(body, ensure_ascii=False, allow_nan=False).encode("utf-8"),
+            headers=request_headers,
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=self.timeout) as response:  # nosec B310 - endpoint scheme is restricted above
+                for raw_line in response:
+                    try:
+                        line = raw_line.decode("utf-8").strip()
+                    except UnicodeError as error:
+                        raise ValueError("provider stream contained invalid UTF-8") from error
+                    if not line or line.startswith(":"):
+                        continue
+                    if not line.startswith("data:"):
+                        continue
+                    data = line[5:].strip()
+                    if data == "[DONE]":
+                        break
+                    try:
+                        payload = json.loads(data)
+                    except json.JSONDecodeError as error:
+                        raise ValueError("provider stream contained invalid JSON") from error
+                    if not isinstance(payload, Mapping):
+                        raise ValueError("provider stream chunks must be JSON objects")
+                    yield dict(payload)
+        except urllib.error.HTTPError as error:
+            raise ValueError(f"provider returned HTTP {error.code}") from error
+        except (urllib.error.URLError, TimeoutError, OSError) as error:
+            raise ValueError(f"provider request failed: {type(error).__name__}") from error
+
+    def __call__(self, row: RenderedScenario) -> dict[str, Any]:
+        """Aggregate streamed text deltas and retain a redacted chunk audit."""
+        chunks = tuple(self.stream(row))
+        text_parts: list[str] = []
+        role: str | None = None
+        for chunk in chunks:
+            choices = chunk.get("choices")
+            if not isinstance(choices, list):
+                continue
+            for choice in choices:
+                if not isinstance(choice, Mapping):
+                    continue
+                delta = choice.get("delta")
+                if not isinstance(delta, Mapping):
+                    continue
+                if isinstance(delta.get("role"), str):
+                    role = delta["role"]
+                content = delta.get("content")
+                if isinstance(content, str):
+                    text_parts.append(content)
+        return {
+            "object": "chat.completion",
+            "choices": [
+                {
+                    "index": 0,
+                    "message": {"role": role or "assistant", "content": "".join(text_parts)},
+                    "finish_reason": "stop",
+                }
+            ],
+            "stream_chunks": list(chunks),
+        }
 
 
 class TraceRecorder:

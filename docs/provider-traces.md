@@ -25,3 +25,10 @@ the original provider responses.
 For local OpenAI-compatible gateways, `OpenAICompatibleProvider` sends rendered
 messages using `urllib`, reads an optional bearer token from an environment
 variable, and never returns that token in the response object or trace.
+
+For gateways that support server-sent events, use
+`OpenAICompatibleStreamingProvider`. Its `stream(row)` iterator parses only
+`data:` JSON events, ignores keep-alives, stops at `[DONE]`, and rejects
+malformed UTF-8/JSON or non-object chunks. Calling the provider aggregates text
+content deltas and includes the decoded `stream_chunks` so a replay fixture can
+audit the exact chunk sequence without retaining request headers or API keys.
