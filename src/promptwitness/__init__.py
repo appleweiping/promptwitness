@@ -34,6 +34,7 @@ from .models import (
 )
 from .parser import PromptFormatError, load_prompt, parse_prompt
 from .policies import PolicyBundle, PolicyFormatError, load_policy, parse_policy
+from .providers import ProviderTrace, ReplayProvider, TraceEvent, TraceRecorder
 from .registry import PromptRegistry, PromptVersion, RenderedPrompt
 from .validation import ValidationPolicy, validate_prompt
 
@@ -59,12 +60,16 @@ __all__ = [
     "PromptFormatError",
     "PromptRegistry",
     "PromptVersion",
+    "ProviderTrace",
     "RenderedPrompt",
     "RenderedScenario",
+    "ReplayProvider",
     "Scenario",
     "ScenarioExecutor",
     "Severity",
     "ToolSpec",
+    "TraceEvent",
+    "TraceRecorder",
     "ValidationPolicy",
     "ValidationReport",
     "adapt_prompt",

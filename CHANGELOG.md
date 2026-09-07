@@ -4,6 +4,8 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+- Add replayable provider wrappers and secret-safe request/tool/response event traces.
+
 ### Added
 
 - Transactional SQLite prompt version registry with content digests, optimistic concurrency,
