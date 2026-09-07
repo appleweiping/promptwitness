@@ -37,8 +37,9 @@ The report retains scenario IDs, prompt/output digests, attempts, and errors;
 it deliberately omits raw provider outputs. `pairwise_agreement` is the
 fraction of comparable successful provider pairs with identical output
 digests. Exit status is zero only when every provider completed every scenario.
-Use `--allow-missing` to record replay misses instead of failing the render
-step; provider failures remain visible in the report.
+Use `--allow-missing` to let scenarios with missing prompt variables render
+with placeholders; replay misses remain visible as provider failures in the
+report.
 
 ## Python API
 
@@ -53,4 +54,3 @@ print(report.pairwise_agreement)
 `workers` parallelizes provider runs while `scenario_workers` controls the
 ordered executor inside each provider. The returned run order always matches
 the declared provider order.
-
