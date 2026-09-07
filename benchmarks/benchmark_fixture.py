@@ -11,7 +11,13 @@ import time
 import tracemalloc
 from pathlib import Path
 
-from promptwitness import Scenario, ScenarioExecutor, load_prompt
+from promptwitness import (
+    Scenario,
+    ScenarioExecutor,
+    evaluate_long_context,
+    load_prompt,
+    make_needle_cases,
+)
 
 
 def main() -> None:
@@ -40,6 +46,14 @@ def main() -> None:
     tracemalloc.start()
     started = time.perf_counter()
     report = ScenarioExecutor().run(document, scenarios, provider, workers=2)
+    long_context = make_needle_cases(
+        (("background " * 4, "methods " * 4, "results " * 4),),
+        needle="Ada owns evaluation",
+        query="Who owns evaluation?",
+        expected="Ada",
+        seed="fixture",
+    )
+    long_context_report = evaluate_long_context(long_context, lambda _case: "Ada")
     elapsed = time.perf_counter() - started
     _, peak = tracemalloc.get_traced_memory()
     tracemalloc.stop()
@@ -51,6 +65,8 @@ def main() -> None:
         "prompt_id": document.prompt_id,
         "scenarios": len(scenarios),
         "succeeded": report.succeeded,
+        "long_context_cases": len(long_context),
+        "long_context_accuracy": long_context_report.accuracy,
         "elapsed_seconds": elapsed,
         "peak_python_bytes": peak,
         "python": sys.version.split()[0],

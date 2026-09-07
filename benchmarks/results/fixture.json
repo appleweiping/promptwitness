@@ -1,7 +1,9 @@
 {
-  "elapsed_seconds": 0.02146560000255704,
+  "elapsed_seconds": 0.01405159998103045,
   "kind": "fixture-real",
-  "peak_python_bytes": 30100,
+  "long_context_accuracy": 1.0,
+  "long_context_cases": 1,
+  "peak_python_bytes": 30125,
   "platform": "Windows-11-10.0.26200-SP0",
   "prompt_id": "order-assistant-v1",
   "python": "3.14.5",
