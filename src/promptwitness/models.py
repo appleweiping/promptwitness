@@ -70,6 +70,7 @@ class FindingCode(str, Enum):
     MALFORMED_TEMPLATE = "malformed_template"
     REPEATED_VARIABLE = "repeated_variable"
     INVALID_MESSAGE_NAME = "invalid_message_name"
+    INVALID_MESSAGE_ID = "invalid_message_id"
     EMPTY_TOOL_DESCRIPTION = "empty_tool_description"
     INVALID_PARAMETER_SCHEMA = "invalid_parameter_schema"
     # Stable validation code identifier, not a credential.
@@ -83,6 +84,7 @@ class Message:
     role: str
     content: str
     name: str | None = None
+    message_id: str | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.role, str):
@@ -93,6 +95,13 @@ class Message:
             raise TypeError("message content must be a string")
         if self.name is not None and not isinstance(self.name, str):
             raise TypeError("message name must be a string or None")
+        if self.message_id is not None:
+            if not isinstance(self.message_id, str):
+                raise TypeError("message id must be a string or None")
+            if not self.message_id.strip():
+                raise ValueError("message id must not be empty")
+            if len(self.message_id) > 128:
+                raise ValueError("message id must be at most 128 characters")
 
 
 @dataclass(frozen=True, slots=True)
@@ -154,6 +163,11 @@ class PromptDocument:
         if not isinstance(self.metadata, Mapping):
             raise TypeError("metadata must be an object")
         object.__setattr__(self, "metadata", _freeze_json(self.metadata, "metadata"))
+        message_ids = [
+            message.message_id for message in self.messages if message.message_id is not None
+        ]
+        if len(message_ids) != len(set(message_ids)):
+            raise ValueError("message ids must be unique within a prompt")
         tool_names = [tool.name for tool in self.tools]
         if len(set(tool_names)) != len(tool_names):
             raise ValueError("tool names must be unique")

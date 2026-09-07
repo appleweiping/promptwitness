@@ -20,6 +20,7 @@ class MessageAlignment(str, Enum):
 
     POSITIONAL = "positional"
     SMART = "smart"
+    ID = "id"
 
 
 @dataclass(frozen=True, slots=True)
@@ -94,9 +95,60 @@ def compare_prompts(
 def _compare_messages(
     before: tuple[Message, ...], after: tuple[Message, ...], options: DiffOptions
 ) -> list[Change]:
+    if options.message_alignment is MessageAlignment.ID:
+        return _compare_messages_by_id(before, after, options)
     if options.message_alignment is MessageAlignment.SMART:
         return _compare_messages_smart(before, after, options)
     return _compare_messages_positional(before, after, options)
+
+
+def _compare_messages_by_id(
+    before: tuple[Message, ...], after: tuple[Message, ...], options: DiffOptions
+) -> list[Change]:
+    """Align messages by explicit stable IDs, independent of list position."""
+
+    old = _message_id_map(before, "before")
+    _message_id_map(after, "after")
+    changes: list[Change] = []
+    for new_index, message in enumerate(after):
+        if message.message_id not in old:
+            changes.append(
+                Change(
+                    ChangeKind.MESSAGE_ADDED,
+                    json_pointer("messages", new_index),
+                    options.added_message_severity,
+                    f"{message.role!r} message added",
+                    None,
+                    _message_value(message),
+                )
+            )
+            continue
+        old_index, old_message = old[message.message_id]
+        del old[message.message_id]
+        changes.extend(_compare_message_pair(old_message, message, new_index, options))
+    for old_index, message in sorted(old.values(), key=lambda item: item[0]):
+        changes.append(
+            Change(
+                ChangeKind.MESSAGE_REMOVED,
+                json_pointer("messages", old_index),
+                Severity.BREAKING,
+                f"{message.role!r} message removed",
+                _message_value(message),
+                None,
+            )
+        )
+    return changes
+
+
+def _message_id_map(messages: tuple[Message, ...], side: str) -> dict[str, tuple[int, Message]]:
+    result: dict[str, tuple[int, Message]] = {}
+    for index, message in enumerate(messages):
+        if message.message_id is None:
+            raise ValueError(f"{side} messages must all have ids for id alignment")
+        if message.message_id in result:
+            raise ValueError(f"{side} messages contain duplicate id {message.message_id!r}")
+        result[message.message_id] = (index, message)
+    return result
 
 
 def _compare_messages_positional(
@@ -427,7 +479,12 @@ def _unified_content_diff(before: str, after: str, context: int) -> tuple[str, .
 
 
 def _message_value(message: Message) -> dict[str, str | None]:
-    return {"role": message.role, "content": message.content, "name": message.name}
+    return {
+        "id": message.message_id,
+        "role": message.role,
+        "content": message.content,
+        "name": message.name,
+    }
 
 
 def _tool_value(tool: ToolSpec) -> dict[str, Any]:

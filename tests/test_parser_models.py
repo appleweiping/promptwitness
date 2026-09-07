@@ -33,6 +33,20 @@ def test_parse_complete_prompt() -> None:
     assert document.tool_map() == {"lookup": document.tools[0]}
 
 
+def test_parse_and_render_stable_message_id() -> None:
+    raw = raw_prompt()
+    raw["messages"] = [{"id": "question", "role": "user", "content": "Hello"}]
+    document = parse_prompt(raw)
+    assert document.messages[0].message_id == "question"
+    duplicate = dict(raw)
+    duplicate["messages"] = [
+        {"id": "same", "role": "user", "content": "one"},
+        {"id": "same", "role": "assistant", "content": "two"},
+    ]
+    with pytest.raises(PromptFormatError, match="unique"):
+        parse_prompt(duplicate)
+
+
 @pytest.mark.parametrize(
     ("value", "message"),
     [
@@ -61,6 +75,8 @@ def test_rejects_invalid_document_shapes(value: object, message: str) -> None:
         ({"role": "user"}, "requires string"),
         ({"role": "user", "content": "x", "extra": 1}, "unknown fields"),
         ({"role": "user", "content": "x", "name": 2}, "name must"),
+        ({"role": "user", "content": "x", "id": 2}, "id must"),
+        ({"role": "user", "content": "x", "id": ""}, "message id"),
     ],
 )
 def test_rejects_invalid_messages(message: object, expected: str) -> None:
@@ -111,6 +127,8 @@ def test_model_invariants() -> None:
         Message(1, "x")  # type: ignore[arg-type]
     with pytest.raises(TypeError, match="name"):
         Message("user", "x", 1)  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="at most"):
+        Message("user", "x", message_id="m" * 129)
     with pytest.raises(TypeError, match="parameters"):
         ToolSpec("x", "", {1: {}})  # type: ignore[dict-item]
     with pytest.raises(TypeError, match="messages"):

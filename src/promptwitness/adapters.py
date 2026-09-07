@@ -109,6 +109,7 @@ def prompt_to_dict(document: PromptDocument) -> dict[str, Any]:
             {
                 **{"role": message.role, "content": message.content},
                 **({"name": message.name} if message.name is not None else {}),
+                **({"id": message.message_id} if message.message_id is not None else {}),
             }
             for message in document.messages
         ],

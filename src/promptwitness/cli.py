@@ -318,7 +318,12 @@ def _run_matrix(arguments: argparse.Namespace) -> int:
                         "variables": list(row.variables),
                         "tags": list(row.tags),
                         "messages": [
-                            {"role": message.role, "name": message.name, "content": message.content}
+                            {
+                                "id": message.message_id,
+                                "role": message.role,
+                                "name": message.name,
+                                "content": message.content,
+                            }
                             for message in row.messages
                         ],
                     }

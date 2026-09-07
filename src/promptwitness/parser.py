@@ -75,18 +75,25 @@ def parse_prompt(raw: Any) -> PromptDocument:
 def _parse_message(raw: Any, index: int) -> Message:
     if not isinstance(raw, dict):
         raise PromptFormatError(f"message {index} must be an object")
-    unexpected = set(raw) - {"role", "content", "name"}
+    unexpected = set(raw) - {"role", "content", "name", "id"}
     if unexpected:
         raise PromptFormatError(
             f"message {index} has unknown fields: {', '.join(sorted(unexpected))}"
         )
-    role, content, name = raw.get("role"), raw.get("content"), raw.get("name")
+    role, content, name, message_id = (
+        raw.get("role"),
+        raw.get("content"),
+        raw.get("name"),
+        raw.get("id"),
+    )
     if not isinstance(role, str) or not isinstance(content, str):
         raise PromptFormatError(f"message {index} requires string role and content")
     if name is not None and not isinstance(name, str):
         raise PromptFormatError(f"message {index} name must be a string or null")
+    if message_id is not None and not isinstance(message_id, str):
+        raise PromptFormatError(f"message {index} id must be a string or null")
     try:
-        return Message(role=role, content=content, name=name)
+        return Message(role=role, content=content, name=name, message_id=message_id)
     except (TypeError, ValueError) as error:
         raise PromptFormatError(f"message {index}: {error}") from error
 

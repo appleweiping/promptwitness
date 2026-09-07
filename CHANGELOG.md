@@ -4,6 +4,9 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+- Add optional stable native message identifiers and explicit ID-based diff
+  alignment for reorder-safe prompt compatibility checks.
+
 - Add overall and per-task accuracy gates to the versioned benchmark-suite CLI.
 - Add replayable provider wrappers and secret-safe request/tool/response event traces.
 - Authenticate provider-trace loading and reject tampered outputs or event inventories.

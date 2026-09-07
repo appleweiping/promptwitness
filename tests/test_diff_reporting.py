@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from promptwitness.diff import DiffOptions, compare_prompts
+from promptwitness.diff import DiffOptions, MessageAlignment, compare_prompts
 from promptwitness.models import (
     ChangeKind,
     FindingCode,
@@ -68,6 +68,31 @@ def test_added_message_severity_is_configurable() -> None:
     assert report.changes[0].severity is Severity.INFO
     with pytest.raises(ValueError, match="non-negative"):
         DiffOptions(context_lines=-1)
+
+
+def test_id_alignment_is_stable_when_messages_are_reordered() -> None:
+    before = prompt(
+        "before",
+        Message("user", "Question", message_id="question"),
+        Message("assistant", "Answer", message_id="answer"),
+    )
+    after = prompt(
+        "after",
+        Message("assistant", "Answer", message_id="answer"),
+        Message("user", "Changed question", message_id="question"),
+    )
+    report = compare_prompts(before, after, DiffOptions(message_alignment=MessageAlignment.ID))
+    assert [change.kind for change in report.changes] == [ChangeKind.MESSAGE_CONTENT]
+    assert report.changes[0].path == "/messages/1/content"
+
+
+def test_id_alignment_requires_ids_on_every_message() -> None:
+    with pytest.raises(ValueError, match="must all have ids"):
+        compare_prompts(
+            prompt("a", Message("user", "x")),
+            prompt("b", Message("user", "x")),
+            DiffOptions(message_alignment=MessageAlignment.ID),
+        )
 
 
 @pytest.mark.parametrize(

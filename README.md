@@ -95,6 +95,10 @@ promptwitness diff examples/before.json examples/after.json \
   --message-alignment smart
 ```
 
+When prompts carry stable message IDs, use `--message-alignment id` to make
+reordering explicit rather than treating it as positional churn. See
+[stable message identifiers](docs/message-identifiers.md).
+
 ## Prompt format
 
 Schema version 1 is intentionally small and portable:
