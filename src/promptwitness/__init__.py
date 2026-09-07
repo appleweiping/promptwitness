@@ -10,6 +10,7 @@ from .adapters import (
     render_prompt_json,
 )
 from .diff import DiffOptions, MessageAlignment, compare_prompts
+from .execution import ExecutionReport, ExecutionRow, ScenarioExecutor
 from .matrix import (
     MatrixArtifact,
     MatrixDiff,
@@ -44,6 +45,8 @@ __all__ = [
     "ChangeKind",
     "DiffOptions",
     "DiffReport",
+    "ExecutionReport",
+    "ExecutionRow",
     "Finding",
     "FindingCode",
     "MatrixArtifact",
@@ -59,6 +62,7 @@ __all__ = [
     "RenderedPrompt",
     "RenderedScenario",
     "Scenario",
+    "ScenarioExecutor",
     "Severity",
     "ToolSpec",
     "ValidationPolicy",

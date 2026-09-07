@@ -24,3 +24,8 @@ review. The artifact includes rendered messages, row digests, tags, and an
 inventory digest; `MatrixArtifact.load(path)` verifies both row content and the
 inventory before returning it. The CLI accepts `matrix ... --artifact PATH` for
 the same workflow.
+
+`ScenarioExecutor` adds an explicit provider boundary for local or remote LLM
+adapters. It executes rendered rows in stable input order, supports bounded
+retries and workers, stores only output digests plus provider outputs, and
+reports failures per scenario without leaking the original variable map.

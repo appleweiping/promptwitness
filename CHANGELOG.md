@@ -10,6 +10,7 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   review annotations, stored-version diffs, and deterministic variable replay.
 - Variable scenario rendering matrices with secret-safe digests and regression diffs.
 - Authenticated, persistable rendering-matrix artifacts with optional CLI emission.
+- Ordered scenario execution with provider boundaries, bounded retries, and per-row failure reports.
 
 ## [0.2.0] - 2026-08-31
 
