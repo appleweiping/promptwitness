@@ -107,6 +107,17 @@ def test_convert_openai_and_validate_provider_input(
     assert main(["validate", str(source), "--from-format", "openai"]) == 0
 
 
+def test_matrix_renders_scenarios(tmp_path: Path) -> None:
+    prompt = tmp_path / "prompt.json"
+    write_prompt(prompt, content="Hello {{name}}")
+    scenarios = tmp_path / "scenarios.json"
+    scenarios.write_text(json.dumps([{"id": "a", "values": {"name": "Ada"}}]), encoding="utf-8")
+    output = tmp_path / "matrix.json"
+    assert main(["matrix", str(prompt), str(scenarios), "--output", str(output)]) == 0
+    payload = json.loads(output.read_text(encoding="utf-8"))
+    assert payload["rows"][0]["messages"][0]["content"] == "Hello Ada"
+
+
 def test_cli_policy_smart_alignment_and_sarif(tmp_path: Path) -> None:
     before, after = tmp_path / "before.json", tmp_path / "after.json"
     before.write_text(

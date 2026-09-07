@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from collections.abc import Sequence
 from dataclasses import replace
@@ -11,6 +12,7 @@ from typing import NoReturn
 
 from .adapters import AdapterError, AdapterFormat, load_adapted_prompt, render_prompt_json
 from .diff import MessageAlignment, compare_prompts
+from .matrix import Scenario, render_matrix
 from .models import DiffReport, Severity, ValidationReport
 from .parser import PromptFormatError
 from .policies import PolicyBundle, PolicyFormatError, load_policy
@@ -103,6 +105,17 @@ def build_parser() -> argparse.ArgumentParser:
     convert.add_argument("--id", dest="prompt_id")
     convert.add_argument("--output", type=Path)
     convert.set_defaults(handler=_run_convert)
+    matrix = subparsers.add_parser("matrix", help="render one prompt over a scenario JSON array")
+    matrix.add_argument("prompt", type=Path)
+    matrix.add_argument("scenarios", type=Path)
+    matrix.add_argument(
+        "--from-format",
+        choices=[source.value for source in AdapterFormat],
+        default=AdapterFormat.NATIVE.value,
+    )
+    matrix.add_argument("--allow-missing", action="store_true")
+    matrix.add_argument("--output", type=Path)
+    matrix.set_defaults(handler=_run_matrix)
     return parser
 
 
@@ -202,6 +215,51 @@ def _run_convert(arguments: argparse.Namespace) -> int:
     )
     _emit_adapter_warnings(result.warnings)
     _emit(render_prompt_json(result.document), arguments.output)
+    return 0
+
+
+def _run_matrix(arguments: argparse.Namespace) -> int:
+    _ensure_distinct_output(arguments.output, arguments.prompt, arguments.scenarios)
+    result = load_adapted_prompt(arguments.prompt, AdapterFormat(arguments.from_format))
+    _emit_adapter_warnings(result.warnings)
+    try:
+        raw = json.loads(arguments.scenarios.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as error:
+        raise ValueError(f"cannot load scenarios: {error}") from error
+    if not isinstance(raw, list):
+        raise ValueError("scenario file must contain a JSON array")
+    scenarios = tuple(
+        Scenario(item["id"], item.get("values", {}), tuple(item.get("tags", ())))
+        for item in raw
+        if isinstance(item, dict)
+    )
+    if len(scenarios) != len(raw):
+        raise ValueError("scenario entries must be objects")
+    rendered = render_matrix(result.document, scenarios, strict=not arguments.allow_missing)
+    _emit(
+        json.dumps(
+            {
+                "prompt_id": result.document.prompt_id,
+                "rows": [
+                    {
+                        "id": row.scenario_id,
+                        "digest": row.digest,
+                        "variables": list(row.variables),
+                        "tags": list(row.tags),
+                        "messages": [
+                            {"role": message.role, "name": message.name, "content": message.content}
+                            for message in row.messages
+                        ],
+                    }
+                    for row in rendered
+                ],
+            },
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        arguments.output,
+    )
     return 0
 
 
