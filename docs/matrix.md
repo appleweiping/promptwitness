@@ -35,3 +35,6 @@ at a deterministic position in each context and `evaluate_long_context()` runs
 an answerer without exposing the expected answer in the rendered prompt. The
 report retains per-case failures and aggregates accuracy by context depth and
 front/middle/back position, which makes lost-in-the-middle regressions visible.
+The same report can be reproduced in CI with
+`promptwitness long-context cases.json predictions.json --output report.json`,
+where predictions is a case-ID-to-answer JSON object.

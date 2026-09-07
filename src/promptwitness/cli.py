@@ -12,6 +12,7 @@ from typing import NoReturn
 
 from .adapters import AdapterError, AdapterFormat, load_adapted_prompt, render_prompt_json
 from .diff import MessageAlignment, compare_prompts
+from .long_context import LongContextCase, evaluate_long_context
 from .matrix import Scenario, render_matrix, save_matrix
 from .models import DiffReport, Severity, ValidationReport
 from .parser import PromptFormatError
@@ -117,6 +118,16 @@ def build_parser() -> argparse.ArgumentParser:
     matrix.add_argument("--output", type=Path)
     matrix.add_argument("--artifact", type=Path, help="also save an authenticated matrix artifact")
     matrix.set_defaults(handler=_run_matrix)
+    long_context = subparsers.add_parser(
+        "long-context", help="score recorded answers for long-context needle cases"
+    )
+    long_context.add_argument("cases", type=Path, help="JSON array of long-context cases")
+    long_context.add_argument(
+        "predictions", type=Path, help="JSON object mapping case IDs to answer strings"
+    )
+    long_context.add_argument("--strict", action="store_true")
+    long_context.add_argument("--output", type=Path)
+    long_context.set_defaults(handler=_run_long_context)
     return parser
 
 
@@ -267,6 +278,45 @@ def _run_matrix(arguments: argparse.Namespace) -> int:
         arguments.output,
     )
     return 0
+
+
+def _run_long_context(arguments: argparse.Namespace) -> int:
+    _ensure_distinct_output(arguments.output, arguments.cases, arguments.predictions)
+    try:
+        raw_cases = json.loads(arguments.cases.read_text(encoding="utf-8"))
+        raw_predictions = json.loads(arguments.predictions.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as error:
+        raise ValueError(f"cannot load long-context inputs: {error}") from error
+    if not isinstance(raw_cases, list) or not isinstance(raw_predictions, dict):
+        raise ValueError("cases must be an array and predictions must be an object")
+    cases: list[LongContextCase] = []
+    for item in raw_cases:
+        if not isinstance(item, dict):
+            raise ValueError("long-context case entries must be objects")
+        try:
+            cases.append(
+                LongContextCase(
+                    str(item["case_id"]),
+                    tuple(item["context"]),
+                    str(item["needle"]),
+                    str(item["query"]),
+                    str(item["expected"]),
+                    int(item["needle_index"]),
+                )
+            )
+        except (KeyError, TypeError, ValueError) as error:
+            raise ValueError(f"invalid long-context case: {error}") from error
+    if not all(
+        isinstance(key, str) and isinstance(value, str) for key, value in raw_predictions.items()
+    ):
+        raise ValueError("predictions must map string case IDs to string answers")
+    report = evaluate_long_context(
+        cases,
+        lambda case: raw_predictions.get(case.case_id, ""),
+        strict=arguments.strict,
+    )
+    _emit(json.dumps(report.to_dict(), indent=2, sort_keys=True) + "\n", arguments.output)
+    return 0 if report.failed == 0 else 2
 
 
 def _render(

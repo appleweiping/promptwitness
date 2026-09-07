@@ -13,6 +13,8 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   and provider-compatible tool messages.
 - Add deterministic needle-in-context long-context evaluation with depth and
   front/middle/back diagnostics.
+- Add a `promptwitness long-context` CLI gate for replaying recorded answers
+  against serialized needle cases.
 
 ### Added
 

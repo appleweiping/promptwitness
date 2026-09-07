@@ -118,6 +118,30 @@ def test_matrix_renders_scenarios(tmp_path: Path) -> None:
     assert payload["rows"][0]["messages"][0]["content"] == "Hello Ada"
 
 
+def test_long_context_cli_scores_recorded_predictions(tmp_path: Path) -> None:
+    cases = tmp_path / "cases.json"
+    cases.write_text(
+        json.dumps(
+            [
+                {
+                    "case_id": "one",
+                    "context": ["front needle", "back"],
+                    "needle": "needle",
+                    "query": "What?",
+                    "expected": "yes",
+                    "needle_index": 0,
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    predictions = tmp_path / "predictions.json"
+    predictions.write_text('{"one":"yes"}', encoding="utf-8")
+    output = tmp_path / "long-context.json"
+    assert main(["long-context", str(cases), str(predictions), "--output", str(output)]) == 0
+    assert json.loads(output.read_text(encoding="utf-8"))["accuracy"] == 1.0
+
+
 def test_cli_policy_smart_alignment_and_sarif(tmp_path: Path) -> None:
     before, after = tmp_path / "before.json", tmp_path / "after.json"
     before.write_text(
