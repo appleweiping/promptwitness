@@ -5,6 +5,7 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 ## [Unreleased]
 
 - Add replayable provider wrappers and secret-safe request/tool/response event traces.
+- Authenticate provider-trace loading and reject tampered outputs or event inventories.
 
 ### Added
 

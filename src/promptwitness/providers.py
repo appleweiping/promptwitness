@@ -139,3 +139,49 @@ class TraceRecorder:
         Path(path).write_text(
             json.dumps(payload, ensure_ascii=False, sort_keys=True) + "\n", encoding="utf-8"
         )
+
+
+def load_traces(path: str | Path) -> tuple[ProviderTrace, ...]:
+    """Load and authenticate a saved provider-trace artifact."""
+    try:
+        payload = json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as error:
+        raise ValueError(f"cannot read provider traces: {error}") from error
+    if (
+        not isinstance(payload, Mapping)
+        or payload.get("format") != "promptwitness.provider-trace/v1"
+    ):
+        raise ValueError("unsupported provider-trace format")
+    raw_traces = payload.get("traces")
+    if not isinstance(raw_traces, list):
+        raise ValueError("provider traces must contain an array")
+    traces: list[ProviderTrace] = []
+    for index, raw in enumerate(raw_traces, start=1):
+        if not isinstance(raw, Mapping):
+            raise ValueError(f"provider trace {index} must be an object")
+        events_value = raw.get("events")
+        if not isinstance(events_value, list):
+            raise ValueError(f"provider trace {index} events must be an array")
+        try:
+            events = tuple(
+                TraceEvent(
+                    str(event["kind"]),
+                    str(event["scenario_id"]),
+                    str(event["prompt_digest"]),
+                    str(event["payload_digest"]),
+                )
+                for event in events_value
+            )
+            trace = ProviderTrace(
+                str(raw["scenario_id"]),
+                str(raw["prompt_digest"]),
+                raw["output"],
+                str(raw["output_digest"]),
+                events,
+            )
+        except (KeyError, TypeError, ValueError) as error:
+            raise ValueError(f"invalid provider trace {index}") from error
+        if trace.output_digest != _digest(trace.output) or raw.get("digest") != trace.digest():
+            raise ValueError(f"provider trace {index} digest mismatch")
+        traces.append(trace)
+    return tuple(traces)

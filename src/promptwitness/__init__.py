@@ -34,7 +34,7 @@ from .models import (
 )
 from .parser import PromptFormatError, load_prompt, parse_prompt
 from .policies import PolicyBundle, PolicyFormatError, load_policy, parse_policy
-from .providers import ProviderTrace, ReplayProvider, TraceEvent, TraceRecorder
+from .providers import ProviderTrace, ReplayProvider, TraceEvent, TraceRecorder, load_traces
 from .registry import PromptRegistry, PromptVersion, RenderedPrompt
 from .validation import ValidationPolicy, validate_prompt
 
@@ -78,6 +78,7 @@ __all__ = [
     "load_adapted_prompt",
     "load_policy",
     "load_prompt",
+    "load_traces",
     "parse_policy",
     "parse_prompt",
     "prompt_to_dict",

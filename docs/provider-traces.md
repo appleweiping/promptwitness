@@ -15,6 +15,9 @@ recorded.save("provider-traces.json")
 replay = ReplayProvider({trace.prompt_digest: trace.output for trace in recorded.traces})
 ```
 
+`load_traces()` authenticates the saved output and event digests before making
+the traces available for review or replay.
+
 The trace file is an audit inventory, not a cryptographic signature from an
 external provider. Keep outputs and trace files under the same access controls as
 the original provider responses.

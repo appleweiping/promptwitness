@@ -1,6 +1,13 @@
 from __future__ import annotations
 
-from promptwitness import ReplayProvider, Scenario, TraceRecorder, load_prompt, render_matrix
+from promptwitness import (
+    ReplayProvider,
+    Scenario,
+    TraceRecorder,
+    load_prompt,
+    load_traces,
+    render_matrix,
+)
 
 
 def test_replay_and_trace_recorder_are_digest_stable(tmp_path) -> None:
@@ -16,6 +23,7 @@ def test_replay_and_trace_recorder_are_digest_stable(tmp_path) -> None:
     path = tmp_path / "traces.json"
     provider.save(path)
     assert "promptwitness.provider-trace/v1" in path.read_text(encoding="utf-8")
+    assert load_traces(path)[0].digest() == provider.traces[0].digest()
     assert ReplayProvider({row.digest: {"text": "ok"}})(row) == {"text": "ok"}
 
 
@@ -28,3 +36,20 @@ def test_replay_provider_fails_for_unknown_digest() -> None:
         assert "no replay response" in str(error)
     else:  # pragma: no cover
         raise AssertionError("missing replay response was accepted")
+
+
+def test_trace_loader_rejects_tampering(tmp_path) -> None:
+    document = load_prompt("examples/before.json")
+    (row,) = render_matrix(document, (Scenario("one", {"customer_name": "Ada", "order_id": "1"}),))
+    recorder = TraceRecorder(lambda _row: {"text": "ok"})
+    recorder(row)
+    path = tmp_path / "traces.json"
+    recorder.save(path)
+    text = path.read_text(encoding="utf-8").replace('"text": "ok"', '"text": "tampered"')
+    path.write_text(text, encoding="utf-8")
+    try:
+        load_traces(path)
+    except ValueError as error:
+        assert "digest mismatch" in str(error)
+    else:  # pragma: no cover
+        raise AssertionError("tampered trace was accepted")
