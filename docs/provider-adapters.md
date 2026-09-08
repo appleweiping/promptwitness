@@ -15,7 +15,9 @@ Multiple text blocks are joined with newline separators because native schema ve
 1 stores one string per message. The adapter reports this boundary flattening, along
 with any block fields that were not represented.
 
-Request controls such as model, temperature, response format, and tool choice are
+String message IDs are preserved when supplied, so converted prompts can opt into
+ID-based alignment without losing provider identity. Request controls such as model,
+temperature, response format, and tool choice are
 outside the prompt document and are reported as unrepresented top-level fields.
 Non-text blocks and non-function tools fail conversion.
 
@@ -44,7 +46,8 @@ String or text-block `system` content becomes the first system message. `message
 accept string or text-block content. Each tool's object `input_schema.properties`
 and `required` become a native tool.
 
-Image, document, tool-use, and tool-result blocks cannot be represented in native
+String message IDs are preserved when supplied. Image, document, tool-use, and
+tool-result blocks cannot be represented in native
 schema version 1 and fail conversion instead of being flattened.
 
 ## Gemini / Vertex `generateContent` requests
@@ -57,7 +60,8 @@ inline/file data, function-call, function-response, executable-code, and
 code-execution-result parts are preserved as provider-native `ContentBlock`
 values; text is also exposed through the message's analysis string.
 
-Multiple function-declaration groups are flattened into the native tool list
+String content IDs are preserved when supplied. Multiple function-declaration groups
+are flattened into the native tool list
 while preserving descriptions, JSON parameters, and required fields. Generation
 controls and unknown fields are not silently interpreted: they are returned as
 adapter warnings. External references and remote schema fetching remain
@@ -68,7 +72,7 @@ intentionally unsupported.
 The adapter accepts a portable subset with `messages` whose role is in `role`,
 `type`, or `_type` and whose text is in `content`, `template`, or
 `prompt.template`. `human` maps to `user`; `ai` maps to `assistant`.
-An optional string `name` is preserved. Conflicting role aliases or competing content
+Optional string `name` and provider-native string `id` values are preserved. Conflicting role aliases or competing content
 fields fail conversion rather than relying on an implicit precedence rule. Other
 message and nested-prompt fields are named in adapter warnings.
 

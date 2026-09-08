@@ -189,12 +189,13 @@ def _adapt_openai(raw: Any, prompt_id: str | None) -> AdapterResult:
         name = message.get("name")
         if name is not None and not isinstance(name, str):
             raise AdapterError(f"OpenAI message {index} name must be a string or null")
-        extras = set(message) - {"role", "content", "name"}
+        message_id = _optional_id(message.get("id"), f"OpenAI message {index} id")
+        extras = set(message) - {"role", "content", "name", "id"}
         if extras:
             warnings.append(
                 f"OpenAI message {index} fields were not represented: {', '.join(sorted(extras))}"
             )
-        messages.append(Message(role, content, name, content_parts=content_parts))
+        messages.append(Message(role, content, name, message_id, content_parts=content_parts))
     tools = _adapt_openai_tools(payload.get("tools", []), warnings)
     metadata = _metadata(payload, AdapterFormat.OPENAI)
     return AdapterResult(
@@ -345,13 +346,14 @@ def _adapt_anthropic(raw: Any, prompt_id: str | None) -> AdapterResult:
             f"Anthropic message {index} content",
             warnings,
         )
-        extras = set(message) - {"role", "content"}
+        message_id = _optional_id(message.get("id"), f"Anthropic message {index} id")
+        extras = set(message) - {"role", "content", "id"}
         if extras:
             warnings.append(
                 f"Anthropic message {index} fields were not represented: "
                 f"{', '.join(sorted(extras))}"
             )
-        messages.append(Message(role, content, content_parts=content_parts))
+        messages.append(Message(role, content, message_id=message_id, content_parts=content_parts))
     tools_raw = _array(payload.get("tools", []), "Anthropic tools")
     tools: list[ToolSpec] = []
     for index, item in enumerate(tools_raw):
@@ -409,12 +411,17 @@ def _adapt_gemini(raw: Any, prompt_id: str | None) -> AdapterResult:
         parts = _gemini_parts(content.get("parts"), f"Gemini content {index} parts", warnings)
         if not parts:
             raise AdapterError(f"Gemini content {index} parts must not be empty")
-        extras = set(content) - {"role", "parts"}
+        extras = set(content) - {"role", "parts", "id"}
         if extras:
             warnings.append(
                 f"Gemini content {index} fields were not represented: {', '.join(sorted(extras))}"
             )
-        messages.append(Message(role, _text_from_parts(parts), content_parts=tuple(parts)))
+        message_id = _optional_id(content.get("id"), f"Gemini content {index} id")
+        messages.append(
+            Message(
+                role, _text_from_parts(parts), message_id=message_id, content_parts=tuple(parts)
+            )
+        )
     tools = _adapt_gemini_tools(payload.get("tools", []), warnings)
     metadata = _metadata(payload, AdapterFormat.GEMINI)
     return AdapterResult(
@@ -556,13 +563,15 @@ def _adapt_langchain(raw: Any, prompt_id: str | None) -> AdapterResult:
         if name is not None and not isinstance(name, str):
             raise AdapterError(f"LangChain message {index} name must be a string or null")
         represented = {*role_keys, content_key, "name"}
+        message_id = _optional_id(message.get("id"), f"LangChain message {index} id")
+        represented.add("id")
         extras = set(message) - represented
         if extras:
             warnings.append(
                 f"LangChain message {index} fields were not represented: "
                 f"{', '.join(sorted(extras))}"
             )
-        messages.append(Message(role, content, name, content_parts=content_parts))
+        messages.append(Message(role, content, name, message_id, content_parts=content_parts))
     declared = payload.get("input_variables")
     if declared is not None:
         declared_names = set(_string_array(declared, "LangChain input_variables"))
@@ -693,10 +702,10 @@ def _prompt_id(payload: dict[str, Any], explicit: str | None, fallback: str) -> 
     return _string(value, "prompt id")
 
 
-def _optional_id(value: Any) -> str | None:
+def _optional_id(value: Any, label: str = "message id") -> str | None:
     if value is None:
         return None
-    return _string(value, "OpenAI Responses input item id")
+    return _string(value, label)
 
 
 def _ignored_top_level(payload: dict[str, Any], represented: set[str], provider: str) -> list[str]:

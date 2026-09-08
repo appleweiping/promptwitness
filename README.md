@@ -328,7 +328,8 @@ synthetic workload is available in [`benchmarks/`](benchmarks/README.md).
 
 ## Roadmap
 
-- richer identifier-aware alignment across provider-native message schemas;
+- provider-native message identifiers are preserved across OpenAI, Responses,
+  Anthropic, Gemini, and LangChain adapters for reorder-safe alignment;
 - OpenAI Responses `input`/`instructions` requests are supported, including
   provider event blocks and top-level function tools;
 - Gemini/Vertex `generateContent` requests are supported through the strict

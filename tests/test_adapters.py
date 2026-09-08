@@ -70,6 +70,66 @@ def test_openai_adapter_preserves_messages_tools_and_reports_loss() -> None:
     assert any("boundaries were flattened" in warning for warning in result.warnings)
 
 
+@pytest.mark.parametrize(
+    ("format", "raw", "expected_id"),
+    [
+        (
+            AdapterFormat.OPENAI,
+            {"messages": [{"id": "openai-1", "role": "user", "content": "x"}]},
+            "openai-1",
+        ),
+        (
+            AdapterFormat.ANTHROPIC,
+            {"messages": [{"id": "anthropic-1", "role": "user", "content": "x"}]},
+            "anthropic-1",
+        ),
+        (
+            AdapterFormat.GEMINI,
+            {"contents": [{"id": "gemini-1", "role": "user", "parts": [{"text": "x"}]}]},
+            "gemini-1",
+        ),
+        (
+            AdapterFormat.LANGCHAIN,
+            {"messages": [{"id": "langchain-1", "type": "human", "content": "x"}]},
+            "langchain-1",
+        ),
+    ],
+)
+def test_provider_adapters_preserve_native_message_ids(
+    format: AdapterFormat, raw: object, expected_id: str
+) -> None:
+    result = adapt_prompt(raw, format)
+    assert result.document.messages[0].message_id == expected_id
+
+
+@pytest.mark.parametrize(
+    ("format", "raw"),
+    [
+        (
+            AdapterFormat.OPENAI,
+            {"messages": [{"id": 1, "role": "user", "content": "x"}]},
+        ),
+        (
+            AdapterFormat.ANTHROPIC,
+            {"messages": [{"id": 1, "role": "user", "content": "x"}]},
+        ),
+        (
+            AdapterFormat.GEMINI,
+            {"contents": [{"id": 1, "parts": [{"text": "x"}]}]},
+        ),
+        (
+            AdapterFormat.LANGCHAIN,
+            {"messages": [{"id": 1, "type": "human", "content": "x"}]},
+        ),
+    ],
+)
+def test_provider_adapters_reject_non_string_message_ids(
+    format: AdapterFormat, raw: object
+) -> None:
+    with pytest.raises(AdapterError, match=r"id must be a .* string"):
+        adapt_prompt(raw, format)
+
+
 def test_openai_adapter_preserves_multimodal_blocks_without_flattening() -> None:
     result = adapt_prompt(
         {
