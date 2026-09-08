@@ -1,0 +1,36 @@
+{
+  "id": "support-responses",
+  "model": "gpt-5",
+  "instructions": "Answer precisely and cite the relevant record.",
+  "input": [
+    {
+      "type": "message",
+      "id": "msg_support_1",
+      "role": "user",
+      "content": [
+        {
+          "type": "input_text",
+          "text": "Look up order {{ order_id }}."
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "type": "function",
+      "name": "lookup_order",
+      "description": "Find one order by ID.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "order_id": {
+            "type": "string"
+          }
+        },
+        "required": ["order_id"],
+        "additionalProperties": false
+      },
+      "strict": true
+    }
+  ]
+}

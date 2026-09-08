@@ -21,6 +21,7 @@ class AdapterFormat(str, Enum):
     AUTO = "auto"
     NATIVE = "native"
     OPENAI = "openai"
+    OPENAI_RESPONSES = "openai-responses"
     ANTHROPIC = "anthropic"
     GEMINI = "gemini"
     LANGCHAIN = "langchain"
@@ -89,6 +90,8 @@ def adapt_prompt(
             return AdapterResult(document, selected)
         if selected is AdapterFormat.OPENAI:
             return _adapt_openai(raw, prompt_id)
+        if selected is AdapterFormat.OPENAI_RESPONSES:
+            return _adapt_openai_responses(raw, prompt_id)
         if selected is AdapterFormat.ANTHROPIC:
             return _adapt_anthropic(raw, prompt_id)
         if selected is AdapterFormat.GEMINI:
@@ -147,6 +150,8 @@ def _detect_format(raw: Any) -> AdapterFormat:
         raise AdapterError("provider prompt must be a JSON object")
     if "schema_version" in raw:
         return AdapterFormat.NATIVE
+    if "input" in raw and ("instructions" in raw or "model" in raw or "tools" in raw):
+        return AdapterFormat.OPENAI_RESPONSES
     if "system" in raw or _tools_use_key(raw.get("tools"), "input_schema"):
         return AdapterFormat.ANTHROPIC
     if (
@@ -161,7 +166,8 @@ def _detect_format(raw: Any) -> AdapterFormat:
     if isinstance(raw.get("messages"), list):
         return AdapterFormat.OPENAI
     raise AdapterError(
-        "cannot detect prompt format; choose native, openai, anthropic, or langchain explicitly"
+        "cannot detect prompt format; choose native, openai, openai-responses, "
+        "anthropic, or langchain explicitly"
     )
 
 
@@ -198,6 +204,125 @@ def _adapt_openai(raw: Any, prompt_id: str | None) -> AdapterResult:
         AdapterFormat.OPENAI,
         tuple(warnings),
     )
+
+
+def _adapt_openai_responses(raw: Any, prompt_id: str | None) -> AdapterResult:
+    """Adapt an OpenAI Responses API request into the native prompt model.
+
+    Responses uses a heterogeneous ``input`` array rather than Chat Completions'
+    ``messages`` array.  Message and tool-call items are retained as content
+    blocks so conversion remains auditable instead of flattening provider events.
+    """
+
+    payload = _object(raw, "OpenAI Responses payload")
+    represented = {
+        "id",
+        "name",
+        "model",
+        "input",
+        "instructions",
+        "tools",
+        "metadata",
+    }
+    warnings = _ignored_top_level(payload, represented, "OpenAI Responses")
+    messages: list[Message] = []
+    if "instructions" in payload:
+        instructions = payload["instructions"]
+        if not isinstance(instructions, str):
+            raise AdapterError("OpenAI Responses instructions must be a string")
+        messages.append(Message("system", instructions))
+    input_value = payload.get("input")
+    if isinstance(input_value, str):
+        messages.append(Message("user", input_value))
+    else:
+        items = _array(input_value, "OpenAI Responses input")
+        for index, item in enumerate(items):
+            messages.append(_adapt_openai_response_item(item, index, warnings))
+    tools = _adapt_openai_responses_tools(payload.get("tools", []), warnings)
+    metadata = _metadata(payload, AdapterFormat.OPENAI_RESPONSES)
+    return AdapterResult(
+        PromptDocument(
+            _prompt_id(payload, prompt_id, "openai-responses-prompt"),
+            tuple(messages),
+            tools,
+            metadata,
+        ),
+        AdapterFormat.OPENAI_RESPONSES,
+        tuple(warnings),
+    )
+
+
+def _adapt_openai_response_item(item: Any, index: int, warnings: list[str]) -> Message:
+    value = _object(item, f"OpenAI Responses input item {index}")
+    item_type = value.get("type", "message")
+    if not isinstance(item_type, str) or not item_type.strip():
+        raise AdapterError(f"OpenAI Responses input item {index} type must be a string")
+    if item_type == "message":
+        role = _string(value.get("role"), f"OpenAI Responses input item {index} role")
+        content, parts = _rich_content(
+            value.get("content"),
+            f"OpenAI Responses input item {index} content",
+            warnings,
+        )
+        name = value.get("name")
+        if name is not None and not isinstance(name, str):
+            raise AdapterError(f"OpenAI Responses input item {index} name must be a string or null")
+        message_id = value.get("id")
+        if message_id is not None and not isinstance(message_id, str):
+            raise AdapterError(f"OpenAI Responses input item {index} id must be a string or null")
+        extras = set(value) - {"type", "role", "content", "name", "id", "status"}
+        if extras:
+            warnings.append(
+                f"OpenAI Responses input item {index} fields were not represented: "
+                f"{', '.join(sorted(extras))}"
+            )
+        return Message(role, content, name, message_id, content_parts=parts)
+    if item_type in {"function_call", "function_call_output"}:
+        role = "assistant" if item_type == "function_call" else "tool"
+    elif item_type in {"reasoning", "computer_call", "file_search_call", "web_search_call"}:
+        role = "assistant"
+    else:
+        warnings.append(
+            f"OpenAI Responses input item {index} type {item_type!r} was preserved "
+            "as an assistant block"
+        )
+        role = "assistant"
+    data = {key: item for key, item in value.items() if key != "type"}
+    return Message(
+        role,
+        "",
+        message_id=_optional_id(value.get("id")),
+        content_parts=(ContentBlock(item_type, data),),
+    )
+
+
+def _adapt_openai_responses_tools(raw: Any, warnings: list[str]) -> tuple[ToolSpec, ...]:
+    tools_raw = _array(raw, "OpenAI Responses tools")
+    tools: list[ToolSpec] = []
+    for index, item in enumerate(tools_raw):
+        tool = _object(item, f"OpenAI Responses tool {index}")
+        tool_type = tool.get("type")
+        if tool_type != "function":
+            warnings.append(f"OpenAI Responses tool {index} type {tool_type!r} was not represented")
+            continue
+        name = _string(tool.get("name"), f"OpenAI Responses tool {index} name")
+        description = tool.get("description", "")
+        if not isinstance(description, str):
+            raise AdapterError(f"OpenAI Responses tool {index} description must be a string")
+        schema = _object(
+            tool.get("parameters", {"type": "object", "properties": {}}),
+            f"OpenAI Responses tool {index} parameters",
+        )
+        tools.append(
+            _tool_from_object_schema(name, description, schema, warnings, "OpenAI Responses")
+        )
+        extras = set(tool) - {"type", "name", "description", "parameters"}
+        if extras:
+            warnings.append(
+                f"OpenAI Responses tool {name!r} fields were not represented: "
+                f"{', '.join(sorted(extras))}"
+            )
+    return tuple(tools)
 
 
 def _adapt_anthropic(raw: Any, prompt_id: str | None) -> AdapterResult:
@@ -566,6 +691,12 @@ def _prompt_id(payload: dict[str, Any], explicit: str | None, fallback: str) -> 
         return identifier
     value = payload.get("id", payload.get("name", fallback))
     return _string(value, "prompt id")
+
+
+def _optional_id(value: Any) -> str | None:
+    if value is None:
+        return None
+    return _string(value, "OpenAI Responses input item id")
 
 
 def _ignored_top_level(payload: dict[str, Any], represented: set[str], provider: str) -> list[str]:

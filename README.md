@@ -329,12 +329,14 @@ synthetic workload is available in [`benchmarks/`](benchmarks/README.md).
 ## Roadmap
 
 - richer identifier-aware alignment across provider-native message schemas;
+- OpenAI Responses `input`/`instructions` requests are supported, including
+  provider event blocks and top-level function tools;
 - Gemini/Vertex `generateContent` requests are supported through the strict
   `gemini` adapter, including system instructions, multimodal parts, model-role
   normalization, and function declarations;
 - optional JSON Schema resolution for tool contracts is available through
-  `--resolve-tool-refs`; broader provider-native schema support remains future
-  work;
+  `--resolve-tool-refs`; provider-specific schemas outside the documented
+  OpenAI, Responses, Anthropic, Gemini, and LangChain subsets remain future work;
 - pre-dispatch tool-call argument validation is available through `check-call`;
 - structured multimodal prompt modeling is available through `ContentBlock` and
   provider adapters; see [multimodal content](docs/multimodal.md).

@@ -10,6 +10,8 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 - Add strict Gemini/Vertex `generateContent` prompt adaptation, including
   system instructions, multimodal parts, model-role normalization, and
   function declarations.
+- Add strict OpenAI Responses API adaptation for `input`/`instructions`,
+  message identifiers, function-call events, and top-level function tools.
 - Preserve structured multimodal content blocks across adapters, native JSON,
   rendering, diffs, registry replay, and provider requests.
 - Add a strict loopback JSON/HTTP service for validation, diff, and tool-call checks.

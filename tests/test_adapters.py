@@ -93,6 +93,89 @@ def test_openai_adapter_preserves_multimodal_blocks_without_flattening() -> None
     )
 
 
+def test_openai_responses_adapter_maps_instructions_items_and_tools() -> None:
+    result = adapt_prompt(
+        {
+            "id": "responses-example",
+            "model": "gpt-5",
+            "instructions": "Be precise.",
+            "input": [
+                {
+                    "type": "message",
+                    "id": "msg_1",
+                    "role": "user",
+                    "content": [{"type": "input_text", "text": "Find {{ item }}"}],
+                },
+                {
+                    "type": "function_call",
+                    "call_id": "call_1",
+                    "name": "lookup",
+                    "arguments": '{"id": "7"}',
+                },
+                {
+                    "type": "function_call_output",
+                    "call_id": "call_1",
+                    "output": "found",
+                },
+            ],
+            "tools": [
+                {
+                    "type": "function",
+                    "name": "lookup",
+                    "description": "Find an item",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {"id": {"type": "string"}},
+                        "required": ["id"],
+                    },
+                    "strict": True,
+                },
+                {"type": "web_search_preview"},
+            ],
+        },
+        AdapterFormat.OPENAI_RESPONSES,
+    )
+    assert result.source_format is AdapterFormat.OPENAI_RESPONSES
+    assert [message.role for message in result.document.messages] == [
+        "system",
+        "user",
+        "assistant",
+        "tool",
+    ]
+    assert result.document.messages[1].message_id == "msg_1"
+    assert result.document.messages[2].content_parts[0].type == "function_call"
+    assert result.document.messages[3].content_parts[0].data["output"] == "found"
+    assert result.document.tools[0].required == ("id",)
+    assert result.document.metadata["promptwitness_adapter"] == "openai-responses"
+    assert any("web_search_preview" in warning for warning in result.warnings)
+    assert any("strict" in warning for warning in result.warnings)
+
+
+def test_openai_responses_auto_detection_and_string_input() -> None:
+    result = adapt_prompt({"model": "gpt-5", "input": "Question"})
+    assert result.source_format is AdapterFormat.OPENAI_RESPONSES
+    assert [(message.role, message.content) for message in result.document.messages] == [
+        ("user", "Question")
+    ]
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        {"input": [{"type": "message", "role": "user"}]},
+        {"input": [{"type": "message", "role": "user", "content": 3}]},
+        {"input": [{"type": "function_call", "id": 3}]},
+        {
+            "input": [{"type": "message", "role": "user", "content": "x"}],
+            "tools": [{"type": "function", "name": "bad", "parameters": []}],
+        },
+    ],
+)
+def test_openai_responses_adapter_rejects_malformed_payloads(raw: object) -> None:
+    with pytest.raises(AdapterError):
+        adapt_prompt(raw, AdapterFormat.OPENAI_RESPONSES)
+
+
 def test_native_parser_round_trips_multimodal_blocks() -> None:
     result = adapt_prompt(
         {

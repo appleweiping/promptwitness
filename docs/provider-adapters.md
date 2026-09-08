@@ -19,6 +19,25 @@ Request controls such as model, temperature, response format, and tool choice ar
 outside the prompt document and are reported as unrepresented top-level fields.
 Non-text blocks and non-function tools fail conversion.
 
+## OpenAI Responses API requests
+
+Use `AdapterFormat.OPENAI_RESPONSES` or `--from-format openai-responses` for the
+Responses API shape with `input` and optional `instructions`. A string input becomes
+a user message; heterogeneous input items retain message content, function calls,
+function-call outputs, reasoning, and other response events as native
+`ContentBlock` values. Item IDs are preserved for message alignment, and function
+tools use their top-level Responses fields (`name`, `description`, and
+`parameters`). Built-in tools such as web search are reported as warnings because
+the native schema models callable function contracts only. Request controls and
+unknown event fields remain explicit warnings rather than being discarded silently.
+The repository includes a runnable fixture at
+`examples/openai-responses-request.json`, which can be converted with:
+
+```bash
+promptwitness convert examples/openai-responses-request.json \
+  --from-format openai-responses
+```
+
 ## Anthropic-shaped requests
 
 String or text-block `system` content becomes the first system message. `messages`
@@ -59,11 +78,11 @@ variables, output parsers, and Python-serialized objects are not executed.
 
 ## Auto detection and warnings
 
-Auto detection recognizes native `schema_version`, Anthropic system/input-schema
-keys, Gemini `contents`/`system_instruction` keys, LangChain template or
-message-role alias keys, then messages-only OpenAI-shaped input. Choose an
-explicit `--from-format` in long-lived CI to avoid relying on detection
-precedence.
+Auto detection recognizes native `schema_version`, OpenAI Responses `input` with
+request markers, Anthropic system/input-schema keys, Gemini `contents`/
+`system_instruction` keys, LangChain template or message-role alias keys, then
+messages-only OpenAI-shaped input. Choose an explicit `--from-format` in long-lived
+CI to avoid relying on detection precedence.
 
 Warnings go to stderr and are also returned by the Python `AdapterResult`. Conversion
 does not copy ignored values into metadata, which reduces accidental credential or
