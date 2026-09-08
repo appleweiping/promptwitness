@@ -166,6 +166,74 @@ def test_anthropic_adapter_reports_message_and_tool_extras() -> None:
     )
 
 
+def test_gemini_adapter_maps_system_contents_model_role_and_function_declarations() -> None:
+    result = adapt_prompt(
+        {
+            "system_instruction": {"parts": [{"text": "Be concise."}]},
+            "contents": [
+                {
+                    "role": "user",
+                    "parts": [
+                        {"text": "Inspect this"},
+                        {"inline_data": {"mime_type": "image/png", "data": "abc"}},
+                    ],
+                },
+                {"role": "model", "parts": [{"text": "I will inspect it."}]},
+            ],
+            "tools": [
+                {
+                    "function_declarations": [
+                        {
+                            "name": "lookup",
+                            "description": "Find an item",
+                            "parameters": {
+                                "type": "object",
+                                "properties": {"id": {"type": "string"}},
+                                "required": ["id"],
+                            },
+                        }
+                    ]
+                }
+            ],
+        },
+        AdapterFormat.GEMINI,
+    )
+    assert result.source_format is AdapterFormat.GEMINI
+    assert [message.role for message in result.document.messages] == [
+        "system",
+        "user",
+        "assistant",
+    ]
+    assert result.document.messages[1].content == "Inspect this"
+    assert result.document.messages[1].content_parts[1].type == "inline_data"
+    assert result.document.tools[0].required == ("id",)
+    assert result.document.metadata["promptwitness_adapter"] == "gemini"
+
+
+def test_gemini_auto_detection_and_camel_case_system_instruction() -> None:
+    result = adapt_prompt(
+        {
+            "systemInstruction": {"parts": [{"text": "Rules"}]},
+            "contents": [{"parts": [{"text": "Question"}]}],
+        }
+    )
+    assert result.source_format is AdapterFormat.GEMINI
+    assert [message.role for message in result.document.messages] == ["system", "user"]
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        {"contents": [{"role": "user", "parts": [{}]}]},
+        {"contents": [{"role": "user", "parts": [{"text": 3}]}]},
+        {"contents": [{"role": "user", "parts": [{"text": "x", "file_data": {}}]}]},
+    ],
+)
+def test_gemini_adapter_rejects_malformed_parts(raw: object) -> None:
+    with pytest.raises(AdapterError):
+        adapt_prompt(raw, AdapterFormat.GEMINI)
+
+
 def test_langchain_adapter_maps_roles_and_audits_declared_variables() -> None:
     raw = {
         "name": "chain",

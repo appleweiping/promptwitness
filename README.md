@@ -37,16 +37,17 @@ The same checks are available behind a loopback-only `PromptService` JSON
 boundary for local CI runners and editor integrations.
 
 The service accepts the same provider adapters as the CLI through
-`from_format`, `before_format`, and `after_format`, so OpenAI, Anthropic, and
-LangChain payloads can be validated at the integration boundary.
+`from_format`, `before_format`, and `after_format`, so OpenAI, Anthropic,
+Gemini/Vertex, and LangChain payloads can be validated at the integration
+boundary.
 
 The severities are an explicit compatibility policy, not universal truth.
 `DiffOptions` lets a caller tighten message-change handling, and the CLI's
 `--fail-on` chooses the CI threshold.
 
-Provider adapters convert documented subsets of OpenAI, Anthropic, and LangChain
-payloads into the same native model. Conversion is loss-aware: unsupported fields
-produce warnings, while structured multimodal blocks are retained as
+Provider adapters convert documented subsets of OpenAI, Anthropic, Gemini/Vertex,
+and LangChain payloads into the same native model. Conversion is loss-aware:
+unsupported fields produce warnings, while structured multimodal blocks are retained as
 `ContentBlock` values. See [multimodal content](docs/multimodal.md).
 
 ## Install
@@ -149,24 +150,24 @@ See [the format reference](docs/prompt-format.md).
 promptwitness validate PROMPT [--require-system-first|--no-require-system-first]
                             [--allow-empty-content|--no-allow-empty-content]
                             [--secret-scan|--no-secret-scan] [--policy POLICY]
-                            [--from-format native|openai|anthropic|langchain|auto]
+                            [--from-format native|openai|anthropic|gemini|langchain|auto]
                             [--format json|markdown|html|sarif] [--output PATH]
                             [--fail-on never|warning|breaking]
 
 promptwitness diff BEFORE AFTER [--include-metadata|--ignore-metadata]
-                              [--before-format native|openai|anthropic|langchain|auto]
-                              [--after-format native|openai|anthropic|langchain|auto]
+                              [--before-format native|openai|anthropic|gemini|langchain|auto]
+                              [--after-format native|openai|anthropic|gemini|langchain|auto]
                               [--context-lines N]
                               [--message-alignment positional|smart]
                               [--policy POLICY]
                               [--format json|markdown|html|sarif] [--output PATH]
                               [--fail-on never|warning|breaking]
 
-promptwitness convert PROVIDER.json [--from-format auto|native|openai|anthropic|langchain]
+promptwitness convert PROVIDER.json [--from-format auto|native|openai|anthropic|gemini|langchain]
                                   [--id PROMPT_ID] [--output native.json]
 
 promptwitness check-call PROMPT TOOL ARGUMENTS.json
-                              [--from-format native|openai|anthropic|langchain|auto]
+                              [--from-format native|openai|anthropic|gemini|langchain|auto]
                               [--no-resolve-refs] [--output report.json]
 
 promptwitness long-context CASES.json PREDICTIONS.json [--strict] [--output report.json]
@@ -328,6 +329,9 @@ synthetic workload is available in [`benchmarks/`](benchmarks/README.md).
 ## Roadmap
 
 - richer identifier-aware alignment across provider-native message schemas;
+- Gemini/Vertex `generateContent` requests are supported through the strict
+  `gemini` adapter, including system instructions, multimodal parts, model-role
+  normalization, and function declarations;
 - optional JSON Schema resolution for tool contracts is available through
   `--resolve-tool-refs`; broader provider-native schema support remains future
   work;

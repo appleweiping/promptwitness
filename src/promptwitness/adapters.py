@@ -22,6 +22,7 @@ class AdapterFormat(str, Enum):
     NATIVE = "native"
     OPENAI = "openai"
     ANTHROPIC = "anthropic"
+    GEMINI = "gemini"
     LANGCHAIN = "langchain"
 
 
@@ -90,6 +91,8 @@ def adapt_prompt(
             return _adapt_openai(raw, prompt_id)
         if selected is AdapterFormat.ANTHROPIC:
             return _adapt_anthropic(raw, prompt_id)
+        if selected is AdapterFormat.GEMINI:
+            return _adapt_gemini(raw, prompt_id)
         if selected is AdapterFormat.LANGCHAIN:
             return _adapt_langchain(raw, prompt_id)
     except AdapterError:
@@ -146,6 +149,13 @@ def _detect_format(raw: Any) -> AdapterFormat:
         return AdapterFormat.NATIVE
     if "system" in raw or _tools_use_key(raw.get("tools"), "input_schema"):
         return AdapterFormat.ANTHROPIC
+    if (
+        "contents" in raw
+        or "system_instruction" in raw
+        or "systemInstruction" in raw
+        or _tools_use_key(raw.get("tools"), "function_declarations")
+    ):
+        return AdapterFormat.GEMINI
     if "input_variables" in raw or _looks_like_langchain_messages(raw.get("messages")):
         return AdapterFormat.LANGCHAIN
     if isinstance(raw.get("messages"), list):
@@ -243,6 +253,133 @@ def _adapt_anthropic(raw: Any, prompt_id: str | None) -> AdapterResult:
         AdapterFormat.ANTHROPIC,
         tuple(warnings),
     )
+
+
+def _adapt_gemini(raw: Any, prompt_id: str | None) -> AdapterResult:
+    """Adapt a Gemini ``generateContent`` request without losing native parts."""
+
+    payload = _object(raw, "Gemini payload")
+    contents_raw = _array(payload.get("contents"), "Gemini contents")
+    system_key = "system_instruction" if "system_instruction" in payload else "systemInstruction"
+    represented = {"contents", "tools", "metadata", "id", "name", system_key}
+    warnings = _ignored_top_level(payload, represented, "Gemini")
+    messages: list[Message] = []
+    system = payload.get(system_key)
+    if system is not None:
+        system_parts = _gemini_parts(system, "Gemini system instruction", warnings)
+        messages.append(
+            Message(
+                "system",
+                _text_from_parts(system_parts),
+                content_parts=tuple(system_parts),
+            )
+        )
+    for index, item in enumerate(contents_raw):
+        content = _object(item, f"Gemini content {index}")
+        role = _string(content.get("role", "user"), f"Gemini content {index} role")
+        if role == "model":
+            role = "assistant"
+        elif role not in {"user", "assistant", "system"}:
+            warnings.append(f"Gemini content {index} role {role!r} was preserved")
+        parts = _gemini_parts(content.get("parts"), f"Gemini content {index} parts", warnings)
+        if not parts:
+            raise AdapterError(f"Gemini content {index} parts must not be empty")
+        extras = set(content) - {"role", "parts"}
+        if extras:
+            warnings.append(
+                f"Gemini content {index} fields were not represented: {', '.join(sorted(extras))}"
+            )
+        messages.append(Message(role, _text_from_parts(parts), content_parts=tuple(parts)))
+    tools = _adapt_gemini_tools(payload.get("tools", []), warnings)
+    metadata = _metadata(payload, AdapterFormat.GEMINI)
+    return AdapterResult(
+        PromptDocument(
+            _prompt_id(payload, prompt_id, "gemini-prompt"),
+            tuple(messages),
+            tools,
+            metadata,
+        ),
+        AdapterFormat.GEMINI,
+        tuple(warnings),
+    )
+
+
+def _gemini_parts(value: Any, label: str, warnings: list[str]) -> list[ContentBlock]:
+    if isinstance(value, Mapping):
+        value = value.get("parts")
+    parts = _array(value, label)
+    result: list[ContentBlock] = []
+    supported = {
+        "text",
+        "inline_data",
+        "file_data",
+        "function_call",
+        "function_response",
+        "executable_code",
+        "code_execution_result",
+    }
+    for index, item in enumerate(parts):
+        block = _object(item, f"{label} block {index}")
+        keys = [key for key in block if key in supported]
+        if len(keys) != 1:
+            raise AdapterError(
+                f"{label} block {index} must contain exactly one supported Gemini part"
+            )
+        part_type = keys[0]
+        data = {part_type: block[part_type]}
+        extras = set(block) - {part_type}
+        if extras:
+            warnings.append(
+                f"{label} block {index} fields were preserved: {', '.join(sorted(extras))}"
+            )
+            data.update({key: block[key] for key in sorted(extras)})
+        if part_type == "text" and not isinstance(block[part_type], str):
+            raise AdapterError(f"{label} block {index} text must be a string")
+        result.append(ContentBlock(part_type, data))
+    return result
+
+
+def _text_from_parts(parts: list[ContentBlock]) -> str:
+    return "\n".join(
+        str(part.data["text"])
+        for part in parts
+        if part.type == "text" and isinstance(part.data.get("text"), str)
+    )
+
+
+def _adapt_gemini_tools(raw: Any, warnings: list[str]) -> tuple[ToolSpec, ...]:
+    tools_raw = _array(raw, "Gemini tools")
+    result: list[ToolSpec] = []
+    for index, item in enumerate(tools_raw):
+        wrapper = _object(item, f"Gemini tool {index}")
+        declarations = _array(
+            wrapper.get("function_declarations"),
+            f"Gemini tool {index} function_declarations",
+        )
+        extras = set(wrapper) - {"function_declarations"}
+        if extras:
+            warnings.append(
+                f"Gemini tool {index} fields were not represented: {', '.join(sorted(extras))}"
+            )
+        for declaration_index, declaration in enumerate(declarations):
+            function = _object(
+                declaration,
+                f"Gemini tool {index} function declaration {declaration_index}",
+            )
+            name = _string(function.get("name"), "Gemini function name")
+            description = function.get("description", "")
+            if not isinstance(description, str):
+                raise AdapterError(f"Gemini function {name!r} description must be a string")
+            parameters = function.get("parameters", {"type": "object", "properties": {}})
+            schema = _object(parameters, f"Gemini function {name!r} parameters")
+            result.append(_tool_from_object_schema(name, description, schema, warnings, "Gemini"))
+            declaration_extras = set(function) - {"name", "description", "parameters"}
+            if declaration_extras:
+                warnings.append(
+                    f"Gemini function {name!r} fields were not represented: "
+                    f"{', '.join(sorted(declaration_extras))}"
+                )
+    return tuple(result)
 
 
 def _adapt_langchain(raw: Any, prompt_id: str | None) -> AdapterResult:

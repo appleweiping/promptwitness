@@ -28,6 +28,22 @@ and `required` become a native tool.
 Image, document, tool-use, and tool-result blocks cannot be represented in native
 schema version 1 and fail conversion instead of being flattened.
 
+## Gemini / Vertex `generateContent` requests
+
+Use `AdapterFormat.GEMINI` or `--from-format gemini` for requests containing
+`contents`, optional `system_instruction`/`systemInstruction`, and Gemini
+`tools.function_declarations`. A missing content role defaults to `user`, while
+the provider's `model` role is normalized to native `assistant`. Text,
+inline/file data, function-call, function-response, executable-code, and
+code-execution-result parts are preserved as provider-native `ContentBlock`
+values; text is also exposed through the message's analysis string.
+
+Multiple function-declaration groups are flattened into the native tool list
+while preserving descriptions, JSON parameters, and required fields. Generation
+controls and unknown fields are not silently interpreted: they are returned as
+adapter warnings. External references and remote schema fetching remain
+intentionally unsupported.
+
 ## LangChain-shaped templates
 
 The adapter accepts a portable subset with `messages` whose role is in `role`,
@@ -44,9 +60,10 @@ variables, output parsers, and Python-serialized objects are not executed.
 ## Auto detection and warnings
 
 Auto detection recognizes native `schema_version`, Anthropic system/input-schema
-keys, LangChain template or message-role alias keys, then messages-only OpenAI-shaped
-input. Choose an explicit `--from-format` in long-lived CI to avoid relying on
-detection precedence.
+keys, Gemini `contents`/`system_instruction` keys, LangChain template or
+message-role alias keys, then messages-only OpenAI-shaped input. Choose an
+explicit `--from-format` in long-lived CI to avoid relying on detection
+precedence.
 
 Warnings go to stderr and are also returned by the Python `AdapterResult`. Conversion
 does not copy ignored values into metadata, which reduces accidental credential or
