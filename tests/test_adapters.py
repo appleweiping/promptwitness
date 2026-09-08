@@ -309,6 +309,49 @@ def test_anthropic_adapter_reports_message_and_tool_extras() -> None:
     )
 
 
+def test_anthropic_adapter_preserves_structured_content_blocks() -> None:
+    result = adapt_prompt(
+        {
+            "messages": [
+                {
+                    "id": "anthropic-rich-1",
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": "Use the tool."},
+                        {
+                            "type": "image",
+                            "source": {"type": "url", "url": "https://example.test/a.png"},
+                        },
+                        {
+                            "type": "tool_use",
+                            "id": "call-1",
+                            "name": "lookup",
+                            "input": {"query": "item"},
+                        },
+                        {
+                            "type": "tool_result",
+                            "tool_use_id": "call-1",
+                            "content": [{"type": "text", "text": "found"}],
+                        },
+                    ],
+                }
+            ]
+        },
+        AdapterFormat.ANTHROPIC,
+    )
+    message = result.document.messages[0]
+    assert message.message_id == "anthropic-rich-1"
+    assert message.content == "Use the tool."
+    assert [part.type for part in message.content_parts] == [
+        "text",
+        "image",
+        "tool_use",
+        "tool_result",
+    ]
+    assert message.content_parts[1].data["source"]["url"] == "https://example.test/a.png"
+    assert message.content_parts[2].data["input"] == {"query": "item"}
+
+
 def test_gemini_adapter_maps_system_contents_model_role_and_function_declarations() -> None:
     result = adapt_prompt(
         {

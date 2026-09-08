@@ -12,6 +12,8 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   function declarations.
 - Preserve provider-native string message identifiers across OpenAI, Anthropic,
   Gemini, and LangChain adapters for ID-based alignment.
+- Preserve Anthropic image, document, tool-use, and tool-result content blocks
+  through the common structured multimodal representation.
 - Add strict OpenAI Responses API adaptation for `input`/`instructions`,
   message identifiers, function-call events, and top-level function tools.
 - Preserve structured multimodal content blocks across adapters, native JSON,

@@ -46,9 +46,10 @@ String or text-block `system` content becomes the first system message. `message
 accept string or text-block content. Each tool's object `input_schema.properties`
 and `required` become a native tool.
 
-String message IDs are preserved when supplied. Image, document, tool-use, and
-tool-result blocks cannot be represented in native
-schema version 1 and fail conversion instead of being flattened.
+String message IDs are preserved when supplied. Anthropic text, image, document,
+tool-use, and tool-result blocks are retained as structured `ContentBlock` values;
+their text portions are exposed through the message analysis string while binary
+and tool fields remain available for round-trip rendering.
 
 ## Gemini / Vertex `generateContent` requests
 
