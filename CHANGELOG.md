@@ -24,6 +24,8 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 - Expose authenticated scenario matrix rendering and matrix-diff regression
   reports through the loopback service.
 - Expose replayable long-context needle evaluation through the loopback service.
+- Expose deterministic replay-provider matrix execution and pairwise agreement
+  reporting through the loopback service.
 
 - Add bounded pre-dispatch tool-call argument validation through `check-call` and `validate_tool_arguments`.
 

@@ -16,6 +16,7 @@ from .long_context import LongContextCase, evaluate_long_context
 from .matrix import MatrixArtifact, Scenario, compare_matrices, render_matrix, save_matrix
 from .models import PromptDocument, message_content_to_wire
 from .parser import load_prompt
+from .provider_matrix import ProviderMatrix, load_replay_providers
 from .validation import ValidationPolicy, validate_prompt
 
 
@@ -140,6 +141,49 @@ class PromptService:
                     for item in differences
                 ],
             }
+        if operation == "provider_matrix":
+            document = _load_document(request, "prompt")
+            scenarios_path = _path(request, "scenarios")
+            try:
+                raw = json.loads(scenarios_path.read_text(encoding="utf-8"))
+            except (OSError, UnicodeError, json.JSONDecodeError) as error:
+                raise ValueError(f"cannot read scenarios: {error}") from error
+            if not isinstance(raw, list) or not raw:
+                raise ValueError("scenario file must contain a non-empty JSON array")
+            provider_scenarios: list[Scenario] = []
+            for index, item in enumerate(raw, start=1):
+                if not isinstance(item, Mapping):
+                    raise ValueError(f"scenario entry {index} must be an object")
+                scenario_id = item.get("id")
+                if not isinstance(scenario_id, str) or not scenario_id.strip():
+                    raise ValueError(
+                        f"invalid scenario entry {index}: id must be a non-empty string"
+                    )
+                values = item.get("values", {})
+                tags = item.get("tags", [])
+                if not isinstance(tags, list) or not all(isinstance(tag, str) for tag in tags):
+                    raise ValueError(f"scenario entry {index} tags must be an array of strings")
+                try:
+                    provider_scenarios.append(Scenario(scenario_id, values, tuple(tags)))
+                except (TypeError, ValueError) as error:
+                    raise ValueError(f"invalid scenario entry {index}: {error}") from error
+            workers = request.get("workers", 1)
+            scenario_workers = request.get("scenario_workers", 1)
+            for name, value in (("workers", workers), ("scenario_workers", scenario_workers)):
+                if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+                    raise ValueError(f"{name} must be a positive integer")
+            strict = request.get("strict", True)
+            if not isinstance(strict, bool):
+                raise ValueError("strict must be a boolean")
+            providers = ProviderMatrix(load_replay_providers(_path(request, "providers")))
+            provider_report = providers.run(
+                document,
+                provider_scenarios,
+                workers=workers,
+                scenario_workers=scenario_workers,
+                strict=strict,
+            )
+            return {"operation": operation, "report": provider_report.to_dict()}
         if operation == "long_context":
             cases_path = _path(request, "cases")
             try:
@@ -185,7 +229,7 @@ class PromptService:
             return {"operation": operation, "report": report.to_dict()}
         raise ValueError(
             "operation must be validate, diff, check_call, convert, matrix, matrix_diff, "
-            "or long_context"
+            "provider_matrix, or long_context"
         )
 
 

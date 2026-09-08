@@ -5,6 +5,8 @@ import urllib.request
 import pytest
 
 from promptwitness import PromptService, create_server
+from promptwitness.matrix import Scenario, render_matrix
+from promptwitness.parser import load_prompt
 
 
 def _prompt(tmp_path):
@@ -248,6 +250,76 @@ def test_prompt_service_replays_long_context_cases(tmp_path) -> None:  # type: i
         PromptService().dispatch(
             {"operation": "long_context", "cases": str(cases), "predictions": []}
         )
+
+
+def test_prompt_service_runs_replay_provider_matrix(tmp_path) -> None:  # type: ignore[no-untyped-def]
+    prompt = tmp_path / "prompt.json"
+    prompt.write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "id": "provider-prompt",
+                "messages": [{"role": "user", "content": "Hello {{name}}"}],
+            }
+        ),
+        encoding="utf-8",
+    )
+    scenarios = tmp_path / "scenarios.json"
+    scenarios.write_text(json.dumps([{"id": "ada", "values": {"name": "Ada"}}]), encoding="utf-8")
+    document = load_prompt(prompt)
+    digest = render_matrix(document, [Scenario("ada", {"name": "Ada"})])[0].digest
+    providers = tmp_path / "providers.json"
+    providers.write_text(
+        json.dumps(
+            {
+                "format": "promptwitness.replay-providers.v1",
+                "providers": [
+                    {"name": "first", "responses": {digest: {"text": "one"}}},
+                    {"name": "second", "responses": {digest: {"text": "one"}}},
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    result = PromptService().dispatch(
+        {
+            "operation": "provider_matrix",
+            "prompt": str(prompt),
+            "scenarios": str(scenarios),
+            "providers": str(providers),
+            "workers": 2,
+            "scenario_workers": 1,
+        }
+    )
+    assert result["report"]["providers"] == ["first", "second"]
+    assert result["report"]["pairwise_agreement"] == 1.0
+    assert result["report"]["runs"][0]["succeeded"] == 1
+
+
+def test_prompt_service_provider_matrix_validates_request(tmp_path) -> None:  # type: ignore[no-untyped-def]
+    prompt = _prompt(tmp_path)
+    scenarios = tmp_path / "scenarios.json"
+    scenarios.write_text(json.dumps([{"id": "one", "values": {}}]), encoding="utf-8")
+    providers = tmp_path / "providers.json"
+    providers.write_text(
+        json.dumps(
+            {
+                "format": "promptwitness.replay-providers.v1",
+                "providers": [{"name": "one", "responses": {"missing": "x"}}],
+            }
+        ),
+        encoding="utf-8",
+    )
+    request = {
+        "operation": "provider_matrix",
+        "prompt": str(prompt),
+        "scenarios": str(scenarios),
+        "providers": str(providers),
+    }
+    with pytest.raises(ValueError, match="positive integer"):
+        PromptService().dispatch({**request, "workers": 0})
+    with pytest.raises(ValueError, match="strict"):
+        PromptService().dispatch({**request, "strict": "yes"})
 
 
 def test_prompt_service_matrix_validates_requests(tmp_path) -> None:  # type: ignore[no-untyped-def]

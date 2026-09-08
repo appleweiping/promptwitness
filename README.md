@@ -347,6 +347,8 @@ synthetic workload is available in [`benchmarks/`](benchmarks/README.md).
   `matrix_diff` regression reports for automation clients.
 - the service exposes replayable, model-free long-context needle evaluation
   through `long_context`, with depth/position diagnostics and case digests.
+- the service exposes deterministic replay-provider matrix execution through
+  `provider_matrix`, with ordered runs and pairwise digest agreement.
 
 Contributions are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md) and
 please include tests for every new compatibility rule.

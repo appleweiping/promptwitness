@@ -39,3 +39,9 @@ explicit `predictions` object. It never calls a model: the supplied outputs are
 replayed through the same long-context evaluator, returning case digests,
 accuracy by depth and needle position, and failure details. Set `strict` to
 fail fast on an invalid prediction.
+
+`provider_matrix` runs multiple replay providers over one scenario matrix. It
+accepts `prompt`, `scenarios`, and a strict replay-provider configuration path,
+plus optional positive `workers` and `scenario_workers` values. The response
+contains ordered per-provider execution rows and pairwise output-digest
+agreement; no live provider is contacted.
