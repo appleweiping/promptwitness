@@ -13,7 +13,7 @@ from types import TracebackType
 
 from .adapters import prompt_to_dict
 from .diff import compare_prompts
-from .models import DiffReport, Message, PromptDocument, ToolSpec
+from .models import ContentBlock, DiffReport, Message, PromptDocument, ToolSpec
 from .parser import parse_prompt
 from .variables import inspect_variables, render_template
 
@@ -193,7 +193,22 @@ class PromptRegistry:
         document = self.get(prompt_id, version)
         rendered = tuple(
             Message(
-                message.role, render_template(message.content, values, strict=strict), message.name
+                message.role,
+                render_template(message.content, values, strict=strict),
+                message.name,
+                message.message_id,
+                tuple(
+                    ContentBlock(
+                        part.type,
+                        {
+                            **dict(part.data),
+                            "text": render_template(part.data["text"], values, strict=strict),
+                        },
+                    )
+                    if isinstance(part.data.get("text"), str)
+                    else part
+                    for part in message.content_parts
+                ),
             )
             for message in document.messages
         )

@@ -43,6 +43,7 @@ from .matrix import (
 from .models import (
     Change,
     ChangeKind,
+    ContentBlock,
     DiffReport,
     Finding,
     FindingCode,
@@ -88,6 +89,7 @@ __all__ = [
     "BenchmarkTask",
     "Change",
     "ChangeKind",
+    "ContentBlock",
     "DiffOptions",
     "DiffReport",
     "ExecutionReport",

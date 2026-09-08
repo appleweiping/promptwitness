@@ -78,6 +78,26 @@ class FindingCode(str, Enum):
 
 
 @dataclass(frozen=True, slots=True)
+class ContentBlock:
+    """One provider-native content block preserved without flattening."""
+
+    type: str
+    data: Mapping[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.type, str) or not self.type.strip():
+            raise ValueError("content block type must be a non-empty string")
+        if not isinstance(self.data, Mapping) or not all(isinstance(key, str) for key in self.data):
+            raise TypeError("content block data must be an object with string keys")
+        object.__setattr__(self, "data", _freeze_json(self.data, "content block data"))
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return a JSON-compatible provider block."""
+
+        return {"type": self.type, **_thaw_json(self.data)}
+
+
+@dataclass(frozen=True, slots=True)
 class Message:
     """One ordered chat message template."""
 
@@ -85,6 +105,7 @@ class Message:
     content: str
     name: str | None = None
     message_id: str | None = None
+    content_parts: tuple[ContentBlock, ...] = ()
 
     def __post_init__(self) -> None:
         if not isinstance(self.role, str):
@@ -102,6 +123,26 @@ class Message:
                 raise ValueError("message id must not be empty")
             if len(self.message_id) > 128:
                 raise ValueError("message id must be at most 128 characters")
+        if not isinstance(self.content_parts, tuple) or not all(
+            isinstance(part, ContentBlock) for part in self.content_parts
+        ):
+            raise TypeError("message content_parts must be a tuple of ContentBlock values")
+
+
+def _thaw_json(value: Any) -> Any:
+    if isinstance(value, Mapping):
+        return {key: _thaw_json(nested) for key, nested in value.items()}
+    if isinstance(value, tuple):
+        return [_thaw_json(item) for item in value]
+    return value
+
+
+def message_content_to_wire(message: Message) -> str | list[dict[str, Any]]:
+    """Return text or preserved provider-native content blocks for a message."""
+
+    if not message.content_parts:
+        return message.content
+    return [part.to_dict() for part in message.content_parts]
 
 
 @dataclass(frozen=True, slots=True)

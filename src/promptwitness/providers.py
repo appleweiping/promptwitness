@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from .matrix import RenderedScenario
+from .models import message_content_to_wire
 
 
 def _digest(value: Any) -> str:
@@ -121,7 +122,7 @@ class OpenAICompatibleProvider:
                 {
                     "role": message.role,
                     **({"name": message.name} if message.name else {}),
-                    "content": message.content,
+                    "content": message_content_to_wire(message),
                 }
                 for message in row.messages
             ],
@@ -174,7 +175,7 @@ class OpenAICompatibleStreamingProvider(OpenAICompatibleProvider):
                 {
                     "role": message.role,
                     **({"name": message.name} if message.name else {}),
-                    "content": message.content,
+                    "content": message_content_to_wire(message),
                 }
                 for message in row.messages
             ],
@@ -273,7 +274,11 @@ class TraceRecorder:
             {
                 "prompt_digest": row.digest,
                 "messages": [
-                    {"role": message.role, "name": message.name, "content": message.content}
+                    {
+                        "role": message.role,
+                        "name": message.name,
+                        "content": message_content_to_wire(message),
+                    }
                     for message in row.messages
                 ],
             }

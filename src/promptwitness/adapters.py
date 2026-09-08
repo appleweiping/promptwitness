@@ -10,7 +10,7 @@ from math import isfinite
 from pathlib import Path
 from typing import Any
 
-from .models import Message, PromptDocument, ToolSpec
+from .models import ContentBlock, Message, PromptDocument, ToolSpec
 from .parser import PromptFormatError, parse_prompt
 from .variables import inspect_variables
 
@@ -107,7 +107,14 @@ def prompt_to_dict(document: PromptDocument) -> dict[str, Any]:
         "id": document.prompt_id,
         "messages": [
             {
-                **{"role": message.role, "content": message.content},
+                **{
+                    "role": message.role,
+                    "content": (
+                        [part.to_dict() for part in message.content_parts]
+                        if message.content_parts
+                        else message.content
+                    ),
+                },
                 **({"name": message.name} if message.name is not None else {}),
                 **({"id": message.message_id} if message.message_id is not None else {}),
             }
@@ -158,7 +165,7 @@ def _adapt_openai(raw: Any, prompt_id: str | None) -> AdapterResult:
     for index, item in enumerate(messages_raw):
         message = _object(item, f"OpenAI message {index}")
         role = _string(message.get("role"), f"OpenAI message {index} role")
-        content = _text_content(
+        content, content_parts = _rich_content(
             message.get("content"),
             f"OpenAI message {index} content",
             warnings,
@@ -171,7 +178,7 @@ def _adapt_openai(raw: Any, prompt_id: str | None) -> AdapterResult:
             warnings.append(
                 f"OpenAI message {index} fields were not represented: {', '.join(sorted(extras))}"
             )
-        messages.append(Message(role, content, name))
+        messages.append(Message(role, content, name, content_parts=content_parts))
     tools = _adapt_openai_tools(payload.get("tools", []), warnings)
     metadata = _metadata(payload, AdapterFormat.OPENAI)
     return AdapterResult(
@@ -191,16 +198,14 @@ def _adapt_anthropic(raw: Any, prompt_id: str | None) -> AdapterResult:
     )
     messages: list[Message] = []
     if "system" in payload:
-        messages.append(
-            Message(
-                "system",
-                _text_content(payload["system"], "Anthropic system", warnings),
-            )
+        system_content, system_parts = _rich_content(
+            payload["system"], "Anthropic system", warnings
         )
+        messages.append(Message("system", system_content, content_parts=system_parts))
     for index, item in enumerate(messages_raw):
         message = _object(item, f"Anthropic message {index}")
         role = _string(message.get("role"), f"Anthropic message {index} role")
-        content = _text_content(
+        content, content_parts = _rich_content(
             message.get("content"),
             f"Anthropic message {index} content",
             warnings,
@@ -211,7 +216,7 @@ def _adapt_anthropic(raw: Any, prompt_id: str | None) -> AdapterResult:
                 f"Anthropic message {index} fields were not represented: "
                 f"{', '.join(sorted(extras))}"
             )
-        messages.append(Message(role, content))
+        messages.append(Message(role, content, content_parts=content_parts))
     tools_raw = _array(payload.get("tools", []), "Anthropic tools")
     tools: list[ToolSpec] = []
     for index, item in enumerate(tools_raw):
@@ -271,12 +276,14 @@ def _adapt_langchain(raw: Any, prompt_id: str | None) -> AdapterResult:
             raise AdapterError(f"LangChain message {index} has conflicting content fields")
         content_key = content_keys[0]
         if content_key != "prompt":
-            content = _content_string(
-                message[content_key], f"LangChain message {index} {content_key}"
+            content, content_parts = _rich_content(
+                message[content_key], f"LangChain message {index} {content_key}", warnings
             )
         else:
             prompt = _object(message.get("prompt"), f"LangChain message {index} prompt")
-            content = _content_string(prompt.get("template"), f"LangChain message {index} template")
+            content, content_parts = _rich_content(
+                prompt.get("template"), f"LangChain message {index} template", warnings
+            )
             prompt_extras = set(prompt) - {"template"}
             if prompt_extras:
                 warnings.append(
@@ -293,7 +300,7 @@ def _adapt_langchain(raw: Any, prompt_id: str | None) -> AdapterResult:
                 f"LangChain message {index} fields were not represented: "
                 f"{', '.join(sorted(extras))}"
             )
-        messages.append(Message(role, content, name))
+        messages.append(Message(role, content, name, content_parts=content_parts))
     declared = payload.get("input_variables")
     if declared is not None:
         declared_names = set(_string_array(declared, "LangChain input_variables"))
@@ -362,28 +369,42 @@ def _tool_from_object_schema(
         raise AdapterError(f"{provider} tool {name!r}: {error}") from error
 
 
-def _text_content(value: Any, label: str, warnings: list[str]) -> str:
+def _rich_content(
+    value: Any, label: str, warnings: list[str]
+) -> tuple[str, tuple[ContentBlock, ...]]:
+    """Normalize text or provider blocks while retaining non-text payloads."""
+
     if isinstance(value, str):
-        return value
+        return value, ()
     if not isinstance(value, list):
-        raise AdapterError(f"{label} must be a string or an array of text blocks")
-    parts: list[str] = []
+        raise AdapterError(f"{label} must be a string or an array of content blocks")
+    blocks: list[ContentBlock] = []
+    text_parts: list[str] = []
     for index, item in enumerate(value):
         block = _object(item, f"{label} block {index}")
-        block_type = block.get("type")
-        if block_type not in {"text", "input_text", "output_text"}:
-            raise AdapterError(
-                f"{label} block {index} type {block_type!r} cannot be represented as text"
-            )
-        parts.append(_content_string(block.get("text"), f"{label} block {index} text"))
-        extras = set(block) - {"type", "text"}
+        block_type = _string(block.get("type"), f"{label} block {index} type")
+        data = dict(block)
+        data.pop("type")
+        text_value = data.get("text")
+        if block_type in {"text", "input_text", "output_text"}:
+            if not isinstance(text_value, str):
+                raise AdapterError(f"{label} block {index} text must be a string")
+            text_parts.append(text_value)
+        elif isinstance(text_value, str):
+            text_parts.append(text_value)
+        if block_type in {"image_url", "image", "input_image"} and not any(
+            key in data for key in ("image_url", "image", "source", "url")
+        ):
+            raise AdapterError(f"{label} block {index} image content cannot be represented")
+        extras = set(data) - {"text"}
         if extras:
             warnings.append(
-                f"{label} block {index} fields were not represented: {', '.join(sorted(extras))}"
+                f"{label} block {index} fields were preserved: {', '.join(sorted(extras))}"
             )
-    if len(parts) > 1:
-        warnings.append(f"{label} text-block boundaries were flattened with newline separators")
-    return "\n".join(parts)
+        blocks.append(ContentBlock(block_type, data))
+    if len(text_parts) > 1:
+        warnings.append(f"{label} text-block boundaries were flattened for text analysis")
+    return "\n".join(text_parts), tuple(blocks)
 
 
 def _metadata(payload: dict[str, Any], source_format: AdapterFormat) -> dict[str, Any]:
@@ -450,12 +471,6 @@ def _array(value: Any, label: str) -> list[Any]:
 def _string(value: Any, label: str) -> str:
     if not isinstance(value, str) or not value.strip():
         raise AdapterError(f"{label} must be a non-empty string")
-    return value
-
-
-def _content_string(value: Any, label: str) -> str:
-    if not isinstance(value, str):
-        raise AdapterError(f"{label} must be a string")
     return value
 
 

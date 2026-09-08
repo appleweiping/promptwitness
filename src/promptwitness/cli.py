@@ -16,7 +16,7 @@ from .diff import MessageAlignment, compare_prompts
 from .invocations import validate_tool_arguments
 from .long_context import LongContextCase, evaluate_long_context
 from .matrix import MatrixArtifact, Scenario, compare_matrices, render_matrix, save_matrix
-from .models import DiffReport, Severity, ValidationReport
+from .models import DiffReport, Severity, ValidationReport, message_content_to_wire
 from .parser import PromptFormatError, load_prompt
 from .policies import PolicyBundle, PolicyFormatError, load_policy
 from .provider_matrix import ProviderMatrix, load_replay_providers
@@ -365,7 +365,7 @@ def _run_matrix(arguments: argparse.Namespace) -> int:
                                 "id": message.message_id,
                                 "role": message.role,
                                 "name": message.name,
-                                "content": message.content,
+                                "content": message_content_to_wire(message),
                             }
                             for message in row.messages
                         ],

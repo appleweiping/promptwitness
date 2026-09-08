@@ -46,7 +46,8 @@ The severities are an explicit compatibility policy, not universal truth.
 
 Provider adapters convert documented subsets of OpenAI, Anthropic, and LangChain
 payloads into the same native model. Conversion is loss-aware: unsupported fields
-produce warnings, while multimodal or otherwise unrepresentable content fails.
+produce warnings, while structured multimodal blocks are retained as
+`ContentBlock` values. See [multimodal content](docs/multimodal.md).
 
 ## Install
 
@@ -329,7 +330,8 @@ synthetic workload is available in [`benchmarks/`](benchmarks/README.md).
   `--resolve-tool-refs`; broader provider-native schema support remains future
   work;
 - pre-dispatch tool-call argument validation is available through `check-call`;
-- richer multimodal prompt modeling without silently flattening non-text content.
+- structured multimodal prompt modeling is available through `ContentBlock` and
+  provider adapters; see [multimodal content](docs/multimodal.md).
 
 Contributions are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md) and
 please include tests for every new compatibility rule.

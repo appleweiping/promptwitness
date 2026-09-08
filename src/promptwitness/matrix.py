@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from types import MappingProxyType
 from typing import Any
 
-from .models import Message, PromptDocument
+from .models import ContentBlock, Message, PromptDocument, message_content_to_wire
 from .variables import inspect_variables, render_template
 
 
@@ -96,7 +96,11 @@ class MatrixArtifact:
                 {
                     "scenario_id": row.scenario_id,
                     "messages": [
-                        {"role": message.role, "name": message.name, "content": message.content}
+                        {
+                            "role": message.role,
+                            "name": message.name,
+                            "content": message_content_to_wire(message),
+                        }
                         for message in row.messages
                     ],
                     "variables": list(row.variables),
@@ -213,11 +217,7 @@ def render_matrix(
     result: list[RenderedScenario] = []
     for scenario in materialized:
         rendered = tuple(
-            Message(
-                message.role,
-                render_template(message.content, scenario.values, strict=strict),
-                message.name,
-            )
+            _render_message(message, scenario.values, strict=strict)
             for message in document.messages
         )
         digest = _scenario_digest(
@@ -232,6 +232,28 @@ def render_matrix(
             )
         )
     return tuple(result)
+
+
+def _render_message(message: Message, values: Mapping[str, Any], *, strict: bool) -> Message:
+    parts = tuple(
+        ContentBlock(
+            part.type,
+            {
+                **dict(part.data),
+                "text": render_template(part.data["text"], values, strict=strict),
+            },
+        )
+        if isinstance(part.data.get("text"), str)
+        else part
+        for part in message.content_parts
+    )
+    return Message(
+        message.role,
+        render_template(message.content, values, strict=strict),
+        message.name,
+        message.message_id,
+        parts,
+    )
 
 
 def save_matrix(rows: Iterable[RenderedScenario], path: str) -> MatrixArtifact:
@@ -269,7 +291,11 @@ def _scenario_digest(prompt_id: str, row: RenderedScenario) -> str:
     body = {
         "prompt": prompt_id,
         "messages": [
-            {"role": message.role, "name": message.name, "content": message.content}
+            {
+                "role": message.role,
+                "name": message.name,
+                "content": message_content_to_wire(message),
+            }
             for message in row.messages
         ],
         "variables": list(row.variables),

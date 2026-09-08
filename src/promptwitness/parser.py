@@ -7,7 +7,7 @@ from math import isfinite
 from pathlib import Path
 from typing import Any
 
-from .models import Message, PromptDocument, ToolSpec
+from .models import ContentBlock, Message, PromptDocument, ToolSpec
 
 
 class PromptFormatError(ValueError):
@@ -86,16 +86,50 @@ def _parse_message(raw: Any, index: int) -> Message:
         raw.get("name"),
         raw.get("id"),
     )
-    if not isinstance(role, str) or not isinstance(content, str):
-        raise PromptFormatError(f"message {index} requires string role and content")
+    if not isinstance(role, str) or not isinstance(content, (str, list)):
+        raise PromptFormatError(f"message {index} requires string role and string or block content")
     if name is not None and not isinstance(name, str):
         raise PromptFormatError(f"message {index} name must be a string or null")
     if message_id is not None and not isinstance(message_id, str):
         raise PromptFormatError(f"message {index} id must be a string or null")
     try:
-        return Message(role=role, content=content, name=name, message_id=message_id)
+        text, parts = _parse_content(content, index)
+        return Message(
+            role=role,
+            content=text,
+            name=name,
+            message_id=message_id,
+            content_parts=parts,
+        )
     except (TypeError, ValueError) as error:
         raise PromptFormatError(f"message {index}: {error}") from error
+
+
+def _parse_content(value: str | list[Any], index: int) -> tuple[str, tuple[ContentBlock, ...]]:
+    if isinstance(value, str):
+        return value, ()
+    parts: list[ContentBlock] = []
+    text_parts: list[str] = []
+    for block_index, raw_block in enumerate(value):
+        if not isinstance(raw_block, dict):
+            raise PromptFormatError(
+                f"message {index} content block {block_index} must be an object"
+            )
+        block_type = raw_block.get("type")
+        if not isinstance(block_type, str) or not block_type.strip():
+            raise PromptFormatError(
+                f"message {index} content block {block_index} requires a non-empty type"
+            )
+        data = dict(raw_block)
+        data.pop("type")
+        if isinstance(data.get("text"), str):
+            text_parts.append(data["text"])
+        elif block_type in {"text", "input_text", "output_text"}:
+            raise PromptFormatError(
+                f"message {index} content block {block_index} text must be a string"
+            )
+        parts.append(ContentBlock(block_type, data))
+    return "\n".join(text_parts), tuple(parts)
 
 
 def _parse_tool(raw: Any, index: int) -> ToolSpec:

@@ -101,7 +101,11 @@ def validate_prompt(
                     f"unsupported role {message.role!r}",
                 )
             )
-        if not message.content.strip() and not active.allow_empty_content:
+        if (
+            not message.content.strip()
+            and not message.content_parts
+            and not active.allow_empty_content
+        ):
             findings.append(
                 Finding(
                     FindingCode.EMPTY_CONTENT,

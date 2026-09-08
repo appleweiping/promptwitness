@@ -1,6 +1,7 @@
 import pytest
 
 from promptwitness import (
+    ContentBlock,
     Message,
     PromptDocument,
     Scenario,
@@ -24,6 +25,25 @@ def test_render_matrix_is_deterministic_and_diffable() -> None:
     assert not any(item.changed for item in compare_matrices(first, second))
     changed = render_matrix(PromptDocument("demo", (Message("user", "Hi {{name}}"),)), scenarios)
     assert all(item.changed for item in compare_matrices(first, changed))
+
+
+def test_render_matrix_renders_text_inside_multimodal_blocks() -> None:
+    source = PromptDocument(
+        "vision",
+        (
+            Message(
+                "user",
+                "Describe {{name}}",
+                content_parts=(
+                    ContentBlock("input_text", {"text": "Describe {{name}}"}),
+                    ContentBlock("image_url", {"image_url": {"url": "https://example.test/a"}}),
+                ),
+            ),
+        ),
+    )
+    row = render_matrix(source, (Scenario("ada", {"name": "Ada"}),))[0]
+    assert row.messages[0].content_parts[0].data["text"] == "Describe Ada"
+    assert row.messages[0].content_parts[1].data["image_url"]["url"] == "https://example.test/a"
 
 
 def test_scenario_validation_and_missing_values() -> None:

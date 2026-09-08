@@ -7,6 +7,7 @@ import pytest
 from promptwitness.diff import DiffOptions, MessageAlignment, compare_prompts
 from promptwitness.models import (
     ChangeKind,
+    ContentBlock,
     FindingCode,
     Message,
     PromptDocument,
@@ -39,6 +40,34 @@ def test_identical_documents_are_compatible() -> None:
     assert report.changes == ()
     assert report.warning_count == report.breaking_count == 0
     assert "No changes" in render_markdown(report)
+
+
+def test_diff_detects_non_text_content_changes() -> None:
+    before = prompt(
+        "v1",
+        Message(
+            "user",
+            "Inspect",
+            content_parts=(
+                ContentBlock("input_text", {"text": "Inspect"}),
+                ContentBlock("image_url", {"url": "a"}),
+            ),
+        ),
+    )
+    after = prompt(
+        "v2",
+        Message(
+            "user",
+            "Inspect",
+            content_parts=(
+                ContentBlock("input_text", {"text": "Inspect"}),
+                ContentBlock("image_url", {"url": "b"}),
+            ),
+        ),
+    )
+    report = compare_prompts(before, after)
+    assert report.changes[0].kind is ChangeKind.MESSAGE_CONTENT
+    assert report.changes[0].before[1]["url"] == "a"
 
 
 def test_message_and_variable_changes() -> None:

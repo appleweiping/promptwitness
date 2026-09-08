@@ -10,7 +10,16 @@ from math import isclose
 from types import MappingProxyType
 from typing import Any
 
-from .models import Change, ChangeKind, DiffReport, Message, PromptDocument, Severity, ToolSpec
+from .models import (
+    Change,
+    ChangeKind,
+    DiffReport,
+    Message,
+    PromptDocument,
+    Severity,
+    ToolSpec,
+    message_content_to_wire,
+)
 from .paths import json_pointer
 from .schemas import resolve_local_refs
 from .variables import inspect_variables
@@ -251,15 +260,17 @@ def _compare_message_pair(
                 new.name,
             )
         )
-    if old.content != new.content:
+    if old.content != new.content or old.content_parts != new.content_parts:
+        before_content = message_content_to_wire(old)
+        after_content = message_content_to_wire(new)
         changes.append(
             Change(
                 ChangeKind.MESSAGE_CONTENT,
                 json_pointer("messages", path_index, "content"),
                 options.content_change_severity,
                 "message content changed",
-                old.content,
-                new.content,
+                before_content,
+                after_content,
                 _unified_content_diff(old.content, new.content, options.context_lines),
             )
         )
@@ -493,11 +504,11 @@ def _unified_content_diff(before: str, after: str, context: int) -> tuple[str, .
     )
 
 
-def _message_value(message: Message) -> dict[str, str | None]:
+def _message_value(message: Message) -> dict[str, Any]:
     return {
         "id": message.message_id,
         "role": message.role,
-        "content": message.content,
+        "content": message_content_to_wire(message),
         "name": message.name,
     }
 

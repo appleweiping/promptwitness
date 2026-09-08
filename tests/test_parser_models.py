@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from promptwitness.models import Message, PromptDocument, ToolSpec
+from promptwitness.models import ContentBlock, Message, PromptDocument, ToolSpec
 from promptwitness.parser import PromptFormatError, load_prompt, parse_prompt
 
 
@@ -31,6 +31,21 @@ def test_parse_complete_prompt() -> None:
     assert document.messages[0].name is None
     assert document.tools[0].required == ("order_id",)
     assert document.tool_map() == {"lookup": document.tools[0]}
+
+
+def test_content_block_validation_and_native_errors() -> None:
+    with pytest.raises(ValueError, match="content block type"):
+        ContentBlock("", {})
+    with pytest.raises(TypeError, match="content block data"):
+        ContentBlock("image", [])  # type: ignore[arg-type]
+    with pytest.raises(PromptFormatError, match="content block 0 requires"):
+        parse_prompt(
+            {
+                "schema_version": 1,
+                "id": "bad",
+                "messages": [{"role": "user", "content": [{"text": "missing type"}]}],
+            }
+        )
 
 
 def test_parse_and_render_stable_message_id() -> None:

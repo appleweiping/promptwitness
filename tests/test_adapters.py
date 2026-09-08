@@ -70,6 +70,58 @@ def test_openai_adapter_preserves_messages_tools_and_reports_loss() -> None:
     assert any("boundaries were flattened" in warning for warning in result.warnings)
 
 
+def test_openai_adapter_preserves_multimodal_blocks_without_flattening() -> None:
+    result = adapt_prompt(
+        {
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "input_text", "text": "Describe this"},
+                        {"type": "image_url", "image_url": {"url": "https://example.test/a.png"}},
+                    ],
+                }
+            ]
+        },
+        AdapterFormat.OPENAI,
+    )
+    message = result.document.messages[0]
+    assert message.content == "Describe this"
+    assert [part.type for part in message.content_parts] == ["input_text", "image_url"]
+    assert prompt_to_dict(result.document)["messages"][0]["content"][1]["image_url"]["url"] == (
+        "https://example.test/a.png"
+    )
+
+
+def test_native_parser_round_trips_multimodal_blocks() -> None:
+    result = adapt_prompt(
+        {
+            "schema_version": 1,
+            "id": "vision",
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": "Inspect"},
+                        {"type": "input_audio", "input_audio": {"data": "abc", "format": "wav"}},
+                    ],
+                }
+            ],
+        },
+        AdapterFormat.NATIVE,
+    )
+    assert prompt_to_dict(result.document)["messages"][0]["content"][1]["type"] == "input_audio"
+
+
+@pytest.mark.parametrize(
+    "content",
+    [[{"type": "input_text"}], [{"type": "image_url"}], [{"type": 3, "text": "bad"}]],
+)
+def test_multimodal_adapter_rejects_incomplete_blocks(content: object) -> None:
+    with pytest.raises(AdapterError):
+        adapt_prompt({"messages": [{"role": "user", "content": content}]}, AdapterFormat.OPENAI)
+
+
 def test_anthropic_adapter_handles_system_blocks_and_input_schema() -> None:
     raw = {
         "name": "anthropic-example",

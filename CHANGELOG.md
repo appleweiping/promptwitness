@@ -4,6 +4,8 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+- Preserve structured multimodal content blocks across adapters, native JSON,
+  rendering, diffs, registry replay, and provider requests.
 - Add a strict loopback JSON/HTTP service for validation, diff, and tool-call checks.
 - Allow the service boundary to validate and diff provider-native adapter formats.
 
