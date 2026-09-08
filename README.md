@@ -36,6 +36,10 @@ additional, type, enum, and nested constraint violations.
 The same checks are available behind a loopback-only `PromptService` JSON
 boundary for local CI runners and editor integrations.
 
+The service accepts the same provider adapters as the CLI through
+`from_format`, `before_format`, and `after_format`, so OpenAI, Anthropic, and
+LangChain payloads can be validated at the integration boundary.
+
 The severities are an explicit compatibility policy, not universal truth.
 `DiffOptions` lets a caller tighten message-change handling, and the CLI's
 `--fail-on` chooses the CI threshold.

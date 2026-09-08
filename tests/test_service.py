@@ -87,3 +87,42 @@ def test_prompt_service_validates_request_options(tmp_path) -> None:  # type: ig
         )
     with pytest.raises(ValueError):
         create_server(port=65536)
+
+
+def test_prompt_service_accepts_openai_adapter_payload(tmp_path) -> None:  # type: ignore[no-untyped-def]
+    path = tmp_path / "openai.json"
+    path.write_text(
+        json.dumps({"messages": [{"role": "user", "content": "hello"}]}),
+        encoding="utf-8",
+    )
+    result = PromptService().dispatch(
+        {"operation": "validate", "prompt": str(path), "from_format": "openai"}
+    )
+    assert result["valid"] is True
+
+
+def test_prompt_service_adapts_openai_diff_and_rejects_format(tmp_path) -> None:  # type: ignore[no-untyped-def]
+    before = tmp_path / "before.json"
+    after = tmp_path / "after.json"
+    before.write_text(
+        json.dumps({"messages": [{"role": "user", "content": "hello"}]}),
+        encoding="utf-8",
+    )
+    after.write_text(
+        json.dumps({"messages": [{"role": "user", "content": "goodbye"}]}),
+        encoding="utf-8",
+    )
+    diff = PromptService().dispatch(
+        {
+            "operation": "diff",
+            "before": str(before),
+            "after": str(after),
+            "before_format": "openai",
+            "after_format": "openai",
+        }
+    )
+    assert diff["compatible"] is True
+    with pytest.raises(ValueError):
+        PromptService().dispatch(
+            {"operation": "validate", "prompt": str(before), "from_format": "unknown"}
+        )

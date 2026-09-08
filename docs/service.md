@@ -17,3 +17,8 @@ result = PromptService().dispatch({
 
 The service never calls a model or provider. Keep the default loopback binding
 when using it as a local CI or editor integration.
+
+Set `from_format` for validation or `before_format`/`after_format` for diffs to
+`openai`, `anthropic`, or `langchain` when the files are not native schema-v1
+documents. Conversion warnings remain explicit in the adapter API; the
+service returns the same strict document findings.

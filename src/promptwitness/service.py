@@ -9,8 +9,10 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 
+from .adapters import AdapterFormat, load_adapted_prompt
 from .diff import compare_prompts
 from .invocations import validate_tool_arguments
+from .models import PromptDocument
 from .parser import load_prompt
 from .validation import ValidationPolicy, validate_prompt
 
@@ -23,7 +25,7 @@ class PromptService:
             raise ValueError("request must be an object")
         operation = request.get("operation")
         if operation == "validate":
-            document = load_prompt(_path(request, "prompt"))
+            document = _load_document(request, "prompt")
             validation = validate_prompt(document, _policy(request))
             return {
                 "operation": operation,
@@ -32,8 +34,8 @@ class PromptService:
                 "findings": [_finding(item) for item in validation.findings],
             }
         if operation == "diff":
-            before = load_prompt(_path(request, "before"))
-            after = load_prompt(_path(request, "after"))
+            before = _load_document(request, "before", "before_format")
+            after = _load_document(request, "after", "after_format")
             diff_report = compare_prompts(before, after)
             return {
                 "operation": operation,
@@ -45,7 +47,7 @@ class PromptService:
                 "changes": [_change(item) for item in diff_report.changes],
             }
         if operation == "check_call":
-            document = load_prompt(_path(request, "prompt"))
+            document = _load_document(request, "prompt")
             name = request.get("tool")
             if not isinstance(name, str) or not name.strip():
                 raise ValueError("tool must be a non-empty string")
@@ -104,6 +106,19 @@ def _path(request: Mapping[str, Any], name: str) -> Path:
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"{name} must be a non-empty path string")
     return Path(value)
+
+
+def _load_document(
+    request: Mapping[str, Any], path_name: str, format_name: str = "from_format"
+) -> PromptDocument:
+    source_format = request.get(format_name, AdapterFormat.NATIVE.value)
+    try:
+        selected = AdapterFormat(source_format)
+    except (TypeError, ValueError) as error:
+        raise ValueError(f"{format_name} must be a supported adapter format") from error
+    if selected is AdapterFormat.NATIVE:
+        return load_prompt(_path(request, path_name))
+    return load_adapted_prompt(_path(request, path_name), selected).document
 
 
 def _policy(request: Mapping[str, Any]) -> ValidationPolicy:
