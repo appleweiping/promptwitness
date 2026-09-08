@@ -24,3 +24,7 @@ Set `from_format` for validation or `before_format`/`after_format` for diffs to
 `openai`, `anthropic`, `gemini`, or `langchain` when the files are not native
 schema-v1 documents. Conversion warnings remain explicit in the adapter API; the
 service returns the same strict document findings.
+
+`convert` exposes the same provider-to-native conversion boundary for automation.
+It accepts `prompt`, a required `from_format`, and an optional `prompt_id`, then
+returns the strict schema-v1 document plus explicit loss warnings.

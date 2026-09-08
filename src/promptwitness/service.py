@@ -9,7 +9,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
 
-from .adapters import AdapterFormat, load_adapted_prompt
+from .adapters import AdapterFormat, load_adapted_prompt, prompt_to_dict
 from .diff import compare_prompts
 from .invocations import validate_tool_arguments
 from .models import PromptDocument
@@ -59,7 +59,22 @@ class PromptService:
                 raise ValueError("arguments must be an object")
             call_report = validate_tool_arguments(tool, arguments)
             return {"operation": operation, **call_report.to_dict()}
-        raise ValueError("operation must be validate, diff, or check_call")
+        if operation == "convert":
+            source_format = request.get("from_format")
+            try:
+                selected = AdapterFormat(source_format)
+            except (TypeError, ValueError) as error:
+                raise ValueError("from_format must be a supported adapter format") from error
+            prompt_id = request.get("prompt_id")
+            if prompt_id is not None and (not isinstance(prompt_id, str) or not prompt_id.strip()):
+                raise ValueError("prompt_id must be a non-empty string when supplied")
+            result = load_adapted_prompt(_path(request, "prompt"), selected, prompt_id=prompt_id)
+            return {
+                "operation": operation,
+                "prompt": prompt_to_dict(result.document),
+                "warnings": list(result.warnings),
+            }
+        raise ValueError("operation must be validate, diff, check_call, or convert")
 
 
 def create_server(

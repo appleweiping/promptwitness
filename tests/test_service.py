@@ -126,3 +126,47 @@ def test_prompt_service_adapts_openai_diff_and_rejects_format(tmp_path) -> None:
         PromptService().dispatch(
             {"operation": "validate", "prompt": str(before), "from_format": "unknown"}
         )
+
+
+def test_prompt_service_converts_provider_payload(tmp_path) -> None:  # type: ignore[no-untyped-def]
+    source = tmp_path / "openai.json"
+    source.write_text(
+        json.dumps(
+            {
+                "messages": [{"role": "user", "content": "hello"}],
+                "temperature": 0.2,
+            }
+        ),
+        encoding="utf-8",
+    )
+    response = PromptService().dispatch(
+        {
+            "operation": "convert",
+            "prompt": str(source),
+            "from_format": "openai",
+            "prompt_id": "converted",
+        }
+    )
+    assert response["prompt"]["id"] == "converted"
+    assert response["prompt"]["messages"][0]["content"] == "hello"
+    assert response["warnings"]
+
+
+def test_prompt_service_convert_validates_format_and_id(tmp_path) -> None:  # type: ignore[no-untyped-def]
+    source = tmp_path / "openai.json"
+    source.write_text(
+        json.dumps({"messages": [{"role": "user", "content": "hello"}]}), encoding="utf-8"
+    )
+    with pytest.raises(ValueError):
+        PromptService().dispatch(
+            {"operation": "convert", "prompt": str(source), "from_format": "unknown"}
+        )
+    with pytest.raises(ValueError):
+        PromptService().dispatch(
+            {
+                "operation": "convert",
+                "prompt": str(source),
+                "from_format": "openai",
+                "prompt_id": "",
+            }
+        )

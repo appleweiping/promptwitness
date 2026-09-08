@@ -341,6 +341,8 @@ synthetic workload is available in [`benchmarks/`](benchmarks/README.md).
 - pre-dispatch tool-call argument validation is available through `check-call`;
 - structured multimodal prompt modeling is available through `ContentBlock` and
   provider adapters; see [multimodal content](docs/multimodal.md).
+- the loopback service also exposes provider-to-native `convert` responses with
+  the strict schema-v1 document and explicit adapter warnings.
 
 Contributions are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md) and
 please include tests for every new compatibility rule.
