@@ -170,3 +170,96 @@ def test_prompt_service_convert_validates_format_and_id(tmp_path) -> None:  # ty
                 "prompt_id": "",
             }
         )
+
+
+def test_prompt_service_renders_and_diffs_matrix(tmp_path) -> None:  # type: ignore[no-untyped-def]
+    prompt = tmp_path / "prompt.json"
+    prompt.write_text(
+        json.dumps(
+            {
+                "schema_version": 1,
+                "id": "matrix-prompt",
+                "messages": [{"role": "user", "content": "Hello {{name}}"}],
+            }
+        ),
+        encoding="utf-8",
+    )
+    scenarios = tmp_path / "scenarios.json"
+    scenarios.write_text(
+        json.dumps([{"id": "ada", "values": {"name": "Ada"}, "tags": ["demo"]}]),
+        encoding="utf-8",
+    )
+    artifact = tmp_path / "matrix.json"
+    response = PromptService().dispatch(
+        {
+            "operation": "matrix",
+            "prompt": str(prompt),
+            "scenarios": str(scenarios),
+            "artifact": str(artifact),
+        }
+    )
+    assert response["prompt_id"] == "matrix-prompt"
+    assert response["rows"][0]["messages"][0]["content"] == "Hello Ada"
+    assert response["artifact"]["digest"]
+    diff = PromptService().dispatch(
+        {"operation": "matrix_diff", "before": str(artifact), "after": str(artifact)}
+    )
+    assert diff["changed"] is False
+    assert diff["scenarios"][0]["changed"] is False
+
+
+def test_prompt_service_matrix_validates_requests(tmp_path) -> None:  # type: ignore[no-untyped-def]
+    prompt = _prompt(tmp_path)
+    scenarios = tmp_path / "scenarios.json"
+    scenarios.write_text(json.dumps([{"id": "one", "values": {}}]), encoding="utf-8")
+    with pytest.raises(ValueError, match="strict"):
+        PromptService().dispatch(
+            {
+                "operation": "matrix",
+                "prompt": str(prompt),
+                "scenarios": str(scenarios),
+                "strict": "yes",
+            }
+        )
+    invalid_payloads = [
+        {},
+        [1],
+        [{"id": "one", "tags": "bad"}],
+        [{"id": ""}],
+        [{"id": "one", "values": []}],
+    ]
+    for index, raw in enumerate(invalid_payloads):
+        invalid = tmp_path / f"invalid-{index}.json"
+        invalid.write_text(json.dumps(raw), encoding="utf-8")
+        with pytest.raises(ValueError):
+            PromptService().dispatch(
+                {"operation": "matrix", "prompt": str(prompt), "scenarios": str(invalid)}
+            )
+    with pytest.raises(ValueError, match="cannot read scenarios"):
+        PromptService().dispatch(
+            {
+                "operation": "matrix",
+                "prompt": str(prompt),
+                "scenarios": str(tmp_path / "missing.json"),
+            }
+        )
+    valid = tmp_path / "valid.json"
+    valid.write_text(json.dumps([{"id": "one", "values": {}}]), encoding="utf-8")
+    without_artifact = PromptService().dispatch(
+        {
+            "operation": "matrix",
+            "prompt": str(prompt),
+            "scenarios": str(valid),
+            "strict": False,
+        }
+    )
+    assert "artifact" not in without_artifact
+    with pytest.raises(ValueError, match="artifact"):
+        PromptService().dispatch(
+            {
+                "operation": "matrix",
+                "prompt": str(prompt),
+                "scenarios": str(valid),
+                "artifact": "",
+            }
+        )

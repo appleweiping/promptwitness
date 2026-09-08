@@ -12,7 +12,8 @@ from typing import Any
 from .adapters import AdapterFormat, load_adapted_prompt, prompt_to_dict
 from .diff import compare_prompts
 from .invocations import validate_tool_arguments
-from .models import PromptDocument
+from .matrix import MatrixArtifact, Scenario, compare_matrices, render_matrix, save_matrix
+from .models import PromptDocument, message_content_to_wire
 from .parser import load_prompt
 from .validation import ValidationPolicy, validate_prompt
 
@@ -74,7 +75,73 @@ class PromptService:
                 "prompt": prompt_to_dict(result.document),
                 "warnings": list(result.warnings),
             }
-        raise ValueError("operation must be validate, diff, check_call, or convert")
+        if operation == "matrix":
+            document = _load_document(request, "prompt")
+            scenarios_path = _path(request, "scenarios")
+            try:
+                raw = json.loads(scenarios_path.read_text(encoding="utf-8"))
+            except (OSError, UnicodeError, json.JSONDecodeError) as error:
+                raise ValueError(f"cannot read scenarios: {error}") from error
+            if not isinstance(raw, list):
+                raise ValueError("scenario file must contain a JSON array")
+            scenarios: list[Scenario] = []
+            for index, item in enumerate(raw, start=1):
+                if not isinstance(item, Mapping):
+                    raise ValueError(f"scenario entry {index} must be an object")
+                values = item.get("values", {})
+                tags = item.get("tags", [])
+                if not isinstance(tags, list) or not all(isinstance(tag, str) for tag in tags):
+                    raise ValueError(f"scenario entry {index} tags must be an array of strings")
+                scenario_id = item.get("id")
+                if not isinstance(scenario_id, str) or not scenario_id.strip():
+                    raise ValueError(
+                        f"invalid scenario entry {index}: id must be a non-empty string"
+                    )
+                try:
+                    scenarios.append(Scenario(scenario_id, values, tuple(tags)))
+                except (TypeError, ValueError) as error:
+                    raise ValueError(f"invalid scenario entry {index}: {error}") from error
+            strict = request.get("strict", True)
+            if not isinstance(strict, bool):
+                raise ValueError("strict must be a boolean")
+            rows = render_matrix(document, scenarios, strict=strict)
+            payload: dict[str, Any] = {
+                "operation": operation,
+                "prompt_id": document.prompt_id,
+                "rows": [_rendered_row(row) for row in rows],
+            }
+            artifact_path = request.get("artifact")
+            if artifact_path is not None:
+                if not isinstance(artifact_path, str) or not artifact_path.strip():
+                    raise ValueError("artifact must be a non-empty path string when supplied")
+                payload["artifact"] = save_matrix(rows, artifact_path).to_dict()
+            return payload
+        if operation == "matrix_diff":
+            before_artifact = MatrixArtifact.load(str(_path(request, "before")))
+            after_artifact = MatrixArtifact.load(str(_path(request, "after")))
+            if before_artifact.prompt_id != after_artifact.prompt_id:
+                raise ValueError("matrix artifacts must use the same prompt ID")
+            differences = compare_matrices(before_artifact.rows, after_artifact.rows)
+            return {
+                "operation": operation,
+                "schema_version": 1,
+                "prompt_id": before_artifact.prompt_id,
+                "before_digest": before_artifact.digest,
+                "after_digest": after_artifact.digest,
+                "changed": any(item.changed for item in differences),
+                "scenarios": [
+                    {
+                        "scenario_id": item.scenario_id,
+                        "before_digest": item.before_digest,
+                        "after_digest": item.after_digest,
+                        "changed": item.changed,
+                    }
+                    for item in differences
+                ],
+            }
+        raise ValueError(
+            "operation must be validate, diff, check_call, convert, matrix, or matrix_diff"
+        )
 
 
 def create_server(
@@ -167,6 +234,24 @@ def _change(change: Any) -> dict[str, Any]:
         "path": change.path,
         "severity": change.severity.value,
         "summary": change.summary,
+    }
+
+
+def _rendered_row(row: Any) -> dict[str, Any]:
+    return {
+        "id": row.scenario_id,
+        "digest": row.digest,
+        "variables": list(row.variables),
+        "tags": list(row.tags),
+        "messages": [
+            {
+                "id": message.message_id,
+                "role": message.role,
+                "name": message.name,
+                "content": message_content_to_wire(message),
+            }
+            for message in row.messages
+        ],
     }
 
 

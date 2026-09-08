@@ -21,6 +21,8 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 - Add a strict loopback JSON/HTTP service for validation, diff, and tool-call checks.
 - Allow the service boundary to validate and diff provider-native adapter formats.
 - Expose provider-to-native conversion and adapter warnings through the loopback service.
+- Expose authenticated scenario matrix rendering and matrix-diff regression
+  reports through the loopback service.
 
 - Add bounded pre-dispatch tool-call argument validation through `check-call` and `validate_tool_arguments`.
 

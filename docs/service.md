@@ -28,3 +28,8 @@ service returns the same strict document findings.
 `convert` exposes the same provider-to-native conversion boundary for automation.
 It accepts `prompt`, a required `from_format`, and an optional `prompt_id`, then
 returns the strict schema-v1 document plus explicit loss warnings.
+
+`matrix` renders a JSON scenario array with deterministic variable substitution,
+optionally persists an authenticated artifact, and returns row digests and
+rendered messages. `matrix_diff` verifies two artifacts and returns added,
+removed, and changed scenario digests without re-rendering a provider prompt.

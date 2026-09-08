@@ -343,6 +343,8 @@ synthetic workload is available in [`benchmarks/`](benchmarks/README.md).
   provider adapters; see [multimodal content](docs/multimodal.md).
 - the loopback service also exposes provider-to-native `convert` responses with
   the strict schema-v1 document and explicit adapter warnings.
+- the service exposes authenticated scenario `matrix` rendering and
+  `matrix_diff` regression reports for automation clients.
 
 Contributions are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md) and
 please include tests for every new compatibility rule.
