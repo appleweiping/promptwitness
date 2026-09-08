@@ -33,3 +33,9 @@ returns the strict schema-v1 document plus explicit loss warnings.
 optionally persists an authenticated artifact, and returns row digests and
 rendered messages. `matrix_diff` verifies two artifacts and returns added,
 removed, and changed scenario digests without re-rendering a provider prompt.
+
+`long_context` evaluates a strict JSON array of needle cases against an
+explicit `predictions` object. It never calls a model: the supplied outputs are
+replayed through the same long-context evaluator, returning case digests,
+accuracy by depth and needle position, and failure details. Set `strict` to
+fail fast on an invalid prediction.

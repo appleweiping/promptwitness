@@ -12,6 +12,7 @@ from typing import Any
 from .adapters import AdapterFormat, load_adapted_prompt, prompt_to_dict
 from .diff import compare_prompts
 from .invocations import validate_tool_arguments
+from .long_context import LongContextCase, evaluate_long_context
 from .matrix import MatrixArtifact, Scenario, compare_matrices, render_matrix, save_matrix
 from .models import PromptDocument, message_content_to_wire
 from .parser import load_prompt
@@ -139,8 +140,52 @@ class PromptService:
                     for item in differences
                 ],
             }
+        if operation == "long_context":
+            cases_path = _path(request, "cases")
+            try:
+                raw = json.loads(cases_path.read_text(encoding="utf-8"))
+            except (OSError, UnicodeError, json.JSONDecodeError) as error:
+                raise ValueError(f"cannot read long-context cases: {error}") from error
+            if not isinstance(raw, list) or not raw:
+                raise ValueError("long-context cases must be a non-empty JSON array")
+            cases: list[LongContextCase] = []
+            for index, item in enumerate(raw, start=1):
+                if not isinstance(item, Mapping):
+                    raise ValueError(f"long-context case {index} must be an object")
+                try:
+                    context = item["context"]
+                    if not isinstance(context, list):
+                        raise ValueError("context must be an array")
+                    cases.append(
+                        LongContextCase(
+                            item["case_id"],
+                            tuple(context),
+                            item["needle"],
+                            item["query"],
+                            item["expected"],
+                            item["needle_index"],
+                        )
+                    )
+                except (KeyError, TypeError, ValueError) as error:
+                    raise ValueError(f"invalid long-context case {index}: {error}") from error
+            predictions = request.get("predictions")
+            if not isinstance(predictions, Mapping) or not all(
+                isinstance(key, str) and isinstance(value, str)
+                for key, value in predictions.items()
+            ):
+                raise ValueError("predictions must map case IDs to strings")
+            strict = request.get("strict", False)
+            if not isinstance(strict, bool):
+                raise ValueError("strict must be a boolean")
+            report = evaluate_long_context(
+                cases,
+                lambda case: predictions.get(case.case_id, ""),
+                strict=strict,
+            )
+            return {"operation": operation, "report": report.to_dict()}
         raise ValueError(
-            "operation must be validate, diff, check_call, convert, matrix, or matrix_diff"
+            "operation must be validate, diff, check_call, convert, matrix, matrix_diff, "
+            "or long_context"
         )
 
 

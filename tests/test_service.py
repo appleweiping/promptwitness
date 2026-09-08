@@ -208,6 +208,48 @@ def test_prompt_service_renders_and_diffs_matrix(tmp_path) -> None:  # type: ign
     assert diff["scenarios"][0]["changed"] is False
 
 
+def test_prompt_service_replays_long_context_cases(tmp_path) -> None:  # type: ignore[no-untyped-def]
+    cases = tmp_path / "long-context.json"
+    cases.write_text(
+        json.dumps(
+            [
+                {
+                    "case_id": "front",
+                    "context": ["NEEDLE: 42", "filler"],
+                    "needle": "42",
+                    "query": "what number?",
+                    "expected": "42",
+                    "needle_index": 0,
+                },
+                {
+                    "case_id": "back",
+                    "context": ["filler", "NEEDLE: 7"],
+                    "needle": "7",
+                    "query": "what number?",
+                    "expected": "7",
+                    "needle_index": 1,
+                },
+            ]
+        ),
+        encoding="utf-8",
+    )
+    result = PromptService().dispatch(
+        {
+            "operation": "long_context",
+            "cases": str(cases),
+            "predictions": {"front": "42", "back": "wrong"},
+        }
+    )
+    assert result["report"]["cases"] == 2
+    assert result["report"]["accuracy"] == 0.5
+    assert result["report"]["by_position"]["front"] == 1.0
+
+    with pytest.raises(ValueError, match="predictions"):
+        PromptService().dispatch(
+            {"operation": "long_context", "cases": str(cases), "predictions": []}
+        )
+
+
 def test_prompt_service_matrix_validates_requests(tmp_path) -> None:  # type: ignore[no-untyped-def]
     prompt = _prompt(tmp_path)
     scenarios = tmp_path / "scenarios.json"

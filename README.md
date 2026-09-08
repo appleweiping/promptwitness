@@ -345,6 +345,8 @@ synthetic workload is available in [`benchmarks/`](benchmarks/README.md).
   the strict schema-v1 document and explicit adapter warnings.
 - the service exposes authenticated scenario `matrix` rendering and
   `matrix_diff` regression reports for automation clients.
+- the service exposes replayable, model-free long-context needle evaluation
+  through `long_context`, with depth/position diagnostics and case digests.
 
 Contributions are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md) and
 please include tests for every new compatibility rule.
