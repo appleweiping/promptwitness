@@ -33,6 +33,9 @@ Concrete calls can be checked before dispatch with `check-call` or
 `validate_tool_arguments`; findings include JSON-pointer paths for missing,
 additional, type, enum, and nested constraint violations.
 
+The same checks are available behind a loopback-only `PromptService` JSON
+boundary for local CI runners and editor integrations.
+
 The severities are an explicit compatibility policy, not universal truth.
 `DiffOptions` lets a caller tighten message-change handling, and the CLI's
 `--fail-on` chooses the CI threshold.

@@ -72,6 +72,7 @@ from .providers import (
 )
 from .registry import PromptRegistry, PromptVersion, RenderedPrompt
 from .schemas import resolve_local_refs
+from .service import PromptService, create_server
 from .tools import ToolBatch, ToolDispatcher, ToolOutcome
 from .validation import ValidationPolicy, validate_prompt
 
@@ -107,6 +108,7 @@ __all__ = [
     "PromptDocument",
     "PromptFormatError",
     "PromptRegistry",
+    "PromptService",
     "PromptVersion",
     "ProviderMatrix",
     "ProviderMatrixReport",
@@ -132,6 +134,7 @@ __all__ = [
     "adapt_prompt",
     "compare_matrices",
     "compare_prompts",
+    "create_server",
     "evaluate_benchmark",
     "evaluate_long_context",
     "load_adapted_prompt",
