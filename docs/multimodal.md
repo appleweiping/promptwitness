@@ -10,13 +10,15 @@ from promptwitness import AdapterFormat, adapt_prompt, prompt_to_dict
 
 result = adapt_prompt(
     {
-        "messages": [{
-            "role": "user",
-            "content": [
-                {"type": "input_text", "text": "Describe this image."},
-                {"type": "image_url", "image_url": {"url": "https://example.test/a.png"}},
-            ],
-        }]
+        "messages": [
+            {
+                "role": "user",
+                "content": [
+                    {"type": "input_text", "text": "Describe this image."},
+                    {"type": "image_url", "image_url": {"url": "https://example.test/a.png"}},
+                ],
+            }
+        ]
     },
     AdapterFormat.OPENAI,
 )

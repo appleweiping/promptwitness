@@ -11,7 +11,8 @@ it possible to review a benchmark release independently from an answer file.
 The root object must use `"format": "promptwitness.benchmark-suite.v1"`, a
 non-empty `suite_id`, and a non-empty `tasks` array. Each task has a unique
 `name`, optional `metadata`, and one or more cases. A case contains `case_id`,
-`task`, `prompt`, and `expected`, plus optional metadata:
+`task`, `prompt`, and `expected`, plus optional metadata, `scorer`, and
+`threshold`:
 
 ```json
 {
@@ -26,7 +27,9 @@ non-empty `suite_id`, and a non-empty `tasks` array. Each task has a unique
           "case_id": "recall-1",
           "task": "recall",
           "prompt": "Who?",
-          "expected": "Ada"
+          "expected": "Ada",
+          "scorer": "exact",
+          "threshold": 1.0
         }
       ]
     }

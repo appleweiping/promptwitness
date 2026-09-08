@@ -8,6 +8,7 @@ from promptwitness import (
     BenchmarkCase,
     evaluate_benchmark,
     load_benchmark_cases,
+    score_prediction,
 )
 from promptwitness.cli import main
 
@@ -96,6 +97,7 @@ def test_benchmark_report_tracks_failures_and_task_aggregates() -> None:
         "attempted": 0,
         "failed": 1,
         "accuracy": None,
+        "mean_score": None,
     }
     payload = report.to_dict()
     assert payload["results"][2]["error"] == "RuntimeError: provider unavailable"
@@ -111,6 +113,70 @@ def test_benchmark_evaluator_validates_inputs_and_strict_errors() -> None:
         evaluate_benchmark((), lambda _: "answer")
     with pytest.raises(ValueError, match="failed"):
         evaluate_benchmark((case,), lambda _: 1, strict=True)  # type: ignore[return-value]
+
+
+def test_benchmark_scoring_registry_preserves_continuous_scores() -> None:
+    cases = (
+        BenchmarkCase("exact", "facts", "p", "Ada", scorer="exact"),
+        BenchmarkCase("contains", "facts", "p", "Ada", scorer="contains"),
+        BenchmarkCase("tokens", "facts", "p", "red blue", scorer="token_f1", threshold=0.5),
+        BenchmarkCase("json", "facts", "p", '{"a": 1}', scorer="json"),
+    )
+    assert score_prediction(cases[0], " ada ") == 1.0
+    assert score_prediction(cases[1], "Ada Lovelace") == 1.0
+    assert score_prediction(cases[2], "red green") == pytest.approx(0.5)
+    assert score_prediction(cases[3], '{"a":1}') == 1.0
+    report = evaluate_benchmark(
+        cases, lambda case: {"tokens": "red green"}.get(case.case_id, case.expected)
+    )
+    assert report.accuracy == 1.0
+    assert report.mean_score == pytest.approx(0.875)
+    assert report.to_dict()["results"][2]["score"] == pytest.approx(0.5)
+
+
+def test_benchmark_loader_round_trips_scorer_and_rejects_invalid_scoring(tmp_path) -> None:  # type: ignore[no-untyped-def]
+    path = tmp_path / "scored.json"
+    path.write_text(
+        json.dumps(
+            [
+                {
+                    "case_id": "a",
+                    "task": "facts",
+                    "prompt": "p",
+                    "expected": "red blue",
+                    "scorer": "token_f1",
+                    "threshold": 0.75,
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+    case = load_benchmark_cases(path)[0]
+    assert case.scorer == "token_f1" and case.threshold == 0.75
+    assert case.prompt_digest != BenchmarkCase("a", "facts", "p", "red blue").prompt_digest
+    with pytest.raises(ValueError, match="unknown benchmark scorer"):
+        BenchmarkCase("id", "task", "p", "e", scorer="bleu")
+    with pytest.raises(ValueError, match="between zero and one"):
+        BenchmarkCase("id", "task", "p", "e", threshold=1.1)
+    with pytest.raises(TypeError, match="real number"):
+        BenchmarkCase("id", "task", "p", "e", threshold="1")  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match="BenchmarkCase"):
+        score_prediction(object(), "answer")  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match="prediction"):
+        score_prediction(BenchmarkCase("id", "task", "p", "e"), 1)  # type: ignore[arg-type]
+
+
+def test_benchmark_scoring_edge_cases_are_explicit() -> None:
+    assert score_prediction(BenchmarkCase("empty", "t", "p", ""), "anything") == 0.0
+    assert score_prediction(BenchmarkCase("both-empty", "t", "p", "", scorer="token_f1"), "") == 1.0
+    assert (
+        score_prediction(BenchmarkCase("one-empty", "t", "p", "word", scorer="token_f1"), "") == 0.0
+    )
+    assert (
+        score_prediction(BenchmarkCase("no-overlap", "t", "p", "word", scorer="token_f1"), "other")
+        == 0.0
+    )
+    assert score_prediction(BenchmarkCase("bad-json", "t", "p", "{", scorer="json"), "{") == 0.0
 
 
 @pytest.mark.parametrize(

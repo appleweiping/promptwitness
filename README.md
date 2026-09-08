@@ -190,8 +190,10 @@ from the same typed report.
 
 Task-oriented benchmark fixtures are documented in
 [benchmark replay](docs/benchmark.md). They support per-task accuracy,
+continuous scorer diagnostics, explicit matching thresholds,
 expected-answer-safe prompt digests, and replayed predictions without coupling
-the core library to a specific model provider.
+the core library to a specific model provider. Built-in scorers cover exact,
+substring, token-F1, and JSON-structured answers.
 Versioned multi-task suite manifests and their deterministic replay gate are
 documented in [benchmark suites](docs/benchmark-suites.md).
 Benchmark-suite accuracy gates can enforce overall and per-task thresholds in CI.

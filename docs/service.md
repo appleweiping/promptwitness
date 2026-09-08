@@ -7,12 +7,14 @@ a loopback-first `POST /v1/dispatch` endpoint and returns deterministic JSON.
 ```python
 from promptwitness import PromptService
 
-result = PromptService().dispatch({
-    "operation": "check_call",
-    "prompt": "examples/before.json",
-    "tool": "lookup_order",
-    "arguments": {"order_id": "A-1"},
-})
+result = PromptService().dispatch(
+    {
+        "operation": "check_call",
+        "prompt": "examples/before.json",
+        "tool": "lookup_order",
+        "arguments": {"order_id": "A-1"},
+    }
+)
 ```
 
 The service never calls a model or provider. Keep the default loopback binding

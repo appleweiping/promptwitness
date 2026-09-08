@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import hashlib
 import json
-from collections import defaultdict
+from collections import Counter, defaultdict
 from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 from types import MappingProxyType
 from typing import Any
+
+SCORERS = ("exact", "contains", "token_f1", "json")
 
 
 def _digest(value: Any) -> str:
@@ -29,6 +31,8 @@ class BenchmarkCase:
     prompt: str
     expected: str
     metadata: Mapping[str, Any] = field(default_factory=dict)
+    scorer: str = "exact"
+    threshold: float = 1.0
 
     def __post_init__(self) -> None:
         for name, value in (
@@ -42,6 +46,13 @@ class BenchmarkCase:
             raise TypeError("expected must be a string")
         if not isinstance(self.metadata, Mapping):
             raise TypeError("metadata must be an object")
+        if self.scorer not in SCORERS:
+            raise ValueError(f"unknown benchmark scorer: {self.scorer}")
+        if isinstance(self.threshold, bool) or not isinstance(self.threshold, (int, float)):
+            raise TypeError("threshold must be a real number")
+        if not 0 <= float(self.threshold) <= 1:
+            raise ValueError("threshold must be between zero and one")
+        object.__setattr__(self, "threshold", float(self.threshold))
         object.__setattr__(self, "metadata", MappingProxyType(dict(self.metadata)))
 
     @property
@@ -54,6 +65,8 @@ class BenchmarkCase:
                 "task": self.task,
                 "prompt": self.prompt,
                 "metadata": dict(self.metadata),
+                "scorer": self.scorer,
+                "threshold": self.threshold,
             }
         )
 
@@ -152,6 +165,8 @@ class BenchmarkSuite:
                             "prompt": case.prompt,
                             "expected": case.expected,
                             "metadata": dict(case.metadata),
+                            "scorer": case.scorer,
+                            "threshold": case.threshold,
                         }
                         for case in task.cases
                     ],
@@ -171,6 +186,7 @@ class BenchmarkResult:
     prediction: str | None
     correct: bool | None
     error: str | None = None
+    score: float | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -191,6 +207,12 @@ class BenchmarkReport:
     def accuracy(self) -> float | None:
         return _accuracy(self.results)
 
+    @property
+    def mean_score(self) -> float | None:
+        """Mean continuous scorer output over successful cases."""
+
+        return _mean_score(self.results)
+
     def by_task(self) -> Mapping[str, Mapping[str, Any]]:
         buckets: dict[str, list[BenchmarkResult]] = defaultdict(list)
         for result in self.results:
@@ -202,6 +224,7 @@ class BenchmarkReport:
                     "attempted": sum(item.correct is not None for item in rows),
                     "failed": sum(item.error is not None for item in rows),
                     "accuracy": _accuracy(rows),
+                    "mean_score": _mean_score(rows),
                 }
                 for task, rows in sorted(buckets.items())
             }
@@ -213,6 +236,7 @@ class BenchmarkReport:
             "attempted": self.attempted,
             "failed": self.failed,
             "accuracy": self.accuracy,
+            "mean_score": self.mean_score,
             "by_task": dict(self.by_task()),
             "results": [
                 {
@@ -221,6 +245,7 @@ class BenchmarkReport:
                     "prompt_digest": item.prompt_digest,
                     "prediction": item.prediction,
                     "correct": item.correct,
+                    "score": item.score,
                     "error": item.error,
                 }
                 for item in self.results
@@ -292,7 +317,15 @@ def load_benchmark_cases(path: str | Path) -> tuple[BenchmarkCase, ...]:
     for index, value in enumerate(values, 1):
         if not isinstance(value, Mapping):
             raise ValueError(f"benchmark case {index} must be an object")
-        unknown = set(value) - {"case_id", "task", "prompt", "expected", "metadata"}
+        unknown = set(value) - {
+            "case_id",
+            "task",
+            "prompt",
+            "expected",
+            "metadata",
+            "scorer",
+            "threshold",
+        }
         if unknown:
             raise ValueError(
                 f"benchmark case {index} has unknown fields: {', '.join(sorted(unknown))}"
@@ -305,6 +338,8 @@ def load_benchmark_cases(path: str | Path) -> tuple[BenchmarkCase, ...]:
                     str(value["prompt"]),
                     value["expected"],
                     value.get("metadata", {}),
+                    value.get("scorer", "exact"),
+                    value.get("threshold", 1.0),
                 )
             )
         except (KeyError, TypeError, ValueError) as error:
@@ -363,6 +398,8 @@ def load_benchmark_suite(path: str | Path) -> BenchmarkSuite:
                         raw_case["prompt"],
                         raw_case["expected"],
                         raw_case.get("metadata", {}),
+                        raw_case.get("scorer", "exact"),
+                        raw_case.get("threshold", 1.0),
                     )
                 )
             except (KeyError, TypeError, ValueError) as error:
@@ -400,13 +437,15 @@ def evaluate_benchmark(
             prediction = answerer(case)
             if not isinstance(prediction, str):
                 raise TypeError("answerer must return a string")
+            score = score_prediction(case, prediction)
             results.append(
                 BenchmarkResult(
                     case.case_id,
                     case.task,
                     case.prompt_digest,
                     prediction,
-                    prediction.strip().casefold() == case.expected.strip().casefold(),
+                    score >= case.threshold,
+                    score=score,
                 )
             )
         except Exception as error:
@@ -425,7 +464,58 @@ def evaluate_benchmark(
     return BenchmarkReport(tuple(results))
 
 
+def score_prediction(case: BenchmarkCase, prediction: str) -> float:
+    """Score one prediction with the case's explicit, dependency-free scorer.
+
+    Scores are always in ``[0, 1]``. The binary ``correct`` field in
+    :class:`BenchmarkResult` is derived by comparing this score to the case's
+    threshold, so reports can preserve both a continuous diagnostic and a
+    reproducible pass/fail gate.
+    """
+
+    if not isinstance(case, BenchmarkCase):
+        raise TypeError("case must be a BenchmarkCase")
+    if not isinstance(prediction, str):
+        raise TypeError("prediction must be a string")
+    expected = case.expected.strip().casefold()
+    actual = prediction.strip().casefold()
+    if case.scorer == "exact":
+        return float(actual == expected)
+    if case.scorer == "contains":
+        return float(bool(expected) and expected in actual)
+    if case.scorer == "token_f1":
+        expected_tokens = Counter(expected.split())
+        actual_tokens = Counter(actual.split())
+        if not expected_tokens and not actual_tokens:
+            return 1.0
+        if not expected_tokens or not actual_tokens:
+            return 0.0
+        overlap = sum((expected_tokens & actual_tokens).values())
+        if not overlap:
+            return 0.0
+        precision = overlap / sum(actual_tokens.values())
+        recall = overlap / sum(expected_tokens.values())
+        return 2 * precision * recall / (precision + recall)
+    if case.scorer == "json":
+        try:
+            expected_value = json.loads(case.expected, parse_constant=_reject_non_finite)
+            actual_value = json.loads(prediction, parse_constant=_reject_non_finite)
+        except (ValueError, json.JSONDecodeError):
+            return 0.0
+        return float(expected_value == actual_value)
+    raise ValueError(f"unknown benchmark scorer: {case.scorer}")
+
+
+def _reject_non_finite(value: str) -> None:
+    raise ValueError(f"non-finite JSON value {value!r} is not allowed")
+
+
 def _accuracy(results: Iterable[BenchmarkResult]) -> float | None:
     rows = tuple(results)
     attempted = sum(item.correct is not None for item in rows)
     return None if not attempted else sum(item.correct is True for item in rows) / attempted
+
+
+def _mean_score(results: Iterable[BenchmarkResult]) -> float | None:
+    scores = [item.score for item in results if item.score is not None]
+    return None if not scores else sum(scores) / len(scores)

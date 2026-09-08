@@ -10,6 +10,7 @@ from .adapters import (
     render_prompt_json,
 )
 from .benchmark import (
+    SCORERS,
     BenchmarkCase,
     BenchmarkGate,
     BenchmarkReport,
@@ -19,6 +20,7 @@ from .benchmark import (
     evaluate_benchmark,
     load_benchmark_cases,
     load_benchmark_suite,
+    score_prediction,
 )
 from .diff import DiffOptions, MessageAlignment, compare_prompts
 from .execution import ExecutionReport, ExecutionRow, ScenarioExecutor
@@ -78,6 +80,7 @@ from .tools import ToolBatch, ToolDispatcher, ToolOutcome
 from .validation import ValidationPolicy, validate_prompt
 
 __all__ = [
+    "SCORERS",
     "AdapterError",
     "AdapterFormat",
     "AdapterResult",
@@ -155,6 +158,7 @@ __all__ = [
     "render_prompt_json",
     "resolve_local_refs",
     "save_matrix",
+    "score_prediction",
     "validate_prompt",
     "validate_tool_arguments",
 ]

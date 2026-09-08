@@ -4,6 +4,9 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+- Add explicit benchmark scorers (`exact`, `contains`, `token_f1`, and `json`)
+  with per-case thresholds, continuous score reporting, and scorer-aware
+  prompt digests.
 - Preserve structured multimodal content blocks across adapters, native JSON,
   rendering, diffs, registry replay, and provider requests.
 - Add a strict loopback JSON/HTTP service for validation, diff, and tool-call checks.
