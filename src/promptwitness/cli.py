@@ -13,6 +13,7 @@ from typing import NoReturn
 from .adapters import AdapterError, AdapterFormat, load_adapted_prompt, render_prompt_json
 from .benchmark import BenchmarkGate, evaluate_benchmark, load_benchmark_cases, load_benchmark_suite
 from .diff import MessageAlignment, compare_prompts
+from .invocations import validate_tool_arguments
 from .long_context import LongContextCase, evaluate_long_context
 from .matrix import MatrixArtifact, Scenario, compare_matrices, render_matrix, save_matrix
 from .models import DiffReport, Severity, ValidationReport
@@ -113,6 +114,24 @@ def build_parser() -> argparse.ArgumentParser:
     convert.add_argument("--id", dest="prompt_id")
     convert.add_argument("--output", type=Path)
     convert.set_defaults(handler=_run_convert)
+    check_call = subparsers.add_parser(
+        "check-call", help="validate one JSON tool invocation against a prompt contract"
+    )
+    check_call.add_argument("prompt", type=Path)
+    check_call.add_argument("tool", help="declared tool name")
+    check_call.add_argument("arguments", type=Path, help="JSON object containing tool arguments")
+    check_call.add_argument(
+        "--from-format",
+        choices=[source.value for source in AdapterFormat],
+        default=AdapterFormat.NATIVE.value,
+    )
+    check_call.add_argument(
+        "--no-resolve-refs",
+        action="store_true",
+        help="leave local JSON Schema $ref pointers unresolved",
+    )
+    check_call.add_argument("--output", type=Path)
+    check_call.set_defaults(handler=_run_check_call)
     matrix = subparsers.add_parser("matrix", help="render one prompt over a scenario JSON array")
     matrix.add_argument("prompt", type=Path)
     matrix.add_argument("scenarios", type=Path)
@@ -288,6 +307,24 @@ def _run_convert(arguments: argparse.Namespace) -> int:
     _emit_adapter_warnings(result.warnings)
     _emit(render_prompt_json(result.document), arguments.output)
     return 0
+
+
+def _run_check_call(arguments: argparse.Namespace) -> int:
+    _ensure_distinct_output(arguments.output, arguments.prompt, arguments.arguments)
+    result = load_adapted_prompt(arguments.prompt, AdapterFormat(arguments.from_format))
+    _emit_adapter_warnings(result.warnings)
+    tool = result.document.tool_map().get(arguments.tool)
+    if tool is None:
+        raise ValueError(f"unknown tool {arguments.tool!r}")
+    try:
+        raw = json.loads(arguments.arguments.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as error:
+        raise ValueError(f"cannot load tool arguments: {error}") from error
+    if not isinstance(raw, dict):
+        raise ValueError("tool arguments must be a JSON object")
+    report = validate_tool_arguments(tool, raw, resolve_refs=not arguments.no_resolve_refs)
+    _emit(json.dumps(report.to_dict(), indent=2, sort_keys=True) + "\n", arguments.output)
+    return 0 if report.valid else 2
 
 
 def _run_matrix(arguments: argparse.Namespace) -> int:

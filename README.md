@@ -29,6 +29,10 @@ variable is now required” or “a tool parameter disappeared” before deploym
 | Required tool parameter addition | breaking | Existing calls become incomplete |
 | Metadata or tool-description change | info | No structural invocation change |
 
+Concrete calls can be checked before dispatch with `check-call` or
+`validate_tool_arguments`; findings include JSON-pointer paths for missing,
+additional, type, enum, and nested constraint violations.
+
 The severities are an explicit compatibility policy, not universal truth.
 `DiffOptions` lets a caller tighten message-change handling, and the CLI's
 `--fail-on` chooses the CI threshold.
@@ -152,6 +156,10 @@ promptwitness diff BEFORE AFTER [--include-metadata|--ignore-metadata]
 
 promptwitness convert PROVIDER.json [--from-format auto|native|openai|anthropic|langchain]
                                   [--id PROMPT_ID] [--output native.json]
+
+promptwitness check-call PROMPT TOOL ARGUMENTS.json
+                              [--from-format native|openai|anthropic|langchain|auto]
+                              [--no-resolve-refs] [--output report.json]
 
 promptwitness long-context CASES.json PREDICTIONS.json [--strict] [--output report.json]
 
@@ -313,6 +321,7 @@ synthetic workload is available in [`benchmarks/`](benchmarks/README.md).
 - optional JSON Schema resolution for tool contracts is available through
   `--resolve-tool-refs`; broader provider-native schema support remains future
   work;
+- pre-dispatch tool-call argument validation is available through `check-call`;
 - richer multimodal prompt modeling without silently flattening non-text content.
 
 Contributions are welcome. Start with [CONTRIBUTING.md](CONTRIBUTING.md) and

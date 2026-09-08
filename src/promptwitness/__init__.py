@@ -22,6 +22,7 @@ from .benchmark import (
 )
 from .diff import DiffOptions, MessageAlignment, compare_prompts
 from .execution import ExecutionReport, ExecutionRow, ScenarioExecutor
+from .invocations import ToolArgumentIssue, ToolArgumentReport, validate_tool_arguments
 from .long_context import (
     LongContextCase,
     LongContextReport,
@@ -118,6 +119,8 @@ __all__ = [
     "Scenario",
     "ScenarioExecutor",
     "Severity",
+    "ToolArgumentIssue",
+    "ToolArgumentReport",
     "ToolBatch",
     "ToolDispatcher",
     "ToolOutcome",
@@ -148,6 +151,7 @@ __all__ = [
     "resolve_local_refs",
     "save_matrix",
     "validate_prompt",
+    "validate_tool_arguments",
 ]
 
 __version__ = "0.2.0"

@@ -4,6 +4,8 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+- Add bounded pre-dispatch tool-call argument validation through `check-call` and `validate_tool_arguments`.
+
 - Add opt-in local JSON Schema `$ref` resolution for tool-parameter diffs,
   with cycle and external-reference rejection.
 
