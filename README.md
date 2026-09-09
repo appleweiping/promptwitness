@@ -44,6 +44,13 @@ limits, transactional event persistence, and resume after process interruption.
 See the [offline session demo](examples/session_demo.py) and
 [session lifecycle and recovery guide](docs/sessions.md).
 
+The [`task-suite` workflow](docs/task-suites.md) loads local records, plans
+complete prompt length budgets, invokes a provider, applies family-specific
+metrics, and resumes model/configuration-bound SQLite runs. Its reports retain
+budget skips and missing model-judge metrics across seven explicit task
+families. The [offline demo](examples/task_suite_demo.py) verifies this workflow;
+it is not real-model or published-benchmark accuracy evidence.
+
 The service accepts the same provider adapters as the CLI through
 `from_format`, `before_format`, and `after_format`, so OpenAI, Anthropic,
 Gemini/Vertex, and LangChain payloads can be validated at the integration
@@ -62,15 +69,18 @@ unsupported fields produce warnings, while structured multimodal blocks are reta
 
 PromptWitness has no runtime dependencies.
 
-Install the latest source from GitHub:
+These development docs and examples describe `feat/whole-repository-alignment`.
+The session and task-suite capabilities have not been merged into `main` or
+published as a new release. To use the APIs shown here, install that branch:
 
 ```bash
-python -m pip install "git+https://github.com/appleweiping/promptwitness.git"
+python -m pip install "git+https://github.com/appleweiping/promptwitness.git@feat/whole-repository-alignment"
 ```
 
-For a source checkout:
+For a source checkout (run from the repository directory):
 
 ```bash
+git switch feat/whole-repository-alignment
 python -m pip install -e ".[dev]"
 ```
 

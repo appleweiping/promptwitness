@@ -88,10 +88,14 @@ from .sessions import (
     SessionView,
     replay_session,
 )
+from .task_data import FAMILIES, TaskSuitePlan, load_task_suite
+from .task_runs import OpenAITaskProvider, TaskRequest, TaskRunConflict, TaskRunStore
+from .task_scores import score_task
 from .tools import ToolBatch, ToolDispatcher, ToolOutcome
 from .validation import ValidationPolicy, validate_prompt
 
 __all__ = [
+    "FAMILIES",
     "SCORERS",
     "AdapterError",
     "AdapterFormat",
@@ -121,6 +125,7 @@ __all__ = [
     "OpenAICompatibleProvider",
     "OpenAICompatibleStreamingProvider",
     "OpenAISessionProvider",
+    "OpenAITaskProvider",
     "PolicyBundle",
     "PolicyFormatError",
     "PromptDocument",
@@ -147,6 +152,10 @@ __all__ = [
     "SessionTransitionError",
     "SessionView",
     "Severity",
+    "TaskRequest",
+    "TaskRunConflict",
+    "TaskRunStore",
+    "TaskSuitePlan",
     "ToolArgumentIssue",
     "ToolArgumentReport",
     "ToolBatch",
@@ -169,6 +178,7 @@ __all__ = [
     "load_policy",
     "load_prompt",
     "load_replay_providers",
+    "load_task_suite",
     "load_traces",
     "make_needle_cases",
     "make_provider_answerer",
@@ -181,6 +191,7 @@ __all__ = [
     "resolve_local_refs",
     "save_matrix",
     "score_prediction",
+    "score_task",
     "validate_prompt",
     "validate_tool_arguments",
 ]

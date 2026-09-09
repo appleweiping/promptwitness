@@ -1,5 +1,9 @@
 # Long-context provider evaluation
 
+For local task datasets, family-specific scoring, length budgets, durable
+provider execution, and recovery, use the [task-suite workflow](task-suites.md).
+The needle primitives below are a smaller diagnostic, not seven-family coverage.
+
 PromptWitness includes deterministic needle cases and reports accuracy by
 context depth and needle position. `evaluate_long_context()` accepts a simple
 answerer callback, while `make_provider_answerer()` adapts an

@@ -23,6 +23,7 @@ from .policies import PolicyBundle, PolicyFormatError, load_policy
 from .provider_matrix import ProviderMatrix, load_replay_providers
 from .reporting import render_html, render_json, render_markdown, render_sarif
 from .session_cli import add_session_commands
+from .task_cli import add_task_commands
 from .validation import validate_prompt
 
 _FAIL_CHOICES = ("never", "warning", "breaking")
@@ -209,6 +210,7 @@ def build_parser() -> argparse.ArgumentParser:
     provider_matrix.add_argument("--output", type=Path)
     provider_matrix.set_defaults(handler=_run_provider_matrix)
     add_session_commands(subparsers)
+    add_task_commands(subparsers)
     return parser
 
 

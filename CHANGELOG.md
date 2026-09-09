@@ -4,6 +4,13 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+- Add integrated seven-family task-suite planning, local dataset adapters,
+  complete-prompt byte/custom-token budgets, real provider execution, specific
+  retrieval/classification metrics, and explicit unsupported model-judge metrics.
+- Add model/input/configuration-bound SQLite task resumption, committed call
+  reservations, explicit retries, stale-writer protection, score/event integrity
+  checks, per-length/family coverage, and a tested offline multi-stage example.
+
 - Add durable multi-turn conversation sessions with pinned rendered prompts,
   hash-linked SQLite events, optimistic concurrency, validated function tools,
   correlated result feedback, bounded provider turns, and explicit crash recovery.

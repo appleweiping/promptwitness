@@ -1,0 +1,1 @@
+{"id":"test","question":"Where is the blue file?","labels":["question","statement"],"answers":["question"],"examples":[{"id":"training-1","text":"Where is the book?","label":"question"},{"id":"training-2","text":"This is a pen.","label":"statement"}]}

@@ -133,6 +133,7 @@ class OpenAICompatibleProvider:
         messages: Sequence[Mapping[str, Any]],
         *,
         tools: Sequence[Mapping[str, Any]] = (),
+        generation: Mapping[str, Any] | None = None,
     ) -> Any:
         """Send chat history, including correlated tool calls and tool results.
 
@@ -144,6 +145,11 @@ class OpenAICompatibleProvider:
         if not all(isinstance(tool, Mapping) for tool in tools):
             raise ValueError("tools must be a sequence of objects")
         body: dict[str, Any] = {"messages": [dict(message) for message in messages]}
+        if generation is not None:
+            # Local import keeps the existing provider/session modules acyclic.
+            from .task_data import generation_settings
+
+            body.update(generation_settings(generation))
         if tools:
             body["tools"] = [dict(tool) for tool in tools]
         if self.model is not None:

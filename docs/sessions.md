@@ -1,5 +1,8 @@
 # Durable conversation sessions
 
+This is unreleased functionality on `feat/whole-repository-alignment`, not the
+current `main` or published package. Use the [development installation](../README.md#install).
+
 `SessionJournal` records a conversation as append-only SQLite events. The public
 `SessionRunner` advances that conversation through provider responses and local
 tool calls until the next user message, an unavailable handler, an interrupted

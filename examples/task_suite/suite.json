@@ -1,0 +1,16 @@
+{
+  "format": "promptwitness.task-suite/v1",
+  "suite_id": "seven-family-checked-in-example",
+  "budgets": [128, 2048],
+  "generation": {"max_tokens": 128, "temperature": 0},
+  "seed": "example-v1",
+  "tasks": [
+    {"id": "file-recall", "family": "recall", "path": "recall.jsonl"},
+    {"id": "file-qa", "family": "rag", "path": "rag.jsonl", "adapter": "kilt"},
+    {"id": "file-ranking", "family": "rerank", "path": "rerank.jsonl", "adapter": "msmarco", "ranking_k": 2},
+    {"id": "file-citations", "family": "cite", "path": "cite.jsonl"},
+    {"id": "file-longqa", "family": "longqa", "path": "longqa.jsonl", "adapter": "processed"},
+    {"id": "file-summary", "family": "summ", "path": "summ.jsonl"},
+    {"id": "request-classification", "family": "icl", "path": "icl.jsonl"}
+  ]
+}
