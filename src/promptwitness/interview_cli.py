@@ -368,7 +368,7 @@ def _silence_failed_stream(stream: Any) -> None:
 def _diagnostic(message: str) -> None:
     try:
         print("promptwitness interview: " + message, file=sys.stderr, flush=True)
-    except (OSError, UnicodeError):
+    except (OSError, ValueError):
         _silence_failed_stream(sys.stderr)
 
 
@@ -397,7 +397,7 @@ def run_interview_command(args: argparse.Namespace) -> int:
             binary.flush()
         else:
             print(content, flush=True)
-    except (OSError, UnicodeError):
+    except (OSError, ValueError):
         _diagnostic(
             "command completed, but stdout could not be delivered; "
             "inspect the current head or export artifact"

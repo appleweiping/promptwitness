@@ -794,3 +794,26 @@ def test_missing_nonregular_input_is_rejected_before_new_database(
     assert invoke(*start_args(database, tmp_path / "does-not-exist", roles)) == 1
     assert invoke(*start_args(database, tmp_path, roles)) == 1
     assert not database.exists()
+
+
+@pytest.mark.parametrize("close_stderr", [False, True])
+def test_closed_host_text_streams_do_not_hide_committed_creation(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    close_stderr: bool,
+) -> None:
+    database, plan, roles = files(tmp_path)
+    closed = io.StringIO()
+    closed.close()
+    with monkeypatch.context() as patch:
+        patch.setattr(sys, "stdout", closed)
+        if close_stderr:
+            patch.setattr(sys, "stderr", closed)
+        assert invoke(*start_args(database, plan, roles)) == 0
+    with InterviewJournal(database) as journal:
+        assert journal.read("one").revision == 1
+    captured = capsys.readouterr()
+    assert not captured.out
+    if not close_stderr:
+        assert "command completed" in captured.err

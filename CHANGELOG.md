@@ -4,6 +4,9 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+- Preserve completed interview command status when an embedding host closes its
+  text output streams, including `ValueError` from closed Python stream objects.
+
 - Connect evidence-linked interviews through a deterministic state reducer,
   single-database event/head/memory transactions and a sequential provider runner.
   Preserve complete raw responses for replay, scope historical recall, distinguish
