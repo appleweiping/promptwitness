@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import io
 import json
 import os
@@ -16,7 +17,7 @@ from typing import Any
 
 import pytest
 
-from promptwitness.cli import build_parser
+from promptwitness.cli import build_parser, main
 from promptwitness.interview_cli import run_interview_command
 from promptwitness.interview_journal import InterviewJournal
 from promptwitness.interview_models import InterviewCriterion, InterviewPlan, InterviewTopic
@@ -807,6 +808,14 @@ def test_closed_host_text_streams_do_not_hide_committed_creation(
     closed = io.StringIO()
     closed.close()
     with monkeypatch.context() as patch:
+        # Exercise Python 3.14's real color probe even on Windows without a VT
+        # console. Production must not mutate process environment or streams.
+        for name in ("PYTHON_COLORS", "NO_COLOR", "FORCE_COLOR", "TERM"):
+            patch.delenv(name, raising=False)
+        if sys.version_info >= (3, 14) and sys.platform == "win32":
+            import nt
+
+            patch.setattr(nt, "_supports_virtual_terminal", lambda: True)
         patch.setattr(sys, "stdout", closed)
         if close_stderr:
             patch.setattr(sys, "stderr", closed)
@@ -817,3 +826,59 @@ def test_closed_host_text_streams_do_not_hide_committed_creation(
     assert not captured.out
     if not close_stderr:
         assert "command completed" in captured.err
+
+
+def test_all_cli_parsers_use_plain_help_without_color_probe(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("FORCE_COLOR", "1")
+    monkeypatch.setenv("PYTHON_COLORS", "1")
+    parser = build_parser()
+    pending = [parser]
+    visited = 0
+    while pending:
+        current = pending.pop()
+        help_text = current.format_help()
+        assert "usage:" in help_text and "\x1b[" not in help_text
+        visited += 1
+        for action in current._actions:
+            if isinstance(action, argparse._SubParsersAction):
+                pending.extend(action.choices.values())
+    assert visited > 20  # Includes nested interview, session and task commands.
+
+
+@pytest.mark.parametrize("prefix", [(), ("interview",), ("interview", "start"), ("session",)])
+def test_normal_cli_help_preserves_stdout_and_exit_zero(
+    prefix: tuple[str, ...], capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("FORCE_COLOR", "1")
+    with pytest.raises(SystemExit) as finished:
+        main([*prefix, "--help"])
+    assert finished.value.code == 0
+    captured = capsys.readouterr()
+    assert "usage:" in captured.out and "\x1b[" not in captured.out
+    assert not captured.err
+
+
+@pytest.mark.parametrize("closed_stdout", [False, True])
+def test_invalid_cli_arguments_preserve_stderr_and_exit_one(
+    closed_stdout: bool, capsys: pytest.CaptureFixture[str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    with monkeypatch.context() as patch:
+        for name in ("PYTHON_COLORS", "NO_COLOR", "FORCE_COLOR", "TERM"):
+            patch.delenv(name, raising=False)
+        if sys.version_info >= (3, 14) and sys.platform == "win32":
+            import nt
+
+            patch.setattr(nt, "_supports_virtual_terminal", lambda: True)
+        if closed_stdout:
+            output = io.StringIO()
+            output.close()
+            patch.setattr(sys, "stdout", output)
+        with pytest.raises(SystemExit) as failed:
+            main(["interview", "start"])
+    assert failed.value.code == 1
+    captured = capsys.readouterr()
+    assert not captured.out
+    assert "usage:" in captured.err and "error:" in captured.err
+    assert "\x1b[" not in captured.err

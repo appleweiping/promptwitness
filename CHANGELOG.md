@@ -4,6 +4,8 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+- Keep parser and formatter help plain on Python 3.14 as on earlier versions,
+  avoiding its startup color probe against already-closed host output streams.
 - Preserve completed interview command status when an embedding host closes its
   text output streams, including `ValueError` from closed Python stream objects.
 

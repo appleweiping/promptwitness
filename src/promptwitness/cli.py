@@ -8,8 +8,9 @@ import sqlite3
 import sys
 from collections.abc import Sequence
 from dataclasses import replace
+from functools import partial
 from pathlib import Path
-from typing import NoReturn
+from typing import Any, NoReturn
 
 from .adapters import AdapterError, AdapterFormat, load_adapted_prompt, render_prompt_json
 from .benchmark import BenchmarkGate, evaluate_benchmark, load_benchmark_cases, load_benchmark_suite
@@ -33,6 +34,16 @@ _FORMAT_CHOICES = ("json", "markdown", "html", "sarif")
 
 class _PromptWitnessParser(argparse.ArgumentParser):
     """Use exit 1 for malformed invocations, reserving exit 2 for report gates."""
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        if sys.version_info >= (3, 14):
+            # 3.14 probes stdout while constructing HelpFormatter, before the
+            # parser applies its color option. Configure both layers, including
+            # every inherited subparser, so parsing never inspects a closed host
+            # stream. Keep plain help consistent with supported older Pythons.
+            kwargs["color"] = False
+            kwargs.setdefault("formatter_class", partial(argparse.HelpFormatter, color=False))
+        super().__init__(*args, **kwargs)
 
     def error(self, message: str) -> NoReturn:
         self.print_usage(sys.stderr)
