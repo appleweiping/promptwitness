@@ -12,8 +12,9 @@ def resolve_local_refs(schema: Mapping[str, Any]) -> dict[str, Any]:
     Only fragment references into the supplied schema are accepted. Cycles,
     missing targets, and external URLs fail explicitly so a compatibility
     report never silently compares an unresolved or remotely fetched schema.
-    Sibling keys next to ``$ref`` override the referenced object, matching the
-    useful draft-2020-12 behavior for local tool contracts.
+    Sibling assertions next to ``$ref`` remain conjunctive with the referenced
+    schema. They cannot weaken a referenced constraint or inherit its property
+    scope. The expanded representation uses ``allOf`` when needed.
     """
 
     if not isinstance(schema, Mapping):
@@ -22,7 +23,7 @@ def resolve_local_refs(schema: Mapping[str, Any]) -> dict[str, Any]:
 
 
 def _resolve(value: Any, root: Mapping[str, Any], stack: tuple[str, ...]) -> Any:
-    if isinstance(value, list):
+    if isinstance(value, (list, tuple)):
         return [_resolve(item, root, stack) for item in value]
     if not isinstance(value, Mapping):
         return value
@@ -36,15 +37,32 @@ def _resolve(value: Any, root: Mapping[str, Any], stack: tuple[str, ...]) -> Any
         if not isinstance(target, Mapping):
             raise ValueError(f"JSON Schema reference {ref!r} does not resolve to an object")
         resolved = _resolve(target, root, (*stack, ref))
-        merged = dict(resolved)
-        merged.update(
-            {
-                key: _resolve(item, root, (*stack, ref))
-                for key, item in value.items()
-                if key != "$ref"
-            }
-        )
-        return merged
+        siblings = {
+            key: _resolve(item, root, (*stack, ref)) for key, item in value.items() if key != "$ref"
+        }
+        annotations = {
+            "$defs",
+            "definitions",
+            "$comment",
+            "$id",
+            "$schema",
+            "title",
+            "description",
+            "default",
+            "examples",
+            "deprecated",
+            "readOnly",
+            "writeOnly",
+        }
+        assertions = set(siblings) - annotations
+        if not assertions or (assertions == {"type"} and siblings["type"] == resolved.get("type")):
+            return {**resolved, **siblings}
+        combined: dict[str, Any] = {"allOf": [resolved, siblings]}
+        # A type declared by either conjunct is still a valid outer assertion;
+        # retain it for callers inspecting the common parameter shape.
+        if "type" in resolved or "type" in siblings:
+            combined["type"] = resolved.get("type", siblings.get("type"))
+        return combined
     return {key: _resolve(item, root, stack) for key, item in value.items()}
 
 

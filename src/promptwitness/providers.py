@@ -7,7 +7,7 @@ import json
 import os
 import urllib.error
 import urllib.request
-from collections.abc import Callable, Iterator, Mapping
+from collections.abc import Callable, Iterator, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -117,16 +117,35 @@ class OpenAICompatibleProvider:
 
     def __call__(self, row: RenderedScenario) -> Any:
         """Send a non-streaming chat request and return its JSON response."""
-        body: dict[str, Any] = {
-            "messages": [
+        return self.complete(
+            [
                 {
                     "role": message.role,
                     **({"name": message.name} if message.name else {}),
                     "content": message_content_to_wire(message),
                 }
                 for message in row.messages
-            ],
-        }
+            ]
+        )
+
+    def complete(
+        self,
+        messages: Sequence[Mapping[str, Any]],
+        *,
+        tools: Sequence[Mapping[str, Any]] = (),
+    ) -> Any:
+        """Send chat history, including correlated tool calls and tool results.
+
+        Session callers validate lifecycle and tool contracts before this
+        transport boundary. API keys remain environment-only as in ``__call__``.
+        """
+        if not messages or not all(isinstance(message, Mapping) for message in messages):
+            raise ValueError("messages must be a non-empty sequence of objects")
+        if not all(isinstance(tool, Mapping) for tool in tools):
+            raise ValueError("tools must be a sequence of objects")
+        body: dict[str, Any] = {"messages": [dict(message) for message in messages]}
+        if tools:
+            body["tools"] = [dict(tool) for tool in tools]
         if self.model is not None:
             body["model"] = self.model
         request_headers = {"Content-Type": "application/json", **self.headers}

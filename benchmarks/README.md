@@ -14,8 +14,9 @@ arguments and an otherwise idle machine.
 
 `benchmark_fixture.py` renders the checked-in prompt fixture and exercises the
 provider-boundary executor with deterministic local scenarios. It records the
-fixture digest, environment, timing, and traced memory; this is fixture-real
-evidence and is kept separate from generated alignment workloads.
+fixture digest, environment, timing, and traced memory. The result kind is
+`checked-in-example`: this handcrafted fixture is an executable example, not
+external real-data validation, and is separate from generated alignment workloads.
 
 ```bash
 python benchmarks/benchmark_fixture.py

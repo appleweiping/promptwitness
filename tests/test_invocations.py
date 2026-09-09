@@ -6,6 +6,77 @@ from promptwitness import ToolSpec, validate_tool_arguments
 from promptwitness.cli import main
 
 
+@pytest.mark.parametrize("keyword", ["allOf", "anyOf", "oneOf"])
+def test_frozen_combinator_refs_enforce_referenced_constraints(keyword):
+    tool = ToolSpec(
+        "positive",
+        "Require a positive value",
+        {
+            "n": {
+                "type": "integer",
+                keyword: [{"$ref": "#/$defs/positive"}],
+                "$defs": {"positive": {"minimum": 1}},
+            }
+        },
+    )
+    assert not validate_tool_arguments(tool, {"n": 0}).valid
+    assert validate_tool_arguments(tool, {"n": 1}).valid
+
+
+@pytest.mark.parametrize("keyword", ["const", "enum"])
+@pytest.mark.parametrize(
+    "declared, actual, valid",
+    [
+        (1, True, False),
+        (True, 1, False),
+        (0, False, False),
+        (1, 1.0, True),
+        ([1], [True], False),
+        ([True], [True], True),
+        ({"x": [1]}, {"x": [True]}, False),
+        ({"x": [1]}, {"x": [1.0]}, True),
+    ],
+)
+def test_const_and_enum_use_recursive_json_equality(keyword, declared, actual, valid):
+    schema = {keyword: declared if keyword == "const" else [declared]}
+    tool = ToolSpec("value", "Check JSON equality", {"value": schema})
+    assert validate_tool_arguments(tool, {"value": actual}).valid is valid
+
+
+def test_ref_siblings_cannot_weaken_referenced_constraints():
+    tool = ToolSpec(
+        "code",
+        "Check a code",
+        {
+            "code": {
+                "$defs": {"base": {"type": "string", "minLength": 5}},
+                "$ref": "#/$defs/base",
+                "minLength": 1,
+            }
+        },
+    )
+    assert not validate_tool_arguments(tool, {"code": "xx"}).valid
+    assert validate_tool_arguments(tool, {"code": "xxxxx"}).valid
+
+
+def test_ref_sibling_object_constraints_keep_their_own_property_scope():
+    tool = ToolSpec(
+        "object",
+        "Check object",
+        {
+            "value": {
+                "$defs": {"base": {"type": "object", "properties": {"a": {"type": "integer"}}}},
+                "$ref": "#/$defs/base",
+                "additionalProperties": False,
+            }
+        },
+    )
+    # The sibling schema declares no properties; additionalProperties applies
+    # to that schema's scope, so the reference cannot implicitly permit 'a'.
+    assert not validate_tool_arguments(tool, {"value": {"a": 1}}).valid
+    assert validate_tool_arguments(tool, {"value": {}}).valid
+
+
 def test_validate_tool_arguments_reports_required_extra_and_nested_findings() -> None:
     tool = ToolSpec(
         "lookup",

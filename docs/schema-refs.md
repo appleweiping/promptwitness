@@ -8,4 +8,6 @@ cycles fail explicitly. The resolver never performs network access.
 
 The Python API exposes the same behavior through
 `DiffOptions(resolve_tool_refs=True)` and `resolve_local_refs`. Sibling keys
-next to `$ref` override keys from the referenced object.
+next to `$ref` apply together with the referenced object. When necessary, the
+expanded schema uses `allOf` so a sibling cannot weaken referenced constraints
+or change the property scope of `additionalProperties`.

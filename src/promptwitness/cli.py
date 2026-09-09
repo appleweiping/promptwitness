@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sqlite3
 import sys
 from collections.abc import Sequence
 from dataclasses import replace
@@ -21,6 +22,7 @@ from .parser import PromptFormatError, load_prompt
 from .policies import PolicyBundle, PolicyFormatError, load_policy
 from .provider_matrix import ProviderMatrix, load_replay_providers
 from .reporting import render_html, render_json, render_markdown, render_sarif
+from .session_cli import add_session_commands
 from .validation import validate_prompt
 
 _FAIL_CHOICES = ("never", "warning", "breaking")
@@ -206,6 +208,7 @@ def build_parser() -> argparse.ArgumentParser:
     provider_matrix.add_argument("--allow-missing", action="store_true")
     provider_matrix.add_argument("--output", type=Path)
     provider_matrix.set_defaults(handler=_run_provider_matrix)
+    add_session_commands(subparsers)
     return parser
 
 
@@ -220,7 +223,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     arguments = parser.parse_args(argv)
     try:
         return int(arguments.handler(arguments))
-    except (AdapterError, PolicyFormatError, PromptFormatError, OSError, ValueError) as error:
+    except (
+        AdapterError,
+        PolicyFormatError,
+        PromptFormatError,
+        OSError,
+        ValueError,
+        sqlite3.Error,
+    ) as error:
         print(f"promptwitness: {error}", file=sys.stderr)
         return 1
 

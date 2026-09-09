@@ -83,10 +83,12 @@ def _validate(value: Any, schema: Mapping[str, Any], path: str) -> tuple[tuple[s
     expected = schema.get("type")
     if expected is not None and not _matches_type(value, expected):
         return ((path, f"expected type {expected!r}, got {_type_name(value)!r}"),)
-    if "const" in schema and value != schema["const"]:
+    if "const" in schema and not _json_equal(value, schema["const"]):
         findings.append((path, "value does not match const"))
     enum = schema.get("enum")
-    if enum is not None and (not isinstance(enum, (list, tuple)) or value not in enum):
+    if enum is not None and (
+        not isinstance(enum, (list, tuple)) or not any(_json_equal(value, item) for item in enum)
+    ):
         findings.append((path, "value is not in enum"))
     for keyword, message in (("anyOf", "anyOf"), ("oneOf", "oneOf")):
         options = schema.get(keyword)
@@ -149,6 +151,27 @@ def _validate(value: Any, schema: Mapping[str, Any], path: str) -> tuple[tuple[s
         if isinstance(maximum, (int, float)) and value > maximum:
             findings.append((path, f"number is above maximum {maximum}"))
     return tuple(findings)
+
+
+def _json_equal(left: Any, right: Any) -> bool:
+    """JSON equality keeps booleans distinct from numbers and thaws schema arrays."""
+    if isinstance(left, bool) or isinstance(right, bool):
+        return isinstance(left, bool) and isinstance(right, bool) and left == right
+    if isinstance(left, Mapping) or isinstance(right, Mapping):
+        return (
+            isinstance(left, Mapping)
+            and isinstance(right, Mapping)
+            and left.keys() == right.keys()
+            and all(_json_equal(value, right[key]) for key, value in left.items())
+        )
+    if isinstance(left, (list, tuple)) or isinstance(right, (list, tuple)):
+        return (
+            isinstance(left, (list, tuple))
+            and isinstance(right, (list, tuple))
+            and len(left) == len(right)
+            and all(_json_equal(a, b) for a, b in zip(left, right, strict=True))
+        )
+    return bool(left == right)
 
 
 def _matches_type(value: Any, expected: Any) -> bool:

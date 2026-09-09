@@ -1,6 +1,6 @@
 {
   "elapsed_seconds": 0.01405159998103045,
-  "kind": "fixture-real",
+  "kind": "checked-in-example",
   "long_context_accuracy": 1.0,
   "long_context_cases": 1,
   "peak_python_bytes": 30125,

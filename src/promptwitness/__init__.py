@@ -76,6 +76,18 @@ from .providers import (
 from .registry import PromptRegistry, PromptVersion, RenderedPrompt
 from .schemas import resolve_local_refs
 from .service import PromptService, create_server
+from .sessions import (
+    OpenAISessionProvider,
+    SessionConflict,
+    SessionEvent,
+    SessionJournal,
+    SessionReplayProvider,
+    SessionRequest,
+    SessionRunner,
+    SessionTransitionError,
+    SessionView,
+    replay_session,
+)
 from .tools import ToolBatch, ToolDispatcher, ToolOutcome
 from .validation import ValidationPolicy, validate_prompt
 
@@ -108,6 +120,7 @@ __all__ = [
     "MessageAlignment",
     "OpenAICompatibleProvider",
     "OpenAICompatibleStreamingProvider",
+    "OpenAISessionProvider",
     "PolicyBundle",
     "PolicyFormatError",
     "PromptDocument",
@@ -125,6 +138,14 @@ __all__ = [
     "ReplayProvider",
     "Scenario",
     "ScenarioExecutor",
+    "SessionConflict",
+    "SessionEvent",
+    "SessionJournal",
+    "SessionReplayProvider",
+    "SessionRequest",
+    "SessionRunner",
+    "SessionTransitionError",
+    "SessionView",
     "Severity",
     "ToolArgumentIssue",
     "ToolArgumentReport",
@@ -156,6 +177,7 @@ __all__ = [
     "prompt_to_dict",
     "render_matrix",
     "render_prompt_json",
+    "replay_session",
     "resolve_local_refs",
     "save_matrix",
     "score_prediction",

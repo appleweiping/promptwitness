@@ -5,9 +5,11 @@ JSON format, validates operational hazards, compares template variables and
 tool contracts, and emits deterministic JSON, Markdown, or standalone HTML for
 CI and code review.
 
-It does **not** score prompt quality, call an LLM, or claim that a structurally
-valid prompt is safe. The narrow goal is to catch changes such as “a new render
-variable is now required” or “a tool parameter disappeared” before deployment.
+Structural checks catch changes such as “a new render variable is now required”
+or “a tool parameter disappeared” before deployment. Optional provider execution
+and [durable conversation sessions](docs/sessions.md) run real model requests,
+validate tool arguments, and preserve an inspectable history for recovery and
+replay. Structural validity alone does not establish prompt quality or safety.
 
 [![CI](https://github.com/appleweiping/promptwitness/actions/workflows/ci.yml/badge.svg)](https://github.com/appleweiping/promptwitness/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/appleweiping/promptwitness/actions/workflows/codeql.yml/badge.svg)](https://github.com/appleweiping/promptwitness/actions/workflows/codeql.yml)
@@ -35,6 +37,12 @@ additional, type, enum, and nested constraint violations.
 
 The same checks are available behind a loopback-only `PromptService` JSON
 boundary for local CI runners and editor integrations.
+
+The `session` CLI and `SessionJournal` / `SessionRunner` API support multi-turn
+conversations with pinned prompt versions, tool-result feedback, explicit turn
+limits, transactional event persistence, and resume after process interruption.
+See the [offline session demo](examples/session_demo.py) and
+[session lifecycle and recovery guide](docs/sessions.md).
 
 The service accepts the same provider adapters as the CLI through
 `from_format`, `before_format`, and `after_format`, so OpenAI, Anthropic,

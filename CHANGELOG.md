@@ -4,6 +4,16 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+- Add durable multi-turn conversation sessions with pinned rendered prompts,
+  hash-linked SQLite events, optimistic concurrency, validated function tools,
+  correlated result feedback, bounded provider turns, and explicit crash recovery.
+- Add `session` create/user/run/respond/tool-result/show/export/replay/finish CLI
+  commands, exact-request provider replay, and complete OpenAI-compatible tool
+  history transport.
+- Enforce references inside frozen schema combinators, recursive JSON equality
+  for `enum`/`const`, and conjunctive `$ref` sibling assertions before tool dispatch.
+  This corrects the previously documented override semantics for `$ref` siblings.
+
 - Add explicit benchmark scorers (`exact`, `contains`, `token_f1`, and `json`)
   with per-case thresholds, continuous score reporting, and scorer-aware
   prompt digests.
