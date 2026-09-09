@@ -14,6 +14,7 @@ from typing import NoReturn
 from .adapters import AdapterError, AdapterFormat, load_adapted_prompt, render_prompt_json
 from .benchmark import BenchmarkGate, evaluate_benchmark, load_benchmark_cases, load_benchmark_suite
 from .diff import MessageAlignment, compare_prompts
+from .interview_cli import add_interview_commands
 from .invocations import validate_tool_arguments
 from .long_context import LongContextCase, evaluate_long_context
 from .matrix import MatrixArtifact, Scenario, compare_matrices, render_matrix, save_matrix
@@ -210,6 +211,7 @@ def build_parser() -> argparse.ArgumentParser:
     provider_matrix.add_argument("--output", type=Path)
     provider_matrix.set_defaults(handler=_run_provider_matrix)
     add_session_commands(subparsers)
+    add_interview_commands(subparsers)
     add_task_commands(subparsers)
     return parser
 

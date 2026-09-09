@@ -32,6 +32,57 @@ def _digest(value: Any) -> str:
     return hashlib.sha256(encoded).hexdigest()
 
 
+def _encode_chat_body(body: Mapping[str, Any]) -> bytes:
+    try:
+        encoded = bytearray()
+        for chunk in json.JSONEncoder(ensure_ascii=False, allow_nan=False).iterencode(body):
+            encoded.extend(chunk.encode("utf-8"))
+            if len(encoded) > MAX_BODY_BYTES:
+                raise ValueError
+        return bytes(encoded)
+    except (TypeError, ValueError, UnicodeError, RecursionError):
+        raise ValueError("provider request is invalid or exceeds byte limit") from None
+
+
+def _chat_body(
+    messages: Sequence[Mapping[str, Any]],
+    *,
+    tools: Sequence[Mapping[str, Any]] = (),
+    generation: Mapping[str, Any] | None = None,
+    model: str | None = None,
+) -> dict[str, Any]:
+    if not messages or not all(isinstance(message, Mapping) for message in messages):
+        raise ValueError("messages must be a non-empty sequence of objects")
+    if not all(isinstance(tool, Mapping) for tool in tools):
+        raise ValueError("tools must be a sequence of objects")
+    body: dict[str, Any] = {"messages": [dict(message) for message in messages]}
+    if generation is not None:
+        # Local import keeps the existing provider/session modules acyclic.
+        from .task_data import generation_settings
+
+        body.update(generation_settings(generation))
+    if tools:
+        body["tools"] = [dict(tool) for tool in tools]
+    if model is not None:
+        body["model"] = model
+    return body
+
+
+def prepare_chat_body(
+    messages: Sequence[Mapping[str, Any]],
+    *,
+    tools: Sequence[Mapping[str, Any]] = (),
+    generation: Mapping[str, Any] | None = None,
+    model: str | None = None,
+) -> bytes:
+    """Prepare the exact complete() JSON body without credentials or network I/O.
+
+    These are HTTP JSON body bytes, not headers, TLS framing or model tokens.
+    The same body construction and encoder are used by the live transport.
+    """
+    return _encode_chat_body(_chat_body(messages, tools=tools, generation=generation, model=model))
+
+
 @dataclass(frozen=True, slots=True)
 class TraceEvent:
     """One provider-boundary event without secret request headers."""
@@ -144,15 +195,7 @@ class OpenAICompatibleProvider:
                 if key.lower() != "authorization"
             }
             request_headers["Authorization"] = f"Bearer {token}"
-        try:
-            encoded = bytearray()
-            for chunk in json.JSONEncoder(ensure_ascii=False, allow_nan=False).iterencode(body):
-                encoded.extend(chunk.encode("utf-8"))
-                if len(encoded) > MAX_BODY_BYTES:
-                    raise ValueError
-            return bytes(encoded), request_headers
-        except (TypeError, ValueError, UnicodeError, RecursionError):
-            raise ValueError("provider request is invalid or exceeds byte limit") from None
+        return _encode_chat_body(body), request_headers
 
     def __call__(self, row: RenderedScenario) -> Any:
         """Send a non-streaming chat request and return its JSON response."""
@@ -179,20 +222,7 @@ class OpenAICompatibleProvider:
         Session callers validate lifecycle and tool contracts before this
         transport boundary. API keys remain environment-only as in ``__call__``.
         """
-        if not messages or not all(isinstance(message, Mapping) for message in messages):
-            raise ValueError("messages must be a non-empty sequence of objects")
-        if not all(isinstance(tool, Mapping) for tool in tools):
-            raise ValueError("tools must be a sequence of objects")
-        body: dict[str, Any] = {"messages": [dict(message) for message in messages]}
-        if generation is not None:
-            # Local import keeps the existing provider/session modules acyclic.
-            from .task_data import generation_settings
-
-            body.update(generation_settings(generation))
-        if tools:
-            body["tools"] = [dict(tool) for tool in tools]
-        if self.model is not None:
-            body["model"] = self.model
+        body = _chat_body(messages, tools=tools, generation=generation, model=self.model)
         encoded, request_headers = self._request(body)
         with exchange(self.endpoint, self.timeout, request_headers, encoded) as response:
             raw = b"".join(response_chunks(response))

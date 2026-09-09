@@ -1,6 +1,6 @@
 """Participant-scoped, immutable memory snapshots and deterministic lexical BM25.
 
-Declared source heads are not authenticated here: a future durable journal must
+Declared source heads are not authenticated here: the integrating journal must
 verify ancestry and membership before constructing these pure snapshots.
 """
 

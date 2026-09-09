@@ -5,7 +5,9 @@ interview workflow. It validates plans, source-bound evidence, assessed coverage
 memory records and scoped lexical retrieval. It does not ask questions, call a
 model, persist interviews, authenticate participants or resume interrupted work.
 Import these APIs from `promptwitness.interview_models` and
-`promptwitness.interview_memory`; no interview CLI is available yet.
+`promptwitness.interview_memory`. The separate
+[durable interview workflow](interviews.md) now supplies scheduling, persistence
+and provider orchestration; those responsibilities are not hidden in these pure classes.
 
 ## Source-bound evidence
 
@@ -30,7 +32,7 @@ Distinct slices of the same consistent answer remain valid.
 
 Exact citation checks prove source linkage, **not** that the participant was
 truthful, the source was authenticated, the model summary is correct, or the
-evidence semantically entails an assessment. The future journal/runner must
+evidence semantically entails an assessment. The integrating journal/runner must
 establish trusted source ownership and revisions before constructing answers.
 
 ## Plans and assessed coverage
@@ -197,8 +199,8 @@ The byte limit includes **the entire supplied prefix, complete canonical JSON
 envelope (IDs, citations, summaries, metadata and delimiters), and suffix** in
 UTF-8. Even the empty envelope must fit or retrieval fails explicitly. Exactly
 fitting results are accepted; one byte less can omit a record. This is not a
-model token limit, chat-message serializer limit or HTTP wire-body limit. A
-future runner must include its remaining prompt/request overhead and reserve
+model token limit, chat-message serializer limit or HTTP wire-body limit. An
+integrating runner must include its remaining prompt/request overhead and reserve
 space for the answer before making calls. Independently, the entire retrieval
 audit export must fit the generic 16 MiB contract cap; its extra hit metadata and
 JSON escaping can cause rejection even if the context alone fits its budget.

@@ -4,6 +4,17 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+- Connect evidence-linked interviews through a deterministic state reducer,
+  single-database event/head/memory transactions and a sequential provider runner.
+  Preserve complete raw responses for replay, scope historical recall, distinguish
+  newly applied reservations from historical receipts, and require explicit retry.
+- Add interview CLI workflows and an original scripted multi-interview demo;
+  these verify engineering behavior, not real-model interview quality.
+- Reject foreign hot SQLite journals before connection, validate complete owned
+  schema/guards, and prevent known database/sidecar aliases before opening.
+- Share exact provider JSON preparation with interview request budgets and pin
+  a fresh transport configuration snapshot for each interview invocation.
+
 - Bound direct provider HTTP(S) requests/responses and framing, disable automatic
   redirects/environment proxies, enforce exchange deadlines after DNS, and retain
   normal TLS verification with redacted transport exceptions.
@@ -11,7 +22,7 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   non-text/multi-choice aggregates and pin the corrected v2 transport identity.
 - Add strict interview plan, answer/citation, assessed-coverage and source-linked
   memory contracts plus scoped deterministic lexical BM25 retrieval. These are
-  pure foundations, not a durable interview runner, semantic index or research
+  usable independently of the durable runner, not a semantic index or research
   quality claim. Keep original and explicitly accepted emergent coverage separate.
 - Include public localhost TLS test fixtures and the existing aggregate fixture
   benchmark report in source distributions.

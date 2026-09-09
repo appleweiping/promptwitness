@@ -51,11 +51,16 @@ budget skips and missing model-judge metrics across seven explicit task
 families. The [offline demo](examples/task_suite_demo.py) verifies this workflow;
 it is not real-model or published-benchmark accuracy evidence.
 
-The unreleased development branch adds [interview and memory contracts](docs/interview-contracts.md):
-exact answer citations, explicitly assessed coverage, participant-scoped immutable
-snapshots and lexical BM25 retrieval with full supplied-context byte accounting.
-These pure APIs do not yet provide a durable interview journal, adaptive runner,
-interview CLI, semantic embeddings or validated interview quality.
+The unreleased development branch adds [durable evidence-linked interviews](docs/interviews.md):
+agenda-targeted questions, exact participant-answer citations, atomic assessed
+coverage and memory commits, explicit emerging-topic review, and scoped lexical
+BM25 recall across reopened interviews. A sequential analyst/questioner runner
+preserves raw completion evidence, fences uncertain attempts and never repeats
+pending provider work without an explicit retry. The [command-line workflow](docs/interview-cli.md)
+and [offline demonstration](docs/interview-demo.md) expose this path.
+The [pure contracts](docs/interview-contracts.md) remain usable independently.
+This is not semantic embeddings, concurrent exploration, speech/web deployment
+or validated human-interview quality.
 The [provider transport](docs/provider-traces.md) documents bounded direct HTTP(S)
 and the correction that prevents truncated streams from being labeled complete.
 
@@ -78,7 +83,7 @@ unsupported fields produce warnings, while structured multimodal blocks are reta
 PromptWitness has no runtime dependencies.
 
 These development docs and examples describe `feat/whole-repository-alignment`.
-The session and task-suite capabilities have not been merged into `main` or
+The session, task-suite and interview capabilities have not been merged into `main` or
 published as a new release. To use the APIs shown here, install that branch:
 
 ```bash
