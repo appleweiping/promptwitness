@@ -716,6 +716,7 @@ class OpenAISessionProvider:
         # configuration rather than exposing potentially private header values.
         return {
             "provider": "openai-compatible",
+            "transport": self.provider.transport_version,
             "model": self.provider.model,
             "endpoint_sha256": hashlib.sha256(self.provider.endpoint.encode()).hexdigest(),
             "headers_sha256": hashlib.sha256(_json(self.provider.headers).encode()).hexdigest(),

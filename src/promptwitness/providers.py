@@ -5,13 +5,22 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-import urllib.error
-import urllib.request
+import re
 from collections.abc import Callable, Iterator, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from ._provider_http import (
+    MAX_BODY_BYTES,
+    TRANSPORT_VERSION,
+    checked_headers,
+    endpoint_parts,
+    exchange,
+    json_object,
+    response_chunks,
+    timeout_value,
+)
 from .matrix import RenderedScenario
 from .models import message_content_to_wire
 
@@ -81,9 +90,10 @@ class ReplayProvider:
 class OpenAICompatibleProvider:
     """Minimal JSON provider for OpenAI-compatible chat endpoints.
 
-    The API key is read from an environment variable for each call and is never
-    included in returned output or trace objects. The provider returns the
-    decoded response object so callers can preserve usage and model metadata.
+    The API key is read from an environment variable for each call; request
+    authorization headers are not copied into traces. Raw upstream output is
+    not content-redacted and may itself contain sensitive data. The provider
+    returns the decoded object to preserve usage, finish reasons and metadata.
     """
 
     def __init__(
@@ -95,25 +105,54 @@ class OpenAICompatibleProvider:
         timeout: float = 60.0,
         headers: Mapping[str, str] | None = None,
     ) -> None:
-        if not isinstance(endpoint, str) or not endpoint.startswith(("http://", "https://")):
-            raise ValueError("endpoint must be an absolute HTTP(S) URL")
-        if not isinstance(timeout, (int, float)) or isinstance(timeout, bool) or timeout <= 0:
-            raise ValueError("timeout must be a positive number")
+        endpoint_parts(endpoint)
+        timeout_value(timeout)
         if api_key_env is not None and (
-            not isinstance(api_key_env, str) or not api_key_env.strip()
+            not isinstance(api_key_env, str)
+            or re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]{0,127}", api_key_env) is None
         ):
             raise ValueError("api_key_env must be a non-empty string or None")
         if model is not None and (not isinstance(model, str) or not model.strip()):
             raise ValueError("model must be a non-empty string or None")
-        if headers is not None and not all(
-            isinstance(key, str) and isinstance(value, str) for key, value in headers.items()
-        ):
-            raise TypeError("headers must map strings to strings")
+        checked_headers(headers)
         self.endpoint = endpoint
         self.api_key_env = api_key_env
         self.model = model
         self.timeout = float(timeout)
         self.headers = dict(headers or {})
+
+    @property
+    def transport_version(self) -> str:
+        """Fixed bounds/routing contract included in durable caller identities."""
+        return TRANSPORT_VERSION
+
+    def _request(self, body: dict[str, Any]) -> tuple[bytes, dict[str, str]]:
+        headers = checked_headers(self.headers)
+        request_headers = {
+            key: value for key, value in headers.items() if key.lower() != "content-type"
+        }
+        request_headers["Content-Type"] = "application/json"
+        if self.api_key_env is not None:
+            token = os.environ.get(self.api_key_env)
+            if not token:
+                raise ValueError("provider credential environment variable is not set")
+            if len(token) > 4096 or any(not 33 <= ord(char) <= 126 for char in token):
+                raise ValueError("provider credential is invalid")
+            request_headers = {
+                key: value
+                for key, value in request_headers.items()
+                if key.lower() != "authorization"
+            }
+            request_headers["Authorization"] = f"Bearer {token}"
+        try:
+            encoded = bytearray()
+            for chunk in json.JSONEncoder(ensure_ascii=False, allow_nan=False).iterencode(body):
+                encoded.extend(chunk.encode("utf-8"))
+                if len(encoded) > MAX_BODY_BYTES:
+                    raise ValueError
+            return bytes(encoded), request_headers
+        except (TypeError, ValueError, UnicodeError, RecursionError):
+            raise ValueError("provider request is invalid or exceeds byte limit") from None
 
     def __call__(self, row: RenderedScenario) -> Any:
         """Send a non-streaming chat request and return its JSON response."""
@@ -154,32 +193,10 @@ class OpenAICompatibleProvider:
             body["tools"] = [dict(tool) for tool in tools]
         if self.model is not None:
             body["model"] = self.model
-        request_headers = {"Content-Type": "application/json", **self.headers}
-        if self.api_key_env is not None:
-            token = os.environ.get(self.api_key_env)
-            if not token:
-                raise ValueError(f"environment variable {self.api_key_env!r} is not set")
-            request_headers["Authorization"] = f"Bearer {token}"
-        request = urllib.request.Request(
-            self.endpoint,
-            data=json.dumps(body, ensure_ascii=False, allow_nan=False).encode("utf-8"),
-            headers=request_headers,
-            method="POST",
-        )
-        try:
-            with urllib.request.urlopen(request, timeout=self.timeout) as response:  # nosec B310 - endpoint scheme is restricted above
-                raw = response.read()
-        except urllib.error.HTTPError as error:
-            raise ValueError(f"provider returned HTTP {error.code}") from error
-        except (urllib.error.URLError, TimeoutError, OSError) as error:
-            raise ValueError(f"provider request failed: {type(error).__name__}") from error
-        try:
-            payload = json.loads(raw.decode("utf-8"))
-        except (UnicodeError, json.JSONDecodeError) as error:
-            raise ValueError("provider returned invalid JSON") from error
-        if not isinstance(payload, Mapping):
-            raise ValueError("provider response must be a JSON object")
-        return dict(payload)
+        encoded, request_headers = self._request(body)
+        with exchange(self.endpoint, self.timeout, request_headers, encoded) as response:
+            raw = b"".join(response_chunks(response))
+        return json_object(raw)
 
 
 class OpenAICompatibleStreamingProvider(OpenAICompatibleProvider):
@@ -208,62 +225,97 @@ class OpenAICompatibleStreamingProvider(OpenAICompatibleProvider):
         }
         if self.model is not None:
             body["model"] = self.model
-        request_headers = {"Content-Type": "application/json", **self.headers}
-        if self.api_key_env is not None:
-            token = os.environ.get(self.api_key_env)
-            if not token:
-                raise ValueError(f"environment variable {self.api_key_env!r} is not set")
-            request_headers["Authorization"] = f"Bearer {token}"
-        request = urllib.request.Request(
-            self.endpoint,
-            data=json.dumps(body, ensure_ascii=False, allow_nan=False).encode("utf-8"),
-            headers=request_headers,
-            method="POST",
-        )
-        try:
-            with urllib.request.urlopen(request, timeout=self.timeout) as response:  # nosec B310 - endpoint scheme is restricted above
-                for raw_line in response:
-                    try:
-                        line = raw_line.decode("utf-8").strip()
-                    except UnicodeError as error:
-                        raise ValueError("provider stream contained invalid UTF-8") from error
-                    if not line or line.startswith(":"):
-                        continue
-                    if not line.startswith("data:"):
-                        continue
-                    data = line[5:].strip()
-                    if data == "[DONE]":
+        encoded, request_headers = self._request(body)
+        with exchange(
+            self.endpoint, self.timeout, request_headers, encoded, streaming=True
+        ) as response:
+            pending = bytearray()
+            done = False
+            for chunk in response_chunks(response):
+                if done:
+                    continue  # Still verify the HTTP body/trailer framing after the SSE sentinel.
+                pending.extend(chunk)
+                while (end := pending.find(b"\n")) >= 0:
+                    raw_line = bytes(pending[:end])
+                    del pending[: end + 1]
+                    if self._stream_done(raw_line):
+                        done = True
+                        pending.clear()
                         break
-                    try:
-                        payload = json.loads(data)
-                    except json.JSONDecodeError as error:
-                        raise ValueError("provider stream contained invalid JSON") from error
-                    if not isinstance(payload, Mapping):
-                        raise ValueError("provider stream chunks must be JSON objects")
-                    yield dict(payload)
-        except urllib.error.HTTPError as error:
-            raise ValueError(f"provider returned HTTP {error.code}") from error
-        except (urllib.error.URLError, TimeoutError, OSError) as error:
-            raise ValueError(f"provider request failed: {type(error).__name__}") from error
+                    payload = self._stream_object(raw_line)
+                    if payload is not None:
+                        yield payload
+            if pending and not done and not self._stream_done(bytes(pending)):
+                payload = self._stream_object(bytes(pending))
+                if payload is not None:
+                    yield payload
+
+    @staticmethod
+    def _stream_done(line: bytes) -> bool:
+        value = line.strip()
+        return value.startswith(b"data:") and value[5:].strip() == b"[DONE]"
+
+    @staticmethod
+    def _stream_object(raw: bytes) -> dict[str, Any] | None:
+        try:
+            line = raw.decode("utf-8").strip()
+        except UnicodeError:
+            raise ValueError("provider stream contained invalid UTF-8") from None
+        if not line.startswith("data:"):
+            return None
+        return json_object(line[5:].strip().encode("utf-8"))
 
     def __call__(self, row: RenderedScenario) -> dict[str, Any]:
-        """Aggregate streamed text deltas and retain a redacted chunk audit."""
+        """Aggregate one text choice without inventing a successful finish."""
         chunks = tuple(self.stream(row))
         text_parts: list[str] = []
         role: str | None = None
+        finish_reason: str | None = None
+        choice_index: int | None = None
         for chunk in chunks:
+            if any(
+                chunk.get(key) for key in ("error", "tool_calls", "function_call", "refusal")
+            ) or ("status" in chunk and chunk["status"] != "completed"):
+                raise ValueError("provider stream cannot aggregate errors or incomplete status")
             choices = chunk.get("choices")
             if not isinstance(choices, list):
+                if "choices" in chunk:
+                    raise ValueError("provider stream choices must be an array")
                 continue
+            if len(choices) > 1:
+                raise ValueError("provider stream aggregation requires one choice")
             for choice in choices:
                 if not isinstance(choice, Mapping):
-                    continue
+                    raise ValueError("provider stream choice must be an object")
+                index = choice.get("index", 0)
+                if type(index) is not int or index < 0 or choice_index not in (None, index):
+                    raise ValueError("provider stream aggregation requires one choice")
+                choice_index = index
                 delta = choice.get("delta")
+                if finish_reason is not None and delta:
+                    raise ValueError("provider stream has content after its terminal choice")
+                reason = choice.get("finish_reason")
+                if reason is not None:
+                    if not isinstance(reason, str) or finish_reason is not None:
+                        raise ValueError("provider stream terminal reason is ambiguous")
+                    finish_reason = reason
+                if choice.get("message"):
+                    raise ValueError("provider stream aggregation requires text deltas")
                 if not isinstance(delta, Mapping):
+                    if delta is not None:
+                        raise ValueError("provider stream delta must be an object")
                     continue
-                if isinstance(delta.get("role"), str):
-                    role = delta["role"]
+                if delta.get("tool_calls") or delta.get("function_call") or delta.get("refusal"):
+                    raise ValueError(
+                        "provider stream aggregation requires text without tools or refusal"
+                    )
+                if "role" in delta:
+                    if delta["role"] != "assistant":
+                        raise ValueError("provider stream aggregation requires an assistant role")
+                    role = "assistant"
                 content = delta.get("content")
+                if content is not None and not isinstance(content, str):
+                    raise ValueError("provider stream aggregation requires string content")
                 if isinstance(content, str):
                     text_parts.append(content)
         return {
@@ -272,7 +324,7 @@ class OpenAICompatibleStreamingProvider(OpenAICompatibleProvider):
                 {
                     "index": 0,
                     "message": {"role": role or "assistant", "content": "".join(text_parts)},
-                    "finish_reason": "stop",
+                    "finish_reason": finish_reason,
                 }
             ],
             "stream_chunks": list(chunks),

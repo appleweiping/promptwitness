@@ -4,6 +4,18 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+- Bound direct provider HTTP(S) requests/responses and framing, disable automatic
+  redirects/environment proxies, enforce exchange deadlines after DNS, and retain
+  normal TLS verification with redacted transport exceptions.
+- Preserve actual streamed finish reasons instead of fabricating `stop`; reject
+  non-text/multi-choice aggregates and pin the corrected v2 transport identity.
+- Add strict interview plan, answer/citation, assessed-coverage and source-linked
+  memory contracts plus scoped deterministic lexical BM25 retrieval. These are
+  pure foundations, not a durable interview runner, semantic index or research
+  quality claim. Keep original and explicitly accepted emergent coverage separate.
+- Include public localhost TLS test fixtures and the existing aggregate fixture
+  benchmark report in source distributions.
+
 - Add integrated seven-family task-suite planning, local dataset adapters,
   complete-prompt byte/custom-token budgets, real provider execution, specific
   retrieval/classification metrics, and explicit unsupported model-judge metrics.

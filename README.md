@@ -51,6 +51,14 @@ budget skips and missing model-judge metrics across seven explicit task
 families. The [offline demo](examples/task_suite_demo.py) verifies this workflow;
 it is not real-model or published-benchmark accuracy evidence.
 
+The unreleased development branch adds [interview and memory contracts](docs/interview-contracts.md):
+exact answer citations, explicitly assessed coverage, participant-scoped immutable
+snapshots and lexical BM25 retrieval with full supplied-context byte accounting.
+These pure APIs do not yet provide a durable interview journal, adaptive runner,
+interview CLI, semantic embeddings or validated interview quality.
+The [provider transport](docs/provider-traces.md) documents bounded direct HTTP(S)
+and the correction that prevents truncated streams from being labeled complete.
+
 The service accepts the same provider adapters as the CLI through
 `from_format`, `before_format`, and `after_format`, so OpenAI, Anthropic,
 Gemini/Vertex, and LangChain payloads can be validated at the integration
