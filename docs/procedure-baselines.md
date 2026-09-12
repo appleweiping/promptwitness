@@ -128,7 +128,7 @@ typed, mostly procedural/synthetic inputs is not language-model benchmark accura
 
 The retained [aggregate report](../benchmarks/results/procedure-baselines.json)
 is byte-identical to the completed checkout run. Its SHA-256 is
-`af494ba77bce0baee34b5649d87aafab310d57ad0f2505ade82c2989d8ca6a55`.
+`767cb830c403f89cfb3e100cd75c7013cdc7789b6f176924db439c97ee5c14ec`.
 The preregistered protocol digest is
 `7c2392adf604a2361b6664e64170f7b0e24959c8c1e05d978e1efd82ee1ab1de`.
 
@@ -156,11 +156,11 @@ control results. The three unsolved cases used the declared malformed fallback
 for the altered-answer control, not a fabricated correct solution.
 
 The run used CPython 3.12.13 / Unicode database 15.0.0 on Windows and took
-712.673 seconds. Loading and validation accounted for 535.809 seconds, solving
-for 57.389 seconds, and scoring plus controls for 114.723 seconds; the remaining
+666.348 seconds. Loading and validation accounted for 494.579 seconds, solving
+for 56.130 seconds, and scoring plus controls for 112.417 seconds; the remaining
 time includes imports, binding checks and report assembly. These measurements
 include `tracemalloc` overhead and the shared host's workload, not isolated
-production latency. Peak tracked Python allocations were 212,132,164 bytes
+production latency. Peak tracked Python allocations were 212,132,931 bytes
 (202.305 MiB); this is **not** peak process RSS or native memory.
 
 The report binds all 49 runtime Python source files, `pyproject.toml` and the
@@ -187,3 +187,23 @@ review, not a data failure or a response to benchmark scores. No intermediate
 scores were published or used for tuning. After the runtime repair and regression
 checks, the identical preregistered dataset selection, algorithms and budgets were
 restarted. Only a completed, unchanged-source run is eligible for retained evidence.
+
+The next completed report (SHA-256
+`af494ba77bce0baee34b5649d87aafab310d57ad0f2505ade82c2989d8ca6a55`)
+was accepted locally and remains in the history at commit `9532311`. Its first
+remote CI run then exposed a separate Python 3.14 POSIX problem: both this
+benchmark entry point and the authored demo constructed color-probing argparse
+formatters even when stdout was already closed. The fix disables color at both
+parser and formatter construction on Python 3.14; earlier versions receive no
+unsupported keyword. The existing publication tests now also exercise that probe
+on Windows. No algorithm, selected data, budget or scorer changed.
+
+Because the benchmark source changed, the complete fixed protocol was run again,
+producing the current report above. All six groups' input/case/result inventory
+hashes and every non-timing metric match the previous completed report. The new
+script is bound to
+`d71d5b5a286f9455b2d7890c5d3abef1981a800a8439acd496f14776b73a7219`.
+All 49 runtime Python files remain byte-identical to `9532311`. The earlier
+full-data schema audit was not rerun: its unchanged runtime/data bindings remain
+separate evidence, not an invented new execution. Neither timing difference is
+an isolated performance comparison.

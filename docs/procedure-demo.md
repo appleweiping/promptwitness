@@ -27,6 +27,12 @@ subprocess, network, credentials or language-model call. The retained database
 contains the invented example inputs and answers; the aggregate report contains
 only counts, statuses, hashes and public task-family names.
 
+Help output is plain. On Python 3.14 both the parser and its formatter disable
+color probing so an already-closed stdout cannot prevent the workflow from
+starting. If the final print fails after a requested report was published, the
+command returns status 1 and leaves that report intact; the exit code does not
+mean that no work was performed.
+
 ## What actually happens
 
 The cases adapter loads six typed cases. Each has a one-byte budget (deliberately

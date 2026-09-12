@@ -9,8 +9,10 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import sys
 import tempfile
 from collections import Counter
+from functools import partial
 from pathlib import Path
 from typing import Any
 
@@ -287,7 +289,12 @@ def _check_output(output: Path | None, directory: Path | None) -> None:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
+    options: dict[str, Any] = {}
+    if sys.version_info >= (3, 14):
+        # Both constructors can probe stdout in Python 3.14, before publication.
+        # Disable color at formatter construction as well as on the parser.
+        options = {"color": False, "formatter_class": partial(argparse.HelpFormatter, color=False)}
+    parser = argparse.ArgumentParser(description=__doc__, **options)
     parser.add_argument(
         "--directory", type=Path, help="new artifact directory; default is temporary"
     )

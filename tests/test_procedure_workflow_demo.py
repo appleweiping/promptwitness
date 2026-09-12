@@ -168,6 +168,11 @@ def test_exclusive_report_survives_closed_stdout(
     closed.close()
     with monkeypatch.context() as context:
         context.setattr(sys, "stdout", closed)
+        if sys.version_info >= (3, 14):
+            import _colorize
+
+            # Exercise POSIX-style stream probing even on a Windows test runner.
+            context.setattr(_colorize, "can_colorize", lambda **_: closed.isatty())
         assert demo.main() == 1
     assert json.loads(output.read_bytes())["passed"] is True
     before = output.read_bytes()

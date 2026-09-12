@@ -19,6 +19,9 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 - Add input-only integer-search and directed-walk baselines, a fixed full-data
   benchmark protocol, private-by-default procedure CLI summaries and an authored
   offline workflow demonstration. These are not real-model accuracy claims.
+- Extend closed-stdout-safe Python 3.14 parser/formatter setup to the procedural
+  benchmark and demonstration scripts. Retain publication tests on every platform
+  and rerun the unchanged full-data protocol against the corrected script.
 
 - Keep parser and formatter help plain on Python 3.14 as on earlier versions,
   avoiding its startup color probe against already-closed host output streams.

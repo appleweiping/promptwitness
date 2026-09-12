@@ -15,6 +15,7 @@ import time
 import tracemalloc
 import unicodedata
 from collections import Counter
+from functools import partial
 from pathlib import Path
 from typing import Any
 
@@ -352,7 +353,12 @@ def publish(report: dict[str, Any], output: Path) -> dict[str, Any]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
+    options: dict[str, Any] = {}
+    if sys.version_info >= (3, 14):
+        # Both constructors can probe stdout in Python 3.14, before publication.
+        # Disable color at formatter construction as well as on the parser.
+        options = {"color": False, "formatter_class": partial(argparse.HelpFormatter, color=False)}
+    parser = argparse.ArgumentParser(description=__doc__, **options)
     parser.add_argument("data_root", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()

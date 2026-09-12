@@ -364,6 +364,11 @@ def test_benchmark_publication_exclusive_and_stdout_failure(
     closed.close()
     with monkeypatch.context() as context:
         context.setattr(sys, "stdout", closed)
+        if sys.version_info >= (3, 14):
+            import _colorize
+
+            # Exercise POSIX-style stream probing even on a Windows test runner.
+            context.setattr(_colorize, "can_colorize", lambda **_: closed.isatty())
         assert benchmark.main() == 1
     assert b'"completed": true' in second.read_bytes()
 
