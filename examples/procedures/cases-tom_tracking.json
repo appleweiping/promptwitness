@@ -1,0 +1,17 @@
+[
+  {
+    "format": "promptwitness.procedure-case/v1",
+    "family": "tom_tracking", "case_id": "authored-hidden-move", "output_bucket": "0.5k",
+    "input": {
+      "story_components": "Neri sees the pebble enter the green box; Neri leaves; Sol moves it unseen.",
+      "story": "Neri watches Sol put a pebble in the green box.\r\nNeri leaves the room. Sol moves the pebble into the amber box without Neri seeing.",
+      "question": "Trace Neri's declared belief before and after the hidden move."
+    },
+    "reference": {
+      "solution": "- Neri initially believes the pebble is in the green box.\n- After the unseen move, Neri still believes the pebble is in the green box.",
+      "answer": ["green box"],
+      "trace": ["- Neri initially believes the pebble is in the green box.", "- After the unseen move, Neri still believes the pebble is in the green box."]
+    },
+    "source": {"kind": "authored", "label": "Original synthetic belief trace, no human evaluation"}
+  }
+]

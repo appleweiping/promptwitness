@@ -22,6 +22,7 @@ from .matrix import MatrixArtifact, Scenario, compare_matrices, render_matrix, s
 from .models import DiffReport, Severity, ValidationReport, message_content_to_wire
 from .parser import PromptFormatError, load_prompt
 from .policies import PolicyBundle, PolicyFormatError, load_policy
+from .procedure_cli import add_procedure_commands
 from .provider_matrix import ProviderMatrix, load_replay_providers
 from .reporting import render_html, render_json, render_markdown, render_sarif
 from .session_cli import add_session_commands
@@ -224,6 +225,7 @@ def build_parser() -> argparse.ArgumentParser:
     add_session_commands(subparsers)
     add_interview_commands(subparsers)
     add_task_commands(subparsers)
+    add_procedure_commands(subparsers)
     return parser
 
 

@@ -1,0 +1,27 @@
+[
+  {
+    "format": "promptwitness.procedure-case/v1",
+    "family": "path_traversal",
+    "case_id": "authored-ferry-route",
+    "output_bucket": "0.5k",
+    "input": {
+      "edges": [
+        {"source": "Aster", "method": "train", "target": "Beryl"},
+        {"source": "Beryl", "method": "ferry", "target": "Cedar😀"},
+        {"source": "Cedar😀", "method": "bus", "target": "Dune"}
+      ],
+      "source": "Aster", "target": "Cedar😀",
+      "problem_description": "Follow only the directed typed connections and stop at Cedar😀.",
+      "context_nl": "Aster has a train to Beryl. Beryl has a ferry to Cedar😀. Cedar😀 has a bus to Dune.",
+      "question_nl": "How do we travel from Aster to Cedar😀?"
+    },
+    "reference": {
+      "steps": [
+        {"source": "Aster", "method": "train", "target": "Beryl"},
+        {"source": "Beryl", "method": "ferry", "target": "Cedar😀"}
+      ],
+      "answer_nl": "From Aster, take a train to Beryl.\nFrom Beryl, take a ferry to Cedar😀."
+    },
+    "source": {"kind": "authored", "label": "Original synthetic directed-route example"}
+  }
+]

@@ -4,6 +4,22 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+- Add closed, immutable six-family procedure cases, all 16 local LongProc data
+  definitions, bounded strict JSON ingestion, source inventories and explicit
+  filtering/sampling accounting. Keep reference fields out of provider messages.
+- Add original bounded arithmetic/path/travel validators, multiplicity-aware TSV
+  scoring and declared belief-trace comparison. Preserve invalid references as
+  diagnostics; report code execution and semantic/search judges as unsupported.
+- Extend durable task execution with a separately versioned procedure plan and
+  report, per-task generation, input-byte budgets and pinned scoring limits.
+  Preserve the historical seven-family format and explicit retry/CAS semantics.
+- Freeze each built-in task provider's transport configuration for its call and
+  reject unverifiable or changed post-call provider identity without attributing
+  a result to the old model. Uncertain reservations require explicit recovery.
+- Add input-only integer-search and directed-walk baselines, a fixed full-data
+  benchmark protocol, private-by-default procedure CLI summaries and an authored
+  offline workflow demonstration. These are not real-model accuracy claims.
+
 - Keep parser and formatter help plain on Python 3.14 as on earlier versions,
   avoiding its startup color probe against already-closed host output streams.
 - Preserve completed interview command status when an embedding host closes its

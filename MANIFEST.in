@@ -1,7 +1,10 @@
 include CHANGELOG.md CITATION.cff CODE_OF_CONDUCT.md CONTRIBUTING.md LICENSE MAINTAINERS.md SECURITY.md SUPPORT.md
 recursive-include benchmarks *.md *.py
 include benchmarks/results/fixture.json
+include benchmarks/results/procedure-data-audit.json
+include benchmarks/results/procedure-baselines.json
 recursive-include docs *.md *.html *.png
 recursive-include examples *.json *.jsonl *.py
+recursive-include scripts *.py
 recursive-include tests *.py
 recursive-include tests/fixtures *.pem

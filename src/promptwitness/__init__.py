@@ -83,6 +83,29 @@ from .models import (
 )
 from .parser import PromptFormatError, load_prompt, parse_prompt
 from .policies import PolicyBundle, PolicyFormatError, load_policy, parse_policy
+from .procedure_baselines import (
+    ProcedureBaselineLimits,
+    ProcedureBaselineResult,
+    solve_countdown,
+    walk_graph_path,
+)
+from .procedure_data import (
+    ProcedureCase,
+    ProcedureDataLimits,
+    ProcedureDataset,
+    audit_longproc_data,
+    load_longproc_dataset,
+    normalize_longproc_record,
+)
+from .procedure_json_data import ProcedureDataError
+from .procedure_plan import (
+    ProcedurePlanLimits,
+    ProcedureSuitePlan,
+    build_procedure_plan,
+    load_procedure_suite,
+    procedure_messages,
+)
+from .procedure_scores import ProcedureScoreLimitError, ProcedureScoreLimits, score_procedure
 from .provider_matrix import (
     ProviderMatrix,
     ProviderMatrixReport,
@@ -178,6 +201,16 @@ __all__ = [
     "ParticipantAnswer",
     "PolicyBundle",
     "PolicyFormatError",
+    "ProcedureBaselineLimits",
+    "ProcedureBaselineResult",
+    "ProcedureCase",
+    "ProcedureDataError",
+    "ProcedureDataLimits",
+    "ProcedureDataset",
+    "ProcedurePlanLimits",
+    "ProcedureScoreLimitError",
+    "ProcedureScoreLimits",
+    "ProcedureSuitePlan",
     "PromptDocument",
     "PromptFormatError",
     "PromptRegistry",
@@ -220,6 +253,8 @@ __all__ = [
     "ValidationReport",
     "adapt_prompt",
     "assessed_coverage",
+    "audit_longproc_data",
+    "build_procedure_plan",
     "compare_matrices",
     "compare_prompts",
     "create_interview",
@@ -230,15 +265,19 @@ __all__ = [
     "load_adapted_prompt",
     "load_benchmark_cases",
     "load_benchmark_suite",
+    "load_longproc_dataset",
     "load_policy",
+    "load_procedure_suite",
     "load_prompt",
     "load_replay_providers",
     "load_task_suite",
     "load_traces",
     "make_needle_cases",
     "make_provider_answerer",
+    "normalize_longproc_record",
     "parse_policy",
     "parse_prompt",
+    "procedure_messages",
     "prompt_to_dict",
     "render_matrix",
     "render_prompt_json",
@@ -246,10 +285,13 @@ __all__ = [
     "resolve_local_refs",
     "save_matrix",
     "score_prediction",
+    "score_procedure",
     "score_task",
+    "solve_countdown",
     "validate_prompt",
     "validate_tool_arguments",
     "verify_interview_export",
+    "walk_graph_path",
 ]
 
 __version__ = "0.2.0"

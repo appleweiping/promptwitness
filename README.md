@@ -51,6 +51,17 @@ budget skips and missing model-judge metrics across seven explicit task
 families. The [offline demo](examples/task_suite_demo.py) verifies this workflow;
 it is not real-model or published-benchmark accuracy evidence.
 
+The development branch also provides a separate
+[`procedure-suite` workflow](docs/procedure-suite.md): bounded local ingestion,
+gold-free typed problem prompts, per-task generation settings, six-family
+procedure scoring, and resumable SQLite execution. The
+[data guide](docs/procedure-data.md) covers all 16 pinned LongProc dataset
+definitions; the [scoring guide](docs/procedure-scoring.md) specifies exactly
+which properties are checked. Original [input-only baselines](docs/procedure-baselines.md)
+solve bounded integer arithmetic and directed paths. Generated C++ remains inert
+text: executable correctness, general theory-of-mind entailment, search-trace
+correctness and real-model quality are not established by these features.
+
 The unreleased development branch adds [durable evidence-linked interviews](docs/interviews.md):
 agenda-targeted questions, exact participant-answer citations, atomic assessed
 coverage and memory commits, explicit emerging-topic review, and scoped lexical

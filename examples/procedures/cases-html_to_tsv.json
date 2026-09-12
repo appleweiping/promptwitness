@@ -1,0 +1,15 @@
+[
+  {
+    "format": "promptwitness.procedure-case/v1",
+    "family": "html_to_tsv", "case_id": "authored-inert-table", "output_bucket": "0.5k",
+    "input": {
+      "html": "<table><tr><th>item</th><th>mark</th></tr><tr><td>Mica</td><td>😀</td></tr><tr><td>Mica</td><td>😀</td></tr><tr><td>Quartz</td><td>{{literal}}</td></tr></table>",
+      "header": ["item", "mark"], "task_topic": "An original mineral collection",
+      "task_description": "Extract every data row in table order, retaining duplicate rows.",
+      "filtering_instruction": "Do not substitute the literal brace text.",
+      "website_id": "authored-inert-no-network"
+    },
+    "reference": {"tsv": "item\tmark\nMica\t😀\nMica\t😀\nQuartz\t{{literal}}"},
+    "source": {"kind": "authored", "label": "Original synthetic inert HTML, not a scraped site"}
+  }
+]

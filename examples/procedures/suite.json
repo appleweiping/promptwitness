@@ -1,0 +1,15 @@
+{
+  "format": "promptwitness.procedure-suite/v1",
+  "suite_id": "authored-durable-six-family-demo",
+  "budgets": [1, 8192],
+  "seed": "authored-demo-v1",
+  "generation": {"max_tokens": 128, "temperature": 0},
+  "tasks": [
+    {"id": "arithmetic", "adapter": "cases", "path": "cases-countdown.json", "generation": {"max_tokens": 128, "temperature": 0}},
+    {"id": "route", "adapter": "cases", "path": "cases-path_traversal.json", "generation": {"max_tokens": 160, "temperature": 0}},
+    {"id": "table", "adapter": "cases", "path": "cases-html_to_tsv.json", "generation": {"max_tokens": 192, "temperature": 0}},
+    {"id": "belief", "adapter": "cases", "path": "cases-tom_tracking.json", "generation": {"max_tokens": 224, "temperature": 0}},
+    {"id": "calendar", "adapter": "cases", "path": "cases-travel_planning.json", "generation": {"max_tokens": 256, "temperature": 0}},
+    {"id": "code-text", "adapter": "cases", "path": "cases-pseudo_to_code.json", "generation": {"max_tokens": 288, "temperature": 0}}
+  ]
+}

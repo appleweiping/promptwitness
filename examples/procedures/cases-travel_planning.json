@@ -1,0 +1,29 @@
+[
+  {
+    "format": "promptwitness.procedure-case/v1",
+    "family": "travel_planning", "case_id": "authored-overlap-calendar", "output_bucket": "2k",
+    "input": {
+      "problem": "Visit Aster for two days and Beryl for three, over days one through four. Fly Aster to Beryl. The flight day counts in both cities; Beryl must be days two through four.",
+      "original_question": "Plan an invented four-day trip with one shared flight day.",
+      "num_cities": 2, "total_days": 4,
+      "constraints": [
+        {"type": "duration", "city": "Aster", "num_days": 2},
+        {"type": "duration", "city": "Beryl", "num_days": 3},
+        {"type": "fixed", "city": "Beryl", "start_day": 2, "end_day": 4}
+      ],
+      "cities": [
+        {"city": "Aster", "duration": 2, "fixed_start": null, "fixed_end": null},
+        {"city": "Beryl", "duration": 3, "fixed_start": 2, "fixed_end": 4}
+      ],
+      "flights": [["Aster", "Beryl"]]
+    },
+    "reference": {
+      "ground_truth_cities": "Aster**Beryl", "ground_truth_durations": "2**3",
+      "ground_truth_plan": "**Day 1-2:** Visit Aster for 2 days.\n**Day 2:** Fly from Aster to Beryl.\n**Day 2-4:** Visit Beryl for 3 days.",
+      "solving_procedure": "The sole direct flight and fixed Beryl interval determine the shared day.",
+      "estimated_output_tokens": 100,
+      "stays": [{"city": "Aster", "start_day": 1, "end_day": 2}, {"city": "Beryl", "start_day": 2, "end_day": 4}]
+    },
+    "source": {"kind": "authored", "label": "Original synthetic inclusive-day schedule"}
+  }
+]

@@ -115,3 +115,120 @@ jobs:
         run: python -c "import glob,subprocess,sys; wheels=glob.glob('artifact/*.whl'); len(wheels)==1 or sys.exit(f'expected one wheel, found {wheels}'); subprocess.check_call([sys.executable,'-m','pip','install',wheels[0]])"
       - name: Smoke-test installed package
         run: python -I -c "import promptwitness; raise SystemExit(0 if promptwitness.__version__ == '0.2.0' else f'unexpected version {promptwitness.__version__}')" && promptwitness --version
+      - name: Validate and execute the installed procedure workflow
+        shell: python
+        run: |
+          import hashlib
+          import json
+          import platform
+          import subprocess
+          import sys
+          import tarfile
+          from pathlib import Path, PurePosixPath
+          import promptwitness
+
+          def require(condition, message):
+              if not condition:
+                  raise RuntimeError(message)
+
+          def sha(data):
+              return hashlib.sha256(data).hexdigest()
+
+          artifacts = Path("artifact")
+          sources = list(artifacts.glob("*.tar.gz"))
+          wheels = list(artifacts.glob("*.whl"))
+          require(len(sources) == len(wheels) == 1, "expected one wheel and sdist")
+          installed = Path(promptwitness.__file__).resolve().parent
+          directory = Path("procedure-evidence").resolve()
+          directory.mkdir(exist_ok=False)
+          unpacked = directory / "source"
+          runtime = {}
+          helpers = {}
+          with tarfile.open(sources[0]) as archive:
+              members = archive.getmembers()
+              require(len(members) < 1000, "unexpected source inventory")
+              require(sum(member.size for member in members) < 64 * 1024 * 1024,
+                      "source archive byte admission exceeded")
+              names = [member.name.rstrip("/") for member in members]
+              require(len(names) == len(set(names)), "duplicate source members")
+              for member in members:
+                  path = PurePosixPath(member.name)
+                  require(not path.is_absolute() and ".." not in path.parts
+                          and "\\" not in member.name and ":" not in member.name,
+                          "unsafe source member")
+                  require(member.isfile() or member.isdir(), "source links are forbidden")
+                  if member.isdir():
+                      continue
+                  require(len(path.parts) >= 2, "missing source archive root")
+                  relative = PurePosixPath(*path.parts[1:]).as_posix()
+                  is_runtime = relative.startswith("src/promptwitness/") and (
+                      relative.endswith(".py") or relative.endswith("/py.typed"))
+                  is_helper = relative == "scripts/procedure_workflow_demo.py" or (
+                      relative.startswith("examples/procedures/") and relative.endswith(".json"))
+                  if not (is_runtime or is_helper):
+                      continue
+                  stream = archive.extractfile(member)
+                  require(stream is not None, "unreadable source member")
+                  with stream:
+                      raw = stream.read()
+                  if is_runtime:
+                      name = relative.removeprefix("src/promptwitness/")
+                      require((installed / name).read_bytes() == raw,
+                              "installed runtime differs from source artifact")
+                      runtime[relative] = sha(raw)
+                  else:
+                      target = unpacked / relative
+                      require(target.resolve().is_relative_to(unpacked.resolve()),
+                              "helper extraction escaped its directory")
+                      target.parent.mkdir(parents=True, exist_ok=True)
+                      with target.open("xb") as output:
+                          output.write(raw)
+                      helpers[relative] = sha(raw)
+          actual = {"src/promptwitness/" + path.relative_to(installed).as_posix()
+                    for path in installed.rglob("*.py")}
+          actual.add("src/promptwitness/py.typed")
+          require(set(runtime) == actual and len(runtime) == 50,
+                  "installed runtime inventory differs")
+          require(len(helpers) == 8, "incomplete authored procedure example")
+          report_path = directory / "workflow.json"
+          subprocess.run([
+              sys.executable, "-I", "-X", "utf8",
+              str(unpacked / "scripts/procedure_workflow_demo.py"),
+              "--directory", str(directory / "run"), "--output", str(report_path),
+          ], check=True, timeout=120)
+          report = json.loads(report_path.read_text(encoding="utf-8"))
+          require(report["passed"] is True and report["synthetic"] is True,
+                  "procedure demonstration failed")
+          require(report["source_sha256"] == helpers, "executed helper sources changed")
+          require(report["model_calls"] == report["network_calls"] == 0,
+                  "unexpected external model work")
+          require(report["scripted_provider_calls"] == 7 and report["journal_events"] == 17,
+                  "durable execution accounting changed")
+          require(report["stale_response_rejected"] is True
+                  and report["successful_rerun_additional_calls"] == 0
+                  and report["six_family_scoring_complete"] is False,
+                  "recovery or unsupported-metric contract changed")
+          require(all(sha((installed / name.removeprefix("src/promptwitness/")).read_bytes())
+                      == digest for name, digest in runtime.items()), "installed sources changed")
+          evidence = {
+              "format": "promptwitness.procedure-wheel-ci/v1", "passed": True,
+              "python": sys.version, "platform": platform.platform(),
+              "installed_package": str(installed), "source_sha256": {**runtime, **helpers},
+              "artifact_sha256": {path.name: sha(path.read_bytes()) for path in [*wheels, *sources]},
+              "workflow_report_sha256": sha(report_path.read_bytes()),
+              "workflow": report,
+          }
+          with (directory / "evidence.json").open("x", encoding="utf-8") as output:
+              json.dump(evidence, output, ensure_ascii=False, indent=2, sort_keys=True)
+              output.write("\n")
+          print(json.dumps({"passed": True, "runtime_files": len(runtime),
+                            "helper_files": len(helpers), "platform": platform.system()}))
+      - name: Upload installed procedure evidence
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: procedure-evidence-${{ matrix.os }}
+          path: |
+            procedure-evidence/evidence.json
+            procedure-evidence/workflow.json
+          if-no-files-found: error
+          retention-days: 7

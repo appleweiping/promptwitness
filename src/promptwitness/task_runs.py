@@ -10,10 +10,43 @@ from pathlib import Path
 from typing import Any
 
 from .models import _freeze_json, _thaw_json
+from .procedure_common_score import utf8_size
+from .procedure_data import ProcedureCase
+from .procedure_plan import PLAN_FORMAT as PROCEDURE_PLAN_FORMAT
+from .procedure_plan import ProcedureSuitePlan
+from .procedure_schema_data import FAMILIES as PROCEDURE_FAMILIES
+from .procedure_scores import (
+    PROCEDURE_METRIC_CAPABILITIES,
+    ProcedureScoreLimits,
+    score_procedure,
+)
 from .providers import OpenAICompatibleProvider
 from .sessions import OpenAISessionProvider, _identity, _json, _load, _positive
 from .task_data import FAMILIES, TaskSuitePlan, digest
 from .task_scores import METRIC_CAPABILITIES, response_text, score_task
+
+
+def _validated_plan(payload: Mapping[str, Any]) -> TaskSuitePlan | ProcedureSuitePlan:
+    # Deliberately closed dispatch: never weaken the historical seven-family schema.
+    if not isinstance(payload, Mapping):
+        raise ValueError("task plan must be an object")
+    if payload.get("format") == PROCEDURE_PLAN_FORMAT:
+        return ProcedureSuitePlan(payload)
+    if payload.get("format") == "promptwitness.task-plan/v1":
+        return TaskSuitePlan(payload)
+    raise ValueError("unsupported task plan format")
+
+
+def _score(item: Mapping[str, Any], prediction: str, plan: Mapping[str, Any]) -> dict[str, Any]:
+    if plan["format"] == PROCEDURE_PLAN_FORMAT:
+        return score_procedure(
+            ProcedureCase.from_dict(item["record"]),
+            prediction,
+            limits=ProcedureScoreLimits(**plan["score_limits"]),
+        )
+    if len(prediction.encode("utf-8")) > 1024 * 1024:
+        raise ValueError("task prediction exceeds 1 MiB")
+    return score_task(item, prediction)
 
 
 class TaskRunConflict(ValueError):
@@ -57,10 +90,19 @@ class OpenAITaskProvider:
         return OpenAISessionProvider(self.provider).identity
 
     def __call__(self, request: TaskRequest) -> Any:
-        if _json(request.provider_identity) != _json(self.identity):
+        # Validate and send one private snapshot. The caller-owned transport
+        # must not be retargeted between identity verification and body routing.
+        transport = OpenAICompatibleProvider(
+            self.provider.endpoint,
+            model=self.provider.model,
+            api_key_env=self.provider.api_key_env,
+            timeout=self.provider.timeout,
+            headers=dict(self.provider.headers),
+        )
+        if _json(request.provider_identity) != _json(OpenAISessionProvider(transport).identity):
             raise TaskRunConflict("provider settings changed after reservation")
         value = request.to_dict()
-        return self.provider.complete(value["messages"], generation=value["generation"])
+        return transport.complete(value["messages"], generation=value["generation"])
 
 
 class TaskRunStore:
@@ -171,9 +213,11 @@ class TaskRunStore:
     def close(self) -> None:
         self.connection.close()
 
-    def bind(self, plan: TaskSuitePlan, identity: Mapping[str, Any]) -> None:
+    def bind(self, plan: TaskSuitePlan | ProcedureSuitePlan, identity: Mapping[str, Any]) -> None:
         """Initialize, or verify exact inputs/configuration/model before resuming."""
-        plan = TaskSuitePlan(plan.payload)
+        if not isinstance(plan, (TaskSuitePlan, ProcedureSuitePlan)):
+            raise ValueError("run requires a typed suite plan")
+        plan = _validated_plan(plan.payload)
         encoded_identity = _json(_identity(identity))
         with self._transaction():
             row = self.connection.execute("SELECT * FROM task_run WHERE id=1").fetchone()
@@ -208,7 +252,7 @@ class TaskRunStore:
         plan = _load(row["plan"])
         if digest(plan) != row["plan_digest"]:
             raise ValueError("stored plan checksum mismatch")
-        TaskSuitePlan(plan)
+        _validated_plan(plan)
         return plan, _identity(_load(row["identity"]))
 
     def snapshot(self) -> dict[str, Any]:
@@ -230,7 +274,7 @@ class TaskRunStore:
                 result = _load(state["result"]) if state["result"] else None
                 if result is not None:
                     if state["status"] != "succeeded" or _json(result.get("score")) != _json(
-                        score_task(item, result["prediction"])
+                        _score(item, result["prediction"], plan)
                     ):
                         raise ValueError("stored result does not match pinned scoring inputs")
                     if result["request_digest"] != self._request(item, plan, identity).digest:
@@ -256,7 +300,12 @@ class TaskRunStore:
                         "result": result,
                     }
                 )
-            report = _report(plan, identity, results)
+            if plan["format"] == PROCEDURE_PLAN_FORMAT:
+                for item, result_row in zip(plan["items"], results, strict=True):
+                    result_row["output_bucket"] = item["output_bucket"]
+                report = _procedure_report(plan, identity, results)
+            else:
+                report = _report(plan, identity, results)
         finally:
             self.connection.rollback()
         return report
@@ -308,7 +357,10 @@ class TaskRunStore:
     def _request(
         item: Mapping[str, Any], plan: Mapping[str, Any], identity: Mapping[str, Any]
     ) -> TaskRequest:
-        return TaskRequest(item["id"], identity, tuple(item["messages"]), plan["generation"])
+        generation = (
+            item["generation"] if plan["format"] == PROCEDURE_PLAN_FORMAT else plan["generation"]
+        )
+        return TaskRequest(item["id"], identity, tuple(item["messages"]), generation)
 
     def _item(self, item_id: str) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
         plan, identity = self._bound()
@@ -354,14 +406,15 @@ class TaskRunStore:
 
     def complete(self, item_id: str, response: Any, *, expected_revision: int) -> None:
         prediction = response_text(response)
-        if len(prediction.encode("utf-8")) > 1024 * 1024:
-            raise ValueError("task prediction exceeds 1 MiB")
+        # Common admission precedes the writer transaction; the pinned scorer
+        # enforces its possibly smaller policy, and legacy plans remain at 1 MiB.
+        utf8_size(prediction, 4 * 1024 * 1024)
         with self._transaction():
             self._state(item_id, expected_revision, {"running"})
             item, plan, identity = self._item(item_id)
             result = {
                 "prediction": prediction,
-                "score": score_task(item, prediction),
+                "score": _score(item, prediction, plan),
                 "request_digest": self._request(item, plan, identity).digest,
             }
             self.connection.execute(
@@ -398,7 +451,7 @@ class TaskRunStore:
 
     def run(
         self,
-        plan: TaskSuitePlan,
+        plan: TaskSuitePlan | ProcedureSuitePlan,
         provider: Callable[[TaskRequest], Any],
         *,
         identity: Mapping[str, Any] | None = None,
@@ -424,6 +477,17 @@ class TaskRunStore:
             used += 1
             try:
                 response = provider(request)
+                if exposed is not None:
+                    try:
+                        unchanged = _json(getattr(provider, "identity", None)) == _json(active)
+                    except Exception:
+                        raise TaskRunConflict(
+                            "provider identity became unverifiable during the invocation"
+                        ) from None
+                    if not unchanged:
+                        # External work may have happened under different settings.
+                        # Retain the reservation for explicit reconciliation/retry.
+                        raise TaskRunConflict("provider identity changed during the invocation")
                 self.complete(state["item_id"], response, expected_revision=revision)
             except TaskRunConflict:
                 raise
@@ -511,6 +575,72 @@ def _report(
                 for name in FAMILIES
             }
             for budget in plan["budgets"]
+        },
+        "results": rows,
+    }
+
+
+def _procedure_coverage(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    scores = [row["result"]["score"] for row in rows if row["result"] is not None]
+    return {
+        **_coverage(rows),
+        "unsupported_primary": sum(score["primary_score"] is None for score in scores),
+        "invalid_reference": sum(score["metrics"].get("reference_valid") == 0 for score in scores),
+    }
+
+
+def _procedure_report(
+    plan: Mapping[str, Any], identity: Mapping[str, Any], rows: list[dict[str, Any]]
+) -> dict[str, Any]:
+    family = {
+        name: {
+            **_procedure_coverage([row for row in rows if row["family"] == name]),
+            "configured": any(task["family"] == name for task in plan["tasks"]),
+            "metric_capabilities": _load(_json(PROCEDURE_METRIC_CAPABILITIES[name])),
+        }
+        for name in PROCEDURE_FAMILIES
+    }
+    overall = _procedure_coverage(rows)
+    overall.pop("mean_primary_score")  # Distinct metrics are not a benchmark average.
+    return {
+        "format": "promptwitness.procedure-report/v1",
+        "plan_format": plan["format"],
+        "suite_id": plan["suite_id"],
+        "plan_digest": digest(plan),
+        "provider_identity": identity,
+        "counter": plan["counter"],
+        "generation": plan["generation"],
+        "template_version": plan["template_version"],
+        "scorer_version": plan["scorer_version"],
+        "score_limits": plan["score_limits"],
+        "coverage": overall,
+        "six_family_execution_complete": all(
+            group["execution_complete"] for group in family.values()
+        ),
+        "six_family_scoring_complete": all(group["scoring_complete"] for group in family.values()),
+        "tasks": plan["tasks"],
+        "by_family": family,
+        "by_budget_family": {
+            str(budget): {
+                name: _procedure_coverage(
+                    [row for row in rows if row["family"] == name and row["budget"] == budget]
+                )
+                for name in PROCEDURE_FAMILIES
+            }
+            for budget in plan["budgets"]
+        },
+        "by_output_bucket_family": {
+            bucket: {
+                name: _procedure_coverage(
+                    [
+                        row
+                        for row in rows
+                        if row["family"] == name and row["output_bucket"] == bucket
+                    ]
+                )
+                for name in PROCEDURE_FAMILIES
+            }
+            for bucket in ("0.5k", "2k", "8k")
         },
         "results": rows,
     }

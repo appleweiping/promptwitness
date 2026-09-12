@@ -1,0 +1,12 @@
+[
+  {
+    "format": "promptwitness.procedure-case/v1",
+    "family": "pseudo_to_code", "case_id": "authored-code-as-text", "output_bucket": "0.5k",
+    "input": {"pseudocode_lines": ["Print the integer seven followed by a newline."]},
+    "reference": {
+      "code_lines": ["#include <iostream>", "int main() { std::cout << 7 << '\\n'; }"],
+      "testcases": [[[], ["7"]]]
+    },
+    "source": {"kind": "authored", "label": "Original synthetic code text; never compiled or run"}
+  }
+]

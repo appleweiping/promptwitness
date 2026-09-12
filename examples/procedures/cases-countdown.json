@@ -1,0 +1,17 @@
+[
+  {
+    "format": "promptwitness.procedure-case/v1",
+    "family": "countdown",
+    "case_id": "authored-arithmetic",
+    "output_bucket": "0.5k",
+    "input": {"numbers": [1, 2, 3, 4], "target": 10, "min_intermediate": 1, "max_intermediate": 2000},
+    "reference": {
+      "solution": ["1 + 2 = 3", "3 + 3 = 6", "4 + 6 = 10"],
+      "solution_text": "1 + 2 = 3\n3 + 3 = 6\n4 + 6 = 10",
+      "demonstration": "An independently authored arithmetic example, not model output.",
+      "search_steps": 3,
+      "num_search_tokens": 0
+    },
+    "source": {"kind": "authored", "label": "Original synthetic durable-workflow example"}
+  }
+]
