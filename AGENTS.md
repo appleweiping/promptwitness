@@ -204,3 +204,20 @@ typed父子edit×query相对强模块控制的边际作用；不能写首次结�
 六configs映射/数据访问/final封存/视觉与native在线/全角色forecast/M1/Pilot/
 统计/英文稿待准入，goalACTIVE/default4科学0/无timer/其他四仓冻结不变。
 详见research/ARIS_ICMR_CPU_RANKING和idea-stage/ICMR_NOVELTY_CHECK。
+
+2026-09-27T22:00:00Z：实际CLIP CPU组件已实现并两次验收。第一方ViT-L/14真实
+932768134B权重actualSHA b8cca3fd...，224px/77token/float32evalno-gradbatch1，
+仅3自制RGB/RGBA/L图+2英文query；主73988/doc10832各一次exit0/40.6711s/40.0724s，
+3image/2text反序bitwise、2完整3-ID排名一致；每次image6/text4forwards，两输入模型前拒绝。
+55pins fbea8bf4实际匹配，15原stagefiles往返bytes一致；base50+SciPy只读/ownedvisual层。
+codeMIT/模型卡research用途已审，weightsMIT再发布未确立，私有研究非formal准入。
+source055实际double-normalization blocker→旧测试fail→rawimage最小修复；唯一同记忆
+056无blocker，同家族provisional；doc057身份unknown/independenceunverified，不科学接受。
+59targeted44.38s/Ruff409/mypy61/configuredsrc+新两helpersBandit通过；未配置src11旧LOW
+与旧execB102保留。0.2.0两包build79353/Twine94088实际过；首次旧0.1.0误查保留。
+whole9530仍pre-fix collection运行/WMI保留，不final源码PASS；旧27c2139 exactCI
+36351707078success15/15不代新未提交源码。新20 CPUencoderforward/24attempt另记，
+generator/tokens/GPU/paid新增0、CPU全开销未量非0；原1170/26a7e04b...DB重核不变、
+unknown未编码非0证明、已知保守和1190不完整allrole。benchmark/M1/Pilot/封存/
+captionfusion/nativeonline/强对照/forecast/统计/英文稿仍pending，goalACTIVE/default4科学0、
+同一run/无timer/其他四仓冻结。见research/ARIS_ICMR_CLIP_CPU，不重复此fixture救准入。

@@ -123,3 +123,14 @@ untested. Public-paper examples exposed/disclosed, not used to tune/score.
 No seventh configuration/seeds/threshold/default4/scientific0/timer reset.
 Data license/sealed final/visual/native online/realM1/Pilot/matrix/manuscript
 pending; bridge and goal ACTIVE, other four repositories frozen.
+
+2026-09-27T22:00:00Z actual CLIP CPU component: primary73988/doc10832 once exit0,
+3 authored images/2 texts, bitwise repeats and full ranks match; 20 real encoder
+forwards separately recorded, no new generator/GPU/paid. 55pin fbea8bf4, official
+checkpoint actual SHA verified privately. Source055 real double-normalization
+blocker reproduced by failing test, raw-image minimal fix/unique056 accepted;
+same-family provisional, doc057 unknown-family/unverified independence. Targeted
+59passed, static quality/package0.2.0 build/Twine pass; whole9530 pre-fix collection
+still running/WMI retained, old27c CI15/15 not new-source validation. No benchmark
+data/result, formal weights/data admission, captioner/fusion freeze, M1/Pilot,
+matrix, scientific effect or manuscript; goalACTIVE/default4/scientific0/no timer.

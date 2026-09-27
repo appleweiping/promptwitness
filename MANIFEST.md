@@ -400,3 +400,33 @@
 | 2026-09-27T21:21:00Z | novelty-check | .aris/traces/novelty-check/2026-09-27_run01/002-icmr-novelty-path-clarification | idea-discovery | 已保存原路径澄清及同一完整final响应，不新增科学round |
 | 2026-09-27T21:21:00Z | novelty-check | .aris/traces/novelty-check/2026-09-27_run01/003-icmr-novelty-hbbops-followup | idea-discovery | 同记忆新来源续查完整原请求/响应，私有不提交 |
 | 2026-09-27T21:21:00Z | experiment-bridge | .aris/compute/icmr-ranking-cpu-provider.md | implementation | fresh-doc一次actual终态receipt与aggregate限制作私有追加 |
+| 2026-09-27T22:00:00Z | experiment-bridge | research/ARIS_ICMR_CLIP_CPU_20260927_220000.md | implementation | 实际第一方CLIP CPU自制图资格/真实费用/失败修复与审查；非科学或正式数据许可准入，私有路径不提交 |
+| 2026-09-27T22:00:00Z | experiment-bridge | research/ARIS_ICMR_CLIP_CPU_20260927_220000.json | implementation | 实际第一方CLIP CPU自制图资格/真实费用/失败修复与审查；非科学或正式数据许可准入，私有路径不提交 |
+| 2026-09-27T22:00:00Z | experiment-bridge | research/ARIS_ICMR_CLIP_CPU.md | implementation | 实际第一方CLIP CPU自制图资格/真实费用/失败修复与审查；非科学或正式数据许可准入，私有路径不提交 |
+| 2026-09-27T22:00:00Z | experiment-bridge | research/ARIS_ICMR_CLIP_CPU.json | implementation | 实际第一方CLIP CPU自制图资格/真实费用/失败修复与审查；非科学或正式数据许可准入，私有路径不提交 |
+| 2026-09-27T22:00:00Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260927_220000.md | implementation | 实际第一方CLIP CPU自制图资格/真实费用/失败修复与审查；非科学或正式数据许可准入，私有路径不提交 |
+| 2026-09-27T22:00:00Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 实际第一方CLIP CPU自制图资格/真实费用/失败修复与审查；非科学或正式数据许可准入，私有路径不提交 |
+| 2026-09-27T22:00:00Z | experiment-bridge | refine-logs/EXPERIMENT_RESULTS_20260927_220000.md | implementation | 实际第一方CLIP CPU自制图资格/真实费用/失败修复与审查；非科学或正式数据许可准入，私有路径不提交 |
+| 2026-09-27T22:00:00Z | experiment-bridge | refine-logs/EXPERIMENT_RESULTS.md | implementation | 实际第一方CLIP CPU自制图资格/真实费用/失败修复与审查；非科学或正式数据许可准入，私有路径不提交 |
+| 2026-09-27T22:00:00Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260927_220000.md | implementation | 实际第一方CLIP CPU自制图资格/真实费用/失败修复与审查；非科学或正式数据许可准入，私有路径不提交 |
+| 2026-09-27T22:00:00Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | 实际第一方CLIP CPU自制图资格/真实费用/失败修复与审查；非科学或正式数据许可准入，私有路径不提交 |
+| 2026-09-27T22:00:00Z | experiment-bridge | research/ICMR_DATA_AUDIT_20260927_220000.md | implementation | 实际第一方CLIP CPU自制图资格/真实费用/失败修复与审查；非科学或正式数据许可准入，私有路径不提交 |
+| 2026-09-27T22:00:00Z | experiment-bridge | research/ICMR_DATA_AUDIT.md | implementation | 实际第一方CLIP CPU自制图资格/真实费用/失败修复与审查；非科学或正式数据许可准入，私有路径不提交 |
+| 2026-09-27T22:00:00Z | experiment-bridge | research/ACCESS_AUDIT_20260927_220000.md | implementation | 实际第一方CLIP CPU自制图资格/真实费用/失败修复与审查；非科学或正式数据许可准入，私有路径不提交 |
+| 2026-09-27T22:00:00Z | experiment-bridge | research/ACCESS_AUDIT.md | implementation | 实际第一方CLIP CPU自制图资格/真实费用/失败修复与审查；非科学或正式数据许可准入，私有路径不提交 |
+| 2026-09-27T22:00:00Z | experiment-bridge | AGENTS.md | implementation | 实际第一方CLIP CPU自制图资格/真实费用/失败修复与审查；非科学或正式数据许可准入，私有路径不提交 |
+| 2026-09-27T22:00:00Z | experiment-bridge | .aris/compute/clip-physical-cost_20260927_220000.json | implementation | 实际第一方CLIP CPU自制图资格/真实费用/失败修复与审查；非科学或正式数据许可准入，私有路径不提交 |
+| 2026-09-27T22:00:00Z | experiment-bridge | .aris/compute/clip-physical-cost.json | implementation | 实际第一方CLIP CPU自制图资格/真实费用/失败修复与审查；非科学或正式数据许可准入，私有路径不提交 |
+| 2026-09-27T22:00:00Z | experiment-bridge | findings.md | implementation | 实际第一方CLIP CPU自制图资格/真实费用/失败修复与审查；非科学或正式数据许可准入，私有路径不提交 |
+| 2026-09-27T22:00:00Z | experiment-bridge | configs/research/retrieval-clip-cpu-env.json | implementation | 实际第一方CLIP CPU自制图资格/真实费用/失败修复与审查；非科学或正式数据许可准入，私有路径不提交 |
+| 2026-09-27T22:00:00Z | experiment-bridge | reproduce/RETRIEVAL_CLIP_CPU.md | implementation | 实际第一方CLIP CPU自制图资格/真实费用/失败修复与审查；非科学或正式数据许可准入，私有路径不提交 |
+| 2026-09-27T22:00:00Z | experiment-bridge | reproduce/retrieval_clip_cpu.py | implementation | 实际第一方CLIP CPU自制图资格/真实费用/失败修复与审查；非科学或正式数据许可准入，私有路径不提交 |
+| 2026-09-27T22:00:00Z | experiment-bridge | reproduce/check_retrieval_clip_cpu.py | implementation | 实际第一方CLIP CPU自制图资格/真实费用/失败修复与审查；非科学或正式数据许可准入，私有路径不提交 |
+| 2026-09-27T22:00:00Z | experiment-bridge | tests/reproduce/test_clip_normalization.py | implementation | 实际第一方CLIP CPU自制图资格/真实费用/失败修复与审查；非科学或正式数据许可准入，私有路径不提交 |
+| 2026-09-27T22:00:00Z | experiment-bridge | tests/reproduce/test_retrieval_clip_cpu.py | implementation | 实际第一方CLIP CPU自制图资格/真实费用/失败修复与审查；非科学或正式数据许可准入，私有路径不提交 |
+| 2026-09-27T22:00:00Z | experiment-bridge | .aris/compute/clip-cpu-provider.md | implementation | 实际第一方CLIP CPU自制图资格/真实费用/失败修复与审查；非科学或正式数据许可准入，私有路径不提交 |
+| 2026-09-27T22:00:00Z | experiment-bridge | .aris/compute/clip-primary-qualification.json | implementation | 实际第一方CLIP CPU自制图资格/真实费用/失败修复与审查；非科学或正式数据许可准入，私有路径不提交 |
+| 2026-09-27T22:00:00Z | experiment-bridge | .aris/compute/clip-doc-qualification.json | implementation | 实际第一方CLIP CPU自制图资格/真实费用/失败修复与审查；非科学或正式数据许可准入，私有路径不提交 |
+| 2026-09-27T22:00:00Z | experiment-bridge | .aris/traces/experiment-bridge/2026-09-27_run01/055-clip-cpu-source-review | implementation | 实际第一方CLIP CPU自制图资格/真实费用/失败修复与审查；非科学或正式数据许可准入，私有路径不提交 |
+| 2026-09-27T22:00:00Z | experiment-bridge | .aris/traces/experiment-bridge/2026-09-27_run01/056-clip-cpu-source-followup | implementation | 实际第一方CLIP CPU自制图资格/真实费用/失败修复与审查；非科学或正式数据许可准入，私有路径不提交 |
+| 2026-09-27T22:00:00Z | experiment-bridge | .aris/traces/experiment-bridge/2026-09-27_run01/057-clip-cpu-fresh-doc | implementation | 实际第一方CLIP CPU自制图资格/真实费用/失败修复与审查；非科学或正式数据许可准入，私有路径不提交 |
