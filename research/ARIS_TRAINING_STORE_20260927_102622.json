@@ -1,0 +1,148 @@
+{
+  "format": "promptwitness.aris.training-store-slice/v1",
+  "recorded_at": "2026-09-27T10:26:22Z",
+  "goal": "ACTIVE",
+  "automation": "DELETED_NO_REPLACEMENT",
+  "ARIS_default_review_rounds": 4,
+  "preparation": {
+    "format": "promptwitness.training-store-preparation/v1",
+    "status": "PREPARED_NOT_SCIENTIFIC_FREEZE",
+    "membership": "proposed-v2 unchanged; NOT_FORMAL_FREEZE",
+    "counts": {
+      "bfcl": {
+        "fit": 512,
+        "search": 256,
+        "selection": 256
+      },
+      "hotpotqa": {
+        "fit": 512,
+        "search": 256,
+        "selection": 256
+      },
+      "instruction_following": {
+        "fit": 512,
+        "search": 256,
+        "selection": 256
+      }
+    },
+    "fit_response_counts": {
+      "bfcl": {
+        "0": 20,
+        "1": 20
+      },
+      "hotpotqa": {
+        "0": 4,
+        "1": 4
+      },
+      "instruction_following": {
+        "0": 5,
+        "1": 5
+      }
+    },
+    "BFCL_source_revision": "6ea57973c7a6097fd7c5915698c54c17c5b1b6c8",
+    "previous_fit_inputs_and_gold_equal": true,
+    "empty_leaves": [
+      "search/reference",
+      "search/parent",
+      "final/inputs",
+      "final/gold"
+    ],
+    "reference_scores": "NOT_GENERATED",
+    "candidate_or_configuration_freeze": "NOT_GENERATED",
+    "selection_outputs_or_scores": "NOT_GENERATED",
+    "final_content_read": false,
+    "access_disclosure": "Training ID tokens streamed; only selected training bodies decoded. Parquet physical row-group bytes may contain nontraining rows. BFCL final-derived ID/group metadata checked, bodies never decoded. Not an air gap; historical test-preview disclosure retained.",
+    "new_model_calls": 0,
+    "new_allocated_GPU_hours": 0,
+    "not_M1_or_Pilot": true
+  },
+  "actual_files": 25,
+  "actual_bytes": 9241430,
+  "actual_empty_leaf_entries": {
+    "search/parent": 0,
+    "search/reference": 0,
+    "final/inputs": 0,
+    "final/gold": 0
+  },
+  "execution": {
+    "fresh_doc_exit": 0,
+    "tool_wall_seconds": 7.93127,
+    "stderr": "",
+    "doc_runtime_divergence_observed": false,
+    "new_context": true,
+    "main_only_read_aggregate_and_file_metadata": true
+  },
+  "environment": {
+    "spec": "configs/research/scorer-env.json",
+    "canonical_hash": "c90d1dd7",
+    "Python": "3.12.13",
+    "pyarrow": "25.0.1",
+    "warm_reuse": true,
+    "build_or_install_this_slice": false,
+    "Python_workers": 1,
+    "GPU": 0,
+    "CPU_threads_independently_certified": false
+  },
+  "review": {
+    "code_route": "same-family/provisional gpt-6-astra/xhigh",
+    "verdict": "no blocking or nonblocking findings",
+    "doc_route": "same-family/provisional inherited Codex",
+    "private_traces": "018/019",
+    "first_reviewer_pytest": {
+      "tests_passed": 13,
+      "exit": 1,
+      "reason": "default full-package coverage threshold on local helper-only tests; retained"
+    },
+    "scope_corrected_local_pytest": {
+      "tests_passed": 13,
+      "exit": 0,
+      "no_cov": true
+    }
+  },
+  "checks": {
+    "main_targeted_passed": 13,
+    "main_targeted_wall_seconds": 2.36,
+    "whole_helpers_passed": 249,
+    "whole_helpers_skipped": 1,
+    "whole_helpers_wall_seconds": 16.7,
+    "ruff_check": "PASS",
+    "ruff_format": "PASS_267_FILES",
+    "mypy_src": "PASS_61",
+    "configured_bandit_src": "PASS",
+    "new_helper_bandit": "PASS_0_ISSUES",
+    "initial_F401_repaired": true,
+    "full_local_package_suite": "NOT_RUN_THIS_SLICE",
+    "local_build": "NOT_RUN_THIS_SLICE_HISTORICAL_FAILURES_RETAINED",
+    "exact_SHA_CI": "PENDING_COMMIT_PUSH_AT_SNAPSHOT",
+    "previous_qualification_CI": {
+      "sha": "670891e9545ec7299fec0cfb850fd01d5a01f6a0",
+      "run": 36311348600,
+      "conclusion": "success",
+      "jobs": "15/15",
+      "Ubuntu_Python_3_12_passed": 1776,
+      "coverage_percent": 94.03
+    }
+  },
+  "new_cost": {
+    "model_calls": 0,
+    "allocated_gpu_hours": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "paid_API_usd": 0
+  },
+  "scientific_admission": "PARTIAL_NOT_PASSED",
+  "application_IPC_controller_stage_and_freeze": "NOT_IMPLEMENTED",
+  "online_execution": "NOT_VALIDATED",
+  "native_optimizer_early_rejection": "NOT_IMPLEMENTED",
+  "M1": "UNFITTED",
+  "Pilot": "NOT_RUN",
+  "original_matrix": {
+    "pairs_completed": 0,
+    "pairs_planned": 144,
+    "runs_completed": 0,
+    "runs_planned": 180,
+    "transfers_completed": 0,
+    "transfers_planned": 36
+  },
+  "next": "Real role messages/controller with complete actual fixed reference, allowed queried parent only, no current/unqueried predictor outcomes, actual stage-end/config/candidate freeze before selection. Then online/native engines/all-role costs/M1/Pilot/original confirmation."
+}
