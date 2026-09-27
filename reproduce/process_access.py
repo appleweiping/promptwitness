@@ -46,6 +46,15 @@ ROLE_STAGES = {
     "search_scorer": frozenset({"search"}),
     "selection_scorer": frozenset({"selection"}),
     "final_scorer": frozenset({"final"}),
+    # CIR target identities and subsets are scorer-only. Legacy text roles
+    # retain their original grants; CIR callers must use these distinct roles.
+    "retrieval_fit_learner": frozenset({"fit"}),
+    "retrieval_fit_scorer": frozenset({"fit"}),
+    "retrieval_optimizer": frozenset({"search"}),
+    "retrieval_predictor": frozenset({"search"}),
+    "retrieval_search_scorer": frozenset({"search"}),
+    "retrieval_selection_scorer": frozenset({"selection"}),
+    "retrieval_final_scorer": frozenset({"final"}),
 }
 ROLE_LEAVES = {
     "fit_learner": ("fit/inputs", "fit/gold", "fit/records"),
@@ -61,6 +70,19 @@ ROLE_LEAVES = {
     "search_scorer": ("search/inputs", "search/gold"),
     "selection_scorer": ("selection/inputs", "selection/gold"),
     "final_scorer": ("final/inputs", "final/gold"),
+    "retrieval_fit_learner": ("fit/inputs", "fit/records"),
+    "retrieval_fit_scorer": ("fit/inputs", "fit/gold"),
+    "retrieval_optimizer": ("fit/inputs", "search/inputs", "search/reference"),
+    "retrieval_predictor": (
+        "fit/inputs",
+        "fit/records",
+        "search/inputs",
+        "search/reference",
+        "search/parent",
+    ),
+    "retrieval_search_scorer": ("search/inputs", "search/gold"),
+    "retrieval_selection_scorer": ("selection/inputs", "selection/gold"),
+    "retrieval_final_scorer": ("final/inputs", "final/gold"),
 }
 
 

@@ -26,6 +26,19 @@ EXPECTED = {
     "search_scorer": {"search/inputs", "search/gold"},
     "selection_scorer": {"selection/inputs", "selection/gold"},
     "final_scorer": {"final/inputs", "final/gold"},
+    "retrieval_fit_learner": {"fit/inputs", "fit/records"},
+    "retrieval_fit_scorer": {"fit/inputs", "fit/gold"},
+    "retrieval_optimizer": {"fit/inputs", "search/inputs", "search/reference"},
+    "retrieval_predictor": {
+        "fit/inputs",
+        "fit/records",
+        "search/inputs",
+        "search/reference",
+        "search/parent",
+    },
+    "retrieval_search_scorer": {"search/inputs", "search/gold"},
+    "retrieval_selection_scorer": {"selection/inputs", "selection/gold"},
+    "retrieval_final_scorer": {"final/inputs", "final/gold"},
 }
 
 
@@ -100,14 +113,12 @@ def check(work: Path, output: Path) -> dict[str, Any]:
             scratch.mkdir()
             stage = (
                 "fit"
-                if role == "fit_learner"
-                else (
-                    "selection"
-                    if role == "selection_scorer"
-                    else "final"
-                    if role == "final_scorer"
-                    else "search"
-                )
+                if role in {"fit_learner", "retrieval_fit_learner", "retrieval_fit_scorer"}
+                else "selection"
+                if role in {"selection_scorer", "retrieval_selection_scorer"}
+                else "final"
+                if role in {"final_scorer", "retrieval_final_scorer"}
+                else "search"
             )
             invocation = launch_role(
                 role, stage, root, scratch, Path(__file__), ["--probe", str(root)]
@@ -132,8 +143,8 @@ def check(work: Path, output: Path) -> dict[str, Any]:
             "abi": abi,
             "controller_pid": os.getpid(),
             "workers": records,
-            "read_checks": 66,
-            "write_checks": 66,
+            "read_checks": len(EXPECTED) * len(LEAVES),
+            "write_checks": len(EXPECTED) * len(LEAVES),
             "evaluation_type": "authored_access_mechanics_not_performance",
             "model_calls": 0,
             "allocated_gpu_hours": 0,

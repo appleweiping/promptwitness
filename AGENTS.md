@@ -238,3 +238,10 @@ helper Bandit通过。首df53792 exactCI36354407932确为15/15 success但不代
 原物理DB26a7e04b...未改。无benchmark数据/许可/fullpool、caption/融合训练
 冻结、M1/Pilot、强CIR、全角色forecast、统计/英文稿；goalACTIVE/default4
 科学0/同一run无timer其他四仓冻结。见research/ARIS_ICMR_COMPOSED_CPU。
+
+2026-09-27T22:58:57Z：M1输入元数据分组审计及七个CIR专用Landlock角色已实现，
+旧文本role未变。FashionIQ固定README的泛CDLA在原issue#22仍有版本歧义，
+原issue#10仅有旧URL缺失报告；不用#18第三方镜像。authored本机测试及
+fresh same-family/provisional review不授真实数据/进程/科学准入；Windows无法
+实际执行Landlock，CIR controller必须强制新角色。见research/ICMR_M1_ACCESS；
+M1/Pilot仍NOT_ADMITTED，default4/scientific0/原账本/无timer不变。

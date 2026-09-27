@@ -146,3 +146,9 @@ New20CPU forwards plus prior20 plus1170 historical generator = known lowerbound1
 unknown not encoded; no newgenerator/GPU/paid, CPU total incomplete. No licensed
 benchmark/fullpool/M1/Pilot/captioner/strongcontrol/method effect/English paper;
 goalACTIVE/default4scientific0/no timer/other four frozen.
+
+2026-09-27T22:58:57Z ICMR M1增量：第一方FashionIQ README/CDLA站/原issue#22
+确认具体CDLA版本未明；#10旧URL缺失仅用户报告，#18第三方镜像非权限证明。
+新增训练侧仅query/reference元数据分组审计和七个检索专用角色，三个非scorer
+无gold；旧文本角色原样。审查same-family/provisional无窄实现blocker，但真实
+Linux、数据store、controller接线、近重复识别和final封存仍未通过。

@@ -31,6 +31,13 @@ def layout(tmp_path):
         ("search_scorer", "search"),
         ("selection_scorer", "selection"),
         ("final_scorer", "final"),
+        ("retrieval_fit_learner", "fit"),
+        ("retrieval_fit_scorer", "fit"),
+        ("retrieval_optimizer", "search"),
+        ("retrieval_predictor", "search"),
+        ("retrieval_search_scorer", "search"),
+        ("retrieval_selection_scorer", "selection"),
+        ("retrieval_final_scorer", "final"),
     ],
 )
 def test_grants_match_independent_matrix(tmp_path, role, stage):
@@ -40,6 +47,18 @@ def test_grants_match_independent_matrix(tmp_path, role, stage):
         role
     ]
     assert policy["runtime_read_execute"] == [str(code)]
+
+
+def test_retrieval_non_scorers_cannot_read_any_gold(tmp_path):
+    data, code, scratch = layout(tmp_path)
+    for role, stage in (
+        ("retrieval_fit_learner", "fit"),
+        ("retrieval_optimizer", "search"),
+        ("retrieval_predictor", "search"),
+    ):
+        policy = access.build_policy(role, stage, data, [code], scratch)
+        assert all("gold" not in Path(path).parts for path in policy["data_read"])
+    assert "fit/gold" in access.role_leaves("retrieval_fit_scorer", "fit")
 
 
 @pytest.mark.parametrize(
@@ -153,7 +172,7 @@ def test_real_linux_process_sentinels(tmp_path, monkeypatch):
         pytest.skip(str(exc))
     monkeypatch.setenv("PW_SENTINEL_PRIVATE", "not-for-worker")
     result = check(tmp_path / "attempt", tmp_path / "witness.json")
-    assert result["read_checks"] == result["write_checks"] == 66
+    assert result["read_checks"] == result["write_checks"] == 143
     assert result["scientific_admission"] == "PARTIAL_NOT_PASSED"
-    assert len({row["pid"] for row in result["workers"]}) == 6
+    assert len({row["pid"] for row in result["workers"]}) == 13
     assert all(row["helper_import_after_restriction"] for row in result["workers"])

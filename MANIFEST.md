@@ -457,3 +457,21 @@
 | 2026-09-27T22:36:18Z | experiment-bridge | .aris/compute/composed-doc-qualification.json | implementation | 真实参考图像＋修改文本融合的自制图CPU机械资格；非benchmark/M1/Pilot/论文，私有证据不提交 |
 | 2026-09-27T22:36:18Z | experiment-bridge | .aris/traces/experiment-bridge/2026-09-27_run01/058-composed-cpu-source-review | implementation | 真实参考图像＋修改文本融合的自制图CPU机械资格；非benchmark/M1/Pilot/论文，私有证据不提交 |
 | 2026-09-27T22:36:18Z | experiment-bridge | .aris/traces/experiment-bridge/2026-09-27_run01/059-composed-cpu-fresh-doc | implementation | 真实参考图像＋修改文本融合的自制图CPU机械资格；非benchmark/M1/Pilot/论文，私有证据不提交 |
+| 2026-09-27T22:58:57Z | experiment-bridge | reproduce/retrieval_split_audit.py | implementation | CIR仅输入元数据的三池参考图/外部近重复组互斥审计 |
+| 2026-09-27T22:58:57Z | experiment-bridge | tests/reproduce/test_retrieval_split_audit.py | implementation | 自制元数据分组与拒绝路径回归 |
+| 2026-09-27T22:58:57Z | experiment-bridge | reproduce/process_access.py | implementation | 新七个无gold非scorer的CIR专用角色，旧文本角色不变 |
+| 2026-09-27T22:58:57Z | experiment-bridge | reproduce/check_process_access.py | implementation | 扩展独立authored权限矩阵至13角色×11叶 |
+| 2026-09-27T22:58:57Z | experiment-bridge | tests/reproduce/test_process_access.py | implementation | CIR角色无gold与原矩阵回归；Windows不称Linux实际执行 |
+| 2026-09-27T22:58:57Z | experiment-bridge | reproduce/RETRIEVAL_SPLIT_AUDIT.md | implementation | 输入分组审计用法与M1边界 |
+| 2026-09-27T22:58:57Z | experiment-bridge | research/ICMR_M1_ACCESS_20260927_225857.md | implementation | 第一方FIQ许可/图库证据及CIR权限增量；不授M1 |
+| 2026-09-27T22:58:57Z | experiment-bridge | research/ICMR_M1_ACCESS.md | implementation | 同内容latest copy |
+| 2026-09-27T22:58:57Z | experiment-bridge | research/ICMR_DATA_AUDIT.md | implementation | 第一方FIQ版本歧义和URL可用性审计追加 |
+| 2026-09-27T22:58:57Z | experiment-bridge | research/ACCESS_AUDIT.md | implementation | 本轮未读取benchmark图片/annotations及历史披露保留 |
+| 2026-09-27T22:58:57Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | M1分组/角色矩阵未准入状态 |
+| 2026-09-27T22:58:57Z | experiment-bridge | AGENTS.md | implementation | 当前方向dashboard及不能越过M1的提醒 |
+| 2026-09-27T22:58:57Z | experiment-bridge | findings.md | implementation | 第一方数据障碍与same-family复审发现 |
+| 2026-09-27T22:58:57Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260927_225857.md | implementation | tracker同字节版本快照 |
+| 2026-09-27T22:58:57Z | experiment-bridge | research/ICMR_DATA_AUDIT_20260927_225857.md | implementation | 数据审计同字节版本快照 |
+| 2026-09-27T22:58:57Z | experiment-bridge | research/ACCESS_AUDIT_20260927_225857.md | implementation | 访问审计同字节版本快照 |
+| 2026-09-27T22:58:57Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | 分组与角色same-family/provisional审查增量 |
+| 2026-09-27T22:58:57Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260927_225857.md | implementation | 审查记录同字节版本快照 |
