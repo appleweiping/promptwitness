@@ -18,10 +18,12 @@ from promptwitness.incremental.predictor import TrainingRow, TransitionPredictor
 from promptwitness.parser import parse_prompt
 from reproduce import pipeline_controller as control
 from reproduce import process_access as access
+from reproduce import real_pipeline as real
 from reproduce import role_pipeline as roles
 from reproduce.incremental_pipeline import IncrementalPipeline
 from reproduce.persistent_model import PersistentModel, PhysicalCallFailure
 from reproduce.prepare_bfcl_fit import MODEL_REVISIONS, write_jsonl
+from reproduce.prepare_preflight_requests import SEEDS
 from reproduce.strict_scoring import ScoringError
 
 UNFITTED = {"format": "promptwitness.delta.predictor/v1.1", "status": "UNFITTED"}
@@ -714,3 +716,254 @@ def test_risk_uses_available_reference_transition_head(pipeline, tmp_path, old_c
     assert plan.population == 1 and plan.strata[0].old_correct == old_correct
     route.close()
     ledger.close()
+
+
+def actual_vector_fixture(tmp_path, monkeypatch, population=2):
+    """Authored executor, actual controller/scorer route; no GPU qualification."""
+    controller, dispatched = make_pipeline(tmp_path, monkeypatch, population)
+    monkeypatch.setattr(
+        real,
+        "execution_bindings",
+        lambda *args: {
+            key: controller.spec["execution"][key]
+            for key in ("data_digest", "scorer_digest", "tool_environment_digest")
+        },
+    )
+    original_rows = roles.rows
+
+    def normalized(store, leaf, family):
+        return {
+            unit: {
+                "id": unit,
+                "family": family,
+                "messages": [
+                    {"role": "system", "content": SEEDS[family]},
+                    {"role": "user", "content": "all authored context"},
+                ],
+            }
+            for unit in original_rows(store, leaf, family)
+        }
+
+    monkeypatch.setattr(real, "rows", normalized)
+    model = Mock()
+    model.model, model.data_root = controller.spec["model"], controller.store.resolve()
+    model.profile = {
+        key: value
+        for key, value in controller.spec["execution"].items()
+        if key not in {"data_digest", "scorer_digest", "tool_environment_digest"}
+    }
+    queried = []
+
+    def metered(call_id, request, *, purpose):
+        assert controller.events[-1]["kind"] == "generation_request"
+        assert controller.events[-1]["call_id"] == call_id
+        frozen = [
+            event
+            for event in controller.events
+            if event["kind"] == "vector_frozen" and event["purpose"] == purpose
+        ]
+        assert len(frozen) == 1  # every request was persisted before any response
+        assert all("gold" not in r["unit"] for r in frozen[0]["requests"])
+        queried.append((purpose, copied(request)))
+        return {**response(request["unit"]["id"]), "replicate": request["replicate"]}
+
+    from reproduce.pipeline_controller import copied
+
+    model.metered_task.side_effect = metered
+    route = real.RealPipeline(controller, model)
+    return route, model, queried, dispatched
+
+
+def test_real_reference_complete_vector_recovery_and_original_seed_selection(tmp_path, monkeypatch):
+    route, model, queried, dispatched = actual_vector_fixture(tmp_path, monkeypatch)
+    replicates = {u: "fixed-ref-" + u for u in route.controller.spec["search_ids"]}
+    result = route.reference(replicates)
+    assert result["reference"] == {"s0": 1, "s1": 1}
+    assert len(queried) == 2 and len(dispatched) == 1
+    assert route.reference(replicates) == result
+    assert len(queried) == 2  # no replay and no extra physical reserve on recovery
+    route.controller.end_search(["seed"])
+    route.selection("seed", {"v": "fixed-selection-v"})
+    receipt = route.controller.end_selection("seed")
+    assert receipt["frozen_prompt"] == route.controller.spec["seed_prompt"]
+    assert receipt["final_admission"] == "NOT_GRANTED_BY_THIS_CONTROLLER"
+    assert queried[-1][0] == "selection" and len(queried) == 3
+    assert model.metered_task.call_count == 3
+    assert len(dispatched) == 2
+
+
+@pytest.mark.parametrize("key", ["model", "data_root", "profile"])
+def test_real_model_binding_rejects_before_any_call(tmp_path, monkeypatch, key):
+    route, model, queried, _ = actual_vector_fixture(tmp_path, monkeypatch)
+    setattr(model, key, None)
+    with pytest.raises(ScoringError, match="original run freeze"):
+        real.RealPipeline(route.controller, model)
+    assert not queried
+
+
+@pytest.mark.parametrize("mapping", [{}, {"s0": "r"}, {"s0": "", "s1": "r"}])
+def test_real_complete_random_unit_mapping_required(tmp_path, monkeypatch, mapping):
+    route, _, queried, _ = actual_vector_fixture(tmp_path, monkeypatch)
+    with pytest.raises(ScoringError, match="random-unit mapping"):
+        route.reference(mapping)
+    assert not queried
+    assert not any(e["kind"] == "vector_frozen" for e in route.controller.events)
+
+
+def test_real_failed_request_keeps_observed_response_and_cannot_replay(tmp_path, monkeypatch):
+    route, model, queried, _ = actual_vector_fixture(tmp_path, monkeypatch)
+    successful = model.metered_task.side_effect
+    physical = {**response("s1"), "replicate": "r"}
+
+    def fail_second(call_id, request, *, purpose):
+        if request["unit"]["id"] == "s1":
+            raise PhysicalCallFailure("actual abort witness", physical)
+        return successful(call_id, request, purpose=purpose)
+
+    model.metered_task.side_effect = fail_second
+    mapping = {u: "r" for u in route.controller.spec["search_ids"]}
+    with pytest.raises(PhysicalCallFailure):
+        route.reference(mapping)
+    failure = route.controller.events[-1]
+    assert failure["kind"] == "generation_failed" and failure["response"] == physical
+    assert model.metered_task.call_count == 2 and len(queried) == 1
+    with pytest.raises(ScoringError, match="do not replay"):
+        route.reference(mapping)
+    assert model.metered_task.call_count == 2
+    assert not any(e["kind"] == "reference_complete" for e in route.controller.events)
+
+
+def test_real_changed_replicate_or_pending_request_not_restarted(tmp_path, monkeypatch):
+    route, model, _, _ = actual_vector_fixture(tmp_path, monkeypatch)
+    mapping = {u: "r" for u in route.controller.spec["search_ids"]}
+    route.reference(mapping)
+    with pytest.raises(ScoringError, match="freeze changed"):
+        route.reference({u: "changed" for u in mapping})
+    assert model.metered_task.call_count == 2
+    route.controller._record(
+        "generation_request", call_id="unresolved", identifier="seed", unit="s0", request={}
+    )
+    with pytest.raises(ScoringError, match="unresolved generation"):
+        real.RealPipeline(route.controller, model)
+    assert model.metered_task.call_count == 2
+
+
+def test_real_all_inputs_preflight_before_first_request(tmp_path, monkeypatch):
+    route, model, _, _ = actual_vector_fixture(tmp_path, monkeypatch)
+    valid = real.rows
+
+    def contaminated(*args):
+        inputs = valid(*args)
+        inputs["s1"]["gold"] = "forbidden"
+        return inputs
+
+    monkeypatch.setattr(real, "rows", contaminated)
+    with pytest.raises(ValueError, match="annotation-bearing"):
+        route.reference({u: "r" for u in route.controller.spec["search_ids"]})
+    assert model.metered_task.call_count == 0
+
+
+def test_real_selection_requires_search_ended_and_survivor(tmp_path, monkeypatch):
+    route, model, _, _ = actual_vector_fixture(tmp_path, monkeypatch)
+    with pytest.raises(ScoringError, match="search_ended"):
+        route.selection("seed", {"v": "r"})
+    route.reference({u: "r" for u in route.controller.spec["search_ids"]})
+    route.controller.end_search(["seed"])
+    with pytest.raises(ScoringError, match="frozen search survivor"):
+        route.selection("unselected", {"v": "r"})
+    assert model.metered_task.call_count == 2
+
+
+def test_real_incremental_reuses_exact_model_ledger_and_single_reservation_callback(
+    tmp_path, monkeypatch
+):
+    route, model, _, _ = actual_vector_fixture(tmp_path, monkeypatch)
+    constructor = Mock(return_value="existing-driver")
+    monkeypatch.setattr(real, "IncrementalPipeline", constructor)
+    driver, execute = route.incremental()
+    assert driver == "existing-driver" and execute == model.task
+    constructor.assert_called_once_with(
+        route.controller,
+        model.ledger,
+        resource_stage=real.STAGE,
+        input_cap=32768,
+        output_cap=64,
+    )
+    model.metered_task.assert_not_called()
+
+
+@pytest.mark.parametrize("family", ["bfcl", "hotpotqa", "instruction_following"])
+def test_real_identity_uses_training_and_actual_scorer_bytes_never_final(
+    tmp_path, monkeypatch, family
+):
+    store, runtime = tmp_path / "store", tmp_path / "runtime"
+    for pool in ("fit", "search", "selection"):
+        for leaf in ("inputs", "gold"):
+            target = store / pool / leaf / (family + ".jsonl")
+            target.parent.mkdir(parents=True)
+            target.write_bytes(b"authored training bytes")
+    runtime.mkdir()
+    (runtime / "code.py").write_bytes(b"authored scorer code")
+    (runtime / "resource").write_bytes(b"authored resource")
+    monkeypatch.setattr(real, "bfcl_inventory", lambda p: {"files": ["code.py"]})
+    monkeypatch.setattr(
+        real,
+        "text_inventory",
+        lambda p: {
+            "code_files": ["code.py"],
+            "resource_files": ["resource"],
+        },
+    )
+    original = real.execution_bindings(store, family, {"bfcl": runtime, "text": runtime})
+    assert all(len(value) == 64 for value in original.values())
+    (store / "search/gold" / (family + ".jsonl")).write_bytes(b"changed training bytes")
+    changed = real.execution_bindings(store, family, {"bfcl": runtime, "text": runtime})
+    assert changed["data_digest"] != original["data_digest"]
+    assert changed["scorer_digest"] == original["scorer_digest"]
+    (runtime / "code.py").write_bytes(b"changed scorer code")
+    assert (
+        real.execution_bindings(store, family, {"bfcl": runtime, "text": runtime})["scorer_digest"]
+        != changed["scorer_digest"]
+    )
+    assert not (store / "final").exists()
+
+
+def test_original_reference_cpu_recovery_keeps_failed_worker_without_generation(
+    tmp_path, monkeypatch
+):
+    from reproduce.recover_reference import original_responses
+
+    route, model, _, dispatched = actual_vector_fixture(tmp_path, monkeypatch)
+    launcher = control.launch_role
+    monkeypatch.setattr(
+        control,
+        "launch_role",
+        lambda *a, **k: subprocess.CompletedProcess([], 1, "", "denied runtime"),
+    )
+    with pytest.raises(ScoringError, match="worker exit"):
+        route.reference({u: "fixed" for u in route.controller.spec["search_ids"]})
+    assert model.metered_task.call_count == 2
+    monkeypatch.setattr(control, "launch_role", launcher)
+    result = route.controller.reference(original_responses(route.controller))
+    assert result["reference"] == {"s0": 1, "s1": 1}
+    assert model.metered_task.call_count == 2 and len(dispatched) == 1
+    assert len([e for e in route.controller.events if e["kind"] == "failed"]) == 1
+
+
+@pytest.mark.parametrize("defect", ["generation_failed", "changed_random_unit", "partial_vector"])
+def test_original_reference_cpu_recovery_never_replays_or_fills(tmp_path, monkeypatch, defect):
+    from reproduce.recover_reference import original_responses
+
+    route, model, _, dispatched = actual_vector_fixture(tmp_path, monkeypatch)
+    route.reference({u: "fixed" for u in route.controller.spec["search_ids"]})
+    if defect == "generation_failed":
+        event = next(e for e in route.controller.events if e["kind"] == "generation_result")
+        event["kind"] = "generation_failed"
+    elif defect == "changed_random_unit":
+        event = next(e for e in route.controller.events if e["kind"] == "generation_result")
+        event["response"]["replicate"] = "changed"
+    else:
+        next(e for e in route.controller.events if e["kind"] == "vector_frozen")["requests"].pop()
+    with pytest.raises(ScoringError):
+        original_responses(route.controller)
+    assert model.metered_task.call_count == 2 and len(dispatched) == 1

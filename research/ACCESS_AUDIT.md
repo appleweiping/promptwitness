@@ -56,3 +56,29 @@ Python files/README/license; exclude `data/`, `ifbench/data/` and `eval/` from
 development searches. The optimizer and predictor must receive explicit sealed
 split-access controls before any scientific experiment. Downloading a public
 example is not evidence of our model's performance or a permission to tune on it.
+
+## Complete training-side reference component, 2026-09-27
+
+The trusted controller now reads the original fit/search/selection input pools
+and hashes their annotation files as bytes for the existing ExecutionIdentity;
+it does not interpret those labels or open/hash final leaves. The inference
+worker has zero benchmark filesystem read grants and receives complete
+input-only search requests by pipe. This is not a claim that the trusted
+controller is label-blind or that hashing itself is an air gap.
+
+The original full256 HotpotQA/Qwen reference generation was actually executed;
+its first scorer failed before publishing any reference because its code-only
+runtime was outside the new worker's existing grant. The failed worker and all
+generation costs are retained. An explicit CPU-only recovery uses the same
+complete original requests and settled responses, compares unchanged data and
+scorer bytes, and lets only the existing search scorer interpret search gold.
+No model replay, new data-leaf grant, final access, outcome-selected subsampling
+or predictor training from search-side records is authorized by this recovery.
+The development agent and document executor inspect aggregate output and the
+specific failure traceback, not raw responses, annotations or per-ID scores.
+
+Any resulting seed correctness is a training-side reference, not held-out method
+performance, Pilot evidence, native optimizer benefit or ONLINE_PINNED proof.
+The earlier public IFBench preview, physical checkout availability and ABI1
+limitations remain disclosed above; this component does not erase them or
+establish completely unexposed developer-held blind final data.

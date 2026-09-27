@@ -1,0 +1,162 @@
+{
+  "format": "promptwitness.aris.real-reference-slice/v1",
+  "recorded_at": "2026-09-27T16:17:21Z",
+  "status": "ACTUAL_REFERENCE_SCORED_ORIGINAL_GENERATIONS_NOT_SCIENCE",
+  "implementation": {
+    "complete_input_only_vectors_frozen_before_generation": true,
+    "original_execution_identity_binds_training_inputs_annotations_scorers_tools": true,
+    "controller_annotation_access": "hashes training-side annotation bytes, does not interpret labels; not label-blind or airgap",
+    "inference_benchmark_filesystem_read_grants": 0,
+    "official_stage_scorer_only_interprets_authorized_gold": true,
+    "failed_or_unresolved_model_generation_replay": false,
+    "selection_preserves_original_survivor_and_selector_rules": true,
+    "incremental_reuses_original_driver_reservation": true,
+    "final_content_read": false,
+    "limits": "cooperating operator; original Landlock ABI1 network/stat/truncate/ioctl limitations and previously disclosed IFBench development preview retained"
+  },
+  "actual_workload": {
+    "family": "hotpotqa",
+    "model": "Qwen/Qwen3.5-9B",
+    "model_revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+    "role": "training-side seed reference, not optimized candidate",
+    "seed": 11,
+    "search_units": 256,
+    "replicates_per_unit": 1,
+    "official_strict_correct": 190,
+    "interpretation": "one full training-side reference vector only; no held-out method accuracy, model comparison, optimization savings or Pilot evidence"
+  },
+  "first_attempt": {
+    "literal_invocations": 1,
+    "original_session": 37849,
+    "SSH_exit": 1,
+    "measured_SSH_wall_seconds": 458.9171906,
+    "all_original_model_generations_completed": 256,
+    "reference_published": false,
+    "failure": "PermissionError13: code-only scorer runtime staged outside the current helper tree's existing Landlock grant",
+    "failed_scorer_worker": 514,
+    "original_source_logs_responses_and_costs_retained": true
+  },
+  "explicit_CPU_recovery": {
+    "literal_invocations": 1,
+    "original_session": 69725,
+    "SSH_exit": 0,
+    "measured_SSH_wall_seconds": 8.3443399,
+    "actual_summary_download_exit": 0,
+    "runtime_repair": "exact-byte code/resource-only copies colocated under the existing reproduce grant in exclusive code-recovery tree; no source policy, data grant, shared environment or model changes",
+    "original_complete_vector_and_generation_receipts_reused": true,
+    "new_model_calls": 0,
+    "new_GPU_allocation": false,
+    "physical_ledger_bytes_unchanged_after_recovery": true,
+    "scorer_worker_pid": 591355,
+    "landlock_ABI": 1,
+    "captured_stream": "combined stdout/stderr; no warning observed; outer decoder exit not separately instrumented",
+    "old_failed_scorer_record_preserved": true,
+    "new_scorer_attempt_appended": true,
+    "first_failed_run_relabelled_success": false
+  },
+  "accounting": {
+    "immediately_prior_closed_DB_sha256": "36350670ca834bf4d885cf7846610beb036dec093704832263632f8b799c7804",
+    "latest_actual_closed_DB_sha256": "26a7e04bbe7f256df6796877cdfb24c5e86cd57495268491804687d44d88bf93",
+    "byte_verified_and_closed_history_recomputed": true,
+    "new_original_generation": {
+      "calls": 256,
+      "input_tokens": 351583,
+      "output_tokens": 1778,
+      "allocated_GPU_hours": 0.1254645915826162
+    },
+    "cross_version": {
+      "calls": 1170,
+      "input_tokens": 2136046,
+      "output_tokens": 195222,
+      "allocated_GPU_hours": 3.8074371029887377,
+      "paid_API_usd": 0
+    },
+    "whole_owned_allocation_includes_cold_idle_scorer_failure_wait_and_child_exit": true,
+    "open_allocations": 0,
+    "original_local_calls_with_reserved_or_unknown_token_cost": 0,
+    "historical_unknown_cost_count": "NOT_ENCODED_IN_ORIGINAL_BASE_SUMMARY",
+    "conservative_unknown_costs_and_all_historical_failures_retained": true,
+    "history_reset": false,
+    "release_observation": "registered GPU466MiB/0% after original generation terminal; unrelated jobs preserved; CPU recovery allocates no GPU",
+    "total_ceilings": {
+      "calls": 800000,
+      "allocated_GPU_hours": 1000,
+      "input_tokens": 2000000000,
+      "output_tokens": 200000000
+    },
+    "extra_small_quota": false
+  },
+  "deployment": {
+    "source_archive_sha256": "829533c12339a0335311830fb7fb0fd7db3f259c10332fc4d8999e5f2fc63b21",
+    "real_pipeline_sha256": "3d0a04bc355d7f14fb27ba9629bfd51638f9a9e80198fa4e58a653f286f43a45",
+    "recover_reference_sha256": "48a72e152dd4d75535765d9a3913cfff7e6629eb612dac8f2678458200e95c56",
+    "original_private_training_archive_sha256": "be06e40ed4c1379e7c858aa630df280c8fe4a6269dbf8046cd3286c9056876fe",
+    "data_scope": "original three tasks each512fit/256search/256selection; no final contents",
+    "environment": "warm-reuse CPU@d41b2c6f and Torch@150b5834, unchanged model revision/profile/caps/singleton/greedy/context",
+    "private_only": "raw inputs/gold/responses/per-ID scores/ledger/SSH provider and full review traces never staged to Git"
+  },
+  "reviews": {
+    "source": "039 fresh code review, explicit gpt-6-astra/xhigh, no BLOCKING; only followup041 checks CPU recovery and acknowledges initial colocation omission; same-family/provisional",
+    "doc": "040 original failed invocation and042 successful CPU recovery, fresh Codex contexts using inherited settings, no cross-family claim",
+    "doc_trace_metadata_limit": "canonical traces record model=inherited, family_relation=unknown and independence_verified=unverified; exact model/effort was not explicitly pinned; retain original metadata, do not reinterpret it as verified independence",
+    "original_prompts_and_responses_saved_privately": true,
+    "MAX_ROUNDS": 4,
+    "scientific_rounds_used": 0,
+    "review_loop_restarted": false
+  },
+  "checks": {
+    "full_local_suite_before_CPU_recovery_helper": {
+      "passed": 1897,
+      "skipped": 6,
+      "wall_seconds": 478.69,
+      "combined_coverage_percent": 94.04,
+      "exit": 0,
+      "not_final_recovery_source_full_suite_proof": true
+    },
+    "final_helpers_and_incremental": {
+      "passed": 467,
+      "skipped": 3,
+      "wall_seconds": 59.50,
+      "exit": 0,
+      "skip_scope": "Windows native Linux/symlink limitations, not native scorer proof"
+    },
+    "Ruff_check_and_format": "PASS_321_FILES",
+    "mypy_src": "PASS_61_UNCHANGED_SRC_FILES",
+    "configured_Bandit_src": "PASS_UNCHANGED_SRC",
+    "three_new_helpers_Bandit": "PASS",
+    "isolated_sdist_wheel_build_and_Twine": "PASS_BEFORE_CPU_RECOVERY_HELPER_SRC_UNCHANGED",
+    "installed_wheel_smoke": "NOT_RUN_THIS_SLICE",
+    "package_scope": "wheel contains core package; research helpers require Git checkout",
+    "earlier_Mock_fixture_E501_and_staging_failures": "RETAINED_NOT_ERASED"
+  },
+  "previous_exact_SHA_CI": {
+    "sha": "50b709ed40f1f269ca9a592612e9f6e5868a51a7",
+    "run": 36328917670,
+    "conclusion": "success",
+    "jobs": "15/15",
+    "Ubuntu_Python_3_12_passed": 1883,
+    "wall_seconds": 161.92,
+    "coverage_percent": 94.06
+  },
+  "current_exact_SHA_CI": "PENDING_COMMIT_PUSH_AT_SNAPSHOT",
+  "scientific": {
+    "one_actual_full_reference_component": "SCORED",
+    "other_reference_cells_and_real_selection": "NOT_RUN",
+    "ONLINE_PINNED": "NOT_VALIDATED",
+    "native_GEPA_MIPRO_early_rejection_engine": "NOT_IMPLEMENTED",
+    "complete_all_role_cost_forecast": "UNMEASURED_NOT_ZERO",
+    "independent_statistical_audit": "NOT_COMPLETED",
+    "M1": "UNFITTED",
+    "Pilot": "NOT_RUN",
+    "method_effects": "NOT_MEASURED",
+    "mechanism_pairs": "0/144",
+    "main_runs": "0/180",
+    "transfers": "0/36",
+    "admission": "PARTIAL_NOT_PASSED",
+    "research_complete": false
+  },
+  "goal": "ACTIVE",
+  "automation": "DELETED_NO_REPLACEMENT",
+  "other_four_repositories": "FROZEN",
+  "next": "Qualify real native GEPA/MIPRO early-rejection semantics and all-role costs, remaining reference/selection cells and independent online/statistical audit; then actual M1/Pilot/full admission/original confirmation matrix/statistics/narrative."
+}

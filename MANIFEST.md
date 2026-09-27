@@ -214,3 +214,27 @@
 | 2026-09-27T15:08:27Z | experiment-bridge | refine-logs/EXPERIMENT_PLAN.md | implementation | 推理文件边界两模型6实际fitwire窄资格；失败与连续成本保留，非M1/Pilot/科学接受 |
 | 2026-09-27T15:08:27Z | experiment-bridge | research/ARIS_MODEL_ACCESS_20260927_150827.json | implementation | 推理文件边界两模型6实际fitwire窄资格；失败与连续成本保留，非M1/Pilot/科学接受 |
 | 2026-09-27T15:08:27Z | experiment-bridge | research/ARIS_MODEL_ACCESS.json | implementation | 推理文件边界两模型6实际fitwire窄资格；失败与连续成本保留，非M1/Pilot/科学接受 |
+
+| 2026-09-27T15:55:49Z | experiment-bridge | refine-logs/EXPERIMENT_RESULTS_20260927_155549.md | implementation | 原完整256reference仍运行的历史快照，随后首次失败不覆盖 |
+| 2026-09-27T15:55:49Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260927_155549.md | implementation | 原source039审查与尚未终态的文档运行快照 |
+| 2026-09-27T15:55:49Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260927_155549.md | implementation | 原running状态与未闭账成本的历史快照 |
+| 2026-09-27T15:55:49Z | experiment-bridge | refine-logs/EXPERIMENT_PLAN_20260927_155549.md | implementation | 原完整参考运行中的计划，非完成声明 |
+| 2026-09-27T16:17:21Z | experiment-bridge | AGENTS.md | implementation | 最新1170实际闭账与参考恢复窄资格，全桥/science未完成 |
+| 2026-09-27T16:17:21Z | experiment-bridge | reproduce/real_pipeline.py | implementation | 实际完整vectorfreeze/官方阶段评分/单次真实预约 |
+| 2026-09-27T16:17:21Z | experiment-bridge | reproduce/run_reference.py | implementation | 原完整256训练侧seed参考CLI，非Pilot/native优化 |
+| 2026-09-27T16:17:21Z | experiment-bridge | reproduce/recover_reference.py | implementation | 已settled原响应CPU-only显式评分恢复，无模型重放 |
+| 2026-09-27T16:17:21Z | experiment-bridge | reproduce/REAL_PIPELINE.md | implementation | 首次运行失败及既有授权下精确runtime布局披露 |
+| 2026-09-27T16:17:21Z | experiment-bridge | reproduce/REFERENCE_RECOVERY.md | implementation | 独立上下文CPU恢复文档及严格scope边界 |
+| 2026-09-27T16:17:21Z | experiment-bridge | tests/reproduce/test_role_pipeline.py | implementation | 实际bridge/authored恢复与失败拒绝回归，非科学收益 |
+| 2026-09-27T16:17:21Z | experiment-bridge | tests/reproduce/test_run_reference.py | implementation | CLI完整人口/数据stage/成本/summary机械验证 |
+| 2026-09-27T16:17:21Z | experiment-bridge | research/ACCESS_AUDIT.md | implementation | 可信controller training字节读取、zero模型grant与原preview披露 |
+| 2026-09-27T16:17:21Z | experiment-bridge | research/ARIS_REAL_REFERENCE_20260927_161721.json | implementation | 实际256/190correct、首次失败与CPU恢复、新1170成本，非science |
+| 2026-09-27T16:17:21Z | experiment-bridge | research/ARIS_REAL_REFERENCE.json | implementation | 最新实际reference报告精确副本 |
+| 2026-09-27T16:17:21Z | experiment-bridge | refine-logs/EXPERIMENT_RESULTS_20260927_161721.md | implementation | 原reference失败保留、CPU评分恢复与质量scope |
+| 2026-09-27T16:17:21Z | experiment-bridge | refine-logs/EXPERIMENT_RESULTS.md | implementation | 最新results精确副本，全桥/科学未完成 |
+| 2026-09-27T16:17:21Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260927_161721.md | implementation | source039/唯一followup041及doc040/042独立性metadata限制 |
+| 2026-09-27T16:17:21Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | 最新审查记录副本，不伪报跨家族接受 |
+| 2026-09-27T16:17:21Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260927_161721.md | implementation | 一cell实际评分而native/online/M1/Pilot/原矩阵未完成 |
+| 2026-09-27T16:17:21Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 最新tracker精确副本 |
+| 2026-09-27T16:17:21Z | experiment-bridge | refine-logs/EXPERIMENT_PLAN_20260927_161721.md | implementation | 接续更高1170账本、原生搜索全角色成本及真实研究准入 |
+| 2026-09-27T16:17:21Z | experiment-bridge | refine-logs/EXPERIMENT_PLAN.md | implementation | 最新plan精确副本，activegoal无timer/default4 |

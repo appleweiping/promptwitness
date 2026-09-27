@@ -77,6 +77,20 @@ source/rescue/doc031–038均same-family/provisional，仅模型窄资格，不�
 当前helpers+incremental443passed3skip59.84s、isolated build/Twine两包通过；no-isolation失败保留。
 详见 `research/ARIS_MODEL_ACCESS.json`；M1/Pilot/ONLINE_PINNED/nativeengine/原确认矩阵尚未完成。
 
+2026-09-27 16:17 UTC 新快照：原完整Hotpot/Qwen256 reference先实际生成后scorer布局失败
+（exit1/458.9171906s），所有失败/响应/费用保留。仅同bytes的code/resource runtime
+colocate到既有reproduce grant，唯一sourcefollowup041无BLOCKING；显式CPU恢复fresh-doc
+原69725 exit0/8.3443399s，官方评分256/190correct、新modelcalls0/GPUallocationfalse、DB未改。
+latestactualDB26a7e04b... byte核对/closed_history重算1170calls/2136046input/195222output/
+3.8074371029887377allocatedGPUh；继续此更高历史而非914/908/898。新增原256calls成本
+351583input/1778output/0.1254645915826162GPUh含cold/idle/scorerfailurewait/actualexit。
+这是训练侧seed参考，不是方法效果、Pilot或ONLINE_PINNED。其他reference/selection/native
+engine/全角色forecast/独立统计/M1/Pilot/原确认矩阵仍未完成；bridge保持running。
+source039/041 same-family/provisional；doc040/042继承设置canonicalfamilyunknown/
+independenceunverified原样保留，不声称跨家族接受。详见research/ARIS_REAL_REFERENCE.json。
+最终helpers+incremental467passed3skip59.50s/Ruff321/new3helpersBandit；本机1897全套94.04%
+在recoveryhelper之前，不冒充新final全套。无timer/额外小quota，default4科学0不变。
+
 目标完成须交付可复现代码、有效真实实验、统计分析、局限和研究叙述。
 正结果不是必需条件；缺失实验、INTEGRITY_BLOCKED、技能安装或 CI 不能冒充完成。
 保持 active goal，只有真正完成可核验交付后才结束；ARIS 停止条件本身不是科研成功。
