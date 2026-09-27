@@ -67,6 +67,16 @@ v1.1 解阻已消耗 128 次/0.2274557214975357 GPU-hours/309,728 输入/12,462 
 最终吞异常中断修复有本地机械回归，但没有最终cleanpeer CODE_REVIEW判定；
 科学门禁与缺失验证不得据此改为通过。环境清单补正不是环境重建或模型重跑。
 
+2026-09-27 15:08 UTC 新快照：修复后的 inference 文件边界已由 fresh doc 原样一次
+完成两模型各3实际 input-only fit wires，原 exit0/268.0048149s、ABI1/零 benchmark 读授权。
+新6calls/4299input/202output/0.07292376862631889 allocatedGPUh；跨版本实际
+914calls/1784463input/193444output/3.6819725114061215 GPUh，原模型启动与诊断失败均保留计费。
+新连续DB字节核对/closed_history重算，无开放allocation；historicalunknowncount未编码非0证明。
+own-task 文件metadata写是整个child自身task子树，不是仅comm名匹配；ABI1限制明确披露。
+source/rescue/doc031–038均same-family/provisional，仅模型窄资格，不是全角色/science准入。
+当前helpers+incremental443passed3skip59.84s、isolated build/Twine两包通过；no-isolation失败保留。
+详见 `research/ARIS_MODEL_ACCESS.json`；M1/Pilot/ONLINE_PINNED/nativeengine/原确认矩阵尚未完成。
+
 目标完成须交付可复现代码、有效真实实验、统计分析、局限和研究叙述。
 正结果不是必需条件；缺失实验、INTEGRITY_BLOCKED、技能安装或 CI 不能冒充完成。
 保持 active goal，只有真正完成可核验交付后才结束；ARIS 停止条件本身不是科研成功。

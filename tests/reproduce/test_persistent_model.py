@@ -145,6 +145,7 @@ class FakeChild:
     def __init__(self, timeouts=0):
         self.stdin, self.stdout = io.StringIO(), io.StringIO()
         self.timeouts, self.returncode, self.operations = timeouts, None, []
+        self.pid = 1123
 
     def wait(self, timeout=None):
         self.operations.append("wait")
@@ -251,6 +252,7 @@ def test_explicit_model_interpreter_and_load_abort(tmp_path, monkeypatch, load_f
         account,
         "AUTHORED_NEW_ALLOCATION",
         model_python=interpreter,
+        data_root=tmp_path,
     )
     child = FakeChild()
     started = []
@@ -262,7 +264,18 @@ def test_explicit_model_interpreter_and_load_abort(tmp_path, monkeypatch, load_f
     def loaded():
         if load_failure:
             raise RuntimeError("AUTHORED failed load")
-        return {"kind": "loaded", "profile": {"authored": True}, "cold_start_seconds": 1.0}
+        return {
+            "kind": "loaded",
+            "profile": {"authored": True},
+            "cold_start_seconds": 1.0,
+            "access": {
+                "role": "inference_message_only",
+                "landlock_abi": 1,
+                "benchmark_data_read_grants": 0,
+                "restriction_before_application_imports": True,
+                "worker_pid": child.pid,
+            },
+        }
 
     monkeypatch.setattr("reproduce.persistent_model.subprocess.Popen", popen)
     monkeypatch.setattr(c, "_read", loaded)
@@ -275,10 +288,13 @@ def test_explicit_model_interpreter_and_load_abort(tmp_path, monkeypatch, load_f
             assert c.profile == {"authored": True}
         assert child.operations == ["wait"]
     command, options = started[0]
-    assert command[:4] == [str(interpreter), "-u", "-m", "reproduce.torch_runtime"]
+    assert command[:3] == [str(interpreter), "-u", "-I"]
+    assert Path(command[3]).name == "model_access.py"
     assert "AUTHORED_CREDENTIAL" not in options["env"]
     assert options["env"]["CUDA_VISIBLE_DEVICES"] == GPU
     assert options["env"]["HF_HUB_OFFLINE"] == "1"
+    assert "PYTHONPATH" not in options["env"]
+    assert options["env"]["HOME"] == str((c.directory / "scratch").resolve())
     assert options["close_fds"] is True
     assert account.connection.execute("SELECT end FROM gpu_allocations").fetchone()[0] is not None
     account.close()
@@ -295,9 +311,28 @@ def test_unregistered_interpreter_rejected_before_allocation(tmp_path, monkeypat
             account,
             "AUTHORED",
             model_python=tmp_path / "missing_python",
+            data_root=tmp_path,
         )
     assert account.connection.execute("SELECT COUNT(*) FROM gpu_allocations").fetchone()[0] == 0
     assert not (tmp_path / "AUTHORED_rejected").exists()
+    account.close()
+
+
+def test_relative_snapshot_rejected_before_child_or_allocation(tmp_path, monkeypatch):
+    account = client(tmp_path).ledger
+    monkeypatch.setattr("reproduce.persistent_model.sys.platform", "linux")
+    with pytest.raises(ValueError, match=r"snapshot.*absolute"):
+        PersistentModel(
+            tmp_path / "AUTHORED_no_launch",
+            Path("relative_snapshot"),
+            next(iter(MODEL_REVISIONS)),
+            account,
+            "AUTHORED",
+            model_python=Path(sys.executable),
+            data_root=tmp_path,
+        )
+    assert account.connection.execute("SELECT COUNT(*) FROM gpu_allocations").fetchone()[0] == 0
+    assert not (tmp_path / "AUTHORED_no_launch").exists()
     account.close()
 
 

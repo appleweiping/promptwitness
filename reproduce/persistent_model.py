@@ -2,7 +2,7 @@
 
 One cooperating trusted controller owns one session and its original ledger.
 No timer/daemon, automatic retry, cache, fake partial vector or scientific
-admission. The inference worker itself is NOT an enforced split-data sandbox.
+admission. The child receives no direct benchmark-data filesystem grant.
 """
 
 from __future__ import annotations
@@ -33,6 +33,27 @@ class PhysicalCallFailure(RuntimeError):
         self.physical_response = response
 
 
+def model_environment(model_python: Path, scratch: Path) -> dict:
+    work = scratch.resolve()
+    return {
+        "PATH": os.pathsep.join((str(model_python.parent), "/usr/bin", "/bin")),
+        "LANG": "C.UTF-8",
+        "PYTHONUTF8": "1",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "HOME": str(work),
+        "TMPDIR": str(work),
+        "CUDA_CACHE_PATH": str(work / "cuda-cache"),
+        "HF_HOME": str(work / "hf-cache"),
+        "CUDA_VISIBLE_DEVICES": GPU,
+        "CUBLAS_WORKSPACE_CONFIG": ":4096:8",
+        "OMP_NUM_THREADS": "4",
+        "MKL_NUM_THREADS": "4",
+        "OPENBLAS_NUM_THREADS": "4",
+        "HF_HUB_OFFLINE": "1",
+        "TRANSFORMERS_OFFLINE": "1",
+    }
+
+
 class PersistentModel:
     """Reuse the existing backend, with a non-batched request/response stream.
 
@@ -50,13 +71,17 @@ class PersistentModel:
         allocation_id: str,
         *,
         model_python: Path,
+        data_root: Path,
     ):
         if sys.platform != "linux":
             raise ValueError("registered Linux native inference environment required")
         if not model_python.is_absolute() or not model_python.is_file():
             raise ValueError("registered inference interpreter must be an existing absolute file")
+        if not snapshot.is_absolute():
+            raise ValueError("registered model snapshot must be an absolute path")
         self.directory, self.snapshot, self.model = directory, snapshot, model
         self.model_python = model_python
+        self.data_root = data_root.resolve(strict=True)
         self.ledger, self.allocation_id = ledger, allocation_id
         self.process = self.stderr = None
         self.started = False
@@ -101,28 +126,15 @@ class PersistentModel:
             signal.signal(signal.SIGTERM, self._stop)
             self.stderr = (self.directory / "stderr").open("x", encoding="utf-8")
             root = Path(__file__).resolve().parents[1]
-            environment = {
-                "PATH": os.pathsep.join((str(self.model_python.parent), "/usr/bin", "/bin")),
-                "LANG": "C.UTF-8",
-                "PYTHONUTF8": "1",
-                "PYTHONDONTWRITEBYTECODE": "1",
-                "PYTHONPATH": os.pathsep.join((str(root / "src"), str(root))),
-                "CUDA_VISIBLE_DEVICES": GPU,
-                "CUBLAS_WORKSPACE_CONFIG": ":4096:8",
-                "OMP_NUM_THREADS": "4",
-                "MKL_NUM_THREADS": "4",
-                "OPENBLAS_NUM_THREADS": "4",
-                "HF_HUB_OFFLINE": "1",
-                "TRANSFORMERS_OFFLINE": "1",
-            }
+            scratch = self.directory / "scratch"
+            scratch.mkdir()
+            environment = model_environment(self.model_python, scratch)
             self.process = subprocess.Popen(
                 [
                     str(self.model_python),
                     "-u",
-                    "-m",
-                    "reproduce.torch_runtime",
-                    str(self.snapshot),
-                    self.model,
+                    "-I",
+                    str(root / "reproduce/model_access.py"),
                 ],
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
@@ -132,13 +144,32 @@ class PersistentModel:
                 bufsize=1,
                 close_fds=True,
                 env=environment,
-                cwd=root,
+                cwd=scratch,
             )
+            launch = {
+                "snapshot": str(self.snapshot),
+                "model": self.model,
+                "data_root": str(self.data_root),
+                "scratch": str(scratch.resolve()),
+            }
+            self.process.stdin.write(json.dumps(launch) + "\n")
+            self.process.stdin.flush()
             hello = self._read()
-            if set(hello) != {"kind", "profile", "cold_start_seconds"} or hello["kind"] != "loaded":
+            if (
+                set(hello) != {"kind", "profile", "cold_start_seconds", "access"}
+                or hello["kind"] != "loaded"
+                or not isinstance(hello["access"], dict)
+                or hello["access"].get("role") != "inference_message_only"
+                or type(hello["access"].get("landlock_abi")) is not int
+                or hello["access"]["landlock_abi"] < 1
+                or hello["access"].get("benchmark_data_read_grants") != 0
+                or hello["access"].get("restriction_before_application_imports") is not True
+                or hello["access"].get("worker_pid") != self.process.pid
+            ):
                 raise ValueError("missing original runtime load receipt")
             self.profile = hello["profile"]
             self._record("loaded", **hello)
+            self.access = hello["access"]
             return self
         except BaseException:
             self.close(abort=True)

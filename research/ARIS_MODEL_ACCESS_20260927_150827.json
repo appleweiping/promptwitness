@@ -1,0 +1,225 @@
+{
+  "format": "promptwitness.aris.model-access-slice/v1",
+  "recorded_at": "2026-09-27T15:08:27Z",
+  "status": "ACTUAL_REPAIRED_MODEL_PROCESS_QUALIFIED_NOT_SCIENCE",
+  "boundary": {
+    "bootstrap": "Python -I, single-threaded standard-library bootstrap; fixed policy installed before application/Torch imports",
+    "benchmark_data_read_grants": 0,
+    "model_inputs": "complete fixed input-only fit requests delivered by pipe",
+    "model_weights": "exact snapshots and referenced blob FILES; no HF cache ancestor grant",
+    "system_metadata_reads": [
+      "/proc/cpuinfo",
+      "/proc/sys/vm/mmap_min_addr"
+    ],
+    "thread_metadata_write_scope": "own_proc_task_only: WRITE_FILE and TRUNCATE when supported, entire own-task file metadata subtree, not comm basename matching",
+    "thread_metadata_no_create_remove_reparent_execute": true,
+    "receipt": "ABI>=1, matching owned worker PID, restriction-before-imports and zero benchmark read grants required",
+    "fixed_GPU_only": true,
+    "no_unrestricted_fallback": true,
+    "unchanged_role_policies": "scorer/predictor/optimizer receive no new own-task write grants",
+    "limits": "cooperating research operator only; ABI1 does not close network/stat/truncate/ioctl, not air gap or hostile-user sandbox"
+  },
+  "deployment": {
+    "original_source_archive_sha256": "37d9633110a5d78f0b56d35d192ec038a8b3cc0b4bd5c1239f72ecf7971d8ffe",
+    "repair_source_diff": "all public .py files compared; only model_access.py and process_access.py differ from original qualification stage",
+    "model_access_sha256": "4ba31e86168ff0d0eb2c3a38b7ae2929ebef70af4dc7d1efcbd2aea464829c17",
+    "process_access_sha256": "a5ec17bbf48b4d0f1bf7eecbd5de1b483ece896231a8deb9ab6e382d369faa3a",
+    "original_stages_and_failures_retained": true,
+    "environment": "warm-reuse Torch spec150b5834; Python3.10.15/Torch2.7.1+cu118/Transformers5.3.0",
+    "shared_environment_or_default_changes": false
+  },
+  "failure_history": [
+    {
+      "attempt": "initial model fresh-doc",
+      "exit": 1,
+      "new_LLM_calls": 0,
+      "result": "two authored CPU probes passed; Qwen CUDA startup failed304, OLMo not reached",
+      "closed_ledger_sha256": "2e78e40d1be399f057e6c4fc673aa4734bfdffbc1053b2803095902ea94019a0",
+      "gpu_hours": 3.605776090816039
+    },
+    {
+      "attempt": "original restricted seeded kernel",
+      "exit": 1,
+      "SSH_wall_seconds": 7.7353683,
+      "result": "CPU metadata reads and own CUDA thread comm write denied",
+      "closed_ledger_sha256": "e713948bdd82db4fbfd9e8fdf42bcb35d9fe8168a154d68a59147d89e3682bbf",
+      "gpu_hours": 3.606750887164187
+    },
+    {
+      "attempt": "metadata-read repair seeded kernel",
+      "exit": 1,
+      "SSH_wall_seconds": 8.4315444,
+      "result": "two metadata reads succeed; own CUDA thread comm write still denied",
+      "closed_ledger_sha256": "48d93257447d3b31fb71a13c608c867471bc81cfcde52dfb7f577b60716cf38a",
+      "gpu_hours": 3.6078651473873635
+    },
+    {
+      "attempt": "own-task repair seeded kernel",
+      "exit": 0,
+      "SSH_wall_seconds": 8.820187,
+      "result": "seeded8x8 finite CUDA matmul on RTX A6000; whole owned group terminal, allocation closed; not an LLM or scientific result",
+      "closed_ledger_sha256": "e72718e15fcce2e3f9e1633aae603ce5c28d6240ef0e7f60120006d2ad0e364a",
+      "gpu_hours": 3.6090487427798026
+    }
+  ],
+  "actual_qualification": {
+    "doc": "reproduce/MODEL_ACCESS.md",
+    "literal_invocations": 1,
+    "original_session": 36246,
+    "SSH_exit": 0,
+    "transport_exit": 0,
+    "measured_SSH_wall_seconds": 268.0048149,
+    "initial_observation_utc": "2026-09-27T14:58:40Z",
+    "end_observation_utc": "2026-09-27T15:03:16Z",
+    "outer_decoder_exit_separately_measured": false,
+    "captured_stream": "combined stdout/stderr; no warning or traceback observed, stderr not independently instrumented",
+    "CPU_probes": {
+      "models": 2,
+      "landlock_ABI": 1,
+      "denied_reads_per_model": 11,
+      "denied_appends_per_model": 11,
+      "original_snapshot_readable": true,
+      "scratch_writable": true,
+      "restriction_before_application_imports": true
+    },
+    "workload": "original three fixed input-only fit wires per model, sequential models; no proposer/scorer/native optimizer execution",
+    "source_request_sha256": "c56391486e9907bec9c610e345cc3fd15cd6fdf7c989b5e357c9a41ce296c59a",
+    "controller_disclosure": "trusted controller parses original ten-row prepared source containing previously disclosed unused fit-gold proposer fixtures; models receive only three input-only fit rows",
+    "new_gold_store_or_final_body_reads": false,
+    "models": [
+      {
+        "model": "Qwen/Qwen3.5-9B",
+        "revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+        "requests": 3,
+        "input_tokens": 2204,
+        "output_tokens": 108,
+        "allocated_GPU_hours": 0.05194203197956071
+      },
+      {
+        "model": "allenai/Olmo-3-7B-Instruct",
+        "revision": "6e5971d9eba42665f5bd5a0fcf047f299ce1dccc",
+        "requests": 3,
+        "input_tokens": 2095,
+        "output_tokens": 94,
+        "allocated_GPU_hours": 0.020981736646758176
+      }
+    ],
+    "release_check": "after actual terminal, registered GPU466MiB/0%; original432MiB unrelated service preserved, no owned inference process present",
+    "assurance": "same-family/provisional fresh agent-follows-doc, narrow mechanical qualification only"
+  },
+  "accounting": {
+    "prior_transport_closed_DB_sha256": "cb2360f6be307b9ea64fdb6686dea9d088dfee3f5cbe5faea245477a64d1f048",
+    "immediately_prior_closed_DB_sha256": "e72718e15fcce2e3f9e1633aae603ce5c28d6240ef0e7f60120006d2ad0e364a",
+    "new_closed_DB_sha256": "36350670ca834bf4d885cf7846610beb036dec093704832263632f8b799c7804",
+    "local_copies_byte_verified_and_closed_history_recomputed": true,
+    "new_model_generation": {
+      "calls": 6,
+      "input_tokens": 4299,
+      "output_tokens": 202,
+      "allocated_GPU_hours": 0.07292376862631889
+    },
+    "cross_version": {
+      "calls": 914,
+      "input_tokens": 1784463,
+      "output_tokens": 193444,
+      "gpu_hours": 3.6819725114061215
+    },
+    "all_failed_startup_and_diagnostic_allocations_charged": true,
+    "open_allocations": 0,
+    "new_reserved_or_unknown_token_cost_calls": 0,
+    "older_base_unknown_cost_count": "NOT_ENCODED_IN_ORIGINAL_BASE_SUMMARY",
+    "unknown_token_costs": "historical conservative reservations retained, never imputed zero",
+    "history_reset": false,
+    "paid_API_usd": 0,
+    "total_ceilings": {
+      "calls": 800000,
+      "gpu_hours": 1000,
+      "input_tokens": 2000000000,
+      "output_tokens": 200000000
+    },
+    "extra_small_quota": false
+  },
+  "reviews": {
+    "route": "same-family/provisional",
+    "private_full_traces": "031/032 initial boundary review;033 original failed doc;034/035 actual diagnostic rescue;036/037 two concrete metadata repairs;038 final actual doc",
+    "routine_review_restarted": false,
+    "MAX_ROUNDS": 4,
+    "scientific_rounds_used": 0
+  },
+  "checks": {
+    "local_helpers_and_incremental": {
+      "passed": 443,
+      "skipped": 3,
+      "wall_seconds": 59.84,
+      "exit": 0,
+      "skip_scope": "Windows native Linux/symlink limitations; not native model evidence"
+    },
+    "ruff_check": "PASS",
+    "ruff_format": "311_FILES_ALREADY_FORMATTED",
+    "mypy_src": "61_FILES_PASS",
+    "configured_Bandit_src": "PASS",
+    "new_helpers_Bandit": {
+      "exit": 1,
+      "LOW": 4,
+      "MEDIUM": 0,
+      "HIGH": 0,
+      "codes": [
+        "B404",
+        "B603"
+      ],
+      "ignore_added": false,
+      "context": "fixed no-shell subprocess and existing absolute interpreter; findings retained"
+    },
+    "no_isolation_build": {
+      "exit": 1,
+      "error": "BackendUnavailable: Cannot import setuptools.build_meta",
+      "retained": true
+    },
+    "isolated_uv_build": {
+      "exit": 0,
+      "sdist": "promptwitness-0.2.0.tar.gz",
+      "wheel": "promptwitness-0.2.0-py3-none-any.whl"
+    },
+    "twine_check": {
+      "exit": 0,
+      "sdist": "PASSED",
+      "wheel": "PASSED"
+    },
+    "full_local_package_suite": "NOT_RUN_THIS_SLICE",
+    "local_wheel_install_smoke": "NOT_RUN_THIS_SLICE",
+    "package_scope": "wheel contains core package; research helpers run from Git checkout, not standalone sdist reproduction",
+    "historical_timeout_WMI_and_WinError127_failures": "RETAINED_NOT_ERASED"
+  },
+  "previous_exact_SHA_CI": {
+    "sha": "b67de274342b9164007676d82441dbd42a5bed4f",
+    "run": 36323230572,
+    "conclusion": "success",
+    "jobs": "15/15",
+    "Ubuntu_Python_3_12_passed": 1860,
+    "wall_seconds": 160.32,
+    "coverage_percent": 94.06
+  },
+  "current_exact_SHA_CI": "PENDING_COMMIT_PUSH_AT_SNAPSHOT",
+  "scientific": {
+    "real_reference_parent_selection_config_freeze": "NOT_GENERATED",
+    "ONLINE_PINNED": "NOT_VALIDATED",
+    "native_GEPA_MIPRO_early_rejection_engine": "NOT_IMPLEMENTED",
+    "complete_all_role_cost_forecast": "UNMEASURED_NOT_ZERO",
+    "independent_statistical_audit": "NOT_COMPLETED",
+    "M1": "UNFITTED",
+    "Pilot": "NOT_RUN",
+    "method_effects": "NOT_MEASURED",
+    "pairs": 0,
+    "pairs_planned": 144,
+    "runs": 0,
+    "runs_planned": 180,
+    "transfers": 0,
+    "transfers_planned": 36,
+    "admission": "PARTIAL_NOT_PASSED",
+    "research_complete": false
+  },
+  "goal": "ACTIVE",
+  "automation": "DELETED_NO_REPLACEMENT",
+  "other_four_repositories": "FROZEN",
+  "next": "Integrate real strict scoring/stage-specific reference and selection generation and native GEPA/MIPRO early rejection with full role costs; validate online/statistical semantics, then real M1/Pilot/cost admission/original confirmation matrix/statistics/narrative."
+}

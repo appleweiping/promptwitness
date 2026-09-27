@@ -125,8 +125,9 @@ def task_wire(request: dict) -> dict:
 class TorchRuntime:
     """One model load, single-unit generation, no response cache or outcome batching.
 
-    This backend consumes only messages. It is not an independently enforced
-    data sandbox; optimizer/predictor/scorer Landlock routing remains separate.
+    This backend consumes only messages. The persistent launcher restricts its
+    process through model_access before importing this application module.
+    Direct invocation of this module does not establish that access boundary.
     Whole GPU allocation is owned by the parent through this process's exit.
     """
 
@@ -265,7 +266,7 @@ class TorchRuntime:
         }
 
 
-def worker(snapshot: Path, model: str):
+def worker(snapshot: Path, model: str, *, access=None):
     runtime = TorchRuntime(snapshot, model)
     print(
         json.dumps(
@@ -273,6 +274,7 @@ def worker(snapshot: Path, model: str):
                 "kind": "loaded",
                 "profile": runtime.profile,
                 "cold_start_seconds": runtime.cold_start_seconds,
+                "access": access,
             }
         ),
         flush=True,

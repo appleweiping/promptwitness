@@ -142,7 +142,13 @@ def _path_flags() -> int:
     raise AccessBoundaryError("Linux path flags are required")
 
 
-def enforce_policy(policy: dict[str, Any]) -> int:
+def enforce_policy(
+    policy: dict[str, Any],
+    *,
+    read_files: Sequence[Path] = (),
+    read_write_files: Sequence[Path] = (),
+    write_file_trees: Sequence[Path] = (),
+) -> int:
     """Irreversibly restrict a fresh single-threaded worker and its children.
 
     ABI1 has no network or truncate syscall restriction. Not an air gap, and
@@ -167,6 +173,10 @@ def enforce_policy(policy: dict[str, Any]) -> int:
             *((Path(path), read) for path in policy["data_read"]),
             *((Path(path), read | 1) for path in policy["runtime_read_execute"]),
             (Path(policy["scratch_read_write"]), handled & ~1),
+            *((path, 1 << 2) for path in read_files),
+            *((path, (1 << 1) | (1 << 2)) for path in read_write_files),
+            # Existing/future files only: no create/remove/reparent/execute.
+            *((path, (1 << 1) | ((1 << 14) if abi >= 3 else 0)) for path in write_file_trees),
         ]
         # Dynamic loader/time-zone files only, not /etc or the user's home.
         for name in ("/etc/ld.so.cache", "/etc/localtime"):

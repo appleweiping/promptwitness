@@ -48,6 +48,7 @@ def run(args):
             account,
             args.run_id,
             model_python=args.model_python,
+            data_root=args.data_root,
         ) as process:
             execution = {
                 **process.profile,
@@ -124,7 +125,8 @@ def run(args):
             "identity": execution,
             "scoring_executed": False,
             "online_certificate_validated": False,
-            "inference_process_data_sandbox": False,
+            "inference_process_access": process.access,
+            "inference_access_independent_native_validation": "NOT_ESTABLISHED_BY_RECEIPT",
             "native_optimizer_or_full_proposer_workflow": False,
             "real_M1_fit": "UNFITTED",
             "Pilot": "NOT_RUN",
@@ -139,7 +141,15 @@ def run(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    for name in ("requests", "history", "ledger", "output", "snapshot", "model-python"):
+    for name in (
+        "requests",
+        "history",
+        "ledger",
+        "output",
+        "snapshot",
+        "model-python",
+        "data-root",
+    ):
         parser.add_argument("--" + name, type=Path, required=True)
     for name in ("request-sha256", "history-sha256", "model", "run-id"):
         parser.add_argument("--" + name, required=True)

@@ -191,3 +191,26 @@
 | 2026-09-27T13:35:00Z | experiment-bridge | refine-logs/EXPERIMENT_PLAN.md | implementation | 实际Qwen/OLMo10wire连续成本，修复吞异常中断，窄doc资格；M1/Pilot/online/native未完成 |
 | 2026-09-27T13:35:00Z | experiment-bridge | refine-logs/EXPERIMENT_RESULTS_20260927_133500.md | implementation | 实际Qwen/OLMo10wire连续成本，修复吞异常中断，窄doc资格；M1/Pilot/online/native未完成 |
 | 2026-09-27T13:35:00Z | experiment-bridge | refine-logs/EXPERIMENT_RESULTS.md | implementation | 实际Qwen/OLMo10wire连续成本，修复吞异常中断，窄doc资格；M1/Pilot/online/native未完成 |
+
+| 2026-09-27T15:08:27Z | experiment-bridge | AGENTS.md | implementation | 推理文件边界两模型6实际fitwire窄资格；失败与连续成本保留，非M1/Pilot/科学接受 |
+| 2026-09-27T15:08:27Z | experiment-bridge | reproduce/persistent_model.py | implementation | 推理文件边界两模型6实际fitwire窄资格；失败与连续成本保留，非M1/Pilot/科学接受 |
+| 2026-09-27T15:08:27Z | experiment-bridge | reproduce/process_access.py | implementation | 推理文件边界两模型6实际fitwire窄资格；失败与连续成本保留，非M1/Pilot/科学接受 |
+| 2026-09-27T15:08:27Z | experiment-bridge | reproduce/run_model_transport.py | implementation | 推理文件边界两模型6实际fitwire窄资格；失败与连续成本保留，非M1/Pilot/科学接受 |
+| 2026-09-27T15:08:27Z | experiment-bridge | reproduce/torch_runtime.py | implementation | 推理文件边界两模型6实际fitwire窄资格；失败与连续成本保留，非M1/Pilot/科学接受 |
+| 2026-09-27T15:08:27Z | experiment-bridge | tests/reproduce/test_persistent_model.py | implementation | 推理文件边界两模型6实际fitwire窄资格；失败与连续成本保留，非M1/Pilot/科学接受 |
+| 2026-09-27T15:08:27Z | experiment-bridge | reproduce/model_access.py | implementation | 推理文件边界两模型6实际fitwire窄资格；失败与连续成本保留，非M1/Pilot/科学接受 |
+| 2026-09-27T15:08:27Z | experiment-bridge | reproduce/check_model_access.py | implementation | 推理文件边界两模型6实际fitwire窄资格；失败与连续成本保留，非M1/Pilot/科学接受 |
+| 2026-09-27T15:08:27Z | experiment-bridge | reproduce/run_model_access.py | implementation | 推理文件边界两模型6实际fitwire窄资格；失败与连续成本保留，非M1/Pilot/科学接受 |
+| 2026-09-27T15:08:27Z | experiment-bridge | reproduce/MODEL_ACCESS.md | implementation | 推理文件边界两模型6实际fitwire窄资格；失败与连续成本保留，非M1/Pilot/科学接受 |
+| 2026-09-27T15:08:27Z | experiment-bridge | tests/reproduce/test_model_access.py | implementation | 推理文件边界两模型6实际fitwire窄资格；失败与连续成本保留，非M1/Pilot/科学接受 |
+| 2026-09-27T15:08:27Z | experiment-bridge | tests/reproduce/test_run_model_access.py | implementation | 推理文件边界两模型6实际fitwire窄资格；失败与连续成本保留，非M1/Pilot/科学接受 |
+| 2026-09-27T15:08:27Z | experiment-bridge | refine-logs/EXPERIMENT_RESULTS_20260927_150827.md | implementation | 推理文件边界两模型6实际fitwire窄资格；失败与连续成本保留，非M1/Pilot/科学接受 |
+| 2026-09-27T15:08:27Z | experiment-bridge | refine-logs/EXPERIMENT_RESULTS.md | implementation | 推理文件边界两模型6实际fitwire窄资格；失败与连续成本保留，非M1/Pilot/科学接受 |
+| 2026-09-27T15:08:27Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260927_150827.md | implementation | 推理文件边界两模型6实际fitwire窄资格；失败与连续成本保留，非M1/Pilot/科学接受 |
+| 2026-09-27T15:08:27Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | 推理文件边界两模型6实际fitwire窄资格；失败与连续成本保留，非M1/Pilot/科学接受 |
+| 2026-09-27T15:08:27Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260927_150827.md | implementation | 推理文件边界两模型6实际fitwire窄资格；失败与连续成本保留，非M1/Pilot/科学接受 |
+| 2026-09-27T15:08:27Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 推理文件边界两模型6实际fitwire窄资格；失败与连续成本保留，非M1/Pilot/科学接受 |
+| 2026-09-27T15:08:27Z | experiment-bridge | refine-logs/EXPERIMENT_PLAN_20260927_150827.md | implementation | 推理文件边界两模型6实际fitwire窄资格；失败与连续成本保留，非M1/Pilot/科学接受 |
+| 2026-09-27T15:08:27Z | experiment-bridge | refine-logs/EXPERIMENT_PLAN.md | implementation | 推理文件边界两模型6实际fitwire窄资格；失败与连续成本保留，非M1/Pilot/科学接受 |
+| 2026-09-27T15:08:27Z | experiment-bridge | research/ARIS_MODEL_ACCESS_20260927_150827.json | implementation | 推理文件边界两模型6实际fitwire窄资格；失败与连续成本保留，非M1/Pilot/科学接受 |
+| 2026-09-27T15:08:27Z | experiment-bridge | research/ARIS_MODEL_ACCESS.json | implementation | 推理文件边界两模型6实际fitwire窄资格；失败与连续成本保留，非M1/Pilot/科学接受 |
