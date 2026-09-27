@@ -50,6 +50,7 @@ promptwitness = ["py.typed"]
 [tool.pytest.ini_options]
 addopts = "-q --strict-markers --cov=promptwitness --cov-report=term-missing --cov-fail-under=90"
 testpaths = ["tests"]
+pythonpath = ["."]
 
 [tool.coverage.run]
 branch = true

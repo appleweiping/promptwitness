@@ -157,6 +157,9 @@
     "responses-v1_1.jsonl": "faa1f891928bd0254dc0ab6200b68e440e9f8a62cadd7c4dfcd8acb093fdff07"
   },
   "status": "COMPLETED_COST_ONLY",
+  "worker_source_bundle_sha256": "cfdbfe805cefe523b9060dc47051c6655f736e803a04e876dcba547decd5c70f",
+  "worker_sha256": "97e468be3d70efa2e6a8c7e2a20cd2c5c544cc94a6c63b1cadc4f0ebfbfabd73",
+  "source_bundle_scope": "exact cost-worker deployment before later native-bridge review; no scientific method executed",
   "unknown_cost_calls": 0,
   "workload_profiles": {
     "bfcl:base": 8,
