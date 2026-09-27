@@ -54,6 +54,16 @@ tests/security rules and the Python 3.10 typing target; no method/budget change.
 The repaired commit's CI must be reported separately, not replaced by this run
 or the historical baseline CI.
 
+The repaired source commit `3898cc7fe7bf9eeee75a73b8f55d70c6fa1cb0a4` has now
+completed [CI run 36293650240](https://github.com/appleweiping/promptwitness/actions/runs/36293650240)
+with **15/15 jobs successful**. The nine full-suite runtime combinations span
+Python 3.10–3.14 and Linux/Windows/macOS, with 1632 tests passing and combined
+coverage 94.03–94.04%. The separate new-core job passed 102 tests and the 90%
+branch gate. Some newer-Python jobs retain 118 warnings; they were not suppressed
+or described as warning-free. Later reporting commits change only delivery
+metadata, not the tested method/configuration. Local full-suite timeout and
+first-run CI failure remain valid historical observations, not erased by success.
+
 Core engineering review has used two cycles; scientific revisions used zero.
 No automatic v1.2, budget expansion, matrix reduction or additional research
 inference follows this blocked delivery. Remaining work is concrete execution

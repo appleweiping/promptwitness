@@ -51,6 +51,15 @@
     "CI_infrastructure_repairs": ["explicit repository-root pytest pythonpath",
       "quality job uses Python3.12 and known numpy1.26.4 scipy1.15.3 sklearn1.6.1; retain source typing target3.10 and full runtime test matrix3.10-3.14"],
     "source_commit_before_CI_infrastructure_repairs": "4db86d94d5c4c2e935d08731ec4569aadf63fb29"},
+  "successful_source_verification": {
+    "sha": "3898cc7fe7bf9eeee75a73b8f55d70c6fa1cb0a4",
+    "CI_run": 36293650240, "conclusion": "success", "jobs_passed": 15, "jobs_total": 15,
+    "full_suite_passed": 1632, "full_suite_runtime_combinations": 9,
+    "full_suite_combined_coverage_percent_range": [94.03, 94.04],
+    "core_tests_passed": 102, "core_branch_threshold": "PASSED_90_percent",
+    "warnings": "118 warnings in some newer-Python full-suite jobs; retained in CI logs, not suppressed or claimed zero",
+    "source_method_changed_by_CI_repairs": false
+  },
   "scientific_results": false,
   "g1_not_completed_by_test_count": true
 }
