@@ -144,11 +144,13 @@ def score_ranking(
         subset_ranking = tuple(x for x in eligible if x in set(gold.subset))
         subset_rank = subset_ranking.index(gold.target_id) + 1
         subset_recalls = tuple((k, int(subset_rank <= k)) for k in (1, 2, 3))
-        cutoffs, primary_k = (1, 5, 10, 50), 5
+        cutoffs: tuple[int, ...] = (1, 5, 10, 50)
+        primary_k = 5
     else:
         eligible = ranking  # FIQ convention: do not inherit CIRR exclusion.
         subset_recalls = ()
-        cutoffs, primary_k = (10, 50), 10
+        cutoffs = (10, 50)
+        primary_k = 10
     target_rank = eligible.index(gold.target_id) + 1
     return RetrievalScore(
         int(target_rank <= primary_k),
@@ -161,7 +163,7 @@ def summarize_rankings(
     golds: Sequence[RetrievalGold],
     rankings: Mapping[str, tuple[str, ...]],
     pools: Mapping[str, tuple[str, ...]],
-) -> dict:
+) -> dict[str, object]:
     """Query micro and, separately, equal-category FashionIQ macro.
 
     CIRR uses pools['cirr']; FashionIQ requires all three category pools and at

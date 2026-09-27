@@ -481,3 +481,16 @@
 | 2026-09-27T23:10:53Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 精确CI终态与未准入状态追加 |
 | 2026-09-27T23:10:53Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260927_231053.md | implementation | CI终态tracker同字节版本快照 |
 | 2026-09-27T23:10:53Z | experiment-bridge | findings.md | implementation | exactSHA CI与Linux authored验证发现追加 |
+| 2026-09-27T23:34:12Z | experiment-bridge | reproduce/retrieval_role_scoring.py | implementation | CIR restricted scorer dispatch/worker；rankings in, scorer-only gold read |
+| 2026-09-27T23:34:12Z | experiment-bridge | reproduce/retrieval_scoring.py | implementation | scoring返回类型注解细化；无行为变化 |
+| 2026-09-27T23:34:12Z | experiment-bridge | tests/reproduce/test_retrieval_role_scoring.py | implementation | 自制CIRR/FIQ、相对store路径、双query人口及Linux实进程回归 |
+| 2026-09-27T23:34:12Z | experiment-bridge | research/ICMR_RESTRICTED_SCORING_20260927_233412.md | implementation | 新评分路径与M1未准入界限 |
+| 2026-09-27T23:34:12Z | experiment-bridge | research/ICMR_RESTRICTED_SCORING.md | implementation | 同内容latest copy |
+| 2026-09-27T23:34:12Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | 首轮blocker与same-family复审关闭记录 |
+| 2026-09-27T23:34:12Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260927_233412.md | implementation | 审查记录同字节快照 |
+| 2026-09-27T23:34:12Z | experiment-bridge | research/ACCESS_AUDIT.md | implementation | 本轮无benchmark数据访问披露 |
+| 2026-09-27T23:34:12Z | experiment-bridge | research/ACCESS_AUDIT_20260927_233412.md | implementation | 访问审计同字节快照 |
+| 2026-09-27T23:34:12Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | scorer工程通过与M1未准入状态 |
+| 2026-09-27T23:34:12Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260927_233412.md | implementation | tracker同字节快照 |
+| 2026-09-27T23:34:12Z | experiment-bridge | AGENTS.md | implementation | 当前M1 scorer增量dashboard |
+| 2026-09-27T23:34:12Z | experiment-bridge | findings.md | implementation | 相对路径blocker修复及权限发现 |

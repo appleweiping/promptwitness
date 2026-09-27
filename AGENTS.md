@@ -251,3 +251,11 @@ M1/Pilot仍NOT_ADMITTED，default4/scientific0/原账本/无timer不变。
 1skipped/127warnings；Linux实际test_real_linux_process_sentinels在通过job中执行，
 覆盖13角色×11leaves=143读/143写检查。本机reproduce475pass4skip。见
 research/ICMR_M1_CI；这不证明CIR controller接线/真实数据/许可证/M1/Pilot。
+
+2026-09-27T23:34:12Z：CIRR/FashionIQ fit/search/selection 新增可调用的受限评分
+路径：控制端只发排名，检索专用scorer进程从本阶段gold读标签，只回指标；search
+可部分评分，fit/selection须完整，final未开放。fresh same-family/provisional
+审查发现并复审关闭相对store路径blocker。本机最终reproduce481pass7skip，
+含最后fit增量；真实Linux执行需等新提交精确CI。仅自制fixture，无正式
+benchmark数据/新模型/GPU/paid；M1/Pilot/论文效果仍NOT_ADMITTED。详见
+research/ICMR_RESTRICTED_SCORING.md；原账本/default4/无timer不变。

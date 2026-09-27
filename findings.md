@@ -157,3 +157,9 @@ Linux、数据store、controller接线、近重复识别和final封存仍未通�
 CI run36357426043全15/15成功；Ubuntu3.14的2018pass1skip127warnings含实际
 Linux Landlock sentinel143读/143写机械断言。本机reproduce475pass4skip。
 证据仅限authored权限机制，不解真实store/controller/数据许可/科学准入。
+
+2026-09-27T23:34:12Z 检索scorer路径已从静态role推进到实际dispatch/worker：
+父进程只传完整排名、worker独立读取本阶段gold且只回指标。首次fresh审查找出
+相对路径在scratch cwd失效的blocker，修复并加回归后复审关闭；两query测试确认
+search抽样与fit/selection完整人口不同。Windows本地套件481pass7skip，Linux
+真实Landlock尚待新SHA CI。无正式数据或M1/Pilot科学准入，其他限制不变。
