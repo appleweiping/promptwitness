@@ -313,3 +313,13 @@
 | 2026-09-27T19:28:06Z | experiment-bridge | research/ICMR_DATA_AUDIT_20260927_192806.md | implementation | CLIP第一方exactrevision/权重候选/预处理/tokenizer长度来源已查，未下载运行 |
 | 2026-09-27T19:28:06Z | experiment-bridge | research/ICMR_DATA_AUDIT.md | implementation | 最新来源审计副本，许可/视觉/native/science仍待准入 |
 | 2026-09-27T19:28:06Z | experiment-bridge | findings.md | implementation | append-only固定背骨来源，不把sourceexpectedhash称本地artifact |
+| 2026-09-27T19:32:23Z | experiment-bridge | research/ARIS_ICMR_RETRIEVAL_20260927_193223.md | implementation | 原完整1957/6/94.03终态、实施SHA CI成功、docSHA queued与localbuild pending |
+| 2026-09-27T19:32:23Z | experiment-bridge | research/ARIS_ICMR_RETRIEVAL.md | implementation | 最新实际状态副本，不改M1/Pilot/科学准入 |
+| 2026-09-27T19:32:23Z | experiment-bridge | research/ARIS_ICMR_RETRIEVAL_20260927_193223.json | implementation | 机器可读原2013.77秒exit0及真实推送/CI状态 |
+| 2026-09-27T19:32:23Z | experiment-bridge | research/ARIS_ICMR_RETRIEVAL.json | implementation | 最新机器状态精确副本 |
+| 2026-09-27T19:32:23Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260927_193223.md | implementation | 追加实际全套与CI终态；原图/许可/native/科学矩阵仍pending |
+| 2026-09-27T19:32:23Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 最新tracker副本 |
+| 2026-09-27T19:32:23Z | experiment-bridge | refine-logs/EXPERIMENT_RESULTS_20260927_193223.md | implementation | 原完整软件终态，不伪造新图像/方法结果 |
+| 2026-09-27T19:32:23Z | experiment-bridge | refine-logs/EXPERIMENT_RESULTS.md | implementation | 最新results副本 |
+| 2026-09-27T19:32:23Z | experiment-bridge | AGENTS.md | implementation | dashboard更新原测试终态和待续40858/latestCI |
+| 2026-09-27T19:32:23Z | experiment-bridge | findings.md | implementation | append-only原终态与未通过科学门禁 |

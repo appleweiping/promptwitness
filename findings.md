@@ -72,3 +72,10 @@ ViT-L/14 checkpoint candidate is distinct from336px/OpenCLIP. Upstream expected
 artifact identity is not a measured local hash. The original loader transform
 and77-token error semantics must be shared/frozen before actual comparisons.
 No encoder/strong-CIR/scientific qualification follows from this source audit.
+
+Original whole-suite39297 later completed exit0:1957passed6skipped/2013.77s,
+94.03% configured-src coverage; original WMI diagnostic retained. Implementation
+27f90c5 was actually pushed/remote matched and exact CI36344286371 succeeded;
+documentation-source commit e95bd09 pushed but its CIqueued at193223. Local
+build40858 still lacks terminal output; remote build is not local-build evidence.
+No image/method benefit/Pilot/scientific acceptance follows from software passes.

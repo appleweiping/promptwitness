@@ -163,3 +163,10 @@ CIRR官网许可核查自动展示testannotation示例，ACCESS_AUDIT披露；�
 image-source与weights审计未完成；不代签/联系/下载镜像/测试上传绕过。
 物理DB26a7e04b...未改，1170calls/2136046input/195222output/3.8074371029887377GPUh；
 unknown未编码保留、新real/GPU/tokens/paid0。default4科学0/no timer/goalACTIVE。
+
+2026-09-27 19:32:23 UTC更新：原39297已terminalexit0/1957passed6skip2013.77s/
+94.03%；WMI日志保留。finalRuff/format366通过；实现27f90c5实际push并exact
+CI36344286371success。来源审计文档e95bd09已push/CIqueued，本机原build40858
+仍未终态，不假称localbuild过。ICMR_DATA_AUDIT记录第一方CLIPexactsource与
+上游expectedweightidentity，但未下载/编码；原图/许可/native/image/cost/M1/Pilot/
+science/manuscript仍pending。待续原build40858；新latestSHA CI须另外核验。
