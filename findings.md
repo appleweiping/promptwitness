@@ -163,3 +163,8 @@ Linux Landlock sentinel143读/143写机械断言。本机reproduce475pass4skip�
 相对路径在scratch cwd失效的blocker，修复并加回归后复审关闭；两query测试确认
 search抽样与fit/selection完整人口不同。Windows本地套件481pass7skip，Linux
 真实Landlock尚待新SHA CI。无正式数据或M1/Pilot科学准入，其他限制不变。
+
+2026-09-27T23:44:46Z fda4464精确CI run36359379065全15/15成功，Linux3.14
+2027pass1skip127warnings，新9项含真实受限scorer。对威胁边界再核：不直接
+返回原始target/subset不等于不可推断；逐查询hit反馈可被自适应探测，正式
+controller仍需调用预算、journal、selector授权和sealed final。M1继续未准入。

@@ -259,3 +259,9 @@ research/ICMR_M1_CI；这不证明CIR controller接线/真实数据/许可证/M1
 含最后fit增量；真实Linux执行需等新提交精确CI。仅自制fixture，无正式
 benchmark数据/新模型/GPU/paid；M1/Pilot/论文效果仍NOT_ADMITTED。详见
 research/ICMR_RESTRICTED_SCORING.md；原账本/default4/无timer不变。
+
+2026-09-27T23:44:46Z：该源SHA fda4464dc4186338e8ed1c06777f369785ebea08
+CI run36359379065终态success15/15；Ubuntu3.14 2027pass1skip127warnings，
+新Linux实际worker测试在通过增量中。受限scorer仅不直接返回原始target/subset；
+逐查询指标可被反复探测推断标签，控制器预算/journal/selector尚缺，不能宣布
+完全盲评、M1或Pilot。见research/ICMR_RESTRICTED_SCORING.md。

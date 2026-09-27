@@ -494,3 +494,13 @@
 | 2026-09-27T23:34:12Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260927_233412.md | implementation | tracker同字节快照 |
 | 2026-09-27T23:34:12Z | experiment-bridge | AGENTS.md | implementation | 当前M1 scorer增量dashboard |
 | 2026-09-27T23:34:12Z | experiment-bridge | findings.md | implementation | 相对路径blocker修复及权限发现 |
+| 2026-09-27T23:44:46Z | experiment-bridge | research/ICMR_RESTRICTED_SCORING_20260927_234446.md | implementation | 精确CI与指标反馈可推断边界新版本 |
+| 2026-09-27T23:44:46Z | experiment-bridge | research/ICMR_RESTRICTED_SCORING.md | implementation | 同内容latest copy |
+| 2026-09-27T23:44:46Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | CI终态及审查结论范围澄清 |
+| 2026-09-27T23:44:46Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260927_234446.md | implementation | 审查记录同字节快照 |
+| 2026-09-27T23:44:46Z | experiment-bridge | research/ACCESS_AUDIT.md | implementation | 指标反馈不能保证标签不可推断 |
+| 2026-09-27T23:44:46Z | experiment-bridge | research/ACCESS_AUDIT_20260927_234446.md | implementation | 访问审计同字节快照 |
+| 2026-09-27T23:44:46Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 15/15精确CI及M1未准入 |
+| 2026-09-27T23:44:46Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260927_234446.md | implementation | tracker同字节快照 |
+| 2026-09-27T23:44:46Z | experiment-bridge | AGENTS.md | implementation | 精确CI终态与反馈风险dashboard |
+| 2026-09-27T23:44:46Z | experiment-bridge | findings.md | implementation | 反馈探测风险与M1下一门禁 |
