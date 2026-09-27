@@ -184,3 +184,23 @@ uv.CMD空77 owned artifact已私有归档。99876b8 exactCI36345101338 success15
 M1原图/许可/封存/fullpool tie、实际encoder/caption/native/online/statistics/fullroles/
 Pilot/确认矩阵/英文稿仍pending，goalACTIVE无timer/default4科学0不改。见新
 research/ARIS_ICMR_NATIVE_METRICS；真实访问门槛不得因CPU通过就跳过。
+
+2026-09-27T21:21:00Z：ICMR单queryfloat32 CPU排名前置实际验收：主23828/doc41132
+各一次exit0，四authoredcase/8原metriccalls/8全72-ID排名/36比较；8malformed拒绝，
+原gate survivor64/rejection4/failed1attempt0score。旧lexical反例保留；querybatch1
+gallery顺序/1-dot/Torchargsort固定，不自授images/encoder/GPU/batch/fullbenchmark。
+新owned SciPy1.15.3层，原50pins只读，新51spec87663299实匹配；71stagefiles
+逐字节往返核对。source053同家族provisional；doc054身份unknown/independence
+unverified，aggregate未单独展示CUDA值/各72-ID列表限制保留。原42147全套终态
+1978passed6skip/1014.27s/94.03%src（非reproducecoverage），Ruff387/mypy61/
+src+新3helpersBandit/build15144两包Twine过；旧exec B102 MEDIUM不屏蔽。
+原80877已1971/6/1159.27s仅bc8304e3；bc exactCI36347625475 success15/15，
+新代码记录时未push，不借旧CI充数。DB26a7e04b...本轮hash未改，1170历史费用/
+unknown未编码保留；新增model/token/GPU/paid0，CPU总开销未完整计量非0。
+ARIS novelty-check初审001/路径澄清002/同记忆新HbBoPs续查003完整私有trace，
+5/10 PROCEED_WITH_CAUTION仅早期过、same-family/provisional，不科学接受。
+HbBoPs已含结构vs整段text、stage配对/superset/真实最高fidelity，C1必须检验
+typed父子edit×query相对强模块控制的边际作用；不能写首次结构/paired/风险。
+六configs映射/数据访问/final封存/视觉与native在线/全角色forecast/M1/Pilot/
+统计/英文稿待准入，goalACTIVE/default4科学0/无timer/其他四仓冻结不变。
+详见research/ARIS_ICMR_CPU_RANKING和idea-stage/ICMR_NOVELTY_CHECK。

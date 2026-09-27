@@ -100,3 +100,26 @@ Old-delivered99876b8 CI36345101338 now success15/15; new helper not yet pushed.
 Old1170 cost history/DB unchanged, new real/GPU/tokens/paid0. Data/user NLVR2
 access/official parity/sealed final/encoder/M1/Pilot/statistics/manuscript still
 pending, same run/default4scientific0/no timer; active goal not completed.
+
+## 2026-09-27T21:21:00Z — CPU numeric witness and narrowed CIR research delta
+
+Actual source053/doc054 qualification is four authored single-query CPU cases,
+8 original metric calls/8 complete72-ID ranks/36 metrics per execution. Retained
+float32 subtraction tie collapse and old lexical mismatch, malformed failures,
+and original gate full-survivor64/reject4/failed0-score. No image/encoder/M1/Pilot.
+Original42147 whole terminal1978pass6skip1014.27s, src94.03%; final Ruff387/
+mypy61/src and new3helper Bandit/build15144 two distributions+Twine passed.
+Old trusted-loader B102 unsuppressed; earlier build failure remains. Old80877
+terminal1971pass belongs bc source; exactbc CI36347625475 success15/15. New source
+not yet delivered at this record. Complete51-pin metadata87663299, source71byte
+roundtrip, owned SciPy layer/base read-only. Full CPU overhead not fully metered.
+Physical1170 DB hash26a7e04b... unchanged; unknown not encoded, newmodel/GPU/paid0.
+Novelty-check001/002/003 same-family/provisional stays5/10 CAUTION, early gate
+cleared only. HbBoPs method includes structural-vs-flat ablation and paired
+superset/full-highest-fidelity final scoring; typed edit relation must beat
+strong matched modular structure control, not weak flat. CIReVL chain already
+exists; C2 uses known finite-pool tools, C3 native/all-role unseen CIR still
+untested. Public-paper examples exposed/disclosed, not used to tune/score.
+No seventh configuration/seeds/threshold/default4/scientific0/timer reset.
+Data license/sealed final/visual/native online/realM1/Pilot/matrix/manuscript
+pending; bridge and goal ACTIVE, other four repositories frozen.

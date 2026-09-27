@@ -100,18 +100,3 @@ zero-shot/training-free。同certifier的文本/结构臂要匹配信息与完�
 近邻原算法/协议适配应分开，不能替换随机观测为预测或确定性主动选点后沿用证书。
 本轮CPU排名新代码通过1978tests，不是M1拟合或科学效果。数据/许可/final封存、
 strong baseline/actualencoder/nativeonline/Pilot/统计/英文稿仍待准入。
-
-## 2026-09-27T21:21:00Z：HbBoPs 作者版续查后的识别要求
-
-[HbBoPs](https://arxiv.org/html/2412.07820v2)已有模块结构对整段文本表示消融，
-共享stage随机实例的paired比较、递增superset/cache及真实full/highest-fidelity
-incumbent；不能用它non-paired或proxy-final来区别。其预算是evaluation calls，
-不冒充已核验all-role。[Coin Flip/PROSE](https://arxiv.org/html/2604.14585v2)有组件化
-定向变异与risk-adjusted fitness，属ICML2026 workshop而非主会。原出版PDF获取
-失败与作者版不逐字核对限制保留。完整续查same-family/provisional仍5/10/CAUTION。
-
-C1收窄为typed父子编辑关系×query对完整文本及强模块化、无显式编辑关系控制的
-条件性边际收益。只胜flat embedding或已有模块特征不足；控制必须匹配完整信息、
-拟合数据/容量/调参/计算并共用certifier。现六configs如何识别新增混淆仍需设计审查
-和训练侧冻结，未自加第七配置或执行实验。C2具体精确审计非新风险原理；C3须
-真实native/全角色预算/封存终评闭环，不推断必有可优化空间或以offline重放代替。

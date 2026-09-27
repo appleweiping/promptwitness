@@ -348,3 +348,55 @@
 | 2026-09-27T20:17:00Z | experiment-bridge | findings.md | implementation | authored原metric核严格排序验收/并列反例/source051/doc052/实际质量与待准入记录，不science通过 |
 | 2026-09-27T20:19:11Z | experiment-bridge | research/ARIS_ICMR_RETRIEVAL_20260927_201911.json | implementation | 明确旧1957源码范围及新helper B102，不沿用旧helper PASS冒充新扫描 |
 | 2026-09-27T20:19:11Z | experiment-bridge | research/ARIS_ICMR_RETRIEVAL.json | implementation | 最新范围明确机器状态副本 |
+| 2026-09-27T21:21:00Z | experiment-bridge | AGENTS.md | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | configs/research/retrieval-ranking-cpu-env.json | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | findings.md | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | novelty-check | idea-stage/ICMR_NOVELTY_CHECK.json | idea-discovery | 初期5/10 CAUTION、同记忆HbBoPs续查、强模块控制与阅读限制，不科学接受 |
+| 2026-09-27T21:21:00Z | novelty-check | idea-stage/ICMR_NOVELTY_CHECK.md | idea-discovery | 初期5/10 CAUTION、同记忆HbBoPs续查、强模块控制与阅读限制，不科学接受 |
+| 2026-09-27T21:21:00Z | novelty-check | idea-stage/ICMR_NOVELTY_CHECK_20260927_212100.json | idea-discovery | 初期5/10 CAUTION、同记忆HbBoPs续查、强模块控制与阅读限制，不科学接受 |
+| 2026-09-27T21:21:00Z | novelty-check | idea-stage/ICMR_NOVELTY_CHECK_20260927_212100.md | idea-discovery | 初期5/10 CAUTION、同记忆HbBoPs续查、强模块控制与阅读限制，不科学接受 |
+| 2026-09-27T21:21:00Z | experiment-bridge | idea-stage/docs/research_contract.md | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | idea-stage/docs/research_contract_20260927_211100.md | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | idea-stage/docs/research_contract_20260927_212100.md | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260927_211100.md | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | refine-logs/EXPERIMENT_PLAN.md | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | refine-logs/EXPERIMENT_PLAN_20260927_203525.md | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | refine-logs/EXPERIMENT_PLAN_20260927_211100.md | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | refine-logs/EXPERIMENT_PLAN_20260927_212100.md | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | refine-logs/EXPERIMENT_RESULTS.md | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | refine-logs/EXPERIMENT_RESULTS_20260927_211100.md | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260927_211100.md | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | reproduce/RETRIEVAL_CPU_RANKING.md | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | reproduce/RETRIEVAL_CPU_RANKING_20260927_203525.md | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | reproduce/check_retrieval_cpu_ranking.py | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | reproduce/check_retrieval_scoring.py | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | reproduce/retrieval_cpu_ranking.py | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | research/ACCESS_AUDIT.md | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | research/ACCESS_AUDIT_20260927_211100.md | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | research/ARIS_ICMR_CPU_RANKING.json | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | research/ARIS_ICMR_CPU_RANKING.md | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | research/ARIS_ICMR_CPU_RANKING_20260927_211100.json | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | research/ARIS_ICMR_CPU_RANKING_20260927_211100.md | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | research/ARIS_ICMR_NATIVE_METRICS.json | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | research/ARIS_ICMR_NATIVE_METRICS.md | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | research/ARIS_ICMR_NATIVE_METRICS_20260927_211100.json | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | research/ARIS_ICMR_NATIVE_METRICS_20260927_211100.md | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | research/ARIS_ICMR_RETRIEVAL.json | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | research/ARIS_ICMR_RETRIEVAL.md | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | research/ARIS_ICMR_RETRIEVAL_20260927_211100.json | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | research/ARIS_ICMR_RETRIEVAL_20260927_211100.md | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | research/ICMR_DATA_AUDIT.md | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | research/ICMR_DATA_AUDIT_20260927_211100.md | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | research/ICMR_SCOPE.json | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | research/ICMR_SCOPE.md | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | research/ICMR_SCOPE_20260927_211100.json | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | research/ICMR_SCOPE_20260927_211100.md | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | research/ICMR_SCOPE_20260927_212100.json | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | research/ICMR_SCOPE_20260927_212100.md | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | experiment-bridge | tests/reproduce/test_retrieval_cpu_ranking.py | implementation | CPU单查询数值/gate限定实际验收、质量终态、版本与访问披露；不真实图像实验 |
+| 2026-09-27T21:21:00Z | novelty-check | .aris/traces/novelty-check/2026-09-27_run01/001-icmr-novelty-review | idea-discovery | 完整原请求/响应及模型元数据私有不提交 |
+| 2026-09-27T21:21:00Z | novelty-check | .aris/traces/novelty-check/2026-09-27_run01/002-icmr-novelty-path-clarification | idea-discovery | 已保存原路径澄清及同一完整final响应，不新增科学round |
+| 2026-09-27T21:21:00Z | novelty-check | .aris/traces/novelty-check/2026-09-27_run01/003-icmr-novelty-hbbops-followup | idea-discovery | 同记忆新来源续查完整原请求/响应，私有不提交 |
+| 2026-09-27T21:21:00Z | experiment-bridge | .aris/compute/icmr-ranking-cpu-provider.md | implementation | fresh-doc一次actual终态receipt与aggregate限制作私有追加 |

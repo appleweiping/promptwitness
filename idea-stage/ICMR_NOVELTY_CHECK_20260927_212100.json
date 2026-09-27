@@ -1,0 +1,77 @@
+{
+  "format": "promptwitness.icmr-novelty-check/v1",
+  "recorded_at": "2026-09-27T21:21:00Z",
+  "skill": "novelty-check",
+  "primary_tasks": "Phase A/B targeted search and selected primary sections",
+  "claims": 3,
+  "minimum_query_formulations_per_claim": 3,
+  "search_coverage": "TARGETED_NOT_EXHAUSTIVE",
+  "fresh_initial": {
+    "model": "gpt-6-astra",
+    "reasoning_effort": "xhigh",
+    "family_relation": "same",
+    "independence_verified": false,
+    "acceptance": "provisional",
+    "score": 5,
+    "out_of": 10,
+    "recommendation": "PROCEED_WITH_CAUTION",
+    "early_check_cleared": true,
+    "traces": [
+      "001",
+      "002"
+    ]
+  },
+  "hbbops_followup": {
+    "trace": "003",
+    "same_existing_reviewer_memory": true,
+    "score": 5,
+    "recommendation": "PROCEED_WITH_CAUTION",
+    "early_check_cleared": true,
+    "scientific_acceptance": false,
+    "HbBoPs_reading": "ARXIV_AUTHOR_V2_METHOD_PROTOCOL_ABLATIONS_AND_APPENDIX; PMLR_PUBLICATION_METADATA; PUBLISHED_PDF_FETCH_FAILED",
+    "Coin_Flip_reading": "AUTHOR_V2_RELATED_STUDIES_DISCUSSION_APPENDIX_C_PROSE; WORKSHOP_NOT_MAIN_CONFERENCE; OPENREVIEW_PDF_CHALLENGE",
+    "author_version_published_byte_equivalence": false
+  },
+  "novelty": "UNESTABLISHED",
+  "scientific_admission": "NOT_PASSED",
+  "real_images_or_models_executed": false,
+  "M1_fit": false,
+  "Pilot": false,
+  "defaults": {
+    "MAX_ROUNDS": 4,
+    "scientific_rounds_used": 0,
+    "same_run_and_memory": true
+  },
+  "strong_comparators": [
+    "SOPL",
+    "HbBoPs",
+    "RG-PT",
+    "POES",
+    "aLTT",
+    "CAPO",
+    "ProEval",
+    "Cer-Eval"
+  ],
+  "exact_result_containing_named_published_paper_found": false,
+  "ABANDON": false,
+  "unpermitted_claims": [
+    "first structured prompt prior",
+    "first risk-controlled prompt optimization",
+    "first correctness proxy",
+    "first fit cost accounting",
+    "first CIR rewrite",
+    "new finite-pool risk theorem",
+    "training-free full method using train labels"
+  ],
+  "declared_delta": "Empirical incremental value of typed parent-child edit x query under complete declared text/equal allowed parents/matched fit and compute, actual finite-pool paired audit, native all-role-budget CIR consequences; beyond matched strong modular representation without explicit edit relation",
+  "decisive_control": "Same certifier and lawful random prefix; matched complete text/parent information/fit/capacity/tuning/compute; real all-role costs and full survivor scores; additionally strong modular representation without explicit parent-child edit relation, not merely flat embedding",
+  "six_configurations_or_five_seeds_changed": false,
+  "additional_comparator_mapping": "PENDING_FREEZE_AND_REVIEW",
+  "papers_reproduced": false,
+  "source_full_proof_audit": false,
+  "official_annotation_files_accessed": false,
+  "public_paper_qualitative_exposure_disclosed": true,
+  "goal": "ACTIVE",
+  "manuscript": "NOT_STARTED",
+  "other_four_repositories": "FROZEN"
+}

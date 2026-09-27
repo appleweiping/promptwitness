@@ -1,0 +1,301 @@
+{
+  "format": "promptwitness.icmr-single-query-cpu-ranking-qualification/v1",
+  "recorded_at": "2026-09-27T21:11:00Z",
+  "status": "PASS_FOUR_AUTHORED_CASES_SINGLE_QUERY_CPU_ONLY",
+  "goal": "ACTIVE",
+  "same_existing_ARIS_run": true,
+  "MAX_ROUNDS": 4,
+  "scientific_rounds_used": 0,
+  "timer": "NONE",
+  "source": {
+    "revision": "a9c314ba4b6e6e14be5a9c3fdf6b66e6a0c23e37",
+    "license": "CC-BY-NC-4.0_PRIVATE_ORIGINAL_NOT_MIT_VENDORED",
+    "metric_functions": [
+      "cirr_compute_val_metrics",
+      "fiq_compute_val_metrics"
+    ],
+    "bodies_modified": false,
+    "native_argsort_witness_returns_original_unchanged": true
+  },
+  "ranker": {
+    "file": "reproduce/retrieval_cpu_ranking.py",
+    "dtype": "float32",
+    "device": "cpu",
+    "query_batch": 1,
+    "query_normalization": "ALREADY_UNIT_NO_RENORMALIZATION",
+    "gallery_normalization": "torch.nn.functional.normalize",
+    "distance": "1 - dot",
+    "tie": "DEFAULT_TORCH_ARGSORT_ORIGINAL_GALLERY_ROW_ORDER",
+    "full_rank_length_per_case": 72
+  },
+  "software_environment": {
+    "spec_file": "configs/research/retrieval-ranking-cpu-env.json",
+    "metadata_hash": "87663299",
+    "Python": "3.10.15",
+    "Torch": "2.7.1+cu118",
+    "NumPy": "1.26.4",
+    "SciPy": "1.15.3",
+    "packages": 51,
+    "complete_metadata_matched": true,
+    "CPUs": 1,
+    "GPUs": 0,
+    "CUDA_VISIBLE_DEVICES": "",
+    "torch_base_50_pins_modified": false,
+    "new_owned_SciPy_layer": true
+  },
+  "stage": {
+    "explicit_files": 71,
+    "tracked_src": 62,
+    "reproduce": 5,
+    "original_source_and_license": 2,
+    "env_spec_and_checker": 2,
+    "upload_original_session": 47487,
+    "roundtrip_original_session": 54938,
+    "terminal_exit_codes": [
+      0,
+      0
+    ],
+    "each_file_byte_equal": true,
+    "benchmark_data_or_weights": false
+  },
+  "source_review": {
+    "trace": "experiment-bridge/053",
+    "model": "gpt-6-astra",
+    "effort": "xhigh",
+    "family": "same-family/provisional",
+    "blocking": [],
+    "concrete_nonblocking": [],
+    "local_targeted": {
+      "passed": 54,
+      "seconds": 21.64,
+      "no_cov": true
+    },
+    "first_inherited_targeted_coverage_exit1_retained": true,
+    "actual_Torch_or_SSH_in_reviewer": false
+  },
+  "primary": {
+    "original_session": 23828,
+    "once": true,
+    "terminal_exit_code": 0,
+    "checker_wall_seconds": 1.1561418620403856
+  },
+  "fresh_doc": {
+    "trace": "experiment-bridge/054",
+    "original_session": 41132,
+    "once": true,
+    "terminal_exit_code": 0,
+    "checker_wall_seconds": 1.1156352909747511,
+    "model": "inherited",
+    "canonical_family": "unknown",
+    "independence": "unverified",
+    "separate_stderr_attribution": false,
+    "aggregate_limits": [
+      "CUDA empty value not independently printed; launcher sets it and checker guards it",
+      "Individual 72-ID rank lists not shown to doc executor; actual checker compares them"
+    ]
+  },
+  "per_invocation": {
+    "native_metric_calls": 8,
+    "full_rank_comparisons": 8,
+    "metric_comparisons": 36,
+    "authored_scenarios": [
+      {
+        "case": "strict",
+        "full_rank_matches": 2,
+        "native_metrics": {
+          "cirr": {
+            "cirr_recall_at1": 100,
+            "cirr_recall_at5": 100,
+            "cirr_recall_at10": 100,
+            "cirr_recall_at50": 100,
+            "cirr_group_recall_at1": 100,
+            "cirr_group_recall_at2": 100,
+            "cirr_group_recall_at3": 100
+          },
+          "fashioniq": {
+            "fiq_recall_at10": 100,
+            "fiq_recall_at50": 100
+          }
+        }
+      },
+      {
+        "case": "all_tie",
+        "full_rank_matches": 2,
+        "native_metrics": {
+          "cirr": {
+            "cirr_recall_at1": 0,
+            "cirr_recall_at5": 0,
+            "cirr_recall_at10": 0,
+            "cirr_recall_at50": 0,
+            "cirr_group_recall_at1": 0,
+            "cirr_group_recall_at2": 0,
+            "cirr_group_recall_at3": 0
+          },
+          "fashioniq": {
+            "fiq_recall_at10": 0,
+            "fiq_recall_at50": 0
+          }
+        }
+      },
+      {
+        "case": "near_tie",
+        "full_rank_matches": 2,
+        "native_metrics": {
+          "cirr": {
+            "cirr_recall_at1": 0,
+            "cirr_recall_at5": 0,
+            "cirr_recall_at10": 0,
+            "cirr_recall_at50": 0,
+            "cirr_group_recall_at1": 0,
+            "cirr_group_recall_at2": 0,
+            "cirr_group_recall_at3": 0
+          },
+          "fashioniq": {
+            "fiq_recall_at10": 0,
+            "fiq_recall_at50": 0
+          }
+        }
+      },
+      {
+        "case": "reverse_gallery_tie",
+        "full_rank_matches": 2,
+        "native_metrics": {
+          "cirr": {
+            "cirr_recall_at1": 0,
+            "cirr_recall_at5": 0,
+            "cirr_recall_at10": 0,
+            "cirr_recall_at50": 100,
+            "cirr_group_recall_at1": 100,
+            "cirr_group_recall_at2": 100,
+            "cirr_group_recall_at3": 100
+          },
+          "fashioniq": {
+            "fiq_recall_at10": 0,
+            "fiq_recall_at50": 100
+          }
+        }
+      }
+    ],
+    "invalid_features_rejected": 8,
+    "distinct_float32_dot_collapses_to_equal_1_minus_dot": true,
+    "old_lexical_counterexample_retained": true,
+    "gate_cases": [
+      {
+        "case": "eligible",
+        "status": "ELIGIBLE",
+        "certificate_scope": "MECHANICAL_SEEDED_FIXTURE",
+        "population": 64,
+        "early_authored_query_attempts": 4,
+        "total_authored_query_attempts": 64,
+        "observed_scores": 64,
+        "logical_episodes": 128
+      },
+      {
+        "case": "rejected",
+        "status": "INELIGIBLE",
+        "certificate_scope": "MECHANICAL_SEEDED_FIXTURE",
+        "population": 64,
+        "early_authored_query_attempts": 4,
+        "total_authored_query_attempts": 4,
+        "observed_scores": 4,
+        "logical_episodes": 68
+      },
+      {
+        "case": "failed",
+        "status": "INCONCLUSIVE",
+        "certificate_scope": "MECHANICAL_SEEDED_FIXTURE",
+        "population": 64,
+        "early_authored_query_attempts": 1,
+        "total_authored_query_attempts": 1,
+        "observed_scores": 0,
+        "logical_episodes": 65
+      }
+    ]
+  },
+  "local_quality": {
+    "author_targeted": {
+      "original_session": 9962,
+      "passed": 54,
+      "seconds": 13.02,
+      "exit_code": 0
+    },
+    "whole_suite": {
+      "original_session": 42147,
+      "exit_code": 0,
+      "passed": 1978,
+      "skipped": 6,
+      "seconds": 1014.27,
+      "coverage_src_percent": 94.03,
+      "statements": 9980,
+      "miss": 444,
+      "branches": 3904,
+      "partial_branches": 373
+    },
+    "Ruff": "PASS",
+    "format_files": 387,
+    "mypy_src_files": 61,
+    "configured_src_Bandit": "PASS",
+    "new_three_helpers_Bandit": {
+      "exit_code": 0,
+      "LOC": 339,
+      "issues": 0,
+      "nosec": 0
+    },
+    "prior_external_metric_loader_B102": "RETAINED_MEDIUM_HIGH_CONFIDENCE_TRUSTED_EXEC_NOT_SANDBOX_NOT_SUPPRESSED"
+  },
+  "build": {
+    "original_session": 15144,
+    "terminal_exit_code": 0,
+    "sdist": "PASS",
+    "wheel": "PASS",
+    "Twine_both": "PASS",
+    "installer": "EXISTING_REAL_UV_EXE_OFFICIAL_PYPI",
+    "observed_setuptools": "84.0.0_both_stages",
+    "reproduce_path_requires_source_checkout_not_wheel": true,
+    "earlier_40858_build_failure_and_owned_uv_CMD_artifact_retained": true
+  },
+  "historical_whole_suite": {
+    "original_session": 80877,
+    "terminal_exit_code": 0,
+    "passed": 1971,
+    "skipped": 6,
+    "seconds": 1159.27,
+    "coverage_src_percent": 94.03,
+    "scope": "bc8304e3_only_not_new_ranker"
+  },
+  "last_delivered_CI": {
+    "sha": "bc8304e3af6dc85d9919b13ce5a05d26f9b23350",
+    "run": 36347625475,
+    "status": "completed",
+    "conclusion": "success",
+    "jobs_success": 15,
+    "jobs_total": 15,
+    "applies_to_current_uncommitted_ranker": false
+  },
+  "new_delivery_at_record": "UNCOMMITTED_NOT_PUSHED",
+  "new_real_model_calls": 0,
+  "new_input_tokens": 0,
+  "new_output_tokens": 0,
+  "new_allocated_GPU_hours": 0,
+  "new_paid_API_USD": 0,
+  "CPU_download_SCP_QA_install_overhead": "NOT_COMPLETELY_METERED_NOT_ZERO",
+  "physical_history": {
+    "sha256": "26a7e04bbe7f256df6796877cdfb24c5e86cd57495268491804687d44d88bf93",
+    "byte_hash_reverified_this_turn": true,
+    "calls": 1170,
+    "input_tokens": 2136046,
+    "output_tokens": 195222,
+    "allocated_GPU_hours": 3.8074371029887377,
+    "historical_unknown_count": "NOT_ENCODED"
+  },
+  "benchmark_images_or_annotation_downloaded": false,
+  "encoder_executed": false,
+  "GPU_or_multiquery_batch_parity": false,
+  "official_benchmark_parity": false,
+  "online_embeddings_qualified": false,
+  "real_M1_or_Pilot": false,
+  "scientific_admission": false,
+  "manuscript": "NOT_STARTED",
+  "data_license_admission": "PENDING_USER_ACCESS_AND_AUDIT",
+  "other_four_repos": "FROZEN"
+}

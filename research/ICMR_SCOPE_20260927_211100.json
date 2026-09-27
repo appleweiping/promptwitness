@@ -1,6 +1,6 @@
 {
   "format": "promptwitness.icmr-composed-retrieval-scope/v0.1",
-  "recorded_at": "2026-09-27T21:21:00Z",
+  "recorded_at": "2026-09-27T21:11:00Z",
   "authority": "User explicitly confirmed ACM ICMR and requested improvement of the unestablished venue fit.",
   "design_not_preregistration": true,
   "historical_scope_lock_modified": false,
@@ -73,7 +73,7 @@
   "claims": [
     {
       "id": "C1",
-      "hypothesis": "Empirical marginal value of typed parent-child edit x query representation under complete declared text, equal allowed parent information, matched fit data/capacity/tuning/compute; not extra information or first structural prior; must exceed strong modular representation without explicit edit relation, not only a flat embedding"
+      "hypothesis": "Empirical marginal value of typed parent-child edit x query representation under complete declared text, equal allowed parent information, matched fit data/capacity/tuning/compute; not extra information or first structural prior"
     },
     {
       "id": "C2",
@@ -87,14 +87,5 @@
   ],
   "training_regime": "SUPERVISED_PROMPT_SEARCH_WITH_FROZEN_BACKBONE_IF_CIR_TRAIN_LABELS_USED_NOT_ZERO_SHOT",
   "novelty_report": "../idea-stage/ICMR_NOVELTY_CHECK.json",
-  "strong_comparator_adaptation": "PENDING_NO_SIX_CONFIG_REPLACEMENT_NO_MATRIX_EXECUTION",
-  "novelty_early_gate": {
-    "recommendation": "PROCEED_WITH_CAUTION",
-    "score": 5,
-    "same_family_provisional": true,
-    "initial_trace": "001",
-    "continuation_trace": "003",
-    "scientific_acceptance": false
-  },
-  "C1_identification_gap": "Strong modular control and six-configuration mapping pending training-side design freeze/review; no seventh main configuration added"
+  "strong_comparator_adaptation": "PENDING_NO_SIX_CONFIG_REPLACEMENT_NO_MATRIX_EXECUTION"
 }

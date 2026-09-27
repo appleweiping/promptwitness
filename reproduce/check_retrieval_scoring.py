@@ -20,7 +20,8 @@ from promptwitness.incremental.sampling import digest, make_plan
 from reproduce.retrieval_scoring import RetrievalGold, rank_cosine, score_ranking
 
 
-def check_case(root: Path, case: str) -> dict:
+def check_case(root: Path, case: str, *, rank_backend=rank_cosine) -> dict:
+    """Authored gate case; the native CPU qualifier supplies its actual ranker."""
     pool = {
         "reference": (1, 0, 0),
         "target": (0, 1, 0),
@@ -31,7 +32,7 @@ def check_case(root: Path, case: str) -> dict:
     def score(unit, vector):
         gold = RetrievalGold(unit, "cirr", "reference", "target", subset=("reference", "target"))
         return score_ranking(
-            gold, candidate_ids=tuple(pool), ranking=rank_cosine(vector, pool)
+            gold, candidate_ids=tuple(pool), ranking=rank_backend(vector, pool)
         ).primary_hit
 
     old = {u: score(u, (0, 0, 1) if case == "eligible" else (0, 1, 0)) for u in units}
