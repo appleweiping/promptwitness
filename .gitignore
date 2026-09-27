@@ -12,3 +12,7 @@ build/
 dist/
 htmlcov/
 promptwitness-report.html
+
+# Local research skills, reviewer traces and resumable state are not release assets.
+.agents/skills/
+.aris/

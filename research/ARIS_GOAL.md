@@ -1,0 +1,77 @@
+# PromptWitness ARIS 目标与续推授权
+
+记录时间：2026-09-27 05:10:00 UTC。
+这是最新用户指令的执行记录，不是科学实验成绩或论文接受意见。
+
+## 用户指令与实际操作
+
+用户明确要求：
+
+- “不要动aris默认轮数，取消你的吝啬额度限制”。
+- “你取消定时任务吧，直接准确的设置目标吧”。
+
+应用已实际删除 `promptwitness-aris` 的按小时线程心跳；删除工具返回
+`deleteStatus=deleted`。没有创建替代 cron、守护调度器或新定时任务。
+本聊天已通过目标工具建立 **active goal**，未设置自定 token budget。
+后续使用本聊天目标、单一 orchestrator 与已有可恢复状态推进。
+取消定时任务不代表停止科研；目标 active 不代表模型实验已在运行。
+
+## 精确目标
+
+仅在 PromptWitness 的 `research/promptwitness-delta-v1` 上完成已固定研究方案。
+其他四个原创仓库保持冻结。研究问题仍为变化感知、风险受控的 prompt
+优化评测；保留 M1/M2/M3、三个任务、两个主模型、五个种子、六个配置、
+144 个机制 pair、180 个主 run、36 个第三模型 transfer，以及独立最终测试。
+不以增加功能、代码量或测试数替代这项研究的验证。
+
+按阶段完成以下可核验工作：
+
+1. **experiment-bridge**：官方严格评分器端到端验证；fit/search/selection/final
+   的进程级访问边界；在线执行、随机单元和采样语义；GEPA/MIPRO 原生
+   early-rejection 搜索路径；完整实际 survivor scores、失败语义与全角色计费；
+   新上下文代码审查及按文档执行的真实环境验收。
+2. **真实研究**：通过相应科学准入后拟合真实 M1，先开展训练/验证侧 Pilot。
+   仅在真实 Pilot GO、隔离/统计/执行核验和保守成本准入同时成立后，开展
+   原定确认矩阵。不得先窥视 final 来修评分器或选择配置。
+3. **审查和交付**：使用 ARIS 默认、有记忆的审查流程；保留真实结果、失败、
+   反例及局限，形成统计分析、可复现说明、研究叙述和 `NARRATIVE_REPORT.md`。
+   对已审查、脱敏文件显式 allowlist commit/push，核验实际提交 SHA 的 CI。
+
+正结果不是目标完成的必需条件：充分执行且有效的负结果也应诚实交付。
+未运行实验、合成测试、CI、资源不足或 `INTEGRITY_BLOCKED` 不是科学负结果，
+也不能冒充研究完成。完成的判断来自实际证据和交付，不来自口头承诺。
+
+## 本次覆盖的旧操作限制
+
+保留历史 v1.1 的 2/2 工程记录，但它不再阻挡新核心实现；不清零历史。
+不再请求用户追加有限工程轮次，不另加调用/GPU/token 小额度来限制新续推。
+旧阶段额度留作历史记录，不继续用作本目标新工作的停止点。
+
+固定 ARIS 源码 `341f914024d270dc5c8fa51337d1ad38829273aa` 的原文保持不变：
+`auto-review-loop MAX_ROUNDS=4`；`AUTO_PROCEED=true`；`HUMAN_CHECKPOINT=false`；
+`CODE_REVIEW=true`；`REVIEWER_DIFFICULTY=medium`；`AUTO_WRITE=false`。
+Bridge 的修复、复审次数也按所选 skill 原文，不叠加旧的两轮限制。
+这不是无限重开 review run 的授权；默认审查停止条件仍须遵守。
+同家族审查标记 `same-family/provisional`，不得写成跨家族接受。
+
+## 仍然有效的安全和科学约束
+
+用户明确的跨版本总保护预算不变：800,000 actual calls、1,000 allocated
+GPU-hours、20 亿输入 token、2 亿输出 token；付费 API/云租赁为零。
+实际消耗、失败和访问预览披露不归零。每步按真实账本及实际可用配额
+核验；完整确认资源准入仍使用 `consumed + 1.20 * remaining_forecast <= ceiling`。
+不预支研究尚未证明的提前拒绝收益来通过资源门禁。
+
+只使用已明确分配且当时可用的设备，不干扰其他任务，不改共享环境。
+不降模型/精度/上下文/输出上限、删基线/任务/种子或放宽统计门限来换取通过。
+不上传受限数据、权重、原始私有响应、凭据或审查 trace；不合并 main、
+不创建 PR、不联系外部人员、不投稿。论文写作默认仍为关闭。
+
+## 起点与停止语义
+
+工程继续已获授权，但科学起点仍是 `INTEGRITY_BLOCKED`，G1 partial、
+真实 M1 UNFITTED、Pilot not_run、confirmation not_started。
+本次仅改变工作流准入和调度，不将任何科学门禁标为通过。
+若 ARIS 达到默认审查停止点，记录真实结果和剩余项，不靠换 run ID 重刷。
+目标仅在所需工作真正交付后标 complete；发生必须由用户解决的授权或资源
+阻塞时如实说明，遵循目标工具的 blocked 规则，不伪造成功。
