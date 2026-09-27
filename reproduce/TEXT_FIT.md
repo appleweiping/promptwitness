@@ -62,9 +62,14 @@ controller 已完成上述准备及 Linux build 后，fresh context 只接收本
 provider ledger 与调用。只执行一次，不改代码/安装/重试，不打开任何 gold、
 inputs、responses 或 per-ID scores。在登记 Linux 主机执行：
 
+Linux 本次采用独立 `text-runtime-packaged` stage：controller 将原版已核对的
+code/resource stage 压缩传输，解到新的独占目录，并将实际解出的文件回读后
+再次逐字节对照原始源码/资源。原始逐文件传输目录另行保留，不与解包目录
+重叠，不以正在写入的半成品作评分输入；不是修改 official scorer 或扩大权限。
+
 ```bash
 cd /media/lenovo/data2/promptwitness-delta-20260926/aris-text-fit-20260927/code
-/media/lenovo/data2/promptwitness-delta-20260926/aris-text-fit-20260927/venv/bin/python -m reproduce.check_text_fit /media/lenovo/data2/promptwitness-delta-20260926/aris-text-fit-20260927/store /media/lenovo/data2/promptwitness-delta-20260926/aris-text-fit-20260927/code/reproduce/text-runtime /media/lenovo/data2/promptwitness-delta-20260926/aris-text-fit-20260927/follow-doc-work /media/lenovo/data2/promptwitness-delta-20260926/aris-text-fit-20260927/follow-doc-result.json
+/media/lenovo/data2/promptwitness-delta-20260926/aris-text-fit-20260927/venv/bin/python -m reproduce.check_text_fit /media/lenovo/data2/promptwitness-delta-20260926/aris-text-fit-20260927/store /media/lenovo/data2/promptwitness-delta-20260926/aris-text-fit-20260927/code/reproduce/text-runtime-packaged /media/lenovo/data2/promptwitness-delta-20260926/aris-text-fit-20260927/follow-doc-work /media/lenovo/data2/promptwitness-delta-20260926/aris-text-fit-20260927/follow-doc-result.json
 ```
 
 900 秒仅为环境观察 deadline，不是实验额度。实际 SSH/worker 退出码必须为 0，

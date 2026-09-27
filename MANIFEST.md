@@ -109,3 +109,16 @@
 | 2026-09-27 09:37:00 UTC | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 文本fit链路实现/准确准备状态；实际worker尚未运行快照 |
 | 2026-09-27 09:37:00 UTC | experiment-bridge | refine-logs/EXPERIMENT_PLAN_20260927_093700.md | implementation | 文本fit链路实现/准确准备状态；实际worker尚未运行快照 |
 | 2026-09-27 09:37:00 UTC | experiment-bridge | refine-logs/EXPERIMENT_PLAN.md | implementation | 文本fit链路实现/准确准备状态；实际worker尚未运行快照 |
+| 2026-09-27 09:52:26 UTC | experiment-bridge | reproduce/TEXT_FIT.md | implementation | 实际文本fit worker完成；传输警告/旧失败保留，不是M1或Pilot；完整pipeline仍待实现 |
+| 2026-09-27 09:52:26 UTC | experiment-bridge | research/ARIS_TEXT_FIT_20260927_095226.json | implementation | 实际文本fit worker完成；传输警告/旧失败保留，不是M1或Pilot；完整pipeline仍待实现 |
+| 2026-09-27 09:52:26 UTC | experiment-bridge | research/ARIS_TEXT_FIT.json | implementation | 实际文本fit worker完成；传输警告/旧失败保留，不是M1或Pilot；完整pipeline仍待实现 |
+| 2026-09-27 09:52:26 UTC | experiment-bridge | research/ARIS_ACCESS_20260927_095226.json | implementation | 实际文本fit worker完成；传输警告/旧失败保留，不是M1或Pilot；完整pipeline仍待实现 |
+| 2026-09-27 09:52:26 UTC | experiment-bridge | research/ARIS_ACCESS.json | implementation | 实际文本fit worker完成；传输警告/旧失败保留，不是M1或Pilot；完整pipeline仍待实现 |
+| 2026-09-27 09:52:26 UTC | experiment-bridge | refine-logs/EXPERIMENT_RESULTS_20260927_095226.md | implementation | 实际文本fit worker完成；传输警告/旧失败保留，不是M1或Pilot；完整pipeline仍待实现 |
+| 2026-09-27 09:52:26 UTC | experiment-bridge | refine-logs/EXPERIMENT_RESULTS.md | implementation | 实际文本fit worker完成；传输警告/旧失败保留，不是M1或Pilot；完整pipeline仍待实现 |
+| 2026-09-27 09:52:26 UTC | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260927_095226.md | implementation | 实际文本fit worker完成；传输警告/旧失败保留，不是M1或Pilot；完整pipeline仍待实现 |
+| 2026-09-27 09:52:26 UTC | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | 实际文本fit worker完成；传输警告/旧失败保留，不是M1或Pilot；完整pipeline仍待实现 |
+| 2026-09-27 09:52:26 UTC | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260927_095226.md | implementation | 实际文本fit worker完成；传输警告/旧失败保留，不是M1或Pilot；完整pipeline仍待实现 |
+| 2026-09-27 09:52:26 UTC | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 实际文本fit worker完成；传输警告/旧失败保留，不是M1或Pilot；完整pipeline仍待实现 |
+| 2026-09-27 09:52:26 UTC | experiment-bridge | refine-logs/EXPERIMENT_PLAN_20260927_095226.md | implementation | 实际文本fit worker完成；传输警告/旧失败保留，不是M1或Pilot；完整pipeline仍待实现 |
+| 2026-09-27 09:52:26 UTC | experiment-bridge | refine-logs/EXPERIMENT_PLAN.md | implementation | 实际文本fit worker完成；传输警告/旧失败保留，不是M1或Pilot；完整pipeline仍待实现 |
