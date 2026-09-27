@@ -1,0 +1,122 @@
+{
+  "format": "promptwitness.aris.text-fit-slice/v1",
+  "recorded_at": "2026-09-27T09:37:00Z",
+  "goal": "ACTIVE",
+  "automation": "DELETED_NO_REPLACEMENT",
+  "aris_auto_review_max_rounds": 4,
+  "source_revisions": {
+    "HotpotQA": "3635853403a8735609ee997664e1528f4480762a",
+    "IFTrain": "99b1ee970490a2d0d5664663eb0b1acc410b944c",
+    "IFBench": "1c40f0c10d9b5c5c2f10a175a28007ebb64f7f4d"
+  },
+  "stage": {
+    "code_files": 11,
+    "declared_NLTK_resource_trees": 4,
+    "resource_files": 155,
+    "controller_original_byte_check": "PASS_LOCAL",
+    "remote_byte_check": "PENDING_TRANSFER",
+    "includes_data_or_git": false
+  },
+  "preparation": {
+    "membership": "proposed-v2 NOT_FORMAL_FREEZE",
+    "fit_inputs": {
+      "hotpotqa": 512,
+      "instruction_following": 512
+    },
+    "fit_gold_per_family": 512,
+    "prior_fit_responses_per_model": {
+      "hotpotqa": 4,
+      "instruction_following": 5
+    },
+    "models": [
+      "Qwen/Qwen3.5-9B",
+      "allenai/Olmo-3-7B-Instruct"
+    ],
+    "original_archived_request_messages_equal": true,
+    "nonfit_leaves_filled": 0,
+    "store_files": 9,
+    "store_bytes": 3964676,
+    "initial_attempt": {
+      "exit": 1,
+      "wall_seconds": 12.3659875,
+      "error": "KeyError final_derived",
+      "retained": true
+    },
+    "after_specific_repair": {
+      "exit": 0,
+      "wall_seconds": 10.2915773
+    },
+    "access": "Parquet nonfit physical row-group bytes may be read; only filtered fit rows decoded. Archive ID tokens/bytes streamed; only fit bodies decoded. Not an air gap."
+  },
+  "environment": {
+    "spec": "configs/research/text-linux-env.json",
+    "canonical_hash": "27f974aa",
+    "Python": "3.10.15",
+    "CPUs": 1,
+    "GPUs": 0,
+    "build_exit": 0,
+    "build_wall_seconds": 13.956878877012059,
+    "shared_environment_modified": false,
+    "native_import": "PENDING_TRANSFER",
+    "fresh_doc": "NOT_RUN_AT_SNAPSHOT"
+  },
+  "review": {
+    "route": "same-family/provisional",
+    "initial": "no blocker; missed actual pool schema mismatch",
+    "single_followup": "repair matches actual three training pools; no remaining findings",
+    "targeted_passed": 30,
+    "reviewer_wall_seconds": 22.47,
+    "private_traces": "015/016"
+  },
+  "checks": {
+    "local_reproduce": {
+      "passed": 236,
+      "skipped": 1,
+      "wall_seconds": 56.31
+    },
+    "ruff_format": "PASS_256_FILES",
+    "mypy_src": "PASS_61",
+    "configured_bandit_src": "PASS",
+    "helper_bandit": {
+      "low": 9,
+      "medium": 1,
+      "high": 0,
+      "findings_retained": true,
+      "medium_disposition": "B310 fixed pinned official HTTPS URL, no operator/response URL or file scheme; not suppressed"
+    },
+    "full_local_suite": "NOT_RUN",
+    "local_build_this_slice": "NOT_RERUN; historical WinError127 wheel failure retained",
+    "exact_SHA_CI": "PENDING_COMMIT_PUSH_AT_SNAPSHOT"
+  },
+  "execution": {
+    "status": "NOT_RUN_AT_SNAPSHOT",
+    "actual_model_scores_reported": false,
+    "IFBench_scope": "authored native mechanical checks only; final data not read"
+  },
+  "new_cost": {
+    "model_calls": 0,
+    "allocated_gpu_hours": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "paid_api_usd": 0
+  },
+  "scientific_admission": "PARTIAL_NOT_PASSED",
+  "M1": "UNFITTED",
+  "Pilot": "NOT_RUN",
+  "original_matrix": {
+    "pairs_completed": 0,
+    "pairs_planned": 144,
+    "runs_completed": 0,
+    "runs_planned": 180,
+    "transfers_completed": 0,
+    "transfers_planned": 36
+  },
+  "remaining": [
+    "actual text native worker qualification",
+    "real search/selection application wiring and allowed IPC/stage/freeze receipts",
+    "online execution and finite-population sampling semantics",
+    "native GEPA/MIPRO early rejection, actual survivor scores and all-role costs",
+    "independent statistics, real M1, Pilot GO and full conservative forecast",
+    "original confirmatory matrix and scientific narrative"
+  ]
+}

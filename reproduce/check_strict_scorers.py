@@ -83,10 +83,19 @@ def verify_native_sources(source):
 
 
 def load_native(source):
+    verify_native_sources(source)
+    return bind_native(source)
+
+
+def bind_native(source):
+    """Bind verified code/resources, without requesting a worker Git/data grant.
+
+    A trusted controller verifies the code-only stage before a worker starts.
+    The original checkout path remains available through load_native above.
+    """
     import nltk
     from langdetect import DetectorFactory
 
-    verify_native_sources(source)
     nltk.data.path.insert(0, str(source / "nltk-data"))
     # Fail before importing the native module's automatic downloader.
     for resource in (

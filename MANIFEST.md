@@ -89,3 +89,23 @@
 | 2026-09-27 08:49:37 UTC | experiment-bridge | refine-logs/EXPERIMENT_RESULTS.md | implementation | 最新结果副本 |
 | 2026-09-27 08:49:37 UTC | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260927_084937.md | implementation | 最终helper完成，精确SHA CI仍待推送 |
 | 2026-09-27 08:49:37 UTC | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 最新tracker副本 |
+| 2026-09-27 09:37:00 UTC | experiment-bridge | reproduce/check_strict_scorers.py | implementation | 文本fit链路实现/准确准备状态；实际worker尚未运行快照 |
+| 2026-09-27 09:37:00 UTC | experiment-bridge | reproduce/text_scorer_stage.py | implementation | 文本fit链路实现/准确准备状态；实际worker尚未运行快照 |
+| 2026-09-27 09:37:00 UTC | experiment-bridge | reproduce/prepare_text_fit.py | implementation | 文本fit链路实现/准确准备状态；实际worker尚未运行快照 |
+| 2026-09-27 09:37:00 UTC | experiment-bridge | reproduce/check_text_fit.py | implementation | 文本fit链路实现/准确准备状态；实际worker尚未运行快照 |
+| 2026-09-27 09:37:00 UTC | experiment-bridge | reproduce/TEXT_FIT.md | implementation | 文本fit链路实现/准确准备状态；实际worker尚未运行快照 |
+| 2026-09-27 09:37:00 UTC | experiment-bridge | configs/research/text-linux-env.json | implementation | 文本fit链路实现/准确准备状态；实际worker尚未运行快照 |
+| 2026-09-27 09:37:00 UTC | experiment-bridge | tests/reproduce/test_text_scorer_stage.py | implementation | 文本fit链路实现/准确准备状态；实际worker尚未运行快照 |
+| 2026-09-27 09:37:00 UTC | experiment-bridge | tests/reproduce/test_text_fit.py | implementation | 文本fit链路实现/准确准备状态；实际worker尚未运行快照 |
+| 2026-09-27 09:37:00 UTC | experiment-bridge | research/ARIS_TEXT_FIT_20260927_093700.json | implementation | 文本fit链路实现/准确准备状态；实际worker尚未运行快照 |
+| 2026-09-27 09:37:00 UTC | experiment-bridge | research/ARIS_TEXT_FIT.json | implementation | 文本fit链路实现/准确准备状态；实际worker尚未运行快照 |
+| 2026-09-27 09:37:00 UTC | experiment-bridge | research/ARIS_ACCESS_20260927_093700.json | implementation | 文本fit链路实现/准确准备状态；实际worker尚未运行快照 |
+| 2026-09-27 09:37:00 UTC | experiment-bridge | research/ARIS_ACCESS.json | implementation | 文本fit链路实现/准确准备状态；实际worker尚未运行快照 |
+| 2026-09-27 09:37:00 UTC | experiment-bridge | refine-logs/EXPERIMENT_RESULTS_20260927_093700.md | implementation | 文本fit链路实现/准确准备状态；实际worker尚未运行快照 |
+| 2026-09-27 09:37:00 UTC | experiment-bridge | refine-logs/EXPERIMENT_RESULTS.md | implementation | 文本fit链路实现/准确准备状态；实际worker尚未运行快照 |
+| 2026-09-27 09:37:00 UTC | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260927_093700.md | implementation | 文本fit链路实现/准确准备状态；实际worker尚未运行快照 |
+| 2026-09-27 09:37:00 UTC | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | 文本fit链路实现/准确准备状态；实际worker尚未运行快照 |
+| 2026-09-27 09:37:00 UTC | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260927_093700.md | implementation | 文本fit链路实现/准确准备状态；实际worker尚未运行快照 |
+| 2026-09-27 09:37:00 UTC | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 文本fit链路实现/准确准备状态；实际worker尚未运行快照 |
+| 2026-09-27 09:37:00 UTC | experiment-bridge | refine-logs/EXPERIMENT_PLAN_20260927_093700.md | implementation | 文本fit链路实现/准确准备状态；实际worker尚未运行快照 |
+| 2026-09-27 09:37:00 UTC | experiment-bridge | refine-logs/EXPERIMENT_PLAN.md | implementation | 文本fit链路实现/准确准备状态；实际worker尚未运行快照 |
