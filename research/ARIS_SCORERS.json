@@ -1,0 +1,91 @@
+{
+  "format": "promptwitness.aris.strict-scorer-slice/v1",
+  "recorded_at": "2026-09-27T05:51:49Z",
+  "native_sources": {
+    "HotpotQA": "3635853403a8735609ee997664e1528f4480762a",
+    "IFTrain": "99b1ee970490a2d0d5664663eb0b1acc410b944c",
+    "IFBench": "1c40f0c10d9b5c5c2f10a175a28007ebb64f7f4d"
+  },
+  "profiles": {
+    "hotpotqa": "official_answer_EM_raw_response",
+    "iftrain": "official_checker_classes_raw_text_all_constraints_explicit_adaptation",
+    "ifbench": "official_strict_prompt_accuracy_authored_fixtures_only",
+    "bfcl": "JSON_only_adaptation_runtime_NOT_QUALIFIED"
+  },
+  "native_authored_checks": {
+    "total": 13,
+    "matched": 13,
+    "hotpotqa": 3,
+    "iftrain": 4,
+    "ifbench": 6,
+    "ifbench_OOD_subset": 2
+  },
+  "prior_fit_archive_intersection": {
+    "hotpotqa": {
+      "units": 4,
+      "correct": 4
+    },
+    "instruction_following": {
+      "units": 5,
+      "correct": 3
+    },
+    "meaning": "fixed frozen membership intersection with infra1 Qwen base archive; not performance estimate or replacement for prior distinct 16-unit audit"
+  },
+  "new_model_calls": 0,
+  "new_allocated_gpu_hours": 0,
+  "paid_api_usd": 0,
+  "final_examples_or_scores_accessed_by_this_check": false,
+  "checks": {
+    "new_mechanical_tests_passed": 39,
+    "reproduce_tests_passed": 132,
+    "core_tests_passed": 102,
+    "full_suite_collected": 1671,
+    "full_suite_passed_at_this_snapshot": null,
+    "adapter_strict_mypy": "PASS",
+    "ruff": "PASS",
+    "src_mypy": "PASS_61",
+    "src_configured_bandit": "PASS",
+    "helper_bandit": {
+      "low": 5,
+      "medium": 0,
+      "high": 0,
+      "findings_retained": true,
+      "triage": "structured shell=false git argv, task-owned cooperating source; no ignore widening"
+    }
+  },
+  "review": {
+    "route": "same-family/provisional",
+    "first": "BLOCKING_directory_pathspec",
+    "after_fix_once": "resolved_no_remaining_defect_reported",
+    "doc_verbatim_exit": 0,
+    "doc_wall_seconds": 48.674,
+    "doc_wall_includes_polling": true
+  },
+  "scientific": {
+    "all_scorers_gate": "PARTIAL_NOT_PASSED",
+    "BFCL_runtime": "NOT_QUALIFIED",
+    "process_isolation": "NOT_PASSED",
+    "online_execution": "NOT_PASSED",
+    "native_early_rejection": "NOT_IMPLEMENTED",
+    "real_M1": "UNFITTED",
+    "pilot": "NOT_RUN",
+    "method_effect_measured": false,
+    "research_complete": false
+  },
+  "scope": {
+    "pairs_planned": 144,
+    "runs_planned": 180,
+    "transfers_planned": 36,
+    "pairs_completed": 0,
+    "runs_completed": 0,
+    "transfers_completed": 0
+  },
+  "goal": "ACTIVE",
+  "automation": "DELETED_NO_REPLACEMENT",
+  "aris_auto_review_max_rounds": 4,
+  "historical_CI_not_current_source": {
+    "sha": "475c96d769bf95894d4f2c428b3b038b54a21a77",
+    "run": 36296675360,
+    "conclusion": "success"
+  }
+}
