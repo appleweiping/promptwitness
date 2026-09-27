@@ -238,3 +238,21 @@
 | 2026-09-27T16:17:21Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 最新tracker精确副本 |
 | 2026-09-27T16:17:21Z | experiment-bridge | refine-logs/EXPERIMENT_PLAN_20260927_161721.md | implementation | 接续更高1170账本、原生搜索全角色成本及真实研究准入 |
 | 2026-09-27T16:17:21Z | experiment-bridge | refine-logs/EXPERIMENT_PLAN.md | implementation | 最新plan精确副本，activegoal无timer/default4 |
+| 2026-09-27T17:13:03Z | experiment-bridge | reproduce/mipro_search.py | implementation | 严格prune/actualsurvivor组件；cadence缺陷明示 |
+| 2026-09-27T17:13:03Z | experiment-bridge | reproduce/check_mipro_search.py | implementation | 原安装MIPRO authored CPU诊断，不是scientific qualification |
+| 2026-09-27T17:13:03Z | experiment-bridge | reproduce/MIPRO_SEARCH.md | implementation | 接口/适配/未修cadence及原样CPU诊断说明 |
+| 2026-09-27T17:13:03Z | experiment-bridge | tests/reproduce/test_mipro_search.py | implementation | helper异常/身份/RNG与restore authored测试 |
+| 2026-09-27T17:13:03Z | experiment-bridge | tests/reproduce/test_role_pipeline.py | implementation | 新5case验证gate拒绝/完整survivor/失败/不支持/错prompt |
+| 2026-09-27T17:13:03Z | experiment-bridge | research/ARIS_MIPRO_SEARCH_20260927_171303.json | implementation | 原67910诊断aggregate、成本/独立验收缺口/科学未准入 |
+| 2026-09-27T17:13:03Z | experiment-bridge | research/ARIS_MIPRO_SEARCH.json | implementation | 最新machine-readable副本 |
+| 2026-09-27T17:13:03Z | experiment-bridge | research/ARIS_MIPRO_SEARCH_20260927_171303.md | implementation | source反例与实际机械结果/局限，不掩盖selector缺陷 |
+| 2026-09-27T17:13:03Z | experiment-bridge | research/ARIS_MIPRO_SEARCH.md | implementation | 最新说明副本 |
+| 2026-09-27T17:13:03Z | experiment-bridge | refine-logs/EXPERIMENT_RESULTS_20260927_171303.md | implementation | authored compile与本机质量、零新真实成本 |
+| 2026-09-27T17:13:03Z | experiment-bridge | refine-logs/EXPERIMENT_RESULTS.md | implementation | 最新results副本 |
+| 2026-09-27T17:13:03Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260927_171303.md | implementation | source043/044限定CPU诊断，cadence科学blocker未解决 |
+| 2026-09-27T17:13:03Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | 最新审查记录副本 |
+| 2026-09-27T17:13:03Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260927_171303.md | implementation | 新component实证、nativefull/online/M1/Pilot/原矩阵未完成 |
+| 2026-09-27T17:13:03Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 最新tracker副本 |
+| 2026-09-27T17:13:03Z | experiment-bridge | refine-logs/EXPERIMENT_PLAN_20260927_171303.md | implementation | 下一步先修共享cadence/strictnative，原科学方案不减 |
+| 2026-09-27T17:13:03Z | experiment-bridge | refine-logs/EXPERIMENT_PLAN.md | implementation | 最新plan副本，activegoal/no timer/default4 |
+| 2026-09-27T17:13:03Z | experiment-bridge | findings.md | implementation | append-only跨阶段prune/cadence实际反例及未解决项 |

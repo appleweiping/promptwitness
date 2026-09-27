@@ -967,3 +967,79 @@ def test_original_reference_cpu_recovery_never_replays_or_fills(tmp_path, monkey
     with pytest.raises(ScoringError):
         original_responses(route.controller)
     assert model.metered_task.call_count == 2 and len(dispatched) == 1
+
+
+@pytest.mark.parametrize("case", ["eligible", "rejected", "failed", "unsupported", "wrong_prompt"])
+def test_mipro_gate_connects_original_driver_without_zero_or_replay(tmp_path, monkeypatch, case):
+    import sys
+    from types import ModuleType, SimpleNamespace
+
+    from reproduce.mipro_search import MIPROGateEvaluator
+
+    class Result:
+        def __init__(self, score, results):
+            self.score, self.results = score, results
+
+    class Pruned(Exception):
+        pass
+
+    dspy, evaluate_module, optuna = (
+        ModuleType("dspy"),
+        ModuleType("dspy.evaluate.evaluate"),
+        ModuleType("optuna"),
+    )
+    dspy.Prediction = lambda **kwargs: SimpleNamespace(**kwargs)
+    evaluate_module.EvaluationResult, optuna.TrialPruned = Result, Pruned
+    for module in (dspy, evaluate_module, optuna):
+        monkeypatch.setitem(sys.modules, module.__name__, module)
+    controller, _ = make_pipeline(tmp_path, monkeypatch, 64)
+    controller.reference([response(u) for u in controller.spec["search_ids"]])
+    route, ledger = incremental(controller, tmp_path)
+    freeze_audit(route, scope="UNVERIFIED" if case == "unsupported" else "FROZEN_TABLE")
+    queried = []
+
+    def execute(request):
+        queried.append(request["unit"]["id"])
+        if case == "failed":
+            raise RuntimeError("authored execution failed")
+        return response(queried[-1], "wrong" if case == "rejected" else "authored answer")
+
+    predictor = SimpleNamespace(
+        signature=SimpleNamespace(
+            instructions="wrong" if case == "wrong_prompt" else "authored instruction",
+            input_fields={"task_input": None},
+            output_fields={"task_output": None},
+        ),
+        demos=[],
+    )
+    program = SimpleNamespace(predictors=lambda: [predictor])
+    native = MIPROGateEvaluator(route, execute, lambda p: "candidate")
+    batch = [{"unit_id": controller.spec["search_ids"][0]}]
+    try:
+        if case == "eligible":
+            result = native(
+                program, devset=batch, callback_metadata={"metric_key": "eval_minibatch"}
+            )
+            assert result.score == 100 and len(result.results) == 1
+            assert result.results[0][1].task_output == "authored answer"
+            assert len(queried) == ledger.usage()["calls"] == 64
+            assert set(controller._candidate_scores("candidate")[0]) == set(
+                controller.spec["search_ids"]
+            )
+            native(program, devset=batch, callback_metadata={"metric_key": "eval_full"})
+            assert len(queried) == 64  # complete original census reused, not free invented scores
+        else:
+            with pytest.raises(Pruned if case == "rejected" else ScoringError):
+                native(program, devset=batch, callback_metadata={"metric_key": "eval_full"})
+            assert len(queried) == {"rejected": 4, "failed": 1}.get(case, 0)
+            assert not any(
+                e["kind"] == "native_mipro_evaluation_complete" for e in controller.events
+            )
+            if case == "rejected":
+                assert any(e["kind"] == "native_mipro_pruned" for e in controller.events)
+            if case == "failed":
+                assert ledger.usage()["calls"] == 1
+                assert any(e["kind"] == "generation_failed" for e in controller.events)
+    finally:
+        route.close()
+        ledger.close()

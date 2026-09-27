@@ -96,6 +96,19 @@ independenceunverified原样保留，不声称跨家族接受。详见research/A
 保持 active goal，只有真正完成可核验交付后才结束；ARIS 停止条件本身不是科研成功。
 
 不得读取最终测试内容来开发，不对已预览数据宣称盲态。
+
+2026-09-27 17:13 UTC：strict MIPRO helper/component 已接原 incremental driver，主作者原67910
+实际CPU authored full/minibatch compile exit0；真实OptunaPRUNED各5/valueNone，complete8/10，
+75seed到100完整非seed。source043/唯一followup044同家族provisional，允许限定诊断。
+但到期TrialPruned跳过周期full/study.add_trial可改变winner，原source反例保留；这项
+cadence/selector缺陷未修，strict native控制也未资格化，不能开展科学native/Pilot部署。
+fresh doc spawn失败thread limit，未执行；主作者不替代独立环境验收。见research/ARIS_MIPRO_SEARCH。
+本机1917passed6skip/695.56s/94.04%，68targeted/Ruff329/mypy61/srcBandit/build/Twine通过；
+helper保留1LOWB404仅构造authored CompletedProcess无执行、不加ignore。原环境缺依赖/
+NumPy lazy import失败保留，新task-ownedCPUenv0279efce不改服务器/原interfaceenv。
+物理DB26a7e04b... bytes未变/closed_history重算1170calls/2136046input/195222output/
+3.8074371029887377GPUh；本轮新realcalls/GPU/tokens/paid0，未知历史count未编码保留。
+default4科学0/no timer/extra quota不变；完整native/online/statistical/fullroles/M1/Pilot/原矩阵仍缺。
 不得访问或占用其他任务的 GPU，不更改共享 CUDA/Python。
 敏感响应、私有端点、模型、数据与大账本、审查 trace 和 `.aris/` 状态不提交。
 
