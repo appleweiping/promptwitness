@@ -1,6 +1,6 @@
 # PromptWitness-Delta 接续 tracker
 
-日期：2026-09-27 08:49:37 UTC。完整原目标保持 active。
+日期：2026-09-27 08:40:00 UTC。完整原目标保持 active。
 
 | ID | 状态 | 真实证据与边界 |
 |---|---|---|
@@ -16,5 +16,5 @@
 | G4 | NOT_READY | 统计/局限/叙述、默认有记忆科学审查尚未开始，最多4轮不改 |
 
 失败日志、第一次fresh-doc、源码审查/一次复审、HOME具体部署修复保留。
-最终helper rerun已结束206passed1skip/40.34秒exit0；当前SHA待commit/push CI，不引用dd17ee2绿灯冒充。
+最终helper rerun在运行；当前SHA待commit/push CI，不引用dd17ee2绿灯冒充。
 本次无新模型/GPU/token/付费成本；继续跨版本原预算，不新增小额度或timer。

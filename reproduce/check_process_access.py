@@ -44,6 +44,10 @@ def private_env_witness() -> Iterator[None]:
 
 def probe(root: Path) -> None:
     """The application attempts actual file opens after entering Landlock."""
+    # Exercise the same restricted namespace-package import as real scorers.
+    from reproduce.process_access import role_leaves
+
+    imported_role_leaves = role_leaves(os.environ["PW_ACCESS_ROLE"], os.environ["PW_ACCESS_STAGE"])
     observations = []
     for leaf in sorted(set.union(*EXPECTED.values())):
         target = root / leaf / "sentinel.txt"
@@ -70,6 +74,8 @@ def probe(root: Path) -> None:
                 "checks": observations,
                 "scratch_write": scratch.read_text(encoding="utf-8") == "authored scratch\n",
                 "private_env_inherited": "PW_SENTINEL_PRIVATE" in os.environ,
+                "helper_import_after_restriction": set(imported_role_leaves)
+                == EXPECTED[os.environ["PW_ACCESS_ROLE"]],
             }
         )
     )

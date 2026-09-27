@@ -112,6 +112,7 @@ def test_launch_has_clean_environment_closed_descriptors_and_no_shell(tmp_path, 
     assert command[1] == "-I"
     assert "shell" not in kwargs and kwargs["close_fds"] is True
     assert "PW_SENTINEL_PRIVATE" not in kwargs["env"]
+    assert kwargs["env"]["HOME"] == str(scratch.resolve())
     assert json.loads(kwargs["input"])["arguments"] == ["plain"]
     assert result.returncode == 3  # not replaced by a score
 
@@ -155,3 +156,4 @@ def test_real_linux_process_sentinels(tmp_path, monkeypatch):
     assert result["read_checks"] == result["write_checks"] == 66
     assert result["scientific_admission"] == "PARTIAL_NOT_PASSED"
     assert len({row["pid"] for row in result["workers"]}) == 6
+    assert all(row["helper_import_after_restriction"] for row in result["workers"])

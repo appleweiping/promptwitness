@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import argparse
 import ctypes
+import importlib.machinery
+import importlib.util
 import json
 import os
 import platform
@@ -226,6 +228,9 @@ def launch_role(
         "MKL_NUM_THREADS": "1",
         "OPENBLAS_NUM_THREADS": "1",
         "TMPDIR": str(scratch.resolve()),
+        # Vendor imports call Path.home(). Do not query the real user database
+        # or inherit a credential/cache home outside the granted scratch.
+        "HOME": str(scratch.resolve()),
     }
     return subprocess.run(
         [sys.executable, "-I", str(Path(__file__).resolve()), "--worker"],
@@ -268,6 +273,11 @@ def worker() -> None:
     # Only source paths are returned to application imports; dataset paths are
     # never added to sys.path. Native libraries remain supplied by the runtime.
     sys.path.insert(0, str(entry.parent))
+    # Namespace discovery would list the ungranted parent of reproduce/. Bind
+    # this known helper package explicitly without widening any directory grant.
+    spec = importlib.machinery.ModuleSpec("reproduce", loader=None, is_package=True)
+    spec.submodule_search_locations = [str(Path(__file__).resolve().parent)]
+    sys.modules["reproduce"] = importlib.util.module_from_spec(spec)
     os.environ["PW_ACCESS_ROLE"] = checked["role"]
     os.environ["PW_ACCESS_STAGE"] = checked["stage"]
     os.environ["PW_LANDLOCK_ABI"] = str(abi)

@@ -63,3 +63,29 @@
 | 2026-09-27 07:36:11 UTC | experiment-bridge | refine-logs/EXPERIMENT_PLAN.md | implementation | 最新实施计划副本 |
 | 2026-09-27 07:36:11 UTC | experiment-bridge | research/ARIS_ACCESS_20260927_073611.json | implementation | 原生 authored 访问证据，整体 science partial |
 | 2026-09-27 07:36:11 UTC | experiment-bridge | research/ARIS_ACCESS.json | implementation | 最新访问状态副本 |
+| 2026-09-27 08:49:37 UTC | experiment-bridge | reproduce/bfcl_native.py | implementation | 原版 binding 与 code-only package 入口 |
+| 2026-09-27 08:49:37 UTC | experiment-bridge | reproduce/bfcl_stage.py | implementation | 固定 Git 原物110文件 staging；不带 data/Git |
+| 2026-09-27 08:49:37 UTC | experiment-bridge | reproduce/prepare_bfcl_fit.py | implementation | auditor 仅 decode 固定fit；原输入相等、历史archive不改 |
+| 2026-09-27 08:49:37 UTC | experiment-bridge | reproduce/check_bfcl_fit.py | implementation | 实际 fit official-GT worker；失败/timeout不归零 |
+| 2026-09-27 08:49:37 UTC | experiment-bridge | reproduce/process_access.py | implementation | 显式 namespace 与 scratch HOME，不扩大 grants |
+| 2026-09-27 08:49:37 UTC | experiment-bridge | reproduce/check_process_access.py | implementation | 限制后 helper import 真实 sentinel 检查 |
+| 2026-09-27 08:49:37 UTC | experiment-bridge | reproduce/BFCL_FIT.md | implementation | 真实受限fit与fresh-doc调用；范围/失败明确 |
+| 2026-09-27 08:49:37 UTC | experiment-bridge | configs/research/bfcl-linux-env.json | implementation | CPU1/GPU0 固定 runtime spec1c3ad127 |
+| 2026-09-27 08:49:37 UTC | experiment-bridge | tests/reproduce/test_bfcl_stage.py | implementation | 原物/inventory/trust边界 authored 测试 |
+| 2026-09-27 08:49:37 UTC | experiment-bridge | tests/reproduce/test_bfcl_fit.py | implementation | fit preparation/scoring/error/timeout authored 测试 |
+| 2026-09-27 08:49:37 UTC | experiment-bridge | tests/reproduce/test_process_access.py | implementation | HOME 与限制后六 worker import 检查 |
+| 2026-09-27 08:49:37 UTC | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260927_084000.md | implementation | source 一次复审、环境失败与具体修复摘要 |
+| 2026-09-27 08:49:37 UTC | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | 最新审查摘要副本 |
+| 2026-09-27 08:49:37 UTC | experiment-bridge | refine-logs/EXPERIMENT_PLAN_20260927_084000.md | implementation | 完整S1-pipeline与online/native接续，矩阵不减 |
+| 2026-09-27 08:49:37 UTC | experiment-bridge | refine-logs/EXPERIMENT_PLAN.md | implementation | 最新实施计划副本 |
+| 2026-09-27 08:49:37 UTC | experiment-bridge | refine-logs/EXPERIMENT_RESULTS_20260927_084000.md | implementation | 真实40 fit评分及当时仍运行的helper快照 |
+| 2026-09-27 08:49:37 UTC | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260927_084000.md | implementation | fit小项完成、完整science partial快照 |
+| 2026-09-27 08:49:37 UTC | experiment-bridge | research/ARIS_BFCL_FIT_20260927_084000.json | implementation | 独立worker真实fit评分及当时验收快照 |
+| 2026-09-27 08:49:37 UTC | experiment-bridge | research/ARIS_BFCL_FIT_20260927_084937.json | implementation | 最终helper206/1与保留wheel失败；当前CI待推送 |
+| 2026-09-27 08:49:37 UTC | experiment-bridge | research/ARIS_BFCL_FIT.json | implementation | 最新BFCL fit证据副本 |
+| 2026-09-27 08:49:37 UTC | experiment-bridge | research/ARIS_ACCESS_20260927_084937.json | implementation | BFCL fit-only store/worker完成，其他角色与科学门禁未完成 |
+| 2026-09-27 08:49:37 UTC | experiment-bridge | research/ARIS_ACCESS.json | implementation | 最新访问状态副本 |
+| 2026-09-27 08:49:37 UTC | experiment-bridge | refine-logs/EXPERIMENT_RESULTS_20260927_084937.md | implementation | 真实官方评分和最终helper结果；不报Pilot收益 |
+| 2026-09-27 08:49:37 UTC | experiment-bridge | refine-logs/EXPERIMENT_RESULTS.md | implementation | 最新结果副本 |
+| 2026-09-27 08:49:37 UTC | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260927_084937.md | implementation | 最终helper完成，精确SHA CI仍待推送 |
+| 2026-09-27 08:49:37 UTC | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 最新tracker副本 |

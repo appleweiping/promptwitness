@@ -70,8 +70,23 @@ def load_bfcl_native(
     if model not in TASK_MODELS:
         raise UnsupportedScoring("model is outside the frozen task model set")
     package = verify_bfcl_source(source)
+    return bind_bfcl_package(package, work_root, model)
+
+
+def bind_bfcl_package(
+    package: Path, work_root: Path, model: str
+) -> tuple[BFCLChecker, dict[str, Any]]:
+    """Bind code already verified by the trusted controller, never a data root.
+
+    Direct checkout callers use load_bfcl_native. Restricted worker callers use
+    bfcl_stage.load_staged_bfcl, whose code-only inventory is controller verified
+    before launch. A worker must not receive access to upstream Git objects.
+    """
+    if model not in TASK_MODELS:
+        raise UnsupportedScoring("model is outside the frozen task model set")
+    package = package.resolve()
     work_root = work_root.resolve()
-    if work_root.is_relative_to(source.resolve()):
+    if work_root.is_relative_to(package.parents[1]):
         raise ScoringError("BFCL scratch must be outside the upstream source checkout")
     work_root.mkdir(parents=True, exist_ok=True)
     cached = sys.modules.get("bfcl_eval.constants.eval_config")

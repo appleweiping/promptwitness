@@ -1,6 +1,6 @@
 # S0 BFCL 真实 fit 与进程评分记录
 
-日期：2026-09-27 08:49:37 UTC。目标 active，完整研究未完成。
+日期：2026-09-27 08:40:00 UTC。目标 active，完整研究未完成。
 机器可核验证据：research/ARIS_BFCL_FIT.json。不是优化效果或 Pilot。
 
 ## 实际执行与结果
@@ -37,7 +37,7 @@ Qwen **12/20**、OLMo **2/20**。这是40条旧成本探针的 simple_python 响
 并非额外完整审查 verdict。质量意见与 fresh-doc assurance 均 provisional。
 
 全部 helper 在 HOME 修复前206passed1skip/32.15秒；HOME 针对性41passed1skip。
-最终 helper rerun 已结束：206passed1skip/40.34秒，exit0；Windows native skip 不替代 Linux。
+最终 helper rerun 正在运行，尚不写成通过；Windows native skip 不替代 Linux。
 Ruff/format、strict mypy4helper、mypy61src、configured Bandit src 通过。
 新增 helper Bandit8 LOW（结构化 Git argv/无 shell/可信固定路径），无中高风险；
 没有扩大忽略。原 verifier/SCP顺序失败和 Windows find quoting 失败保留。
