@@ -1,0 +1,223 @@
+{
+  "format": "promptwitness.aris.incremental-pipeline-slice/v1",
+  "recorded_at": "2026-09-27T12:17:38Z",
+  "status": "AUTHORED_NATIVE_INCREMENTAL_UNIFORM_QUALIFIED",
+  "implementation": {
+    "driver": "existing AuditPlan/AuditJournal/certifier/controller/complete_survivor_scores reused; fixed-prefix actual unit scoring and complete survivor vector",
+    "freeze": "literal run/candidate/predictor/reference/execution, full replicate mapping, original plan/looks and resource caps before generation; no replan/replay",
+    "risk": "selected reference1 regression / reference0 improvement; missing required head fails closed; actual local FITTED_SYNTHETIC tests only, real M1 not fitted",
+    "logical_budget": "original2048 explicit in run configuration, full fixed reference charged, max32candidate slots unchanged",
+    "physical_search_accounting": "injected ResourceLedger reserve before executor, actual known tokens retained, unknown failure reservations retained, incurred overrun stopped; model success separate from scorer failure",
+    "other_role_costs": "NOT_COMPLETE; reference/selection/proposer/reflection/backends still require actual physical-call integration",
+    "recovery": "unresolved worker/generation/logical reservation fails closed; cross-ledger crash can require inspecting original records; no automatic regeneration",
+    "selector": "only actual full survivor vectors can end search; original seed/native caller choice retained; final not granted",
+    "execution_assumptions": "ONLINE_PINNED is caller assumption pending separate actual backend/wire/allocation/random-unit validation, not proven by driver"
+  },
+  "qualification": {
+    "scope": "AUTHORED_CANNED_EXECUTOR_AND_SEEDED_PLAN_NOT_REAL_INFERENCE_OR_METHOD_EFFECT",
+    "doc": "reproduce/INCREMENTAL_PIPELINE.md",
+    "invocations_final_source": 1,
+    "SSH_exit": 0,
+    "SSH_wall_seconds": 107.7728659,
+    "stderr": "",
+    "decoder_exit_separately_measured": false,
+    "actual_aggregate_download_exit": 0,
+    "aggregate_ABIs": "all78ABI1",
+    "distinct_worker_PIDs": 78,
+    "controller_PID": 7560,
+    "actual_official_authored_score_checks": 264,
+    "cases": [
+      {
+        "case": "eligible",
+        "status": "ELIGIBLE",
+        "population": 64,
+        "early_authored_executor_attempts": 4,
+        "total_authored_executor_attempts": 64,
+        "observed_actual_scores": 64,
+        "logical_episodes": 128,
+        "workers": 68,
+        "CPU_worker_wall_seconds": 89.70940426457673,
+        "seed_choice_retained": true,
+        "authored_ledger_not_real_resource_usage": {
+          "calls": 64,
+          "input_tokens": 768,
+          "output_tokens": 192,
+          "gpu_hours": 0,
+          "calls_with_reserved_or_unknown_token_cost": 0
+        }
+      },
+      {
+        "case": "rejected",
+        "status": "INELIGIBLE",
+        "population": 64,
+        "early_authored_executor_attempts": 4,
+        "total_authored_executor_attempts": 4,
+        "observed_actual_scores": 4,
+        "logical_episodes": 68,
+        "workers": 7,
+        "CPU_worker_wall_seconds": 8.105986737413332,
+        "seed_choice_retained": true,
+        "authored_ledger_not_real_resource_usage": {
+          "calls": 4,
+          "input_tokens": 48,
+          "output_tokens": 12,
+          "gpu_hours": 0,
+          "calls_with_reserved_or_unknown_token_cost": 0
+        }
+      },
+      {
+        "case": "failed",
+        "status": "INCONCLUSIVE",
+        "population": 64,
+        "early_authored_executor_attempts": 1,
+        "total_authored_executor_attempts": 1,
+        "observed_actual_scores": 0,
+        "logical_episodes": 65,
+        "workers": 3,
+        "CPU_worker_wall_seconds": 2.9058155780658126,
+        "seed_choice_retained": true,
+        "authored_ledger_not_real_resource_usage": {
+          "calls": 1,
+          "input_tokens": 32768,
+          "output_tokens": 64,
+          "gpu_hours": 0,
+          "calls_with_reserved_or_unknown_token_cost": 1
+        }
+      }
+    ],
+    "worker_confinement_independently_reaudited_this_slice": false,
+    "risk_head_Linux_fit_or_ranking_evaluation": "NOT_RUN_LOCAL_SYNTHETIC_INTERFACE_ONLY",
+    "original_source_invocation_preserved": {
+      "exit": 0,
+      "SSH_wall_seconds": 114.6229545,
+      "workers": 78,
+      "checks": 264,
+      "scope": "OLD_PRE_RISK_FIX_UNIFORM_SOURCE_NOT_FINAL_SOURCE_PROOF"
+    },
+    "doc_divergence": false,
+    "repair_or_retry_during_doc": false,
+    "assurance": "same-family/provisional narrow authored execution"
+  },
+  "environment": {
+    "spec": "configs/research/incremental-linux-env.json",
+    "canonical_hash": "d41b2c6f",
+    "python": "3.10.15",
+    "numpy": "2.2.6",
+    "scipy": "1.15.3",
+    "CPU_workers": 1,
+    "GPU": 0,
+    "build_exit": 0,
+    "build_integer_timestamp_elapsed_seconds": 26,
+    "precise_fractional_build_wall": "NOT_MEASURED",
+    "native_hypergeom_import_witness": true,
+    "final_source_warm_reuse": true,
+    "shared_environment_modified": false,
+    "code_archive_roundtrip_exact_bytes": true,
+    "native_text_runtime_copy_all_bytes_equal": true,
+    "source_or_Git_or_data_ancestor_grant_added": false
+  },
+  "checks": {
+    "whole_helpers_and_incremental": {
+      "passed": 382,
+      "skipped": 1,
+      "wall_seconds": 41.03,
+      "exit": 0,
+      "skip": "Windows cannot execute actual Linux Landlock"
+    },
+    "ruff_check": "PASS",
+    "ruff_format": "283_FILES_PASS",
+    "mypy_src": "61_FILES_PASS",
+    "configured_Bandit_src": "PASS_NO_ISSUES",
+    "three_helpers_Bandit": {
+      "exit": 1,
+      "LOW": 1,
+      "MEDIUM": 0,
+      "HIGH": 0,
+      "confidence": "HIGH",
+      "code": "B404",
+      "file": "reproduce/pipeline_controller.py:13",
+      "ignore_added": false
+    },
+    "full_local_package_and_build_this_slice": "NOT_RUN_HISTORICAL_FAILURES_UNCHANGED"
+  },
+  "review": {
+    "first": {
+      "no_blocker": true,
+      "passed": 131,
+      "wall_seconds": 30.29,
+      "missed": "optional risk-head per-reference selection"
+    },
+    "main_old_code_regression": {
+      "failed": 1,
+      "passed": 1,
+      "wall_seconds": 7.12
+    },
+    "fixed_two_cases": {
+      "passed": 2,
+      "wall_seconds": 7.74
+    },
+    "single_followup": {
+      "no_remaining_blocker": true,
+      "passed": 133,
+      "wall_seconds": 24.06,
+      "acknowledged_first_omission": true
+    },
+    "route": "same-family/provisional",
+    "private_traces": "023/024/025/026",
+    "scientific_auto_review_rounds_used": 0,
+    "scientific_acceptance": false
+  },
+  "retained_failures": [
+    "Initial Ruff line-length errors repaired by normal formatter, no ignore.",
+    "Original risk-head old-code synthetic regression failed; first review omission retained.",
+    "Direct-script --help ModuleNotFoundError retained; documented module invocation works.",
+    "New helper Bandit LOW subprocess import retained; historical local full-suite timeout1800s/wheel WinError127 not erased.",
+    "Read-only lookup/PowerShell quote and atomic patch-context errors retained in task evidence, not model experiment failures."
+  ],
+  "previous_exact_source_CI": {
+    "sha": "4f82fe91434e8db04911714d1cd4f5e175e526dc",
+    "run": 36315639278,
+    "conclusion": "success",
+    "jobs": "15/15",
+    "Ubuntu_Python_3_12_passed": 1808,
+    "wall_seconds": 158.44,
+    "coverage_percent": 94.03
+  },
+  "current_exact_SHA_CI": "PENDING_COMMIT_PUSH_AT_SNAPSHOT",
+  "real_training_store": "ALL3_PREPARED_512FIT_256SEARCH_256SELECTION_NOT_SCIENTIFIC_FREEZE",
+  "real_reference_parent_selection_config_freeze": "NOT_GENERATED",
+  "online_random_unit_semantics": "NOT_VALIDATED",
+  "native_GEPA_MIPRO_early_rejection_engine": "NOT_IMPLEMENTED",
+  "all_role_physical_cost_integration": "NOT_COMPLETE",
+  "M1": "UNFITTED",
+  "Pilot": "NOT_RUN",
+  "confirmatory": {
+    "pairs_completed": 0,
+    "pairs_planned": 144,
+    "runs_completed": 0,
+    "runs_planned": 180,
+    "transfers_completed": 0,
+    "transfers_planned": 36
+  },
+  "scientific_admission": "PARTIAL_NOT_PASSED",
+  "research_complete": false,
+  "goal": "ACTIVE",
+  "automation": "DELETED_NO_REPLACEMENT",
+  "aris_auto_review_max_rounds": 4,
+  "other_four_repositories": "FROZEN",
+  "new_real_cost": {
+    "model_calls": 0,
+    "allocated_gpu_hours": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "paid_API_usd": 0
+  },
+  "historical_cross_version_snapshot": {
+    "calls": 898,
+    "allocated_gpu_hours": 3.4812718904634763,
+    "input_tokens": 1758607,
+    "output_tokens": 190976,
+    "paid_API_usd": 0
+  },
+  "next": "Use measured persistent-model backend/supervisor for actual complete request execution, all-role cost, access and recorded random units; connect pinned GEPA/MIPRO engine early rejection with actual survivor vectors. Independent statistical audit, real M1/Pilot/admission/full original matrix/statistics/narrative and default remembered review remain."
+}

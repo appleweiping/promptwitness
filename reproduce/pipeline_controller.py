@@ -1,8 +1,8 @@
 """Single-writer, durable stage routing for actual research role applications.
 
 Literal run/candidate/profile/predictor freezes precede application execution.
-This full-score route supplies real vectors; incremental sampling and native
-optimizer control flow remain the next integration, not implied certificates.
+Both full and incremental routes supply actual observed vectors; native
+optimizer engine control flow is separate, not an implied certificate.
 No final stage is opened here; scientific confirmation admission is separate.
 """
 
@@ -124,6 +124,14 @@ class PipelineController:
         terminal = {e["attempt"] for e in self.events if e["kind"] in {"result", "failed"}}
         if requests != terminal:
             raise ScoringError("unresolved worker attempt; inspect original logs, do not replay")
+        generations = {e["call_id"] for e in self.events if e["kind"] == "generation_request"}
+        settled = {
+            e["call_id"]
+            for e in self.events
+            if e["kind"] in {"generation_result", "generation_failed"}
+        }
+        if generations != settled:
+            raise ScoringError("unresolved generation attempt; inspect cost ledger, do not replay")
 
     def _one(self, kind):
         self._no_pending()
@@ -345,18 +353,29 @@ class PipelineController:
     def _candidate_scores(self, identifier, stage="search"):
         if stage == "search" and identifier == self.events[0]["spec"]["seed_prompt"]["id"]:
             return [self._one("reference_complete")["observations"]]
-        return [
+        vectors = [
             e["report"]["observations"]
             for e in self.events
             if e["kind"] == "result" and e["tag"] == stage + ":" + identifier
         ]
+        merged = {}
+        for vector in vectors:
+            if set(merged) & set(vector):
+                raise ScoringError("duplicate actual candidate observations")
+            merged.update(vector)
+        return [merged] if vectors else []
+
+    def _search_requested(self, identifier):
+        return any(
+            (e["kind"] == "request" and e["tag"] == "search:" + identifier)
+            or (e["kind"] == "generation_request" and e["identifier"] == identifier)
+            for e in self.events
+        )
 
     def predict(self, identifier):
         self._absent("search_ended")
         frozen = self._candidate(identifier)
-        if self._candidate_scores(identifier) or any(
-            e["kind"] == "request" and e["tag"] == "search:" + identifier for e in self.events
-        ):
+        if self._candidate_scores(identifier) or self._search_requested(identifier):
             raise ScoringError("prediction must precede current candidate outcomes")
         parent = frozen["parent"]
         if parent == self.spec["seed_prompt"]:
@@ -388,6 +407,31 @@ class PipelineController:
         if self._candidate_scores(identifier):
             raise ScoringError("candidate already fully scored")
         return self._score(candidate, responses, "search", "search:" + identifier)
+
+    def score_unit(self, identifier, response):
+        """Score one actual response under a previously frozen audit plan.
+
+        The incremental driver controls designated prefixes and episode charges.
+        A partial vector cannot enter end_search until every unit is observed.
+        """
+        self._absent("search_ended")
+        candidate = self._candidate(identifier)["candidate"]
+        plans = [
+            e for e in self.events if e["kind"] == "audit_frozen" and e["identifier"] == identifier
+        ]
+        if len(plans) != 1 or response["id"] not in plans[0]["replicates"]:
+            raise ScoringError("unit requires original frozen audit population")
+        if response["replicate"] != plans[0]["replicates"][response["id"]]:
+            raise ScoringError("actual random replicate differs from audit freeze")
+        observed = self._candidate_scores(identifier)
+        if observed and response["id"] in observed[0]:
+            raise ScoringError("actual unit already scored; do not replay")
+        return self._dispatch(
+            "search_scorer",
+            "search",
+            self._message("score", candidate, responses=[response]),
+            "search:" + identifier,
+        )["observations"][response["id"]]
 
     def end_search(self, survivors: list[str]):
         self._no_pending()

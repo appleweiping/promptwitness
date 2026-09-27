@@ -155,3 +155,14 @@
 | 2026-09-27 11:20:00 UTC | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 实际全分角色IPC/controller的Linux authored资格通过，15workers156officialchecks；真实online/native/M1/Pilot未通过 |
 | 2026-09-27 11:20:00 UTC | experiment-bridge | refine-logs/EXPERIMENT_PLAN_20260927_112000.md | implementation | 实际全分角色IPC/controller的Linux authored资格通过，15workers156officialchecks；真实online/native/M1/Pilot未通过 |
 | 2026-09-27 11:20:00 UTC | experiment-bridge | refine-logs/EXPERIMENT_PLAN.md | implementation | 实际全分角色IPC/controller的Linux authored资格通过，15workers156officialchecks；真实online/native/M1/Pilot未通过 |
+
+| 2026-09-27T12:17:38Z | experiment-bridge | research/ARIS_INCREMENTAL_PIPELINE_20260927_121738.json | implementation | 最终fixedprefix authored Linux78workers264checks；真实M1/Pilot/online/native未完成 |
+| 2026-09-27T12:17:38Z | experiment-bridge | research/ARIS_INCREMENTAL_PIPELINE.json | implementation | 最终fixedprefix authored Linux78workers264checks；真实M1/Pilot/online/native未完成 |
+| 2026-09-27T12:17:38Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260927_121738.md | implementation | 最终fixedprefix authored Linux78workers264checks；真实M1/Pilot/online/native未完成 |
+| 2026-09-27T12:17:38Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | 最终fixedprefix authored Linux78workers264checks；真实M1/Pilot/online/native未完成 |
+| 2026-09-27T12:17:38Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260927_121738.md | implementation | 最终fixedprefix authored Linux78workers264checks；真实M1/Pilot/online/native未完成 |
+| 2026-09-27T12:17:38Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 最终fixedprefix authored Linux78workers264checks；真实M1/Pilot/online/native未完成 |
+| 2026-09-27T12:17:38Z | experiment-bridge | refine-logs/EXPERIMENT_PLAN_20260927_121738.md | implementation | 最终fixedprefix authored Linux78workers264checks；真实M1/Pilot/online/native未完成 |
+| 2026-09-27T12:17:38Z | experiment-bridge | refine-logs/EXPERIMENT_PLAN.md | implementation | 最终fixedprefix authored Linux78workers264checks；真实M1/Pilot/online/native未完成 |
+| 2026-09-27T12:17:38Z | experiment-bridge | refine-logs/EXPERIMENT_RESULTS_20260927_121738.md | implementation | 最终fixedprefix authored Linux78workers264checks；真实M1/Pilot/online/native未完成 |
+| 2026-09-27T12:17:38Z | experiment-bridge | refine-logs/EXPERIMENT_RESULTS.md | implementation | 最终fixedprefix authored Linux78workers264checks；真实M1/Pilot/online/native未完成 |

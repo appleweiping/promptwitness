@@ -10,10 +10,15 @@ from dataclasses import asdict
 
 import pytest
 
-from promptwitness.incremental.features import ParentTrace
+from promptwitness.incremental.budget import ResourceLedger, ResourceLimit
+from promptwitness.incremental.features import ParentTrace, extract_features
+from promptwitness.incremental.gate import GateStatus
+from promptwitness.incremental.predictor import TrainingRow, TransitionPredictor
+from promptwitness.parser import parse_prompt
 from reproduce import pipeline_controller as control
 from reproduce import process_access as access
 from reproduce import role_pipeline as roles
+from reproduce.incremental_pipeline import IncrementalPipeline
 from reproduce.prepare_bfcl_fit import MODEL_REVISIONS, write_jsonl
 from reproduce.strict_scoring import ScoringError
 
@@ -81,27 +86,31 @@ def message(kind="score"):
     return result
 
 
-@pytest.fixture
-def pipeline(tmp_path, monkeypatch):
+def make_pipeline(tmp_path, monkeypatch, population=1):
     store = tmp_path / "store"
     for leaf in access.LEAVES:
         (store / leaf).mkdir(parents=True)
-    for stage, unit in (("search", "s"), ("selection", "v")):
+    search = ["s"] if population == 1 else [f"s{i}" for i in range(population)]
+    for stage, units in (("search", search), ("selection", ["v"])):
         write_jsonl(
             store / f"{stage}/inputs/hotpotqa.jsonl",
-            [{"id": unit, "messages": [{"role": "user", "content": "authored context"}]}],
+            [
+                {"id": unit, "messages": [{"role": "user", "content": "authored context"}]}
+                for unit in units
+            ],
         )
         write_jsonl(
-            store / f"{stage}/gold/hotpotqa.jsonl", [{"id": unit, "answer": "authored answer"}]
+            store / f"{stage}/gold/hotpotqa.jsonl",
+            [{"id": unit, "answer": "authored answer"} for unit in units],
         )
     spec = {
         "run_id": "authored",
         "family": "hotpotqa",
         "model": next(iter(MODEL_REVISIONS)),
         "execution": execution(),
-        "configuration": {"evaluator": "authored-full-route"},
+        "configuration": {"evaluator": "authored-full-route", "max_evaluation_episodes": 2048},
         "seed_prompt": prompt("seed", "old instruction"),
-        "search_ids": ["s"],
+        "search_ids": search,
         "selection_ids": ["v"],
     }
     monkeypatch.setattr(control, "text_inventory", lambda path: {})
@@ -128,6 +137,11 @@ def pipeline(tmp_path, monkeypatch):
         store, tmp_path / "run", spec, {"bfcl": tmp_path, "text": tmp_path}
     )
     return controller, dispatched
+
+
+@pytest.fixture
+def pipeline(tmp_path, monkeypatch):
+    return make_pipeline(tmp_path, monkeypatch)
 
 
 @pytest.mark.parametrize("key,value", [("responses", []), ("current_score", 1), ("gold", {})])
@@ -397,3 +411,249 @@ def test_parent_trace_without_current_labels_and_missingness(pipeline):
     request["parent_observations"]["s"] = {**asdict(ParentTrace()), "new_correct": 1}
     with pytest.raises(ScoringError, match="forbidden"):
         roles.validate(request, "predictor", "search")
+
+
+def incremental(controller, tmp_path, predictor=UNFITTED):
+    # Authored transport costs only; the exact user ceilings are not reduced.
+    limit = ResourceLimit(800000, 2000000000, 200000000, 1000)
+    ledger = ResourceLedger(
+        tmp_path / "resources.sqlite",
+        historical_usage={
+            "calls": 0,
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "gpu_hours": 0,
+        },
+        historical_digest="a" * 64,
+        global_limit=limit,
+        stage_limits={"authored": limit},
+        gpu_uuid="GPU-authored-no-allocation",
+    )
+    controller.freeze_candidate(
+        controller.spec["seed_prompt"], prompt("candidate"), predictor, structured=True
+    )
+    route = IncrementalPipeline(
+        controller, ledger, resource_stage="authored", input_cap=32768, output_cap=64
+    )
+    return route, ledger
+
+
+def freeze_audit(route, *, scope="FROZEN_TABLE", use_risk=False):
+    return route.freeze(
+        "candidate",
+        replicates={u: "sample-0" for u in route.controller.spec["search_ids"]},
+        execution_scope=scope,
+        fixture_seed=7,
+        use_risk=use_risk,
+    )
+
+
+def test_incremental_eligible_completes_only_unobserved_and_keeps_native_seed(
+    tmp_path, monkeypatch
+):
+    controller, dispatched = make_pipeline(tmp_path, monkeypatch, 64)
+    controller.reference([response(u, "wrong answer") for u in controller.spec["search_ids"]])
+    route, ledger = incremental(controller, tmp_path)
+    plan = freeze_audit(route)
+    queried = []
+
+    def execute(request):
+        assert controller.events[-1]["kind"] == "generation_request"
+        assert ledger.usage()["calls"] == len(queried) + 1  # reserve before actual invocation
+        assert "gold" not in request and "reference" not in request
+        assert request["candidate"] == prompt("candidate")
+        queried.append(request["unit"]["id"])
+        return response(queried[-1])
+
+    result = route.evaluate("candidate", execute)
+    assert result.status == GateStatus.ELIGIBLE
+    assert result.certificate_scope == "MECHANICAL_SEEDED_FIXTURE"
+    expected = [
+        u for s, n in zip(plan.strata, plan.allocations[0], strict=True) for u in s.permutation[:n]
+    ]
+    assert queried == expected and len(queried) < 64
+    with pytest.raises(ScoringError, match="score vector"):
+        controller.end_search(["candidate"])
+    with pytest.raises(ScoringError, match="precede"):
+        controller.predict("candidate")
+    vector = route.complete_survivor("candidate", execute)
+    assert vector.unit_ids == tuple(controller.spec["search_ids"]) and vector.scores == (1,) * 64
+    assert len(queried) == len(set(queried)) == 64
+    assert route.journal.consumed_episodes() == 128  # original reference + all actual queries
+    assert ledger.usage()["calls"] == 64 and ledger.usage()["input_tokens"] == 768
+    assert ledger.usage()["gpu_hours"] == 0  # no fabricated allocation from scoring CPU walltime
+    controller.end_search(["seed", "candidate"])
+    controller.selection("seed", [response("v")])
+    controller.selection("candidate", [response("v")])
+    assert controller.end_selection("seed")["frozen_prompt"] == controller.spec["seed_prompt"]
+    assert len(dispatched) == 67  # reference + 64 actual units + two selection vectors
+    route.close()
+    ledger.close()
+
+
+def test_incremental_early_rejection_leaves_unknowns_and_partial_parent(tmp_path, monkeypatch):
+    controller, _ = make_pipeline(tmp_path, monkeypatch, 64)
+    controller.reference([response(u) for u in controller.spec["search_ids"]])
+    route, ledger = incremental(controller, tmp_path)
+    plan = freeze_audit(route)
+    seen = []
+
+    def execute(request):
+        seen.append(request["unit"]["id"])
+        return response(seen[-1], "wrong answer")
+
+    result = route.evaluate("candidate", execute)
+    assert result.status == GateStatus.INELIGIBLE and len(seen) < 64
+    assert set(route.journal.observations(plan)) == set(seen)
+    assert route.journal.consumed_episodes() == 64 + len(seen)
+    with pytest.raises(ScoringError, match="eligible"):
+        route.complete_survivor("candidate", execute)
+    controller.freeze_candidate(prompt("candidate"), prompt("child"), UNFITTED, structured=True)
+    controller.predict("child")
+    request = controller.events[-2]["message"]
+    assert set(request["parent_observations"]) == set(seen)
+    assert len(request["reference"]) == 64  # fixed reference, not queried parent subset
+    controller.end_search(["seed"])
+    route.close()
+    ledger.close()
+
+
+@pytest.mark.parametrize(
+    "failure", ["exception", "unknown_tokens", "wrong_unit", "overrun", "scorer"]
+)
+def test_incremental_failure_charges_no_zero_no_automatic_replay(
+    pipeline, tmp_path, monkeypatch, failure
+):
+    controller, _ = pipeline
+    controller.reference([response("s")])
+    route, ledger = incremental(controller, tmp_path)
+    plan = freeze_audit(route)
+    seen = []
+    if failure == "scorer":
+        monkeypatch.setattr(
+            control,
+            "launch_role",
+            lambda *a, **kw: subprocess.CompletedProcess([], 2, "", "scorer failed"),
+        )
+
+    def execute(request):
+        seen.append(request)
+        if failure == "exception":
+            raise RuntimeError("authored failure")
+        row = response("other" if failure == "wrong_unit" else "s")
+        if failure == "unknown_tokens":
+            row.update(input_tokens=None, output_tokens=None)
+        if failure == "overrun":
+            row["output_tokens"] = 65
+        return row
+
+    result = route.evaluate("candidate", execute)
+    assert result.status == GateStatus.INCONCLUSIVE and len(seen) == 1
+    assert route.journal.observations(plan) == {}
+    assert route.journal.consumed_episodes() == 2 and ledger.usage()["calls"] == 1
+    if failure in ("exception", "unknown_tokens"):
+        assert ledger.usage()["calls_with_reserved_or_unknown_token_cost"] == 1
+        assert ledger.usage()["input_tokens"] == 32768
+    else:
+        assert ledger.usage()["calls_with_reserved_or_unknown_token_cost"] == 0
+        assert ledger.usage()["output_tokens"] == (65 if failure == "overrun" else 3)
+    assert route.evaluate("candidate", execute).status == GateStatus.INCONCLUSIVE
+    assert len(seen) == 1  # unchanged failed random unit is not regenerated
+    control.PipelineController.resume(controller.store, controller.directory, controller.runtimes)
+    route.close()
+    ledger.close()
+
+
+def test_audit_freeze_unsupported_unfitted_resume_and_changed_random_units(pipeline, tmp_path):
+    controller, _ = pipeline
+    controller.reference([response("s")])
+    route, ledger = incremental(controller, tmp_path)
+    controller.predict("candidate")
+    with pytest.raises(ScoringError, match="UNFITTED"):
+        freeze_audit(route, use_risk=True)
+    plan = freeze_audit(route, scope="UNVERIFIED")
+    assert (
+        route.evaluate(
+            "candidate", lambda request: pytest.fail("unsupported must not execute")
+        ).status
+        == GateStatus.UNSUPPORTED
+    )
+    assert ledger.usage()["calls"] == 0
+    route.close()
+    resumed = control.PipelineController.resume(
+        controller.store, controller.directory, controller.runtimes
+    )
+    again = IncrementalPipeline(
+        resumed, ledger, resource_stage="authored", input_cap=32768, output_cap=64
+    )
+    assert freeze_audit(again, scope="UNVERIFIED") == plan
+    with pytest.raises(ScoringError, match="changed"):
+        again.freeze(
+            "candidate", replicates={"s": "sample-1"}, execution_scope="UNVERIFIED", fixture_seed=7
+        )
+    again.close()
+    ledger.close()
+
+
+def test_unresolved_generation_or_logical_episode_remains_fail_closed(
+    pipeline, tmp_path, monkeypatch
+):
+    controller, _ = pipeline
+    controller.reference([response("s")])
+    route, ledger = incremental(controller, tmp_path)
+    plan = freeze_audit(route)
+    route.journal.reserve(plan, "s")
+    result = route.evaluate("candidate", lambda r: pytest.fail("no replay"))
+    assert result.status == GateStatus.INCONCLUSIVE and route.journal.consumed_episodes() == 2
+    controller._record("generation_request", identifier="candidate", unit="s", call_id="unresolved")
+    with pytest.raises(ScoringError, match="unresolved generation"):
+        control.PipelineController.resume(
+            controller.store, controller.directory, controller.runtimes
+        )
+    route.close()
+    ledger.close()
+
+
+def test_incremental_does_not_silently_replace_original_budget(pipeline, tmp_path):
+    controller, _ = pipeline
+    controller.reference([response("s")])
+    controller.spec["configuration"]["max_evaluation_episodes"] = 200
+    with pytest.raises(ScoringError, match="2048"):
+        IncrementalPipeline(
+            controller, None, resource_stage="authored", input_cap=32768, output_cap=64
+        )
+
+
+@pytest.mark.parametrize("old_correct", [0, 1])
+def test_risk_uses_available_reference_transition_head(pipeline, tmp_path, old_correct):
+    pytest.importorskip("sklearn")
+    controller, _ = pipeline
+    controller.reference([response("s", "authored answer" if old_correct else "wrong answer")])
+    model = TransitionPredictor()
+    model.fit(
+        (
+            TrainingRow(
+                features=extract_features(
+                    parse_prompt(controller.spec["seed_prompt"]),
+                    parse_prompt(prompt("candidate")),
+                    "authored input",
+                ),
+                old_correct=old_correct,
+                new_correct=1 - old_correct,
+                lineage="authored",
+                source_group="authored",
+                split="fit",
+                label_source_digest="a" * 64,
+                kind="synthetic",
+            ),
+        )
+    )
+    route, ledger = incremental(controller, tmp_path, model.to_dict())
+    prediction = controller.predict("candidate")["predictions"]["s"]
+    relevant = "regression_probability" if old_correct else "improvement_probability"
+    irrelevant = "improvement_probability" if old_correct else "regression_probability"
+    assert prediction[relevant] is not None and prediction[irrelevant] is None
+    plan = freeze_audit(route, use_risk=True)
+    assert plan.population == 1 and plan.strata[0].old_correct == old_correct
+    route.close()
+    ledger.close()

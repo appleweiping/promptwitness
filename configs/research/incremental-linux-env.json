@@ -1,0 +1,20 @@
+{
+  "format": "promptwitness.research.scorer-env/v1",
+  "base": "python3.10.15",
+  "resource_shape": {"gpus": 0, "workers": 1},
+  "purpose": "Isolated CPU authored incremental IPC qualification, not inference or research effects",
+  "pip_phases": [
+    ["numpy==2.2.6", "scipy==1.15.3"],
+    ["absl-py==2.5.0", "langdetect==1.0.9", "nltk==3.10.3", "immutabledict==4.3.1", "emoji==2.16.0", "syllapy==0.8.0", "ujson==6.0.0"]
+  ],
+  "native_sources": {
+    "IFTrain": "99b1ee970490a2d0d5664663eb0b1acc410b944c",
+    "IFBench": "1c40f0c10d9b5c5c2f10a175a28007ebb64f7f4d",
+    "HotpotQA": "3635853403a8735609ee997664e1528f4480762a"
+  },
+  "nltk_resources": ["punkt", "punkt_tab", "stopwords", "averaged_perceptron_tagger_eng"],
+  "language_detector_seed": 11,
+  "construction_rng_seed": 11,
+  "no_model_calls": true,
+  "no_final_samples": true
+}
