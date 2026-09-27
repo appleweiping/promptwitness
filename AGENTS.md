@@ -221,3 +221,20 @@ generator/tokens/GPU/paid新增0、CPU全开销未量非0；原1170/26a7e04b...D
 unknown未编码非0证明、已知保守和1190不完整allrole。benchmark/M1/Pilot/封存/
 captionfusion/nativeonline/强对照/forecast/统计/英文稿仍pending，goalACTIVE/default4科学0、
 同一run/无timer/其他四仓冻结。见research/ARIS_ICMR_CLIP_CPU，不重复此fixture救准入。
+
+2026-09-27T22:36:18Z：ICMR B3真实图文融合机制已在authored-only资格跑通：参考图像
+raw向量＋修改文本unit向量→预写定0.5组合→原完整图库CPUrank；0.5非科学冻结/
+优化结果。主40503/doc一次各exit0/checker38.7071/38.5269s，3图/2修改反序
+bitwise、2完整3-ID排名一致，各6image＋4text实际CLIPforward。source058
+gpt-6-astra/xhigh无具体blocker同家族provisional；doc059按文档一次无retry、
+identity inherited/familyunknown/independenceunverified，不科学通过。ownedstage
+新两源码hash与本地匹配、原55pin fbea8bf4/权重/base环境不变。
+局部67项66passed1skipped51.23s（本地无Torch数值）、Ruff420/mypy61/两
+helper Bandit通过。首df53792 exactCI36354407932确为15/15 success但不代
+此未提交源码；原whole9530终态1981passed6skip1failed2830.81s/94.03%src，
+旧closed-pipe Windows wait15s超时，单例6.29s复测通过不能覆盖整套失败，WMI保留。
+新组合额外20CPUencoderforwards，上一组件20，历史generator1170；已知保守和
+1210/unknown未编码，不写allcall0或CPUtotal0；新generator/token/GPU/paid0、
+原物理DB26a7e04b...未改。无benchmark数据/许可/fullpool、caption/融合训练
+冻结、M1/Pilot、强CIR、全角色forecast、统计/英文稿；goalACTIVE/default4
+科学0/同一run无timer其他四仓冻结。见research/ARIS_ICMR_COMPOSED_CPU。

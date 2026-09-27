@@ -1,0 +1,191 @@
+{
+  "format": "promptwitness.icmr-composed-cpu-qualification/v1",
+  "recorded_at": "2026-09-27T22:36:18Z",
+  "status": "PASS_AUTHORED_REFERENCE_IMAGE_PLUS_MODIFICATION_TEXT_REAL_ENCODER_CPU_ONLY",
+  "goal": "ACTIVE",
+  "same_existing_ARIS_run": true,
+  "MAX_ROUNDS": 4,
+  "scientific_rounds_used": 0,
+  "timer": "NONE",
+  "other_four_repos": "FROZEN",
+  "model": {
+    "source_revision": "d05afc436d78f1c48dc0dbf8e5980a9d471f35f6",
+    "checkpoint_actual_sha256": "b8cca3fd41ae0c99ba7e8951adf17d267cdb84cd88be6f7c2e0eca1737a03836",
+    "spec_hash": "fbea8bf4",
+    "packages_matched": 55,
+    "CPUs": 1,
+    "GPUs": 0,
+    "CUDA_VISIBLE_DEVICES": "",
+    "dtype": "float32",
+    "query_batch": 1,
+    "weight_redistribution_MIT": "UNESTABLISHED_NOT_REDISTRIBUTED",
+    "formal_legal_admission": false
+  },
+  "implementation": {
+    "files": [
+      "reproduce/retrieval_composed_cpu.py",
+      "reproduce/check_retrieval_composed_cpu.py",
+      "reproduce/RETRIEVAL_COMPOSED_CPU.md",
+      "tests/reproduce/test_retrieval_composed_cpu.py"
+    ],
+    "reference_image_feature": "RAW_GALLERY_FEATURE_NORMALIZED_ONCE",
+    "modification_text_feature": "UNIT_FROM_CLIP_CPU_ENCODER_NO_EXTRA_TEXT_NORMALIZATION",
+    "mixed_query": "WEIGHTED_THEN_UNIT_NORMALIZED",
+    "authored_image_weight": 0.5,
+    "weight_scientifically_frozen": false,
+    "hyperparameter_tuning": false,
+    "ranker": "EXISTING_COMPLETE_CPU_GALLERY",
+    "reference_exclusion": "NOT_IN_THIS_LAYER_CIRR_SCORER_SPECIFIC",
+    "captioner_or_LLM_called": false,
+    "labels_or_gold_used": false
+  },
+  "staging": {
+    "new_source_files": 2,
+    "absent_path_preflight": true,
+    "local_remote_sha256_equal": true,
+    "package_or_weight_rebuilt": false,
+    "source_review_trace": "experiment-bridge/058",
+    "source_review": "NO_CONCRETE_BLOCKER_SAME_FAMILY_PROVISIONAL",
+    "fresh_doc_trace": "experiment-bridge/059",
+    "fresh_doc": "LITERAL_ONCE_EXIT0_CANONICAL_FAMILY_UNKNOWN_INDEPENDENCE_UNVERIFIED",
+    "fresh_doc_checked_source_internals": false
+  },
+  "receipts": [
+    {
+      "run_role": "primary",
+      "original": 40503,
+      "status": "PASS_AUTHORED_COMPOSED_IMAGE_TEXT_CPU_ONLY",
+      "terminal_exit": 0,
+      "checker_wall_seconds": 38.707057795953006,
+      "model_load_wall_seconds": 15.460972368950024,
+      "image_attempts": 6,
+      "text_attempts": 4,
+      "image_forward_calls": 6,
+      "text_forward_calls": 4,
+      "image_wall_seconds": 19.956025678897277,
+      "text_wall_seconds": 1.3578965093474835,
+      "image_repeats_bitwise_equal": 3,
+      "modification_repeats_bitwise_equal": 2,
+      "full_ranks_equal": 2,
+      "full_ranks": [
+        [
+          "authored-red",
+          "authored-blue",
+          "authored-grey"
+        ],
+        [
+          "authored-blue",
+          "authored-red",
+          "authored-grey"
+        ]
+      ],
+      "recovered_file": ".aris/compute/composed-primary-qualification.json"
+    },
+    {
+      "run_role": "fresh_doc",
+      "original": "agent-execution-once",
+      "status": "PASS_AUTHORED_COMPOSED_IMAGE_TEXT_CPU_ONLY",
+      "terminal_exit": 0,
+      "checker_wall_seconds": 38.526855575852096,
+      "model_load_wall_seconds": 15.392536701867357,
+      "image_attempts": 6,
+      "text_attempts": 4,
+      "image_forward_calls": 6,
+      "text_forward_calls": 4,
+      "image_wall_seconds": 19.87392257200554,
+      "text_wall_seconds": 1.3139825807884336,
+      "image_repeats_bitwise_equal": 3,
+      "modification_repeats_bitwise_equal": 2,
+      "full_ranks_equal": 2,
+      "full_ranks": [
+        [
+          "authored-red",
+          "authored-blue",
+          "authored-grey"
+        ],
+        [
+          "authored-blue",
+          "authored-red",
+          "authored-grey"
+        ]
+      ],
+      "recovered_file": ".aris/compute/composed-doc-qualification.json"
+    }
+  ],
+  "local_software": {
+    "targeted": {
+      "collected": 67,
+      "passed": 66,
+      "skipped": 1,
+      "seconds": 51.23,
+      "exit": 0
+    },
+    "reviewer_targeted": {
+      "passed": 18,
+      "skipped": 1,
+      "seconds": 13.96,
+      "global_python_314_attempt": "7_passed_then_Torch_import_stall_TERMINATED_NOT_PASS"
+    },
+    "Ruff": "PASS_420_FORMAT_FILES",
+    "mypy_src_files": 61,
+    "Bandit_new_two_helpers": "PASS_ZERO_ISSUES",
+    "previous_first_commit_CI": {
+      "sha": "df537922ffc14ab22abb162f31fb8cd719259cd3",
+      "run": 36354407932,
+      "conclusion": "success",
+      "jobs": 15,
+      "not_this_uncommitted_composed_code": true
+    },
+    "original_whole_9530": {
+      "exit": 1,
+      "passed": 1981,
+      "skipped": 6,
+      "failed": 1,
+      "seconds": 2830.81,
+      "source_coverage_percent": 94.03,
+      "failure": "PREEXISTING_WINDOWS_CLOSED_PIPE_SUBPROCESS_TIMEOUT_15S_STATUS_0",
+      "started_before_first_component_fix": true,
+      "WMI_0x8007000e_retained": true,
+      "cannot_claim_full_pass": true
+    },
+    "isolated_failed_test_recheck": {
+      "passed": 1,
+      "seconds": 6.29,
+      "does_not_erase_whole_failure": true
+    }
+  },
+  "costs": {
+    "format": "promptwitness.composed-cpu-physical-cost/v1",
+    "recorded_at": "2026-09-27T22:36:18Z",
+    "component": "authored-image-and-text-direct-fusion-qualification",
+    "new_encoder_forwards": {
+      "image": 12,
+      "text": 8,
+      "total": 20,
+      "input_attempts": 20
+    },
+    "new_generator_calls": 0,
+    "new_generator_input_tokens": 0,
+    "new_generator_output_tokens": 0,
+    "new_allocated_GPU_hours": 0,
+    "new_paid_API_USD": 0,
+    "complete_CPU_cost": "NOT_FULLY_METERED_NOT_ZERO",
+    "first_CLIP_component_forwards": 20,
+    "this_composed_component_forwards": 20,
+    "historical_generator_calls": 1170,
+    "conservative_known_forward_sum": 1210,
+    "historical_unknown_count": "NOT_ENCODED_NOT_PROVEN_ZERO",
+    "historical_generator_DB_SHA256": "26a7e04bbe7f256df6796877cdfb24c5e86cd57495268491804687d44d88bf93",
+    "historical_generator_DB_unchanged": true,
+    "full_matrix_forecast": "NOT_ADMITTED"
+  },
+  "benchmark_images_or_annotations_downloaded": false,
+  "benchmark_performance": false,
+  "formal_dataset_access": false,
+  "real_M1_or_Pilot": false,
+  "native_online_semantics": false,
+  "all_role_forecast_admitted": false,
+  "scientific_admission": false,
+  "manuscript": "NOT_STARTED",
+  "next": "LAWFUL_CIRR_NLVR2_ACCESS_AND_FIQ_EXACT_SOURCE; SEALED_SPLITS; FROZEN_CAPTION_FUSION_STRONG_CONTROLS; REAL_NATIVE_ALL_ROLE_M1_PILOT"
+}

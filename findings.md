@@ -134,3 +134,15 @@ same-family provisional, doc057 unknown-family/unverified independence. Targeted
 still running/WMI retained, old27c CI15/15 not new-source validation. No benchmark
 data/result, formal weights/data admission, captioner/fusion freeze, M1/Pilot,
 matrix, scientific effect or manuscript; goalACTIVE/default4/scientific0/no timer.
+
+2026-09-27T22:36:18Z B3 direct image+modification fusion actual CLIP CPU qualification:
+source058 same-family/no blocker, freshdoc059 inherited identity/unverified independence;
+primary40503/doc each terminal0, 6image+4text real forwards and complete authored ranks
+with reverse bitwise repeats. Fixed authored weight0.5 not science frozen or tuned.
+Local67=66passed1skipped; firstcommit df53792 CI15/15 exact, not new uncommitted
+fusion. Original whole9530 1981passed6skip1failed/2830.81s old Windows closed-pipe
+15s timeout; isolated same test6.29s pass does not erase whole failure/WMI retained.
+New20CPU forwards plus prior20 plus1170 historical generator = known lowerbound1210,
+unknown not encoded; no newgenerator/GPU/paid, CPU total incomplete. No licensed
+benchmark/fullpool/M1/Pilot/captioner/strongcontrol/method effect/English paper;
+goalACTIVE/default4scientific0/no timer/other four frozen.

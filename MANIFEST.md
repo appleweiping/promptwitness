@@ -430,3 +430,30 @@
 | 2026-09-27T22:00:00Z | experiment-bridge | .aris/traces/experiment-bridge/2026-09-27_run01/055-clip-cpu-source-review | implementation | 实际第一方CLIP CPU自制图资格/真实费用/失败修复与审查；非科学或正式数据许可准入，私有路径不提交 |
 | 2026-09-27T22:00:00Z | experiment-bridge | .aris/traces/experiment-bridge/2026-09-27_run01/056-clip-cpu-source-followup | implementation | 实际第一方CLIP CPU自制图资格/真实费用/失败修复与审查；非科学或正式数据许可准入，私有路径不提交 |
 | 2026-09-27T22:00:00Z | experiment-bridge | .aris/traces/experiment-bridge/2026-09-27_run01/057-clip-cpu-fresh-doc | implementation | 实际第一方CLIP CPU自制图资格/真实费用/失败修复与审查；非科学或正式数据许可准入，私有路径不提交 |
+| 2026-09-27T22:36:18Z | experiment-bridge | research/ARIS_ICMR_COMPOSED_CPU_20260927_223618.json | implementation | 真实参考图像＋修改文本融合的自制图CPU机械资格；非benchmark/M1/Pilot/论文，私有证据不提交 |
+| 2026-09-27T22:36:18Z | experiment-bridge | research/ARIS_ICMR_COMPOSED_CPU.json | implementation | 真实参考图像＋修改文本融合的自制图CPU机械资格；非benchmark/M1/Pilot/论文，私有证据不提交 |
+| 2026-09-27T22:36:18Z | experiment-bridge | research/ARIS_ICMR_COMPOSED_CPU_20260927_223618.md | implementation | 真实参考图像＋修改文本融合的自制图CPU机械资格；非benchmark/M1/Pilot/论文，私有证据不提交 |
+| 2026-09-27T22:36:18Z | experiment-bridge | research/ARIS_ICMR_COMPOSED_CPU.md | implementation | 真实参考图像＋修改文本融合的自制图CPU机械资格；非benchmark/M1/Pilot/论文，私有证据不提交 |
+| 2026-09-27T22:36:18Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260927_223618.md | implementation | 真实参考图像＋修改文本融合的自制图CPU机械资格；非benchmark/M1/Pilot/论文，私有证据不提交 |
+| 2026-09-27T22:36:18Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 真实参考图像＋修改文本融合的自制图CPU机械资格；非benchmark/M1/Pilot/论文，私有证据不提交 |
+| 2026-09-27T22:36:18Z | experiment-bridge | refine-logs/EXPERIMENT_RESULTS_20260927_223618.md | implementation | 真实参考图像＋修改文本融合的自制图CPU机械资格；非benchmark/M1/Pilot/论文，私有证据不提交 |
+| 2026-09-27T22:36:18Z | experiment-bridge | refine-logs/EXPERIMENT_RESULTS.md | implementation | 真实参考图像＋修改文本融合的自制图CPU机械资格；非benchmark/M1/Pilot/论文，私有证据不提交 |
+| 2026-09-27T22:36:18Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260927_223618.md | implementation | 真实参考图像＋修改文本融合的自制图CPU机械资格；非benchmark/M1/Pilot/论文，私有证据不提交 |
+| 2026-09-27T22:36:18Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | 真实参考图像＋修改文本融合的自制图CPU机械资格；非benchmark/M1/Pilot/论文，私有证据不提交 |
+| 2026-09-27T22:36:18Z | experiment-bridge | research/ICMR_DATA_AUDIT_20260927_223618.md | implementation | 真实参考图像＋修改文本融合的自制图CPU机械资格；非benchmark/M1/Pilot/论文，私有证据不提交 |
+| 2026-09-27T22:36:18Z | experiment-bridge | research/ICMR_DATA_AUDIT.md | implementation | 真实参考图像＋修改文本融合的自制图CPU机械资格；非benchmark/M1/Pilot/论文，私有证据不提交 |
+| 2026-09-27T22:36:18Z | experiment-bridge | research/ACCESS_AUDIT_20260927_223618.md | implementation | 真实参考图像＋修改文本融合的自制图CPU机械资格；非benchmark/M1/Pilot/论文，私有证据不提交 |
+| 2026-09-27T22:36:18Z | experiment-bridge | research/ACCESS_AUDIT.md | implementation | 真实参考图像＋修改文本融合的自制图CPU机械资格；非benchmark/M1/Pilot/论文，私有证据不提交 |
+| 2026-09-27T22:36:18Z | experiment-bridge | AGENTS.md | implementation | 真实参考图像＋修改文本融合的自制图CPU机械资格；非benchmark/M1/Pilot/论文，私有证据不提交 |
+| 2026-09-27T22:36:18Z | experiment-bridge | findings.md | implementation | 真实参考图像＋修改文本融合的自制图CPU机械资格；非benchmark/M1/Pilot/论文，私有证据不提交 |
+| 2026-09-27T22:36:18Z | experiment-bridge | reproduce/RETRIEVAL_COMPOSED_CPU.md | implementation | 真实参考图像＋修改文本融合的自制图CPU机械资格；非benchmark/M1/Pilot/论文，私有证据不提交 |
+| 2026-09-27T22:36:18Z | experiment-bridge | reproduce/check_retrieval_composed_cpu.py | implementation | 真实参考图像＋修改文本融合的自制图CPU机械资格；非benchmark/M1/Pilot/论文，私有证据不提交 |
+| 2026-09-27T22:36:18Z | experiment-bridge | reproduce/retrieval_composed_cpu.py | implementation | 真实参考图像＋修改文本融合的自制图CPU机械资格；非benchmark/M1/Pilot/论文，私有证据不提交 |
+| 2026-09-27T22:36:18Z | experiment-bridge | tests/reproduce/test_retrieval_composed_cpu.py | implementation | 真实参考图像＋修改文本融合的自制图CPU机械资格；非benchmark/M1/Pilot/论文，私有证据不提交 |
+| 2026-09-27T22:36:18Z | experiment-bridge | .aris/compute/composed-cpu-provider.md | implementation | 真实参考图像＋修改文本融合的自制图CPU机械资格；非benchmark/M1/Pilot/论文，私有证据不提交 |
+| 2026-09-27T22:36:18Z | experiment-bridge | .aris/compute/composed-physical-cost.json | implementation | 真实参考图像＋修改文本融合的自制图CPU机械资格；非benchmark/M1/Pilot/论文，私有证据不提交 |
+| 2026-09-27T22:36:18Z | experiment-bridge | .aris/compute/composed-physical-cost_20260927_223618.json | implementation | 真实参考图像＋修改文本融合的自制图CPU机械资格；非benchmark/M1/Pilot/论文，私有证据不提交 |
+| 2026-09-27T22:36:18Z | experiment-bridge | .aris/compute/composed-primary-qualification.json | implementation | 真实参考图像＋修改文本融合的自制图CPU机械资格；非benchmark/M1/Pilot/论文，私有证据不提交 |
+| 2026-09-27T22:36:18Z | experiment-bridge | .aris/compute/composed-doc-qualification.json | implementation | 真实参考图像＋修改文本融合的自制图CPU机械资格；非benchmark/M1/Pilot/论文，私有证据不提交 |
+| 2026-09-27T22:36:18Z | experiment-bridge | .aris/traces/experiment-bridge/2026-09-27_run01/058-composed-cpu-source-review | implementation | 真实参考图像＋修改文本融合的自制图CPU机械资格；非benchmark/M1/Pilot/论文，私有证据不提交 |
+| 2026-09-27T22:36:18Z | experiment-bridge | .aris/traces/experiment-bridge/2026-09-27_run01/059-composed-cpu-fresh-doc | implementation | 真实参考图像＋修改文本融合的自制图CPU机械资格；非benchmark/M1/Pilot/论文，私有证据不提交 |
