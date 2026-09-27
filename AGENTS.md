@@ -114,6 +114,14 @@ default4科学0/no timer/extra quota不变；完整native/online/statistical/ful
 
 ## Git and delivery
 
+2026-09-27 17:36 UTC 用户新增：论文目标 ICMR，遵守最新届规格/字数/页面要求。
+按 `research/ICMR_REQUIREMENTS.md` 的官方核验与明确假设准备英文稿；当前按
+ACM ICMR 2027 regular long paper 登记，不默认换成 ICML、不照抄 generic ACM 页数。
+写作现已明确要求；旧默认 AUTO_WRITE=false 不得成为遗漏后续论文交付的理由。
+上游 skill 默认轮数和原研究冻结不变；先完成证据冻结/研究准入及主题匹配审查，
+再执行 paper-writing，不把格式登记写成研究或投稿完成。投稿前重新核验官方要求。
+现有文本/工具任务尚未建立多媒体检索主题匹配，不私自添加实验或改题。
+
 在 `research/promptwitness-delta-v1` 上保留用户改动。
 只对已审查、脱敏、任务范围内的文件进行显式暂存、commit、push。
 不使用 reset/clean，不合并 main，不自行创建 PR、联系导师或投稿。

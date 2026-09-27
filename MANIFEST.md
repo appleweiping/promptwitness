@@ -256,3 +256,8 @@
 | 2026-09-27T17:13:03Z | experiment-bridge | refine-logs/EXPERIMENT_PLAN_20260927_171303.md | implementation | 下一步先修共享cadence/strictnative，原科学方案不减 |
 | 2026-09-27T17:13:03Z | experiment-bridge | refine-logs/EXPERIMENT_PLAN.md | implementation | 最新plan副本，activegoal/no timer/default4 |
 | 2026-09-27T17:13:03Z | experiment-bridge | findings.md | implementation | append-only跨阶段prune/cadence实际反例及未解决项 |
+| 2026-09-27T17:36:45Z | research-pipeline | research/ICMR_REQUIREMENTS_20260927_173645.md | paper | 官方ICMR2027长短文页面/匿名/无附录规则，字数未指定与主题匹配未建立 |
+| 2026-09-27T17:36:45Z | research-pipeline | research/ICMR_REQUIREMENTS.md | paper | 最新写作约束副本；未开始稿件，不伪造准入 |
+| 2026-09-27T17:36:45Z | research-pipeline | research/ARIS_GOAL_20260927_173645.md | paper | 原目标与历史保留，追加用户指定会议及后续稿件交付要求 |
+| 2026-09-27T17:36:45Z | research-pipeline | research/ARIS_GOAL.md | paper | 最新目标副本，active/no timer/default rounds不变 |
+| 2026-09-27T17:36:45Z | research-pipeline | AGENTS.md | paper | dashboard登记新写作要求与不可暗改科学方案边界 |
