@@ -1,0 +1,157 @@
+"""Role policy checks and optional real Linux sentinel qualification."""
+
+from __future__ import annotations
+
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+import pytest
+
+from reproduce import process_access as access
+from reproduce.check_process_access import EXPECTED, check, private_env_witness
+
+
+def layout(tmp_path):
+    data, code, scratch = (tmp_path / name for name in ("store", "code", "scratch"))
+    for leaf in access.LEAVES:
+        (data / leaf).mkdir(parents=True)
+    code.mkdir()
+    scratch.mkdir()
+    return data, code, scratch
+
+
+@pytest.mark.parametrize(
+    "role,stage",
+    [
+        ("fit_learner", "fit"),
+        ("optimizer", "search"),
+        ("predictor", "search"),
+        ("search_scorer", "search"),
+        ("selection_scorer", "selection"),
+        ("final_scorer", "final"),
+    ],
+)
+def test_grants_match_independent_matrix(tmp_path, role, stage):
+    data, code, scratch = layout(tmp_path)
+    policy = access.build_policy(role, stage, data, [code], scratch)
+    assert {Path(path).relative_to(data).as_posix() for path in policy["data_read"]} == EXPECTED[
+        role
+    ]
+    assert policy["runtime_read_execute"] == [str(code)]
+
+
+@pytest.mark.parametrize(
+    "role,stage",
+    [
+        ("optimizer", "final"),
+        ("predictor", "selection"),
+        ("final_scorer", "search"),
+        ("selection_scorer", "fit"),
+        ("unknown", "search"),
+        ("optimizer", "unknown"),
+    ],
+)
+def test_invalid_role_stage_denied(role, stage):
+    with pytest.raises(access.AccessBoundaryError, match="authorized"):
+        access.role_leaves(role, stage)
+
+
+@pytest.mark.parametrize(
+    "kind", ["runtime_ancestor", "runtime_inside", "scratch_inside", "scratch_runtime"]
+)
+def test_data_or_scratch_cannot_be_inside_runtime(tmp_path, kind):
+    data, code, scratch = layout(tmp_path)
+    runtime = [tmp_path] if kind == "runtime_ancestor" else [code]
+    if kind == "runtime_inside":
+        runtime = [data / "fit/inputs"]
+    if kind == "scratch_inside":
+        scratch = data / "final/gold"
+    if kind == "scratch_runtime":
+        scratch = code
+    with pytest.raises(access.AccessBoundaryError, match="separate"):
+        access.build_policy("predictor", "search", data, runtime, scratch)
+
+
+def test_missing_leaf_does_not_silently_widen_grant(tmp_path):
+    data, code, scratch = layout(tmp_path)
+    (data / "final/gold").rmdir()
+    with pytest.raises(FileNotFoundError):
+        access.build_policy("optimizer", "search", data, [code], scratch)
+
+
+def test_no_runtime_roots_denied(tmp_path):
+    data, _, scratch = layout(tmp_path)
+    with pytest.raises(access.AccessBoundaryError, match="separate"):
+        access.build_policy("optimizer", "search", data, [], scratch)
+
+
+def test_file_not_directory_denied(tmp_path):
+    file = tmp_path / "file"
+    file.write_text("fixture", encoding="utf-8")
+    with pytest.raises(access.AccessBoundaryError, match="directories"):
+        access._directory(file)
+
+
+def test_launch_has_clean_environment_closed_descriptors_and_no_shell(tmp_path, monkeypatch):
+    data, code, scratch = layout(tmp_path)
+    entry = code / "application.py"
+    entry.write_text("pass\n", encoding="utf-8")
+    monkeypatch.setattr(access, "runtime_roots", lambda: (code,))
+    monkeypatch.setenv("PW_SENTINEL_PRIVATE", "not-for-worker")
+    calls = []
+
+    def run(command, **kwargs):
+        calls.append((command, kwargs))
+        return subprocess.CompletedProcess(command, 3, "", "application failure")
+
+    monkeypatch.setattr(access.subprocess, "run", run)
+    result = access.launch_role("optimizer", "search", data, scratch, entry, ["plain"])
+    command, kwargs = calls[0]
+    assert command[1] == "-I"
+    assert "shell" not in kwargs and kwargs["close_fds"] is True
+    assert "PW_SENTINEL_PRIVATE" not in kwargs["env"]
+    assert json.loads(kwargs["input"])["arguments"] == ["plain"]
+    assert result.returncode == 3  # not replaced by a score
+
+
+def test_entrypoint_outside_runtime_denied(tmp_path, monkeypatch):
+    data, code, scratch = layout(tmp_path)
+    entry = tmp_path / "outside.py"
+    entry.write_text("pass", encoding="utf-8")
+    monkeypatch.setattr(access, "runtime_roots", lambda: (code,))
+    with pytest.raises(access.AccessBoundaryError, match="entrypoint"):
+        access.launch_role("optimizer", "search", data, scratch, entry)
+
+
+def test_unsupported_host_is_not_unrestricted_fallback(monkeypatch):
+    monkeypatch.setattr(access.sys, "platform", "win32")
+    with pytest.raises(access.AccessBoundaryError, match="Linux"):
+        access.landlock_abi()
+
+
+@pytest.mark.parametrize("previous", [None, "original-sentinel"])
+def test_environment_probe_seeds_and_restores_parent(monkeypatch, previous):
+    if previous is None:
+        monkeypatch.delenv("PW_SENTINEL_PRIVATE", raising=False)
+    else:
+        monkeypatch.setenv("PW_SENTINEL_PRIVATE", previous)
+    with pytest.raises(ValueError, match="fixture"), private_env_witness():
+        assert access.os.environ["PW_SENTINEL_PRIVATE"] == "AUTHORED_NOT_A_CREDENTIAL"
+        raise ValueError("fixture failure")
+    assert access.os.environ.get("PW_SENTINEL_PRIVATE") == previous
+
+
+def test_real_linux_process_sentinels(tmp_path, monkeypatch):
+    if sys.platform != "linux":
+        pytest.skip("actual Landlock witness requires Linux")
+    try:
+        access.landlock_abi()
+    except access.AccessBoundaryError as exc:
+        pytest.skip(str(exc))
+    monkeypatch.setenv("PW_SENTINEL_PRIVATE", "not-for-worker")
+    result = check(tmp_path / "attempt", tmp_path / "witness.json")
+    assert result["read_checks"] == result["write_checks"] == 66
+    assert result["scientific_admission"] == "PARTIAL_NOT_PASSED"
+    assert len({row["pid"] for row in result["workers"]}) == 6

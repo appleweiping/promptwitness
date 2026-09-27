@@ -1,0 +1,14 @@
+{
+  "base": "existing task-owned Linux x86_64 venv, Python 3.10.15",
+  "system_pkgs": [],
+  "pip_phases": [],
+  "env": {"OMP_NUM_THREADS": "1", "MKL_NUM_THREADS": "1", "OPENBLAS_NUM_THREADS": "1", "PYTHONDONTWRITEBYTECODE": "1"},
+  "run_commands": [],
+  "weight_dirs": {},
+  "resource_shape": {"cpus": 1, "gpus": 0},
+  "smoke": {
+    "import_names": ["ctypes", "runpy", "subprocess"],
+    "gpu_tests": [],
+    "cli_checks": ["Landlock ABI >= 1; no unrestricted fallback"]
+  }
+}

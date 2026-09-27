@@ -48,3 +48,18 @@
 | 2026-09-27 06:52:47 UTC | experiment-bridge | refine-logs/EXPERIMENT_PLAN.md | implementation | 最新实施计划副本 |
 | 2026-09-27 06:52:47 UTC | experiment-bridge | research/ARIS_SCORERS_20260927_065247.json | implementation | 原版 BFCL 限定 runtime 证据；science gate 不清 |
 | 2026-09-27 06:52:47 UTC | experiment-bridge | research/ARIS_SCORERS.json | implementation | 最新 scorer 状态副本 |
+| 2026-09-27 07:36:11 UTC | experiment-bridge | reproduce/process_access.py | implementation | 六角色实际 Linux Landlock worker；无无限制降级 |
+| 2026-09-27 07:36:11 UTC | experiment-bridge | reproduce/check_process_access.py | implementation | authored 66 reads/66 append opens，独立预定矩阵与环境哨兵 |
+| 2026-09-27 07:36:11 UTC | experiment-bridge | reproduce/PROCESS_ACCESS.md | implementation | fresh-agent 原样执行成功的 CPU-only 文档与明确限制 |
+| 2026-09-27 07:36:11 UTC | experiment-bridge | configs/research/process-access-env.json | implementation | 复用已有 Python3.10.15，CPU1/GPU0，无安装 |
+| 2026-09-27 07:36:11 UTC | experiment-bridge | tests/reproduce/test_process_access.py | implementation | 24 本机机械用例通过，native Linux 明确 skip |
+| 2026-09-27 07:36:11 UTC | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260927_073611.md | implementation | 环境探针问题修复、一次复审与真实文件读取验收 |
+| 2026-09-27 07:36:11 UTC | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | 最新审查摘要副本 |
+| 2026-09-27 07:36:11 UTC | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260927_073611.md | implementation | S1-files 已验证、真实 pipeline/科学准入尚缺 |
+| 2026-09-27 07:36:11 UTC | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 最新 tracker 副本 |
+| 2026-09-27 07:36:11 UTC | experiment-bridge | refine-logs/EXPERIMENT_RESULTS_20260927_073611.md | implementation | 19 allowed/47 denied reads；未读真实 GT/响应 |
+| 2026-09-27 07:36:11 UTC | experiment-bridge | refine-logs/EXPERIMENT_RESULTS.md | implementation | 最新初始记录副本 |
+| 2026-09-27 07:36:11 UTC | experiment-bridge | refine-logs/EXPERIMENT_PLAN_20260927_073611.md | implementation | 真实分池、scorer/process/native 优化器接续；矩阵不改 |
+| 2026-09-27 07:36:11 UTC | experiment-bridge | refine-logs/EXPERIMENT_PLAN.md | implementation | 最新实施计划副本 |
+| 2026-09-27 07:36:11 UTC | experiment-bridge | research/ARIS_ACCESS_20260927_073611.json | implementation | 原生 authored 访问证据，整体 science partial |
+| 2026-09-27 07:36:11 UTC | experiment-bridge | research/ARIS_ACCESS.json | implementation | 最新访问状态副本 |
