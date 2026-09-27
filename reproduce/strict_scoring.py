@@ -175,7 +175,9 @@ def score_bfcl(
     )
     if category == "irrelevance":
         return BinaryScore(int(not (valid_format and calls)), "bfcl_json_native_irrelevance")
-    if not possible_answers or any(not isinstance(answer, dict) for answer in possible_answers):
+    if not possible_answers or any(
+        not isinstance(answer, dict) or not answer for answer in possible_answers
+    ):
         raise ScoringError("BFCL dataset-provided possible answers are required")
     if not valid_format or not calls:
         return BinaryScore(0, "bfcl_json_native_AST")

@@ -31,3 +31,20 @@
 | 2026-09-27 05:51:49 UTC | experiment-bridge | refine-logs/EXPERIMENT_PLAN.md | implementation | 最新实施计划副本 |
 | 2026-09-27 05:51:49 UTC | experiment-bridge | research/ARIS_SCORERS_20260927_055149.json | implementation | 官方 13/13 fixtures 与 fit 交集汇总，无敏感 unit |
 | 2026-09-27 05:51:49 UTC | experiment-bridge | research/ARIS_SCORERS.json | implementation | 最新 scorer 状态副本 |
+| 2026-09-27 06:52:47 UTC | experiment-bridge | configs/research/bfcl-scorer-env_20260927_061345.json | implementation | 首次 BFCL spec 原文保留，import 缺 soundfile，不标 ready |
+| 2026-09-27 06:52:47 UTC | experiment-bridge | configs/research/bfcl-scorer-env.json | implementation | 原版 SDK 导入所需独立 CPU spec，实证第三 phase 修复 |
+| 2026-09-27 06:52:47 UTC | experiment-bridge | reproduce/bfcl_native.py | implementation | 原版 AST 绑定及明确 scorer-only 元数据，不推理 |
+| 2026-09-27 06:52:47 UTC | experiment-bridge | reproduce/check_bfcl_scorer.py | implementation | 40 authored cases × 3 profiles；不读取数据或 final |
+| 2026-09-27 06:52:47 UTC | experiment-bridge | reproduce/BFCL_SCORER.md | implementation | fresh agent 实际原样执行的 CPU 文档 |
+| 2026-09-27 06:52:47 UTC | experiment-bridge | reproduce/SCORERS.md | implementation | 区分旧 Hotpot/IF 子集与独立 BFCL runtime |
+| 2026-09-27 06:52:47 UTC | experiment-bridge | tests/reproduce/test_bfcl_native.py | implementation | 14 binding mechanics 测试，不导入 SDK/数据 |
+| 2026-09-27 06:52:47 UTC | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260927_065247.md | implementation | annotation blocker 修复、唯一复审、fresh-doc 脱敏摘要 |
+| 2026-09-27 06:52:47 UTC | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | 最新审查摘要副本 |
+| 2026-09-27 06:52:47 UTC | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260927_065247.md | implementation | BFCL runtime partial，完整科学矩阵仍未运行 |
+| 2026-09-27 06:52:47 UTC | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 最新 tracker 副本 |
+| 2026-09-27 06:52:47 UTC | experiment-bridge | refine-logs/EXPERIMENT_RESULTS_20260927_065247.md | implementation | 99 score checks+21 expected errors，不是 120 真实样本 |
+| 2026-09-27 06:52:47 UTC | experiment-bridge | refine-logs/EXPERIMENT_RESULTS.md | implementation | 最新初始记录副本 |
+| 2026-09-27 06:52:47 UTC | experiment-bridge | refine-logs/EXPERIMENT_PLAN_20260927_065247.md | implementation | S1、fit-only real GT、S2 的原范围接续 |
+| 2026-09-27 06:52:47 UTC | experiment-bridge | refine-logs/EXPERIMENT_PLAN.md | implementation | 最新实施计划副本 |
+| 2026-09-27 06:52:47 UTC | experiment-bridge | research/ARIS_SCORERS_20260927_065247.json | implementation | 原版 BFCL 限定 runtime 证据；science gate 不清 |
+| 2026-09-27 06:52:47 UTC | experiment-bridge | research/ARIS_SCORERS.json | implementation | 最新 scorer 状态副本 |

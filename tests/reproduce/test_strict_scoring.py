@@ -204,6 +204,12 @@ def test_bfcl_unsupported_missing_gold_and_native_failures_are_not_zero():
     )
 
 
+@pytest.mark.parametrize("response", ["[]", "fixture.alpha(value=2)"])
+def test_bfcl_empty_annotation_is_error_before_format_shortcut(response):
+    with pytest.raises(ScoringError, match="dataset-provided"):
+        score_bfcl(response, "completed", "simple_python", FUNCTIONS, [{}], unavailable)
+
+
 @pytest.mark.parametrize("value", [True, 0.5, -1, 2])
 def test_only_binary_observed_values(value):
     with pytest.raises(ScoringError):

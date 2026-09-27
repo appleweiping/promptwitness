@@ -17,8 +17,8 @@ fit 侧历史成本响应；不打开 final 文件、上游 `eval/` 或数据卡
 - BFCL：固定 `name/arguments` JSON interface，转成官方 AST checker 的 decoded
   call 结构，精确保留名称。禁止 upstream Python-expression decoder 的 `eval`。
   这是明确、所有控制组共享的 JSON-only 适配；native irrelevance 为 absence of
-  decodable call，不等于遵循 JSON 输出格式。官方 checker import 暂未具备依赖，
-  不能用机械 Mock 结果将 BFCL gate 写成通过。
+  decodable call，不等于遵循 JSON 输出格式。独立环境的原版 runtime 验证见
+  `BFCL_SCORER.md`；本命令仍只执行 Hotpot/IF 子集，不能证明 BFCL real-GT 门禁。
 
 空的已完成文本可以按实际规则评分；缺失/failed/cancelled 响应、未知约束、
 错位 annotation、scorer 异常和缺失的 native flags 都是错误/unsupported，不填零分。
