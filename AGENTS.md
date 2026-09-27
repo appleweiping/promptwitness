@@ -114,6 +114,22 @@ default4科学0/no timer/extra quota不变；完整native/online/statistical/ful
 
 ## Git and delivery
 
+2026-09-27 18:29 UTC：共享MIPRO objective适配完成限定CPU机械验收：原73744和
+fresh-doc91776各一次四路径compile exit0；minibatch objective6/native trial7拒绝
+仍实际full promotion，空池/已full池不伪造trial。source唯一followup045同家族
+provisional；初次完整请求未落盘、旧verdict原样重附，保留trace缺口。doc047继承
+模型canonicalfamilyunknown/independenceunverified，不声称跨家族接受。
+最新22214f6 CI14/15暴露constructor preflight并发错误，本机确定性复现后最小
+in-process RLock修复；76passed1skip，不作跨进程保证。fresh journal review
+thread limit未创建，trace046保存完整失败，local-only而非独立审查通过。
+最终1924passed6skip1116.10s/94.03%，WMI fatal0x8007000e日志保留，终态exit0；
+Ruff343/mypy61/configuredsrcBandit/build/Twine通过，helper1LOW B404不隐藏。
+实际DB26a7e04b... bytes未变，续1170calls/2136046input/195222output/
+3.8074371029887377GPUh，historicalunknown未编码保留，新real/GPU/tokens/paid0。
+详见research/ARIS_MIPRO_SEARCH；接真实nativebackend/allroles与GEPA原engine，
+M1/Pilot/online/statistics/原矩阵/ICMR主题匹配与稿件仍未完成，goalACTIVE。
+不以旧a77b622成功重试替代交付新exactSHA CI；无timer/额外小quota/default4科学0不变。
+
 2026-09-27 17:36 UTC 用户新增：论文目标 ICMR，遵守最新届规格/字数/页面要求。
 按 `research/ICMR_REQUIREMENTS.md` 的官方核验与明确假设准备英文稿；当前按
 ACM ICMR 2027 regular long paper 登记，不默认换成 ICML、不照抄 generic ACM 页数。

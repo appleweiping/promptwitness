@@ -261,3 +261,18 @@
 | 2026-09-27T17:36:45Z | research-pipeline | research/ARIS_GOAL_20260927_173645.md | paper | 原目标与历史保留，追加用户指定会议及后续稿件交付要求 |
 | 2026-09-27T17:36:45Z | research-pipeline | research/ARIS_GOAL.md | paper | 最新目标副本，active/no timer/default rounds不变 |
 | 2026-09-27T17:36:45Z | research-pipeline | AGENTS.md | paper | dashboard登记新写作要求与不可暗改科学方案边界 |
+| 2026-09-27T17:50:29Z | experiment-bridge | reproduce/MIPRO_SEARCH_20260927_175029.md | implementation | 共享objective初版诊断说明，后续反例/修正保留 |
+| 2026-09-27T18:02:29Z | experiment-bridge | reproduce/MIPRO_SEARCH_20260927_180229.md | implementation | objective计数/空池/已full池及JSON投影的限定CPU文档 |
+| 2026-09-27T18:02:29Z | experiment-bridge | reproduce/MIPRO_SEARCH.md | implementation | 最新literal invocation，fresh-doc一次实际exit0 |
+| 2026-09-27T18:29:47Z | experiment-bridge | research/ARIS_MIPRO_SEARCH_20260927_182947.md | implementation | 四路径安装版与fresh-doc验收、源反例及CI修复/trace缺口/研究缺失 |
+| 2026-09-27T18:29:47Z | experiment-bridge | research/ARIS_MIPRO_SEARCH.md | implementation | 最新验收副本，科学门禁未通过 |
+| 2026-09-27T18:29:47Z | experiment-bridge | research/ARIS_MIPRO_SEARCH_20260927_182947.json | implementation | 实际1924测试、四compile/真实资源未增与机器可读状态 |
+| 2026-09-27T18:29:47Z | experiment-bridge | research/ARIS_MIPRO_SEARCH.json | implementation | 最新结构状态副本 |
+| 2026-09-27T18:29:47Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260927_182947.md | implementation | 唯一followup045与fresh-doc047事实；journal046未创建/local-only |
+| 2026-09-27T18:29:47Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | 最新审查副本，无跨模型/科学接受声明 |
+| 2026-09-27T18:29:47Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260927_182947.md | implementation | cadence工程已验证，nativebackend/GEPA/真实研究/ICMR仍缺 |
+| 2026-09-27T18:29:47Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 最新tracker副本 |
+| 2026-09-27T18:29:47Z | experiment-bridge | refine-logs/EXPERIMENT_PLAN_20260927_182947.md | implementation | 接实际roles/GEPA源码路径，保留完整科学矩阵与写作约束 |
+| 2026-09-27T18:29:47Z | experiment-bridge | refine-logs/EXPERIMENT_PLAN.md | implementation | 最新plan副本，active/no timer/default4 |
+| 2026-09-27T18:29:47Z | experiment-bridge | AGENTS.md | implementation | dashboard登记新组件事实与未完成门禁 |
+| 2026-09-27T18:29:47Z | experiment-bridge | findings.md | implementation | append-only共享cadence修正及下一GEPA静态发现 |

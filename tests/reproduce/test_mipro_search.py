@@ -24,6 +24,7 @@ def native_modules(monkeypatch):
             self.kwargs = kwargs
 
     native = ModuleType("dspy.teleprompt.mipro_optimizer_v2")
+    native.MIPROv2 = type("MIPROv2", (), {"_optimize_prompt_parameters": lambda *args: None})
     native.Evaluate = Evaluate
     native.eval_candidate_program = lambda *args: "original"
     utils = ModuleType("dspy.teleprompt.utils")
@@ -71,7 +72,11 @@ def test_exact_native_text_demo_rendering_not_response_schema():
 
 def test_native_sampler_strict_scores_and_restore(native_modules):
     native, Result, _ = native_modules
-    original = native.Evaluate, native.eval_candidate_program
+    original = (
+        native.Evaluate,
+        native.eval_candidate_program,
+        native.MIPROv2._optimize_prompt_parameters,
+    )
     data = [{"unit_id": str(i)} for i in range(8)]
     captured = []
 
@@ -92,14 +97,22 @@ def test_native_sampler_strict_scores_and_restore(native_modules):
         assert captured[-1][2] == {"metric_key": "eval_full"}
         with pytest.raises(ScoringError, match="one owned"), bridge.strict_mipro_search():
             pytest.fail("nested ownership admitted")
-    assert (native.Evaluate, native.eval_candidate_program) == original
+    assert (
+        native.Evaluate,
+        native.eval_candidate_program,
+        native.MIPROv2._optimize_prompt_parameters,
+    ) == original
     assert not bridge._ACTIVE
 
 
 @pytest.mark.parametrize("kind", ["prune", "failure", "incomplete"])
 def test_native_error_is_not_zero_and_symbols_restored(native_modules, kind):
     native, Result, Pruned = native_modules
-    original = native.Evaluate, native.eval_candidate_program
+    original = (
+        native.Evaluate,
+        native.eval_candidate_program,
+        native.MIPROv2._optimize_prompt_parameters,
+    )
 
     def fail(*args, **kwargs):
         if kind == "incomplete":
@@ -109,7 +122,11 @@ def test_native_error_is_not_zero_and_symbols_restored(native_modules, kind):
     error = Pruned if kind == "prune" else RuntimeError if kind == "failure" else ScoringError
     with pytest.raises(error), bridge.strict_mipro_search(fail):
         native.eval_candidate_program(1, [{}], None, None)
-    assert (native.Evaluate, native.eval_candidate_program) == original
+    assert (
+        native.Evaluate,
+        native.eval_candidate_program,
+        native.MIPROv2._optimize_prompt_parameters,
+    ) == original
     assert not bridge._ACTIVE
 
 

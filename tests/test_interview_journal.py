@@ -3,7 +3,8 @@
 import copy
 import sqlite3
 from concurrent.futures import ThreadPoolExecutor
-from threading import Barrier
+from pathlib import Path
+from threading import Barrier, Event, RLock
 
 import pytest
 from interview_fixtures import completion_envelope
@@ -392,6 +393,56 @@ def test_concurrent_initializers_recheck_ownership_under_lock(tmp_path):
 
     with ThreadPoolExecutor(max_workers=2) as executor:
         assert len(set(executor.map(initialize, range(2)))) == 1
+    with InterviewJournal(path):
+        pass
+
+
+def test_second_constructor_waits_before_inspecting_owned_in_progress_sidecar(
+    tmp_path, monkeypatch
+):
+    path = tmp_path / "in-progress.db"
+    written, release, contender = Event(), Event(), Event()
+    lock = RLock()
+    original = InterviewJournal._initialize
+    acquisitions = 0
+
+    class ObservedLock:
+        def __enter__(self):
+            nonlocal acquisitions
+            acquisitions += 1
+            if acquisitions == 2:
+                contender.set()
+            lock.acquire()
+
+        def __exit__(self, *_args):
+            lock.release()
+
+    def paused_initialize(journal):
+        journal.connection.execute(f"PRAGMA application_id={journal_module._APPLICATION_ID}")
+        written.set()
+        assert release.wait(10), "initialization release absent"
+        original(journal)
+
+    def initialize():
+        with InterviewJournal(path, create=True) as journal:
+            return journal.connection.execute("PRAGMA application_id").fetchone()[0]
+
+    monkeypatch.setattr(journal_module, "_OPEN_LOCK", ObservedLock())
+    monkeypatch.setattr(InterviewJournal, "_initialize", paused_initialize)
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        first = executor.submit(initialize)
+        try:
+            assert written.wait(10), "first initialization absent"
+            assert path.stat().st_size == 0
+            assert Path(str(path) + "-journal").exists()
+            second = executor.submit(initialize)
+            assert contender.wait(10), "second constructor did not acquire ownership lock"
+            assert not second.done()
+        finally:
+            release.set()
+        assert (
+            first.result(timeout=10) == second.result(timeout=10) == journal_module._APPLICATION_ID
+        )
     with InterviewJournal(path):
         pass
 

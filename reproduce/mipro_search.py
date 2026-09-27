@@ -1,8 +1,8 @@
 """Adapt pinned MIPRO search to the existing actual incremental controller.
 
 The pinned helper swallows Exception (including TrialPruned) into score=0.
-The synchronous, single-owner boundary below replaces that helper only during
-compile, retains its exact minibatch sampler, and restores both native symbols.
+The synchronous, single-owner boundary adapts its helper, Evaluate and objective
+method during compile, retains its exact sampler and restores all three symbols.
 No partial/predicted scores or unverified online assumptions are introduced.
 """
 
@@ -13,6 +13,7 @@ import math
 from contextlib import contextmanager
 
 from promptwitness.incremental.gate import GateStatus
+from reproduce.mipro_cadence import cadence_optimizer
 from reproduce.strict_scoring import ScoringError
 
 _ACTIVE = False
@@ -82,9 +83,11 @@ def strict_mipro_search(evaluator=None):
     """Run the original synchronous compile with strict evaluation semantics.
 
     This is an explicit adapted boundary, not a patch to the upstream checkout.
-    Original proposer/bootstrap/TPE/minibatch/selector methods are invoked,
-    but a prune skips the objective's scheduled full-evaluation block. This
-    boundary alone is not qualified for scientific native-cadence equivalence.
+    Original proposer/bootstrap/TPE/minibatch/selector methods are invoked.
+    The explicit shared objective adaptation performs due full evaluation of
+    actual earlier survivors before propagating a candidate's TrialPruned.
+    It is shared with the strict native control, not an unchanged upstream
+    objective. No scientific qualification follows just from this context.
     Failures no longer become zero; TrialPruned reaches Optuna.
     Supply MIPROGateEvaluator for the certifier, or leave evaluator=None for the
     corresponding strict native control. One owned compile per process only.
@@ -95,6 +98,7 @@ def strict_mipro_search(evaluator=None):
     if _ACTIVE:
         raise ScoringError("one owned synchronous MIPRO compile per process required")
     original_evaluate, original_helper = native.Evaluate, native.eval_candidate_program
+    original_optimize = native.MIPROv2._optimize_prompt_parameters
     _ACTIVE = True
 
     class StrictEvaluate(original_evaluate):
@@ -116,10 +120,12 @@ def strict_mipro_search(evaluator=None):
         return validate_result(result, batch)
 
     native.Evaluate, native.eval_candidate_program = StrictEvaluate, strict_helper
+    native.MIPROv2._optimize_prompt_parameters = cadence_optimizer(native)
     try:
         yield
     finally:
         native.Evaluate, native.eval_candidate_program = original_evaluate, original_helper
+        native.MIPROv2._optimize_prompt_parameters = original_optimize
         _ACTIVE = False
 
 

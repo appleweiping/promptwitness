@@ -246,7 +246,11 @@ def check(source, output):
     ):
         if Path(module.__file__).read_bytes() != (source / "dspy" / relative).read_bytes():
             raise ScoringError("installed DSPy source differs from the fixed checkout")
-    original = native.Evaluate, native.eval_candidate_program
+    original = (
+        native.Evaluate,
+        native.eval_candidate_program,
+        native.MIPROv2._optimize_prompt_parameters,
+    )
 
     def prune(*args, **kwargs):
         raise optuna.TrialPruned("authored upstream failure witness")
@@ -315,19 +319,48 @@ def check(source, output):
                     controller.spec["search_ids"]
                 ):
                     raise ScoringError("partial vector reached original selector")
+            scheduled = (
+                [
+                    {
+                        "native_trial_number": entry["native_trial_number"],
+                        "objective_call": entry["objective_call"],
+                        "scheduled_full_evaluation": entry.get("scheduled_full_evaluation"),
+                        "pruned": bool(entry.get("pruned", False)),
+                    }
+                    for entry in compiled.trial_logs.values()
+                    if "objective_call" in entry
+                    and (entry["objective_call"] % 3 == 0 or entry["objective_call"] == 12)
+                ]
+                if minibatch
+                else []
+            )
+            pruned_numbers = {t.number for t in trials if t.state.name == "PRUNED"}
             scheduled_pruned = [
-                t.number for t in trials if t.state.name == "PRUNED" and (t.number + 1) % 4 == 0
+                entry for entry in scheduled if entry["native_trial_number"] in pruned_numbers
             ]
             if minibatch:
                 if not any(
                     e["trial"] is not None and e["metric_key"] == "eval_full" for e in evaluations
                 ):
                     raise ScoringError("post-baseline periodic full-evaluation path not exercised")
-                if not scheduled_pruned or any(
-                    e["trial"] in scheduled_pruned and e["metric_key"] == "eval_full"
-                    for e in evaluations
+                if [entry["objective_call"] for entry in scheduled] != [3, 6, 9, 12]:
+                    raise ScoringError("full cadence did not follow actual objective calls")
+                for entry in scheduled:
+                    reason = entry.get("scheduled_full_evaluation")
+                    if reason == "actual_survivor":
+                        if not any(
+                            e["trial"] == entry["native_trial_number"]
+                            and e["metric_key"] == "eval_full"
+                            for e in evaluations
+                        ):
+                            raise ScoringError("a due actual survivor skipped full evaluation")
+                    elif reason not in ("no_actual_candidate", "no_unseen_actual_candidate"):
+                        raise ScoringError("due full evaluation has no explicit outcome")
+                if not any(
+                    entry["scheduled_full_evaluation"] == "actual_survivor"
+                    for entry in scheduled_pruned
                 ):
-                    raise ScoringError("prune-at-periodic-boundary behavior not witnessed")
+                    raise ScoringError("missing actual promotion during a due pruned trial")
             results.append(
                 {
                     "minibatch": minibatch,
@@ -341,21 +374,51 @@ def check(source, output):
                     "native_winner_score": compiled.score,
                     "baseline_score": completed[0]["native_score"],
                     "evaluation_cadence": evaluations,
-                    "scheduled_pruned_trials": scheduled_pruned if minibatch else [],
-                    "pruning_skips_original_periodic_full": minibatch,
+                    "scheduled_full_evaluations": scheduled,
+                    "scheduled_pruned_trials": scheduled_pruned,
+                    "pruning_skips_original_periodic_full": False,
                 }
             )
-    if (native.Evaluate, native.eval_candidate_program) != original:
+    controls = []
+    for minibatch in (False, True):
+        lm, studies = SearchFixtureLM(), []
+        student = dspy.Predict(
+            dspy.Signature("task_input -> task_output", instructions="authored seed")
+        )
+        compiled = compile_fixture(lm, student, None, studies, minibatch=minibatch)
+        states = Counter(t.state.name for t in studies[0].trials)
+        if states["PRUNED"] or states["FAIL"] or compiled is None or compiled.score != 100:
+            raise ScoringError("shared strict native control compile failed")
+        if compiled.signature.instructions != "authored retain":
+            raise ScoringError("shared strict native control did not select actual winner")
+        controls.append(
+            {
+                "minibatch": minibatch,
+                "trial_states": dict(states),
+                "winner_score": compiled.score,
+                "fixture_LM_calls_all_roles": dict(Counter(c["role"] for c in lm.calls)),
+                "shared_objective_adaptation": True,
+                "scientific_qualification": False,
+            }
+        )
+    if (
+        native.Evaluate,
+        native.eval_candidate_program,
+        native.MIPROv2._optimize_prompt_parameters,
+    ) != original:
         raise ScoringError("native runtime symbols not restored")
     report = {
         "format": "promptwitness.delta.mipro-search-qualification/v1",
-        "status": "DIAGNOSTIC_GATE_BOUNDARY_OK_CADENCE_UNQUALIFIED",
+        "status": "AUTHORED_SHARED_CADENCE_AND_CONTROL_COMPILE_OK",
         "dspy_revision": "da1736e21ffda8cc4b86379d4748b011764d507c",
         "numpy_version": numpy.__version__,
         "selected_installed_source_byte_equal": True,
         "original_helper_swallowed_prune_as_zero": True,
         "source_checkout_modified": False,
         "qualifications": results,
+        "strict_native_controls": controls,
+        "runtime_objective_adapted": True,
+        "strict_native_control_compile_exercised": True,
         "real_model_calls": 0,
         "new_gpu_allocations": 0,
         "scientific_admission": False,
@@ -370,8 +433,8 @@ def check(source, output):
             "real M1, Pilot or GEPA qualification.",
             "Strict exception/max_errors/failure_score boundary is an explicit "
             "shared control adaptation.",
-            "TrialPruned exits an original objective before its scheduled full-eval block; "
-            "this altered cadence is not scientific native-equivalence qualification.",
+            "Shared objective adaptation retains due full evaluation before candidate prune; "
+            "TPE trajectory can still differ because actual prunes are not completed scores.",
         ],
     }
     with (output / "qualification.json").open("x", encoding="utf-8") as stream:

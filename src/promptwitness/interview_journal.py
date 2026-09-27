@@ -13,6 +13,7 @@ from collections.abc import Iterator, Mapping, Sequence
 from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
+from threading import RLock
 from typing import Any
 
 from .interview_memory import MemoryEntry, MemorySnapshot, SourceHead
@@ -40,6 +41,9 @@ _APPLICATION_ID = 1347897674
 _SCHEMA_VERSION = 1
 MAX_HISTORY_BYTES = 64 * 1024 * 1024
 MAX_HISTORY_EVENTS = 100_000
+# SQLite serializes transactions, but not our pre-connect ownership checks.
+# Cooperating constructors in this process must not inspect a half-created file.
+_OPEN_LOCK = RLock()
 _SCHEMA = (
     """CREATE TABLE interview_events (
         interview_id TEXT NOT NULL,
@@ -160,6 +164,10 @@ class InterviewJournal:
     """
 
     def __init__(self, path: str | Path, *, create: bool = False) -> None:
+        with _OPEN_LOCK:
+            self._open(path, create=create)
+
+    def _open(self, path: str | Path, *, create: bool) -> None:
         if type(create) is not bool:
             raise ValueError("create must be boolean")
         if str(path) == ":memory:":
