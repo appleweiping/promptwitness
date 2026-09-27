@@ -170,3 +170,17 @@ CI36344286371success。来源审计文档e95bd09已push/CIqueued，本机原buil
 仍未终态，不假称localbuild过。ICMR_DATA_AUDIT记录第一方CLIPexactsource与
 上游expectedweightidentity，但未下载/编码；原图/许可/native/image/cost/M1/Pilot/
 science/manuscript仍pending。待续原build40858；新latestSHA CI须另外核验。
+
+2026-09-27T20:17:00Z最新组件：published原metric核两次actualCPU（48422/54921）各一次exit0，
+11query/15比较/5native函数；source051无具体blocker但same-family/provisional，
+doc052familyunknown/independenceunverified。原all-tie global0%vslexical100%反例
+保留，strict-order authored PASS不授official/fullnumeric parity。50pins metadata
+6687ae36实匹配、CPU1GPU0无install/rebuild；原source/许可仅私有不改MIT。
+新14util+33scoring局部47passed，whole80877运行中。Ruff374/mypy61/srcBandit过；
+新helper保留B102 MEDIUM/HIGH-confidence可信exec非sandbox，不屏蔽。
+原build40858实际失败虽最后sdistTwine使terminal0；新39828实际两包/Twine过，
+uv.CMD空77 owned artifact已私有归档。99876b8 exactCI36345101338 success15/15，
+不是新未提交helperCI；newreal/GPU/token/paid0、原1170历史/DB不变。
+M1原图/许可/封存/fullpool tie、实际encoder/caption/native/online/statistics/fullroles/
+Pilot/确认矩阵/英文稿仍pending，goalACTIVE无timer/default4科学0不改。见新
+research/ARIS_ICMR_NATIVE_METRICS；真实访问门槛不得因CPU通过就跳过。

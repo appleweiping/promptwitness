@@ -1,6 +1,6 @@
 {
   "format": "promptwitness.icmr-retrieval-component/v0.1",
-  "recorded_at": "2026-09-27T20:19:11Z",
+  "recorded_at": "2026-09-27T20:17:00Z",
   "active_goal_status": "ACTIVE",
   "same_existing_ARIS_run": true,
   "default_MAX_ROUNDS": 4,
@@ -72,18 +72,13 @@
       "passed": 1957,
       "skipped": 6,
       "seconds": 2013.77,
-      "configured_src_coverage_percent": 94.03,
-      "source_scope": "PRIOR_39297_ONLY_NOT_NEW_NATIVE_CHECKER"
+      "configured_src_coverage_percent": 94.03
     }
   },
   "ruff": "PASS",
-  "ruff_format_check": "374 files already formatted in new native-component check; historical366 and355 preserved",
+  "ruff_format_check": "366 files already formatted at final check; earlier355 preserved",
   "mypy": "61 src files PASS",
-  "configured_src_and_new_helpers_bandit": {
-    "configured_src": "PASS",
-    "prior_M0_helpers": "PASS_AT_193223",
-    "new_native_helper": "ONE_MEDIUM_B102_EXEC_USED_RETAINED_NOT_SUPPRESSED"
-  },
+  "configured_src_and_new_helpers_bandit": "PASS",
   "isolated_build_twine": {
     "original_40858": "BUILD_FAILED_WITH_LAST_TWINE_EXIT0_NOT_FULL_SUCCESS",
     "new_39828": "SDIST_WHEEL_AND_TWINE_BOTH_PASS"

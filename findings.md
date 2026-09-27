@@ -79,3 +79,24 @@ Original whole-suite39297 later completed exit0:1957passed6skipped/2013.77s,
 documentation-source commit e95bd09 pushed but its CIqueued at193223. Local
 build40858 still lacks terminal output; remote build is not local-build evidence.
 No image/method benefit/Pilot/scientific acceptance follows from software passes.
+
+## 2026-09-27T20:17:00Z — Actual published retrieval kernels, tied-ranking counterexample
+
+Authored CPU selected original SEARLE AST functions executed once by author48422
+and fresh-document executor54921. Each strict-order11query/15comparison/5native
+metric calls passed; source051 same-family/provisional, doc052 identity unknown.
+Both actual all-tie probes produced original Torch global0% versus independent
+lexical100%. This is a retained concrete mismatch, not full scorer qualification
+or an inconvenient case removed to pass. Real images/near-ties/full pools and
+an authoritative ranking policy remain future admission requirements.
+
+50-pin existing CPU software metadata6687ae36 matched without install/rebuild;
+6 code/license/config bytes roundtrip exact. New14 utility tests add to47local,
+whole80877 still running. B102 MEDIUM exec_used retained for explicit trusted
+original code; not a sandbox. Original40858 build failed despite finalsdistTwine
+terminal0; new uv/PyPI39828 actualsdist+wheel/Twine success, actualsetuptools84.
+uv.CMD created an empty77 redirection artifact, task-owned and privately archived.
+Old-delivered99876b8 CI36345101338 now success15/15; new helper not yet pushed.
+Old1170 cost history/DB unchanged, new real/GPU/tokens/paid0. Data/user NLVR2
+access/official parity/sealed final/encoder/M1/Pilot/statistics/manuscript still
+pending, same run/default4scientific0/no timer; active goal not completed.

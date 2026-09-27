@@ -1,0 +1,151 @@
+{
+  "format": "promptwitness.icmr-published-metric-qualification/v1",
+  "recorded_at": "2026-09-27T20:17:00Z",
+  "status": "PASS_STRICT_ORDER_AUTHORED_ONLY",
+  "active_goal": "ACTIVE",
+  "same_ARIS_run": true,
+  "default_MAX_ROUNDS": 4,
+  "scientific_rounds_used": 0,
+  "timer": "NONE",
+  "source_revision": "a9c314ba4b6e6e14be5a9c3fdf6b66e6a0c23e37",
+  "source_license": "CC-BY-NC-4.0_PRIVATE_ORIGINAL_NOT_MIT_VENDORED",
+  "source_functions": [
+    "cirr_compute_val_metrics",
+    "fiq_compute_val_metrics"
+  ],
+  "metric_bodies_modified": false,
+  "prediction_generation": "AUTHORED_CPU_TENSORS",
+  "exact_stage_roundtrip_files": 6,
+  "CPU_environment": {
+    "spec": "6687ae36",
+    "python": "3.10.15",
+    "torch": "2.7.1+cu118",
+    "numpy": "1.26.4",
+    "packages": 50,
+    "exact_metadata_match": true,
+    "cpus": 1,
+    "gpus": 0,
+    "new_install_or_rebuild": false,
+    "CUDA_visible": ""
+  },
+  "source_review": {
+    "trace": "051",
+    "model": "gpt-6-astra",
+    "effort": "xhigh",
+    "family": "same-family/provisional",
+    "blocking": [],
+    "concrete_nonblocking": [],
+    "reviewer_tests_passed": 47,
+    "reviewer_test_seconds": 18.16
+  },
+  "primary": {
+    "original_session": 48422,
+    "once": true,
+    "terminal_exit_code": 0,
+    "checker_wall_seconds": 0.4262390269432217
+  },
+  "fresh_doc": {
+    "trace": "052",
+    "original_session": 54921,
+    "once": true,
+    "terminal_exit_code": 0,
+    "checker_wall_seconds": 0.09774209395982325,
+    "model": "inherited",
+    "canonical_family": "unknown",
+    "independence": "unverified",
+    "separate_stderr_attribution": false
+  },
+  "per_invocation": {
+    "strict_order_queries": 11,
+    "metric_comparisons": 15,
+    "native_CPU_metric_calls": 5
+  },
+  "tie_counterexample": {
+    "native_CIRR_global_percent": {
+      "1": 0,
+      "5": 0,
+      "10": 0,
+      "50": 0
+    },
+    "independent_lexical_CIRR_global_percent": {
+      "1": 100,
+      "5": 100,
+      "10": 100,
+      "50": 100
+    },
+    "qualified": false
+  },
+  "tests": {
+    "new_utility": 14,
+    "author_targeted": {
+      "passed": 47,
+      "seconds": 33.26,
+      "combined_command_exit": 1,
+      "combined_command_after_pytest_failure": "Get-Content nonexistent namespace __init__.py"
+    },
+    "new_whole": {
+      "original_session": 80877,
+      "status": "RUNNING_NOT_PASSED"
+    },
+    "old_whole": {
+      "original_session": 39297,
+      "passed": 1957,
+      "skipped": 6,
+      "seconds": 2013.77,
+      "coverage_src_percent": 94.03,
+      "applies_to_new_helper": false
+    }
+  },
+  "quality": {
+    "ruff": "PASS",
+    "ruff_format_files": 374,
+    "mypy_src_files": 61,
+    "configured_src_bandit": "PASS",
+    "new_helpers_bandit": {
+      "exit": 1,
+      "medium": 1,
+      "high_confidence": 1,
+      "code": "B102_exec_used",
+      "suppressed": false,
+      "trusted_external_execution_not_sandbox": true
+    }
+  },
+  "build": {
+    "original_40858": "BUILD_FAILED_then_prior_sdist_Twine_PASS_masked_by_terminal_exit0",
+    "actual_new_39828": "SDIST_WHEEL_TWINE_BOTH_PASS",
+    "new_installer": "existing_uv_official_PyPI",
+    "observed_setuptools": "84.0.0_both_stages",
+    "uv_CMD_redirection_artifact": "OWN_EMPTY_77_PRESERVED_PRIVATELY"
+  },
+  "old_delivered_CI": {
+    "sha": "99876b8d4295cc0293f08cd3f8484c204553f8fd",
+    "run": 36345101338,
+    "conclusion": "success",
+    "jobs_success": 15,
+    "jobs_total": 15,
+    "applies_to_new_helper": false
+  },
+  "new_delivery_at_record": "UNCOMMITTED_NOT_PUSHED",
+  "new_real_calls": 0,
+  "new_input_tokens": 0,
+  "new_output_tokens": 0,
+  "new_allocated_GPU_hours": 0,
+  "new_paid_API_USD": 0,
+  "complete_CPU_cost_instrumentation": false,
+  "physical_history": {
+    "sha256": "26a7e04bbe7f256df6796877cdfb24c5e86cd57495268491804687d44d88bf93",
+    "calls": 1170,
+    "input_tokens": 2136046,
+    "output_tokens": 195222,
+    "allocated_GPU_hours": 3.8074371029887377,
+    "historical_unknown_count": "NOT_ENCODED"
+  },
+  "benchmark_records_accessed": false,
+  "encoder_executed": false,
+  "whole_native_CLI_executed": false,
+  "official_benchmark_parity_established": false,
+  "scientific_admission": false,
+  "data_license_access": "PENDING_USER_ACCESS_AND_AUDIT",
+  "manuscript": "NOT_STARTED",
+  "other_four_repositories": "FROZEN"
+}
