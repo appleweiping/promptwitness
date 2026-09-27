@@ -40,3 +40,28 @@ raise_on_exception=True and reflective child evaluation is counted after a
 successful batch return. MIPRO's prune exception cannot be copied without
 checking run termination, multi-child behavior and actual rejected-work cost.
 No GEPA search, real M1/Pilot/confirmation or ICMR venue-fit has been established.
+
+## 2026-09-27 — User-authorized substantive ICMR direction, authored M0 only
+
+Latest user confirmed multimedia-retrieval ICMR and explicitly requested the
+missing topic fit be improved. New v0.1 composed-image-retrieval design proposes
+CIRR/FashionIQ, shared caption/text generator inputs and a fixed visual/text
+ranking backend; it supersedes the old future text-task matrix, not its costs,
+failures or access history. Novelty and empirical venue fit remain unestablished.
+
+Independent formula implementation validates complete single-target rankings,
+CIRR reference exclusion/subset, FashionIQ reference retention and macro/micro
+separation. Actual authored rankings feed the old binary gate; eligible vectors
+require all actual scores, malformed ranks fail without zero imputation.
+33new/135targeted passed; source048/sole049 followup same-family/provisional.
+Fresh doc050 original93654 once exit0/25.0974021s; familyunknown/independence
+unverified, aggregate-only facts. No actual images/encoder/model savings claimed.
+Whole39297/build40858 still running at191839 snapshot, WMI diagnostic retained.
+
+CIRR official licensing lookup automatically exposed a public test annotation
+example after design/kernel implementation; no tuning/selection/model forwarding
+or scoring from it. ACCESS_AUDIT now retains this event, no completely blind test
+claim. Original NLVR2 image terms/access and exact FashionIQ CDLA/image source,
+visual weights, native parity, sealed final, real costs, M1/Pilot/confirmation and
+manuscript remain pending. Actual1170 cost DB bytes unchanged; no new real cost.
+Default4/scientific0, same run, no timer; other four repos frozen. Goal ACTIVE.

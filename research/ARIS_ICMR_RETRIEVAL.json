@@ -1,0 +1,32 @@
+{
+  "format": "promptwitness.icmr-retrieval-component/v0.1",
+  "recorded_at": "2026-09-27T19:18:39Z",
+  "active_goal_status": "ACTIVE",
+  "same_existing_ARIS_run": true,
+  "default_MAX_ROUNDS": 4,
+  "scientific_rounds_used": 0,
+  "timer": "NONE",
+  "direction": "CIRR/FashionIQ composed image retrieval; substantive user-authorized v0.1 design, not scientific freeze",
+  "scope": "research/ICMR_SCOPE.md",
+  "access_audit": "research/ACCESS_AUDIT.md",
+  "data_license_admission": "PENDING",
+  "official_native_scorer_parity": false,
+  "authored_CPU_kernel": "PASS_LIMITED_M0",
+  "authored_case_totals": [
+    {"case": "eligible", "early_attempts": 4, "total_attempts": 64, "observed_scores": 64, "logical_episodes": 128},
+    {"case": "rejected", "early_attempts": 4, "total_attempts": 4, "observed_scores": 4, "logical_episodes": 68},
+    {"case": "failed", "early_attempts": 1, "total_attempts": 1, "observed_scores": 0, "logical_episodes": 65}
+  ],
+  "primary_CLI": {"original_session": 15705, "exit_code": 0, "CPU_wall_seconds": 32.2339146000013},
+  "fresh_doc": {"original_session": 93654, "once": true, "exit_code": 0, "CPU_wall_seconds": 25.09740210000018, "trace": "050", "model_family": "unknown", "independence": "unverified", "scope": "allowed aggregate only"},
+  "source_review": {"traces": ["048", "049"], "model": "gpt-6-astra", "effort": "xhigh", "family_relation": "same-family/provisional", "scientific_acceptance": false},
+  "tests": {"new_authored": 33, "targeted_plus_incremental": 135, "targeted_exit_code": 0, "targeted_seconds": 134.50, "reviewer_authored_passed": 33, "whole_suite": "RUNNING_ORIGINAL_39297"},
+  "ruff": "PASS", "format": "355 files already formatted", "mypy": "61 src files PASS", "configured_src_and_new_helpers_bandit": "PASS", "isolated_build_twine": "RUNNING_ORIGINAL_40858",
+  "known_local_diagnostic": "Windows WMI fatal 0x8007000e during collection; original run retained",
+  "new_real_calls": 0, "new_allocated_GPU_hours": 0, "new_input_tokens": 0, "new_output_tokens": 0, "new_paid_API_USD": 0,
+  "physical_history": {"sha256": "26a7e04bbe7f256df6796877cdfb24c5e86cd57495268491804687d44d88bf93", "calls": 1170, "input_tokens": 2136046, "output_tokens": 195222, "allocated_GPU_hours": 3.8074371029887377, "historical_unknown_count": "NOT_ENCODED_IN_ORIGINAL_BASE_SUMMARY"},
+  "new_matrix": {"pairs": 96, "runs": 120, "transfers": 24, "frozen": false, "completed": 0, "forecast": "UNMEASURED_NOT_ZERO"},
+  "venue_fit": "DESIGN_ALIGNED_EMPIRICAL_PENDING", "novelty": "UNESTABLISHED", "scientific_admission": "NOT_PASSED", "manuscript": "NOT_STARTED",
+  "other_four_repositories": "FROZEN", "external_writes_or_term_acceptance": false,
+  "old_exact_SHA_CI": {"sha": "c9f85da3c20e1bd4506263ec29b0b888fd0634d2", "run": 36341220170, "status": "success", "applies_to_new_artifacts": false}
+}

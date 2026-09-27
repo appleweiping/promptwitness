@@ -1,0 +1,30 @@
+# ICMR 数据与视觉组件准入审计 v0.1
+
+记录：2026-09-27 19:14 UTC。仅来源/许可/访问初审，不是法律意见、下载许可、
+数据准入通过或实际图像实验。本轮仅阅读相关代码/README/网页，未下载新
+benchmark annotation/image、模型/encoder weights，未修改服务器环境。
+
+| 对象 | 已核对的第一方来源事实 | 尚缺与当前状态 |
+|---|---|---|
+| CIRR | [固定 README](https://github.com/Cuberick-Orion/CIRR/blob/5cfd587f247c6d287900fcc4c6b3fdf81f7dab4d/README.md) 指向[项目官网](https://www.zheyuanliu.me/CIRR/#licensing)；官网区分 MIT code/annotations 与 NLVR2 第三方原图，raw-image 流程要求同意 NLVR2 ToS | 原图权限/条款未由用户完成；未填表或接受条款；原图 manifest、训练分组、封存 final 和评分 parity 未资格化 |
+| FashionIQ | [固定 README](https://github.com/XiaoxiaoGuo/fashion-iq/blob/f71b16c3b09ef03b02c0fed160fa072fb3b8aa16/README.md) 将图像来源指向 metadata 仓库，许可仅列 CDLA 通用链接 | 未明确 CDLA edition/version 和原图许可链；URL 元数据不是已获取图像或可用性证明；不绕过此缺口下载/再发布 |
+| CLIP | [第一方 code LICENSE](https://github.com/openai/CLIP/blob/main/LICENSE) 为 MIT | 这是 code 来源核查，不是 exact checkpoint/preprocessing/tokenizer/artifact hash 的冻结；需对真实 encoder 与数值 tie 行为验证 |
+| SEARLE | 固定 revision `a9c314ba4b6e6e14be5a9c3fdf6b66e6a0c23e37` 的 `src/validate.py` 用于核对 CIRR/FashionIQ 评分约定；项目为 CC BY-NC4.0 | 未复制其 code/weights 为本项目 MIT；未执行 native evaluator；外部强基线是否合法可复现仍待审计 |
+| Captioner | v0.1 拟让两个原文本模型共享同一固定 reference caption，避免额外视觉输入优势 | exact captioner/checkpoint/license/cache identity 未选择，费用未测量；不可把公开 test annotation 当 reference caption |
+
+## 访问披露与下一顺序
+
+官网许可页面自动包含一个 CIRR test annotation 及辅助示例；development agent
+意外接触已记入 `ACCESS_AUDIT.md`。不在此复述其记录/文本，不转入开发输入。
+方向、cutoffs 和 authored CPU 核在该查阅前已实现；无基于样例的修改或结果。
+官方 validation 最终池内容未读取，但目前也没有已验收的 sealed store。
+
+下一步先明确用户可用的 CIRR 原图访问、FashionIQ 准确数据许可/来源和视觉
+权重清单，再冻结训练侧 grouping 与未读 final。scorer 仅收到 labels/subsets，
+generator/predictor 仅收到 reference image/caption 与 modification；图库图像共享
+不等于可共享 query-target gold。native parity、实际数值编码与成本测量随后验收。
+若任一访问/许可链不成立，记录未准入，不自动切换镜像、数据或模型救实验。
+
+CIRR 访问需用户按第一方流程确认/同意条款；本审计不自动联系管理员/作者、
+签署条款、对外上传、测试服务器投稿或产生费用。仍可继续完成无数据的
+代码/原生评分对齐设计，但不宣称真实 M1/Pilot 已通过。

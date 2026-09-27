@@ -276,3 +276,37 @@
 | 2026-09-27T18:29:47Z | experiment-bridge | refine-logs/EXPERIMENT_PLAN.md | implementation | 最新plan副本，active/no timer/default4 |
 | 2026-09-27T18:29:47Z | experiment-bridge | AGENTS.md | implementation | dashboard登记新组件事实与未完成门禁 |
 | 2026-09-27T18:29:47Z | experiment-bridge | findings.md | implementation | append-only共享cadence修正及下一GEPA静态发现 |
+| 2026-09-27T18:45:43Z | experiment-plan | research/ICMR_SCOPE_20260927_184543.md | plan | 用户授权新组合图像检索 v0.1，旧矩阵与成本历史保留，未科学冻结 |
+| 2026-09-27T18:45:43Z | experiment-plan | research/ICMR_SCOPE_20260927_184543.json | plan | 新方向机器可读初版，96/120/24拟矩阵未运行 |
+| 2026-09-27T18:45:43Z | experiment-plan | refine-logs/EXPERIMENT_PLAN_20260927_184543.md | plan | 四claim blocks、许可/原评分/实际图像/全成本/M1/Pilot先后准入 |
+| 2026-09-27T18:45:43Z | experiment-plan | refine-logs/EXPERIMENT_PLAN.md | plan | 最新主计划副本；不冒充旧科学矩阵完成 |
+| 2026-09-27T18:45:43Z | experiment-bridge | reproduce/retrieval_scoring.py | implementation | 独立CPU全库排名/CIRR reference subset/FIQ macro micro，非encoder/native parity |
+| 2026-09-27T18:45:43Z | experiment-bridge | reproduce/check_retrieval_scoring.py | implementation | 实际 authored rank→gold→原gate三路径，完整survivor与失败非zero |
+| 2026-09-27T18:45:43Z | experiment-bridge | tests/reproduce/test_retrieval_scoring.py | implementation | 33 authored tests，不访问数据/model/GPU |
+| 2026-09-27T18:45:43Z | experiment-bridge | reproduce/RETRIEVAL_SCORING_20260927_184543.md | implementation | literal一次CPU doc invocation与mechanical-only范围 |
+| 2026-09-27T18:45:43Z | experiment-bridge | reproduce/RETRIEVAL_SCORING.md | implementation | 最新机械运行文档副本 |
+| 2026-09-27T18:58:07Z | research-pipeline | research/ARIS_GOAL_20260927_185807.md | plan | 旧目标保留、新方向覆盖未来texttasks；active/no timer/default4 |
+| 2026-09-27T18:58:07Z | research-pipeline | research/ARIS_GOAL.md | plan | 最新目标合同精确副本 |
+| 2026-09-27T18:58:07Z | experiment-bridge | idea-stage/docs/research_contract_20260927_185807.md | plan | 旧合同保留，新C1/C2真实检索与未冻结选择/成本 |
+| 2026-09-27T18:58:07Z | experiment-bridge | idea-stage/docs/research_contract.md | plan | 最新研究合同副本；不作科学通过 |
+| 2026-09-27T19:14:00Z | experiment-bridge | research/ACCESS_AUDIT.md | implementation | 如实追加CIRR官方test示例非预期接触，未调参/评分/转入模型 |
+| 2026-09-27T19:14:00Z | experiment-plan | research/ICMR_SCOPE_20260927_191400.md | plan | 追加原图条款、FIQ精确CDLA与公开test示例访问边界 |
+| 2026-09-27T19:14:00Z | experiment-plan | research/ICMR_SCOPE.md | plan | 最新主设计副本，实证主题匹配未通过 |
+| 2026-09-27T19:14:00Z | experiment-plan | research/ICMR_SCOPE_20260927_191400.json | plan | 数据许可和访问披露pending机器状态 |
+| 2026-09-27T19:14:00Z | experiment-plan | research/ICMR_SCOPE.json | plan | 最新设计机器状态副本 |
+| 2026-09-27T19:14:00Z | experiment-bridge | research/ICMR_DATA_AUDIT_20260927_191400.md | implementation | CIRR/NLVR2与FIQ/CDLA/CLIP/SEARLE第一方许可初审，不接受条款/下载 |
+| 2026-09-27T19:14:00Z | experiment-bridge | research/ICMR_DATA_AUDIT.md | implementation | 最新数据/权重许可待准入副本 |
+| 2026-09-27T19:14:00Z | research-pipeline | research/ICMR_REQUIREMENTS_20260927_191400.md | paper | 既有官方当届写作规则不变；新用户授权和实证未通过登记 |
+| 2026-09-27T19:14:00Z | research-pipeline | research/ICMR_REQUIREMENTS.md | paper | 最新写作约束副本；英文稿未开始 |
+| 2026-09-27T19:18:39Z | experiment-bridge | research/ARIS_ICMR_RETRIEVAL_20260927_191839.md | implementation | actual authored M0/source048049/doc050/135tests；full/build仍运行 |
+| 2026-09-27T19:18:39Z | experiment-bridge | research/ARIS_ICMR_RETRIEVAL.md | implementation | 最新实际验收副本，不授科学准入 |
+| 2026-09-27T19:18:39Z | experiment-bridge | research/ARIS_ICMR_RETRIEVAL_20260927_191839.json | implementation | 实际CPU三路径/费用零新增/历史1170与pending机器状态 |
+| 2026-09-27T19:18:39Z | experiment-bridge | research/ARIS_ICMR_RETRIEVAL.json | implementation | 最新机器状态精确副本 |
+| 2026-09-27T19:18:39Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260927_191839.md | implementation | 048/唯一049/050真实trace及family限制，无跨家族声明 |
+| 2026-09-27T19:18:39Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | 最新限定M0审查副本 |
+| 2026-09-27T19:18:39Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260927_191839.md | implementation | 新M0机械通过；data/image/native/M1/Pilot/matrix/manuscript仍缺 |
+| 2026-09-27T19:18:39Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 最新ICMR tracker副本，原历史不清零 |
+| 2026-09-27T19:18:39Z | experiment-bridge | refine-logs/EXPERIMENT_RESULTS_20260927_191839.md | implementation | only authored CPU结果；full39297/build40858未终态 |
+| 2026-09-27T19:18:39Z | experiment-bridge | refine-logs/EXPERIMENT_RESULTS.md | implementation | 最新机械results副本 |
+| 2026-09-27T19:18:39Z | experiment-bridge | AGENTS.md | implementation | 最新用户实质方向授权/机械事实与访问/数据门禁 |
+| 2026-09-27T19:18:39Z | experiment-bridge | findings.md | implementation | append-only新方向、实际M0与意外公开test接触披露 |

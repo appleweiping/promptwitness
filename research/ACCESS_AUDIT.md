@@ -82,3 +82,37 @@ performance, Pilot evidence, native optimizer benefit or ONLINE_PINNED proof.
 The earlier public IFBench preview, physical checkout availability and ABI1
 limitations remain disclosed above; this component does not erase them or
 establish completely unexposed developer-held blind final data.
+
+## ICMR direction: unintended public CIRR example exposure, 2026-09-27
+
+The latest user explicitly authorized a substantive ACM ICMR direction change.
+The proposed composed-image-retrieval design is recorded in `ICMR_SCOPE.md`;
+the old text-task history is retained rather than relabeled as retrieval results.
+
+A primary-source licensing lookup at the official CIRR project homepage returned
+the whole page, including one public test-split annotation example and an
+auxiliary annotation example. This was an unintended development-agent exposure,
+not a requested test-data inspection or an evaluation. Do not reproduce those
+record IDs, captions or relationships in development fixtures or prompts.
+No test image, model response, per-query score or test result was accessed.
+The v0.1 design, retrieval cutoffs, reference-image conventions and authored CPU
+kernel had already been implemented before the licensing-page lookup. No
+parameter, candidate, dataset subset or configuration was selected from the
+example. It has not been supplied to a proposer, predictor, scorer or inference
+request. Actual benchmark annotations/images have not been downloaded in this
+ICMR component; code/README/license metadata are not benchmark results.
+
+Consequently, future CIRR test-split work must not claim completely unexposed
+developer-held blind data. An independent access/overlap review is required at
+the new freeze; contamination of tuning, selection or final evaluation triggers
+INTEGRITY_BLOCKED rather than silent removal of inconvenient records. The
+proposed official-validation final pool has not been read, but its sealed
+process-level store and independent admission are not yet implemented. No CIRR
+test-server submission or external upload is authorized by this component.
+
+The official licensing section distinguishes MIT code/annotations from
+third-party NLVR2 images. Its raw-image access process requires agreement to
+NLVR2 terms. No form, agreement, account change, contact or mirror bypass has
+been performed. FashionIQ's pinned README names CDLA without a specific edition;
+the original image-source/terms audit remains unresolved. Public availability
+is not treated as permission to redistribute raw images or as legal clearance.

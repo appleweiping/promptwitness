@@ -5,6 +5,13 @@
 language: zh
 
 研究仅限 PromptWitness-Delta。其他四个 NLP 原创项目保持冻结。
+2026-09-27最新方向授权：用户已确认ACM ICMR，并明确要求改进尚未建立的主题匹配。
+当前主研究设计以 `research/ICMR_SCOPE.md` 为准：真实组合图像检索，CIRR/FashionIQ，
+版本v0.1设计而非科学冻结；新实验须通过各自许可、评分、隔离、在线与成本准入。
+这明确覆盖下文旧“不改三文本任务/旧矩阵作为未来必做前置”的限制，不改历史记录。
+旧scope.lock/PROTOCOL仍保存数学、总资源与历史事实；不把旧144/180/36转写为已完成。
+同一ARIS run和审查记忆继续，不创建新run重置default4或已发生费用。
+最终交付包含符合ICMR当届要求的英文稿/PDF；不得把旧AUTO_WRITE=false作为省略理由。
 以 `research/PROTOCOL.md`、`research/scope.lock.json`、
 `research/PROTOCOL_v1_1.md` 和实际账本为科学与资源约束来源。
 续推授权以用户最新指令及 `research/ARIS_GOAL.md` 为准；它覆盖下述历史
@@ -142,3 +149,17 @@ ACM ICMR 2027 regular long paper 登记，不默认换成 ICML、不照抄 gener
 只对已审查、脱敏、任务范围内的文件进行显式暂存、commit、push。
 不使用 reset/clean，不合并 main，不自行创建 PR、联系导师或投稿。
 每次交付区分实际 SHA 的 CI、局部测试、研究效果和未完成事项。
+
+2026-09-27 19:18:39 UTC：最新用户已授权实质ICMR主题改进，主设计以ICMR_SCOPE
+v0.1为准而非继续把旧三个texttasks作为整套未来必做。候选CIRR/FashionIQ图像+
+修改文本→共享固定caption→原两文本模型→固定视觉/文本编码排名；96/120/24
+为NOT_FROZEN/NOT_RUN新设计，旧144/180/36保留未运行历史。无科学准入或稿件。
+新独立CPU评分核/CLI接原gate，33new+135targeted通过；source048/唯一049限定
+same-family/provisional；fresh-doc050原93654一次exit0/25.0974021s，familyunknown/
+independenceunverified。只有authored vectors，不是实际images/encoder/模型节省。
+whole39297与build40858仍运行，不称通过；WMI诊断保留。见ARIS_ICMR_RETRIEVAL。
+CIRR官网许可核查自动展示testannotation示例，ACCESS_AUDIT披露；不转入开发，
+不声称CIRRtest开发者完全盲态。CIRR原图NLVR2条款由用户完成访问，FIQexactCDLA/
+image-source与weights审计未完成；不代签/联系/下载镜像/测试上传绕过。
+物理DB26a7e04b...未改，1170calls/2136046input/195222output/3.8074371029887377GPUh；
+unknown未编码保留、新real/GPU/tokens/paid0。default4科学0/no timer/goalACTIVE。
