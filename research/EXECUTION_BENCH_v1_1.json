@@ -1,0 +1,167 @@
+{
+  "accounting": "supervisor reservation through child exit; interval union, not summed overlapping request latency",
+  "allocation_intervals": [
+    {
+      "end_unix": 1790481184.965929,
+      "gpu_uuid": "GPU-18ce5833-27a4-ac4b-f952-49cc52045714",
+      "start_unix": 1790480366.1253316
+    }
+  ],
+  "best_repeat_same_text_and_token_counts": 32,
+  "best_repeated_once": true,
+  "cold_start_seconds": 41.25406264094636,
+  "configurations": [
+    {
+      "batch_size": 1,
+      "cap_hits": 0,
+      "config": "config-0-batch-1",
+      "elapsed_seconds": 333.64800339215435,
+      "input_tokens": 77432,
+      "input_tokens_per_second": 232.07691702860282,
+      "output_tokens": 3090,
+      "output_tokens_per_second": 9.261257278881892,
+      "peak_allocated_mib": 19864.57666015625,
+      "peak_reserved_mib": 24642.0,
+      "prefix_hits": "NOT_SUPPORTED_measured_tokenizer_cache_only",
+      "queue_policy": "offline fixed profile then input length; no outcome scheduling",
+      "repeat_of_batch_size": null,
+      "requests": 32,
+      "requests_per_second": 0.09590946049327527
+    },
+    {
+      "batch_size": 4,
+      "cap_hits": 0,
+      "config": "config-1-batch-4",
+      "elapsed_seconds": 164.47377042402513,
+      "input_tokens": 77432,
+      "input_tokens_per_second": 470.78631322413764,
+      "output_tokens": 3102,
+      "output_tokens_per_second": 18.86015011392286,
+      "peak_allocated_mib": 25982.1259765625,
+      "peak_reserved_mib": 38552.0,
+      "prefix_hits": "NOT_SUPPORTED_measured_tokenizer_cache_only",
+      "queue_policy": "offline fixed profile then input length; no outcome scheduling",
+      "repeat_of_batch_size": null,
+      "requests": 32,
+      "requests_per_second": 0.19455989801596763
+    },
+    {
+      "batch_size": 8,
+      "cap_hits": 0,
+      "config": "config-2-batch-8",
+      "elapsed_seconds": 133.57043762505054,
+      "input_tokens": 77432,
+      "input_tokens_per_second": 579.7091136091177,
+      "output_tokens": 3135,
+      "output_tokens_per_second": 23.470762361356858,
+      "peak_allocated_mib": 33982.02490234375,
+      "peak_reserved_mib": 47176.0,
+      "prefix_hits": "NOT_SUPPORTED_measured_tokenizer_cache_only",
+      "queue_policy": "offline fixed profile then input length; no outcome scheduling",
+      "repeat_of_batch_size": null,
+      "requests": 32,
+      "requests_per_second": 0.2395739698766888
+    },
+    {
+      "batch_size": 8,
+      "cap_hits": 0,
+      "config": "config-3-batch-8",
+      "elapsed_seconds": 143.96698660519905,
+      "input_tokens": 77432,
+      "input_tokens_per_second": 537.8455285192704,
+      "output_tokens": 3135,
+      "output_tokens_per_second": 21.77582565228733,
+      "peak_allocated_mib": 33982.9638671875,
+      "peak_reserved_mib": 36572.0,
+      "prefix_hits": "NOT_SUPPORTED_measured_tokenizer_cache_only",
+      "queue_policy": "offline fixed profile then input length; no outcome scheduling",
+      "repeat_of_batch_size": 8,
+      "requests": 32,
+      "requests_per_second": 0.22227318050181644
+    }
+  ],
+  "configurations_tested": 3,
+  "execution_identity": {
+    "attention": "sdpa",
+    "backend_config": "Torch_generate_left_padded_length_scheduled",
+    "cache": "no_response_cache",
+    "compile": false,
+    "cpu_threads": 4,
+    "deterministic_algorithms": true,
+    "do_sample": false,
+    "dtype": "bfloat16",
+    "enable_thinking": false,
+    "gpu_uuid": "GPU-18ce5833-27a4-ac4b-f952-49cc52045714",
+    "model": "Qwen/Qwen3.5-9B",
+    "request_source_sha256": "dc882aa9f4d5e72f1cf01f26d079b49dc990ccfbc6a3b9c83c8b2bb68a6341ec",
+    "revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+    "scorer": "NOT_RUN_cost_only",
+    "seed": 11,
+    "template_sha256": "12de9034d5269e8b1fe6012b3538374fcb3941bf93c95fc81b0cf5acf3f08ce4",
+    "tf32": false,
+    "torch": "2.7.1+cu118",
+    "transformers": "5.3.0"
+  },
+  "failed_calls": 0,
+  "fixed_complete_requests_per_configuration": 32,
+  "format": "promptwitness.delta.execution-bench/v1.1",
+  "limits": [
+    "same-workload repeat is diagnostic, not a universal deterministic proof",
+    "batch composition changes observed outputs; an adaptive online finite-table certificate is not admitted",
+    "no prefix backend cache; tokenizer/rendered reuse only",
+    "input length quantiles, not a proven full-campaign cost distribution; retain v1 long-output stress evidence",
+    "BFCL accepted native demos and complete proposer workflow remain unmeasured",
+    "Olmo, Mistral, scoring, pilot and full cold-switch schedules remain unpriced"
+  ],
+  "native_optimizer_savings_measured": false,
+  "new_startup_failures": 0,
+  "online_batch_invariance_validated": false,
+  "output_cap_hits": 0,
+  "output_comparisons": [
+    {
+      "config": "config-1-batch-4",
+      "different": 4,
+      "same_text_and_token_counts_as_batch_1": 28,
+      "speedup_vs_batch_1": 2.028578797287774
+    },
+    {
+      "config": "config-2-batch-8",
+      "different": 7,
+      "same_text_and_token_counts_as_batch_1": 25,
+      "speedup_vs_batch_1": 2.497918022315292
+    },
+    {
+      "config": "config-3-batch-8",
+      "different": 7,
+      "same_text_and_token_counts_as_batch_1": 25,
+      "speedup_vs_batch_1": 2.3175313400642183
+    }
+  ],
+  "physical_cross_version_usage": {
+    "calls": 898,
+    "gpu_hours": 3.4812718904634763,
+    "input_tokens": 1758607,
+    "output_tokens": 190976
+  },
+  "physical_stage_usage": {
+    "calls": 128,
+    "gpu_hours": 0.2274557214975357,
+    "input_tokens": 309728,
+    "output_tokens": 12462
+  },
+  "scientific_scores_measured": false,
+  "source_sha256": {
+    "bench-v1_1.json": "7cbd13befaeac839932a9780d71950d3aa2629d66f6adf3a123c279f611cfa6a",
+    "execution-requests-v1_1.jsonl": "dc882aa9f4d5e72f1cf01f26d079b49dc990ccfbc6a3b9c83c8b2bb68a6341ec",
+    "resources-v1_1.sqlite": "22b0913b411adb65d3b5b0b67aa66e887b1e7169491dd909afbd58a53f420001",
+    "responses-v1_1.jsonl": "faa1f891928bd0254dc0ab6200b68e440e9f8a62cadd7c4dfcd8acb093fdff07"
+  },
+  "status": "COMPLETED_COST_ONLY",
+  "unknown_cost_calls": 0,
+  "workload_profiles": {
+    "bfcl:base": 8,
+    "hotpotqa:four_fit_gold_demo_cost_context": 8,
+    "instruction_following:base": 8,
+    "instruction_following:four_valid_demo_cost_context": 8
+  }
+}

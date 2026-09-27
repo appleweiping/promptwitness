@@ -1,0 +1,57 @@
+{
+  "checked": [
+    {
+      "digest": "2160488d137e4f9228cb407048093babea8958ef",
+      "file": "README.md"
+    },
+    {
+      "digest": "9f913dc05d66cfb23c16e3c93b3cc4899813dfa6",
+      "file": "config.json"
+    },
+    {
+      "digest": "b6bea2642bc3fe80f392111d52af91d1563a8de2",
+      "file": "generation_config.json"
+    },
+    {
+      "digest": "ce6fb6f6f4d0183f4813cbf4ece24109da629a08d4210da46f77e1d8b0bd5c19",
+      "file": "model-00001-of-00003.safetensors"
+    },
+    {
+      "digest": "8c0e72f148366b6a3709e002a98706a33d31aec8515090c856c95b2044f92ae0",
+      "file": "model-00002-of-00003.safetensors"
+    },
+    {
+      "digest": "905dd405363e43d95779c1c1155a2dbfd36155914ae95dbd934e12e490cfb4ca",
+      "file": "model-00003-of-00003.safetensors"
+    },
+    {
+      "digest": "050e5515d49376fc01e4837d031902c63af98111",
+      "file": "model.safetensors.index.json"
+    },
+    {
+      "digest": "00dc7d10b86d793afaf3d6733a45ee4d8c557194",
+      "file": "params.json"
+    },
+    {
+      "digest": "451134b2ddc2e78555d1e857518c54b4bdc2e87d",
+      "file": "special_tokens_map.json"
+    },
+    {
+      "digest": "8d7d23136b474a3df1182ed829db19984e295ee7",
+      "file": "tokenizer.json"
+    },
+    {
+      "digest": "d8233e5b061987d32b63dbfb38fe86d7d4fc8a18",
+      "file": "tokenizer.model.v3"
+    },
+    {
+      "digest": "940a9c375c745ccbf0bebc5bedcec924d71827aa",
+      "file": "tokenizer_config.json"
+    }
+  ],
+  "failures": [],
+  "format": "promptwitness.delta.artifact-verification/v1",
+  "model": "mistralai/Mistral-7B-Instruct-v0.3",
+  "passed": true,
+  "revision": "c170c708c41dac9275d15a8fff4eca08d52bab71"
+}

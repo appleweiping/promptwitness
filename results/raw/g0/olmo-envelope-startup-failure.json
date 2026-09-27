@@ -1,0 +1,12 @@
+{
+  "format": "promptwitness.delta.startup-failure/v1",
+  "observed_at_utc": "2026-09-26T23:26:00Z",
+  "ledger_run": "allenai/Olmo-3-7B-Instruct@cost-envelope-v1",
+  "archive_run": "allenai/Olmo-3-7B-Instruct@cost-envelope-v1:startup-failed1",
+  "model_requests_attempted": 0,
+  "cause": "The launch omitted the task-owned TMPDIR. The full root/home volumes have no usable default temporary directory; Torch/Transformers import failed before loading a tokenizer/model or issuing generate.",
+  "resolution": "Restore TMPDIR to the existing isolated task tmp directory on writable data2. Do not clean shared disk or change shared environments. Preserve the failed run and its elapsed cost before relaunching unchanged frozen requests.",
+  "accounting": "Preserve the original zero-request startup row under the explicit archive identity; the shared 700-attempt ceiling and previous consumption are unchanged.",
+  "is_method_revision": false,
+  "is_model_runtime_revision": false
+}

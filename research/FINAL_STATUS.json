@@ -1,0 +1,97 @@
+{
+  "format": "promptwitness.delta.final-status/v1",
+  "recorded_at_utc": "2026-09-27T02:05:12Z",
+  "status": "RESOURCE_BLOCKED",
+  "stopped_before_gate": "G1",
+  "g0_passed": false,
+  "research_complete": false,
+  "submission_package_ready": false,
+  "scientific_negative_result_established": false,
+  "reason": "The first completed main-model native-context boundary forecasts 2229.8733702978943 allocated GPU hours with 20% reserve for measured Qwen task stages alone at the unchanged matrix allowances, above the 1000-hour protective ceiling. Remaining optional calibration was not launched.",
+  "reason_scope": "Sample-mean maximum-allowance planning failure for this frozen model/execution/count protocol, not a certified lower bound or proof every alternative protocol is infeasible. Unmeasured costs are explicitly unpriced, not zero.",
+  "code": {
+    "last_verified_committed_sha": "acdee7653746987b7d4556a33ef4832a1638874c",
+    "branch": "research/promptwitness-delta-v1",
+    "research_sidecars_committed": false,
+    "research_sidecars_pushed": false,
+    "same_sha_research_ci": false,
+    "main_merged": false,
+    "tracked_baseline_source_changed": false
+  },
+  "evidence": {
+    "native_context_summary": "results/summary/g0/native-context-qwen-boundary-v1.json",
+    "native_context_summary_sha256": "e3807cc3c9713152193c5c80f0acdad8161cccf8da2cd8464c73e0bb31c04d04",
+    "resource_forecast": "results/summary/g0/model-boundary-budget-v1.json",
+    "resource_forecast_sha256": "894ce05078c7e6cc4b35712815babcfca99dba9055615b538ff2f817743f8df4",
+    "native_context_worker_sha256": "d084772b96abb8ca7894a3ee75c1e6eacb445344c7efec9151d9846679688192",
+    "prior_700_request_ledger_sha256": "830e1cd419cd496b7e7dec2ff280a71b178a517db7fef9be04dbd12a58c67852",
+    "expanded_770_request_ledger_sha256": "62797c3b673bf78a4b1faa6f0ae99049e826c931662b55d73ec71505efdd54f1",
+    "expanded_ledger_copied_after_worker_exit": true,
+    "scientific_preregistration": false,
+    "independent_statistical_review_completed": false
+  },
+  "completed_engineering": {
+    "existing_baseline_tests_passed": 1434,
+    "existing_baseline_tests_skipped": 3,
+    "helper_fixture_tests_passed": 93,
+    "helper_independent_rerun_exit_code": 0,
+    "helper_ruff_check_and_format_check": "passed",
+    "helper_bandit_findings": {"high": 0, "medium": 4, "low": 2},
+    "real_cost_probe_requests_completed": 770,
+    "inference_failures": 0,
+    "zero_request_startup_failures_retained": 3,
+    "native_context_complete_model_requests": {"Qwen/Qwen3.5-9B": 70},
+    "native_context_calibration_complete": false,
+    "remaining_optional_native_context_calls_not_executed": 140,
+    "other_models_have_prior_envelope_costs": true,
+    "matching_identical_request_diagnostics": 4,
+    "universal_determinism_proven": false
+  },
+  "implementation": {"M1_predictor": false, "M2_certifier": false, "M3_gate": false, "research_API_CLI": false},
+  "scientific_matrix": {
+    "mechanism_pairs": {"completed": 0, "planned": 144},
+    "main_optimization_runs": {"completed": 0, "planned": 180},
+    "selection_checkpoints": {"completed": 0, "maximum_planned": 540},
+    "one_final_prompt_per_run": {"completed": 0, "planned": 180},
+    "third_family_frozen_prompt_transfers": {"completed": 0, "planned": 36},
+    "real_method_pilot_completed": false,
+    "method_revision_cycles_used": 0
+  },
+  "actual_consumption": {
+    "real_model_calls": 770,
+    "input_tokens": 1448879,
+    "output_tokens": 178514,
+    "allocated_gpu_hours": 3.2538161689659404,
+    "paid_api_usd": 0,
+    "includes_prior_startup_failures_and_shutdown_overhead": true
+  },
+  "remaining_protective_ceiling_headroom_not_confirmed_quota": {
+    "real_model_calls": 799230,
+    "input_tokens": 1998551121,
+    "output_tokens": 199821486,
+    "allocated_gpu_hours": 996.7461838310341,
+    "continued_execution_authorized_by_this_terminal_report": false
+  },
+  "forecast": {
+    "measured_qwen_task_subset_before_reserve_gpu_hours": 1858.2278085815788,
+    "reserve_fraction": 0.2,
+    "measured_qwen_task_subset_with_reserve_gpu_hours": 2229.8733702978943,
+    "protective_gpu_hours_ceiling": 1000,
+    "full_campaign_costs_all_priced": false,
+    "statistical_lower_bound": false,
+    "matrix_counts_reduced_for_budget": false,
+    "other_unpriced_costs": ["Unmeasured model and transfer stages", "Proposers", "Reloads", "Pilot/G1", "Future retries and failures", "Already consumed G0", "BFCL/HotpotQA context costs beyond disclosed base placeholders"]
+  },
+  "missing_work": [
+    "A feasible full representative resource forecast and remaining G0 prerequisites",
+    "Finalized legal data/scorers, sealed split access and reviewed native accounting",
+    "M1-M3, research API/CLI and exhaustive statistical tests",
+    "Real method pilot and independent statistical review",
+    "One frozen full scientific matrix and transfer evaluation",
+    "Evidence-derived paper, clean reproduction and same-SHA remote CI"
+  ],
+  "preserved": {"prior_ledger_and_failures": true, "unrelated_server_jobs": true, "other_four_repositories_frozen": true, "public_artifacts_include_credentials": false},
+  "restart_policy": "No automatic restart or new inference. A new explicit user authorization and versioned resource/execution protocol are required; do not silently reduce baselines, seeds, matrix counts or raise ceilings.",
+  "automatic_monitor_created": false,
+  "outreach_or_submission_performed": false
+}

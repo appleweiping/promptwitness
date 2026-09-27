@@ -1,0 +1,53 @@
+{
+  "format": "promptwitness.delta.infrastructure-cost-probe/v1",
+  "status": "FROZEN_BEFORE_REPAIR_MODEL_REQUESTS",
+  "frozen_at_utc": "2026-09-26T22:32:49Z",
+  "probe_id": "infra1-torch271",
+  "purpose": "Throughput repair check only; no task accuracy or method selection",
+  "source_plan_sha256": "070b691d7d4946505a158288d15d54c5f1d8200624cf2b0dec443f6c0ae8aff3",
+  "script_sha256": "f328909e3225396a31aa51c041bb08ed17287d85f07d4a5fe741b4d3c73a9c42",
+  "request_file_sha256": "afa83b3d7aaf8735397b009951faf47a50b00f52c288159591b9f9e2b924190d",
+  "models": [
+    {
+      "id": "Qwen/Qwen3.5-9B",
+      "revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a"
+    },
+    {
+      "id": "allenai/Olmo-3-7B-Instruct",
+      "revision": "6e5971d9eba42665f5bd5a0fcf047f299ce1dccc"
+    }
+  ],
+  "requests_per_model": 100,
+  "maximum_additional_attempts": 200,
+  "prior_charged_attempts": 200,
+  "aggregate_attempt_ceiling": 400,
+  "shared_ledger": true,
+  "request_reselection": false,
+  "scoring_executed": false,
+  "gpu_allocation": 1,
+  "sequential_model_loading": true,
+  "max_allocated_gpu_hours_per_model_probe": 1,
+  "paid_api_usd": 0,
+  "transport_retries": 0,
+  "batch_size": 8,
+  "cpu_threads": 4,
+  "disable_compile": true,
+  "diagnostic_stack_interval_seconds": 60,
+  "runtime": {
+    "python": "3.10.15",
+    "torch": "2.7.1+cu118",
+    "transformers": "5.3.0",
+    "huggingface_hub": "1.6.0",
+    "safetensors": "0.8.0",
+    "tokenizers": "0.22.2",
+    "numpy": "1.26.4",
+    "precision": "bfloat16",
+    "attention": "sdpa"
+  },
+  "unchanged": [
+    "Training-side requests, model weights and chat templates",
+    "Greedy decoding, disabled thinking, input bound and output caps",
+    "No oracle scores or final-test input access"
+  ],
+  "accounting": "The first 200 attempts and 0.6453472552819747 allocated GPU hours remain charged. This phase does not reset prior consumption."
+}

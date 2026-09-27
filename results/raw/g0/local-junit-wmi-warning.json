@@ -1,0 +1,9 @@
+{
+  "format": "promptwitness.delta.engineering-run-observation/v1",
+  "test_assertions_reported_passed": 93,
+  "elapsed_seconds_reported": 32.47,
+  "junit_artifact_sha256": "48aaafd7a8ccfaec128954b7cface5f1e84c45655600c70b4d5a0651c1525afd",
+  "warning": "Windows fatal exception 0x8007000e was printed in platform._wmi_query during pytest's JUnit hostname collection. The combined shell later completed Ruff successfully; the individual pytest process exit code was not captured separately.",
+  "clean_pytest_process_success_established_by_this_run": false,
+  "next_check": "Preserve the XML and warning. Parse its counts and rerun the tests alone without the optional JUnit/WMI hostname hook; do not delete or silently claim this run was clean."
+}

@@ -1,0 +1,20 @@
+{
+  "format": "promptwitness.delta.g0-cost-decision-order/v1",
+  "recorded_at_utc": "2026-09-27T01:35:39Z",
+  "stage": "G0_COST_ONLY_NOT_SCIENTIFIC_PREREGISTRATION",
+  "calibration_plan": "preflight-native-context-v1.json",
+  "already_observed_costs_disclosed": true,
+  "decision": "At the first completed 70-request main-model boundary, strictly validate every raw record and prior ledger. Forecast that measured model's task share at the unchanged matrix allowances with at least 20% reserve. If this priced subset already exceeds a protective ceiling, stop the remaining optional cost calibration and report RESOURCE_BLOCKED before M1/G1 or scientific experiments.",
+  "unpriced_costs": "Other model stages, all proposer/cold/pilot/failure costs are explicitly unpriced, not estimates of zero. A small or feasible subset never approves G0.",
+  "scope_unchanged": {
+    "main_runs": 180,
+    "mechanism_pairs": 144,
+    "main_models": 2,
+    "third_model_transfer_only": true,
+    "call_ceiling": 800000,
+    "input_tokens_ceiling": 2000000000,
+    "output_tokens_ceiling": 200000000,
+    "allocated_gpu_hours_ceiling": 1000
+  },
+  "limitations": "This resource decision is based on preformal cost observations, not method scores or blinded research preregistration. Sample means/reserve are planning assumptions, not certified lower bounds. Legitimate early stopping and alternate execution protocols can change future actual costs."
+}

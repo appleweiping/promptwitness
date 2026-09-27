@@ -1,0 +1,30 @@
+{
+  "format": "promptwitness.delta.security-scan-review/v1",
+  "command": ".venv/Scripts/bandit.exe -r reproduce -q -f json",
+  "scan_exit_code": 1,
+  "high_severity_findings": 0,
+  "medium_severity_findings": 4,
+  "low_severity_findings": 2,
+  "scanner_zero_findings": false,
+  "review": [
+    {
+      "ids": ["B615"],
+      "locations": ["archive/run_preflight_probe_v2.py", "run_preflight_probe.py", "run_native_context_probe.py"],
+      "count": 3,
+      "assessment": "Local snapshot loads, not unpinned Hub downloads: local_files_only=True, trust_remote_code=False, revision-specific snapshot paths and separately verified model-file hashes. The scanner cannot establish that provenance. Do not edit frozen workers merely to remove the warning."
+    },
+    {
+      "ids": ["B310"],
+      "locations": ["inference_preflight.py"],
+      "count": 1,
+      "assessment": "The HEAD probe iterates exactly two fixed HTTPS origins; no user-supplied file/custom scheme or credential URL is accepted. urllib's default redirect policy remains a trust assumption. No endpoint response body is processed."
+    },
+    {
+      "ids": ["B404", "B603"],
+      "locations": ["research_inventory.py"],
+      "count": 2,
+      "assessment": "Fixed nvidia-smi argv, no shell and no untrusted input interpolation. Executable/PATH trust assumptions remain; this is not a proof of a hardened shared-host environment."
+    }
+  ],
+  "scope": "Manual source triage, not an independent security audit or a claim that the new helper scan passed. The earlier configured src-only baseline scan passed separately."
+}

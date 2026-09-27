@@ -1,0 +1,93 @@
+{
+  "accepted_count": 7,
+  "baseline_accuracy_or_method_effect_measured": false,
+  "final_test_accessed": false,
+  "first_four_accepted_for_cost_context": [
+    "ai2-adapt-dev/tulu_v3.9_open_math_2_gsm8k_50k_35337",
+    "personahub_cs3896z5uee6l2o5kwgqzxe1",
+    "personahub_oyqg6e6t1lkgp037ltavfi2t",
+    "personahub_udkdj6jikgl66q0qe57x414p"
+  ],
+  "fit_only_units": [
+    {
+      "strict_all_constraints_pass": true,
+      "unit": "ai2-adapt-dev/tulu_v3.9_open_math_2_gsm8k_50k_35337"
+    },
+    {
+      "strict_all_constraints_pass": false,
+      "unit": "ai2-adapt-dev/tulu_v3.9_aya_100k_69434"
+    },
+    {
+      "strict_all_constraints_pass": false,
+      "unit": "ai2-adapt-dev/flan_v2_converted_81363"
+    },
+    {
+      "strict_all_constraints_pass": true,
+      "unit": "personahub_cs3896z5uee6l2o5kwgqzxe1"
+    },
+    {
+      "strict_all_constraints_pass": true,
+      "unit": "personahub_oyqg6e6t1lkgp037ltavfi2t"
+    },
+    {
+      "strict_all_constraints_pass": false,
+      "unit": "personas_math_easy_d8bgcd9k5hqwjaa7dwvyleoz"
+    },
+    {
+      "strict_all_constraints_pass": false,
+      "unit": "ai2-adapt-dev/tulu_v3.9_wildjailbreak_decontaminated_50k_9765"
+    },
+    {
+      "strict_all_constraints_pass": false,
+      "unit": "ai2-adapt-dev/tulu_v3.9_open_math_2_gsm8k_50k_12311"
+    },
+    {
+      "strict_all_constraints_pass": true,
+      "unit": "personahub_udkdj6jikgl66q0qe57x414p"
+    },
+    {
+      "strict_all_constraints_pass": false,
+      "unit": "ai2-adapt-dev/numinamath_tir_math_decontaminated_24854"
+    },
+    {
+      "strict_all_constraints_pass": false,
+      "unit": "ai2-adapt-dev/tulu_v3.9_synthetic_finalresp_wildguardmixtrain_decontaminated_50k_7419"
+    },
+    {
+      "strict_all_constraints_pass": false,
+      "unit": "personahub_2khhbzpy7g2powl2st0xwlyo"
+    },
+    {
+      "strict_all_constraints_pass": true,
+      "unit": "ai2-adapt-dev/tulu_v3.9_aya_100k_25216"
+    },
+    {
+      "strict_all_constraints_pass": false,
+      "unit": "personahub_spv8badt31h6inhmw7qan8vd"
+    },
+    {
+      "strict_all_constraints_pass": true,
+      "unit": "ai2-adapt-dev/tulu_v3.9_open_math_2_gsm8k_50k_11833"
+    },
+    {
+      "strict_all_constraints_pass": true,
+      "unit": "ai2-adapt-dev/tulu_v3.9_wildjailbreak_decontaminated_50k_8054"
+    }
+  ],
+  "format": "promptwitness.delta.cost-demonstration-audit/v1",
+  "language_detector_seed": 11,
+  "limitations": [
+    "The candidate audit unit set is determined only by previously frozen IDs, fit membership and hash order, before looking at the scores.",
+    "For the optional cost context, taking the first four passing responses resembles native bootstrap acceptance but is not a reproduction of its shuffle/teacher. All failed checks and prior inference costs remain recorded.",
+    "Not the actual randomized native MIPRO bootstrap sequence; acceptance here does not establish the final demonstration distribution or optimization benefit.",
+    "Binary training checks require all constraints, rather than upstream fractional reward. No thinking-text removal or loose whitespace transformation is applied."
+  ],
+  "new_model_calls": 0,
+  "pool_proposal_sha256": "e1f4f8f504b220e2f03fb610e95aa5bad9b1136aa070cfc4d6cefd715db76ef3",
+  "prior_response_file_sha256": "d4e50c57c500928cc826088d2e3acd3cf0da4c03498dbf0268b00df71066b93d",
+  "purpose": "Check whether the frozen repeated unscored-response stress context is a native accepted demonstration proxy.",
+  "scoped_to_all_prior_fit_responses": true,
+  "script_sha256": "d82fa0eecbbb6602a4f91003aed46d64f19502143a8a23f0dd612b43a0665221",
+  "sentence_resource_sha256": "e57f64187974277726a3417ca6f181ec5403676c717672eef6a748a7b20e0106",
+  "source_commit": "99b1ee970490a2d0d5664663eb0b1acc410b944c"
+}

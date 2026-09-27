@@ -1,0 +1,11 @@
+{
+  "format": "promptwitness.delta.process-observation/v1",
+  "model": "mistralai/Mistral-7B-Instruct-v0.3",
+  "probe_id": "cost-envelope-v1",
+  "elapsed_seconds_stdout": 1191.6829708360601,
+  "cold_start_seconds": 31.601432651048526,
+  "allocated_gpu_hours_stdout": 0.33102304745446115,
+  "peak_allocated_memory_mib": 21015.35546875,
+  "peak_reserved_memory_mib": 24012.0,
+  "note": "Exit-time SQLite elapsed remains the cost authority. Shared-server workloads were preserved; no task scores measured."
+}

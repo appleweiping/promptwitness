@@ -1,0 +1,91 @@
+{
+  "format": "promptwitness.delta.native-context-plan/v1",
+  "status": "FROZEN_BEFORE_REQUESTS_COST_CALIBRATION_NOT_SCIENTIFIC_PREREGISTRATION",
+  "frozen_at_utc": "2026-09-27T01:09:23Z",
+  "probe_id": "native-context-v1",
+  "purpose": "Final finite G0 calibration after verifying native MIPRO total demonstration limit and strict fit-side acceptance. No further throughput repair or method experiment is authorized by this plan.",
+  "script_sha256": "d084772b96abb8ca7894a3ee75c1e6eacb445344c7efec9151d9846679688192",
+  "preparation_script_sha256": "4fc7600010094f08fd02dab809f17ffecc133bb0fa9ff6a5b40437007523174f",
+  "request_file_sha256": "59c619982e613b0d6e2200253eed071c75646a74a830f64a0e2a5b715e7a50d3",
+  "training_pool_proposal_sha256": "e1f4f8f504b220e2f03fb610e95aa5bad9b1136aa070cfc4d6cefd715db76ef3",
+  "fit_acceptance_audit_sha256": "2be012d65f1b353f382acd29eae1e9fd5693e3c8f19aaade05b00ab47af0419a",
+  "prior_ledger_sha256": "830e1cd419cd496b7e7dec2ff280a71b178a517db7fef9be04dbd12a58c67852",
+  "prior_summary_sha256": "c3c18190036ab1946c8f3f7497c6205abd9111aa5e5e5a360cd555b5efac46d0",
+  "prior_charged_requests": 700,
+  "prior_allocated_gpu_hours": 2.4007580474448496,
+  "prior_startup_failures_without_model_requests": 3,
+  "maximum_additional_requests": 210,
+  "aggregate_g0_attempt_ceiling": 910,
+  "requests_per_model": 70,
+  "requests_per_model_excluding_diagnostic_repeats": 66,
+  "request_retries": 0,
+  "maximum_allocated_gpu_hours_per_model": 1,
+  "time_guard": "Checked at each single-request boundary; no replay, baseline deletion, seed reduction or protective ceiling increase. Retain any in-flight overshoot/failure cost.",
+  "gpu_allocation": 1,
+  "models_loaded_sequentially": true,
+  "unrelated_gpu_workloads_preserved": true,
+  "paid_api_usd": 0,
+  "models": [
+    {
+      "id": "Qwen/Qwen3.5-9B",
+      "revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a"
+    },
+    {
+      "id": "allenai/Olmo-3-7B-Instruct",
+      "revision": "6e5971d9eba42665f5bd5a0fcf047f299ce1dccc"
+    },
+    {
+      "id": "mistralai/Mistral-7B-Instruct-v0.3",
+      "revision": "c170c708c41dac9275d15a8fff4eca08d52bab71"
+    }
+  ],
+  "per_model_profiles": {
+    "base_task": {
+      "bfcl": 16,
+      "hotpotqa": 16,
+      "instruction_following": 16
+    },
+    "four_distinct_strictly_accepted_fit_demo_instruction_tasks": 16,
+    "official_json_proposer_cost_fixtures": {
+      "hotpotqa": 1,
+      "instruction_following": 1
+    },
+    "identical_request_diagnostics": 4
+  },
+  "max_new_tokens": {
+    "bfcl": 1024,
+    "hotpotqa": 64,
+    "instruction_following": 4096,
+    "proposer": 2048
+  },
+  "max_input_tokens": 32768,
+  "truncation_allowed": false,
+  "batch_size": 1,
+  "cpu_threads": 4,
+  "do_sample": false,
+  "enable_thinking": false,
+  "disable_compile": true,
+  "precision": "bfloat16",
+  "attention": "sdpa",
+  "deterministic_algorithms": true,
+  "cublas_workspace_config": ":4096:8",
+  "allow_tf32": false,
+  "runtime": {
+    "python": "3.10.15",
+    "torch": "2.7.1+cu118",
+    "transformers": "5.3.0"
+  },
+  "cost_fixture_dspy_version": "3.4.0",
+  "cost_fixture_dspy_selected_sources_verified_against_commit": "da1736e21ffda8cc4b86379d4748b011764d507c",
+  "final_test_access": false,
+  "task_accuracy_or_method_effect_measurement": false,
+  "limitations": [
+    "The four accepted responses are used once each and come only from the fit pool. Acceptance checks are not a native randomized bootstrap/teacher reproduction.",
+    "Search-side original inputs are selected by frozen metadata/hash order; no search or final answer labels enter prompts.",
+    "Only IF four-demo task cost is calibrated. BFCL/HotpotQA base-only costs and the older eight-demo pressure costs must remain distinguished.",
+    "Official proposer signatures/JSON formatting with static training summaries are cost fixtures, not a complete native proposal workflow.",
+    "Four repeated requests/model diagnose but do not prove universal determinism or validate a formal certificate.",
+    "Shared-server load is preserved. Allocated times are not exclusive-device throughput.",
+    "All prior 700 calls, three zero-request startup failures and associated time/tokens remain charged."
+  ]
+}

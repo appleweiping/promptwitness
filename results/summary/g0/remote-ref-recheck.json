@@ -1,0 +1,10 @@
+{
+  "format": "promptwitness.delta.repository-ref-check/v1",
+  "checked_at_utc": "2026-09-27T01:52:06Z",
+  "remote": "https://github.com/appleweiping/promptwitness.git",
+  "HEAD": "9606fbe0980ef07a16be1883ab8f04ba55ba1754",
+  "refs/heads/main": "9606fbe0980ef07a16be1883ab8f04ba55ba1754",
+  "refs/heads/feat/whole-repository-alignment": "acdee7653746987b7d4556a33ef4832a1638874c",
+  "starting_snapshot_still_matches": true,
+  "research_changes_committed_or_pushed": false
+}

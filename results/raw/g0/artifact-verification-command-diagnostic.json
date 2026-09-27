@@ -1,0 +1,8 @@
+{
+  "format": "promptwitness.delta.cpu-diagnostic/v1",
+  "purpose": "Retain the Qwen pinned-snapshot hash verification report after inference exit",
+  "initial_failure": "The unqualified python command was not present on the remote shell PATH (exit 1).",
+  "recovery": "Use the existing task-owned venv-torch271 absolute interpreter; no package installation, GPU allocation, model request or runtime change.",
+  "real_model_calls": 0,
+  "not_an_inference_startup_failure": true
+}

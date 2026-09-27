@@ -1,0 +1,31 @@
+{
+  "default_demo_limits_retained": {
+    "bootstrapped": 4,
+    "labeled": 4
+  },
+  "default_total_demonstration_limit": 4,
+  "dspy_source_commit": "da1736e21ffda8cc4b86379d4748b011764d507c",
+  "dspy_version": "3.4.0",
+  "format": "promptwitness.delta.native-mipro-mechanical-check/v1",
+  "limitations": [
+    "Uses synthetic completions and a six-unit search pool; not the 2048-episode campaign or real model adapter.",
+    "Canonical message identity alone does not validate the full production cache key or nondeterministic execution assumptions.",
+    "Fixture proposer output fields are scripted for parsing. Real proposer failures must remain charged, not replaced by scripts.",
+    "No MIPRO selector code was replaced; the adapter setting is an explicit task-interface configuration deviation."
+  ],
+  "maximum_total_demonstrations_seen": 4,
+  "native_default_seed_request_identity_matches_canonical_renderer": true,
+  "native_default_seed_vector_genuine_fixture_completions": 6,
+  "optimizer_source_modified": false,
+  "original_student_remains_demo_free": true,
+  "real_model_calls": 0,
+  "real_task_scores_or_optimizer_benefits_measured": false,
+  "script_sha256": "c43171c1934230e41cce0d1ab0e10bff5280e2caf915befc0b3cbc1a963fea5d",
+  "source_total_demo_limit_basis": "bootstrap.py:_train subtracts augmented demos from the labeled limit, then concatenates; defaults 4/4 do not mean eight demos.",
+  "status": "PASSED_MECHANICAL_ONLY",
+  "supersedes": "mipro-native-mechanical-v1.json: two candidate sets exercised only zero-shot/labeled special sets; this check includes the actual bootstrap path.",
+  "synthetic_proposer_calls": 4,
+  "synthetic_task_calls": 25,
+  "synthetic_training_bootstrap_calls": 7,
+  "task_renderer": "Explicit single task input/output, same canonical renderer planned for GEPA; different from DSPy default ChatAdapter"
+}

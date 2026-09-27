@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, research/promptwitness-delta-v1]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -15,6 +15,19 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  incremental-core:
+    name: Incremental core branch coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -e ".[dev,research]" numpy==1.26.4 scipy==1.15.3 scikit-learn==1.6.1
+      - run: pytest tests/incremental --override-ini addopts=-q --cov=promptwitness.incremental --cov-report=json:core-coverage.json --cov-fail-under=90
+      - run: python reproduce/check_g1_branch_coverage.py core-coverage.json
   quality:
     name: Quality
     runs-on: ubuntu-latest
@@ -29,7 +42,7 @@ jobs:
           python-version: "3.14"
           cache: pip
       - name: Install quality dependencies
-        run: python -m pip install --upgrade pip && python -m pip install -e ".[dev]"
+        run: python -m pip install --upgrade pip && python -m pip install -e ".[dev,research]"
       - name: Lint
         run: ruff check .
       - name: Check formatting
@@ -66,7 +79,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
       - name: Install package
-        run: python -m pip install --upgrade pip && python -m pip install -e ".[dev]"
+        run: python -m pip install --upgrade pip && python -m pip install -e ".[dev,research]"
       - name: Run tests
         run: pytest
 
@@ -187,7 +200,7 @@ jobs:
           actual = {"src/promptwitness/" + path.relative_to(installed).as_posix()
                     for path in installed.rglob("*.py")}
           actual.add("src/promptwitness/py.typed")
-          require(set(runtime) == actual and len(runtime) == 50,
+          require(set(runtime) == actual and len(runtime) == 62,
                   "installed runtime inventory differs")
           require(len(helpers) == 8, "incomplete authored procedure example")
           report_path = directory / "workflow.json"

@@ -1,0 +1,358 @@
+{
+  "format": "promptwitness.research-charter/v1",
+  "created_on": "2026-09-26",
+  "language": "zh-CN",
+  "state": "RESOURCE_BLOCKED",
+  "project": "appleweiping/promptwitness",
+  "research_label": "PromptWitness-Delta",
+  "working_title": "PromptWitness: Change-Aware, Risk-Controlled Evaluation for Prompt Optimization",
+  "audited_base": {
+    "branch": "feat/whole-repository-alignment",
+    "sha": "acdee7653746987b7d4556a33ef4832a1638874c",
+    "ci_run_id": 34699696102,
+    "ci_conclusion": "success",
+    "ci_created_at": "2026-09-12T14:34:45Z",
+    "local_worktree_inspected": false,
+    "local_tests_executed": false,
+    "full_source_audit_completed": false
+  },
+  "other_repositories": {
+    "turnscope": "6388881da221caf4a825f7419f913b1e90df0794",
+    "corpusledger": "25c83efb9887388fdac54b42d07ae93691623c63",
+    "splitproof": "44e3600d9ab5499f22252e8aeccba5a6665bd5f0",
+    "metricguard": "ed9dbf728a919b9077262f5f06068a6d42a70502"
+  },
+  "supersedes_goal": "五个仓库持续扩展直至整仓对齐；本研究不再以该目标为验收条件",
+  "scope": {
+    "core": [
+      "edit_conditioned_transition_predictor",
+      "design_valid_paired_incremental_evaluation",
+      "bounded_optimizer_integration",
+      "reproducible_three_family_experiments"
+    ],
+    "frozen": [
+      "turnscope_expansion",
+      "corpusledger_expansion",
+      "splitproof_expansion",
+      "metricguard_expansion",
+      "whole_repository_parity",
+      "new_ocr",
+      "new_interview_platform",
+      "new_multimodal_platform",
+      "foundation_model_pretraining",
+      "rl_training",
+      "new_cloud_dashboard"
+    ],
+    "research_dependency_policy": "Prefer reuse through local artifacts; do not require simultaneous changes to other four repositories"
+  },
+  "predictor": {
+    "inputs": [
+      "structural_diff",
+      "parent_and_candidate_text_features",
+      "input_features",
+      "allowed_parent_execution_trace",
+      "parent_score_if_available",
+      "explicit_missingness"
+    ],
+    "outputs": [
+      "probability_correct_to_incorrect",
+      "probability_incorrect_to_correct",
+      "estimated_query_cost"
+    ],
+    "first_model": "frozen_text_features_plus_regularized_logistic_transition_heads_with_structured_interactions",
+    "maximum_architecture_revisions": 2,
+    "forbidden": [
+      "candidate_unqueried_outputs",
+      "final_test_labels",
+      "unreported_extra_judge_calls",
+      "training_on_current_audit_labels_before_current_sampling_is_fixed"
+    ]
+  },
+  "inference": {
+    "primary_score_type": "binary_machine_verifiable",
+    "reference": "fixed_seed_prompt_per_optimization_run; changing reference requires explicit recosting and new analysis",
+    "estimands": [
+      "finite_suite_mean_score_delta",
+      "unconditional_correct_to_incorrect_rate"
+    ],
+    "noninferiority_margin": 0.01,
+    "max_unconditional_regression_rate": 0.05,
+    "familywise_alpha_per_run": 0.05,
+    "max_candidate_certifications": 32,
+    "max_strata": 8,
+    "max_looks": 6,
+    "sampling": "stratified_simple_random_without_replacement; partition and stage allocation frozen before current candidate outcomes",
+    "look_schedule": "deduplicate min(N,ceil(f*N)) for f in [0.0625,0.125,0.25,0.5,0.75,1.0]",
+    "first_certifier": "exact_hypergeometric_inversion_for_binary_transition_counts_with_preallocated_error_budget",
+    "unknown_action": "more_samples_then_full_evaluation_if_budget_allows_else_INCONCLUSIVE",
+    "full_population_bounds": "collapse_to_exact_observed_finite_suite_metrics",
+    "guarantee_scope": "conditional finite-suite protocol under stated randomization/execution assumptions; not future-user safety or global guarantee across all experimental runs",
+    "no_unobserved_zero_scores": true,
+    "unsupported_contract_semantics": "UNSUPPORTED not valid"
+  },
+  "experiments": {
+    "families": [
+      "bfcl_pinned_offline_function_calling",
+      "hotpotqa_distractor",
+      "iftrain_to_ifbench"
+    ],
+    "main_model_families": 2,
+    "model_selection": "hardware_and_license_feasibility_before_outcomes; independent pretrained families; at least one contemporary checkpoint",
+    "confirmatory_model_families": 1,
+    "main_search_seeds": [
+      11,
+      23,
+      37,
+      53,
+      71
+    ],
+    "main_configs": [
+      "GEPA_native",
+      "GEPA_uniform_certifier",
+      "GEPA_strong_generic_certifier",
+      "GEPA_PromptWitness_Delta",
+      "MIPROv2_native",
+      "MIPROv2_PromptWitness_Delta"
+    ],
+    "main_run_count": 180,
+    "max_episodes_per_main_run": 2048,
+    "max_candidates_per_main_run": 32,
+    "max_proposer_calls_per_main_run": 128,
+    "candidate_patience": 8,
+    "validation_budget_checkpoints": [
+      512,
+      1024,
+      2048
+    ],
+    "final_test_policy": "one frozen final prompt per planned run; no further development from final-test feedback",
+    "mechanism_full_score_pairs_per_task_model_cell": 24,
+    "mechanism_examples_per_pair_target": 512,
+    "mechanism_oracle_store": "auditor_only; not visible to optimizer or predictor on held-out pairs",
+    "mechanism_baselines": [
+      "full_evaluation",
+      "uniform_sequential",
+      "metadata_stratified_sequential",
+      "ProEval",
+      "paired_text_only_same_certifier",
+      "structured_change_aware_same_certifier"
+    ],
+    "ablations": [
+      "without_structural_features",
+      "without_parent_delta_information",
+      "without_random_audit_and_valid_weighting_diagnostic_only"
+    ],
+    "holdout_units": [
+      "prompt_lineage",
+      "source_document_or_tool_family",
+      "constraint_family_when_applicable"
+    ],
+    "third_model_protocol": "frozen prompt transfer; no reoptimization; report as transfer not fresh optimization"
+  },
+  "budget": {
+    "note": "Suggested protective ceilings, not observed hardware capacity, cost estimate, or authorization to spend. Respect any lower existing user quota. Freeze feasible resource plan before confirmatory launch.",
+    "paid_api_usd_default": 0,
+    "new_cloud_rental_allowed": false,
+    "pilot_max_real_model_calls": 12000,
+    "pilot_max_allocated_gpu_hours": 30,
+    "global_max_real_model_calls": 800000,
+    "global_max_input_tokens": 2000000000,
+    "global_max_output_tokens": 200000000,
+    "global_max_allocated_gpu_hours": 1000,
+    "preflight_probe_requests": 200,
+    "required_forecast_reserve_fraction": 0.2,
+    "count_all_roles_retries_and_failed_attempts": true,
+    "cold_start_costs_must_be_reported": true,
+    "breach_action": "STOP_RESOURCE_BLOCKED_NOT_AUTO_EXTEND"
+  },
+  "readiness_targets": {
+    "interpretation": "Project decision thresholds, not universal conference acceptance standards; all are to be tested, not achieved results",
+    "certifier_math_and_small_population_exhaustive_tests": "pass",
+    "cost_reduction_vs_full_at_matched_decision_quality_min": 0.3,
+    "cost_reduction_vs_strongest_valid_generic_baseline_min": 0.15,
+    "structured_vs_text_only_cost_reduction_min": 0.1,
+    "clear_eligible_candidate_retention_min": 0.95,
+    "end_to_end_macro_score_delta_vs_strongest_control_min": 0.02,
+    "end_to_end_adjusted_confidence_lower_bound_min": 0,
+    "per_family_noninferiority_margin": 0.01,
+    "minimum_families_with_efficiency_gain": 2,
+    "negative_or_inconclusive_outcome_is_terminal_delivery": true
+  },
+  "stopping": {
+    "max_method_revision_cycles_after_first_pilot": 2,
+    "max_full_confirmatory_campaigns": 1,
+    "max_editorial_review_cycles": 2,
+    "max_transport_retries_per_request": 2,
+    "max_infra_repair_attempts_per_issue": 2,
+    "terminal_states": [
+      "SUBMISSION_PACKAGE_READY",
+      "NEGATIVE_RESULT_COMPLETE",
+      "RESOURCE_BLOCKED",
+      "NOVELTY_BLOCKED",
+      "INTEGRITY_BLOCKED"
+    ],
+    "restart_requires_new_user_authorization_and_protocol_version": true,
+    "no_automatic_submission_or_main_merge": true
+  },
+  "required_before_confirmatory": [
+    "exact_model_and_tokenizer_revisions",
+    "dataset_and_scorer_hashes",
+    "actual_pool_sizes_and_splits",
+    "hardware_inventory_and_cost_forecast",
+    "baseline_source_commits_and_deviations",
+    "complete_statistical_protocol",
+    "sealed_test_access_policy",
+    "working_budget_kill_switch",
+    "preregistration_hash"
+  ],
+  "delivery": [
+    "research/PROTOCOL.md",
+    "research/scope.lock.json",
+    "research/RELATED_WORK.md",
+    "research/CLAIM_EVIDENCE.csv",
+    "research/DECISION.md",
+    "research/FINAL_STATUS.json",
+    "configs/research/",
+    "src/promptwitness/incremental/",
+    "tests/incremental/",
+    "results/raw/",
+    "results/summary/",
+    "paper/",
+    "reproduce/"
+  ],
+  "sources": [
+    {
+      "id": "SAMMO",
+      "title": "Symbolic Prompt Program Search: A Structure-Aware Approach to Efficient Compile-Time Prompt Optimization",
+      "url": "https://aclanthology.org/2024.findings-emnlp.37/"
+    },
+    {
+      "id": "GEPA",
+      "title": "GEPA: Reflective Prompt Evolution Can Outperform Reinforcement Learning",
+      "url": "https://arxiv.org/abs/2507.19457"
+    },
+    {
+      "id": "MPO",
+      "title": "Modular Prompt Optimization: Optimizing Structured Prompts with Section-Local Textual Gradients",
+      "url": "https://arxiv.org/abs/2601.04055"
+    },
+    {
+      "id": "ADOPT",
+      "title": "ADOPT: Adaptive Dependency-Guided Joint Prompt Optimization for Multi-Step LLM Pipelines",
+      "url": "https://arxiv.org/abs/2512.24933"
+    },
+    {
+      "id": "SERO",
+      "title": "Roles with Rails: Contract-Preserving Role Evolution in Multi-Agent Structured Reasoning",
+      "url": "https://arxiv.org/abs/2605.28433"
+    },
+    {
+      "id": "CARE",
+      "title": "CARE: Enhancing LLM Instruction following via Dual-Agent Prompt Refinement",
+      "url": "https://journals.sagepub.com/doi/10.3233/FAIA251321"
+    },
+    {
+      "id": "RLMOpt",
+      "title": "RLMOpt: Adaptive Prompt Optimization via Recursive Language Models",
+      "url": "https://arxiv.org/abs/2608.10471"
+    },
+    {
+      "id": "ESPO",
+      "title": "ESPO: Error-Structured Prompt Optimization via Diagnose, Diversify, and Stabilize",
+      "url": "https://arxiv.org/abs/2609.04197"
+    },
+    {
+      "id": "STEVE",
+      "title": "STEVE: Stabilizing Textual Gradient-Based Prompt Optimization via Error-Driven Refinement and Regularized Verification",
+      "url": "https://arxiv.org/abs/2609.23716"
+    },
+    {
+      "id": "RECAP",
+      "title": "RECAP: Regression Evaluation for Continual Adaptation of Prompts",
+      "url": "https://arxiv.org/abs/2606.06698"
+    },
+    {
+      "id": "ActiveTesting",
+      "title": "Active Testing: Sample-Efficient Model Evaluation",
+      "url": "https://proceedings.mlr.press/v139/kossen21a.html"
+    },
+    {
+      "id": "ProEval",
+      "title": "ProEval: Proactive Failure Discovery and Efficient Performance Estimation for Generative AI Evaluation",
+      "url": "https://arxiv.org/abs/2604.23099"
+    },
+    {
+      "id": "PPI",
+      "title": "Prediction-Powered Inference",
+      "url": "https://arxiv.org/abs/2301.09633"
+    },
+    {
+      "id": "PPI++",
+      "title": "PPI++: Efficient Prediction-Powered Inference",
+      "url": "https://arxiv.org/abs/2311.01453"
+    },
+    {
+      "id": "WoR-CS",
+      "title": "Confidence sequences for sampling without replacement",
+      "url": "https://arxiv.org/abs/2006.04347"
+    },
+    {
+      "id": "tinyBenchmarks",
+      "title": "tinyBenchmarks: evaluating LLMs with fewer examples",
+      "url": "https://arxiv.org/abs/2402.14992"
+    },
+    {
+      "id": "BFCL",
+      "title": "Berkeley Function Calling Leaderboard",
+      "url": "https://gorilla.cs.berkeley.edu/leaderboard"
+    },
+    {
+      "id": "HotpotQA",
+      "title": "HotpotQA official dataset and evaluation",
+      "url": "https://hotpotqa.github.io/"
+    },
+    {
+      "id": "IFBench",
+      "title": "Generalizing Verifiable Instruction Following",
+      "url": "https://arxiv.org/abs/2507.02833"
+    },
+    {
+      "id": "Attribution",
+      "title": "Attributing Structured-Output Gains in Function Calling: Interface Alignment versus Procedural Transfer",
+      "url": "https://arxiv.org/abs/2607.02595"
+    }
+  ],
+  "execution_snapshot": {
+    "branch": "research/promptwitness-delta-v1",
+    "verified_code_sha": "acdee7653746987b7d4556a33ef4832a1638874c",
+    "source_charter_sha256": "c31070c22a9a74a2df37d9f65a6d06841ead3b0a00886632096728561310d1dd",
+    "source_handoff_sha256": "b3ff7f00d7d5cb1297a52600916b6e8059559f6bd8a71f4ddc5237ec399a5306",
+    "protocol_preregistered": false,
+    "preregistration_sha256": null,
+    "models_selected": true,
+    "main_model_revisions": {
+      "Qwen/Qwen3.5-9B": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+      "allenai/Olmo-3-7B-Instruct": "6e5971d9eba42665f5bd5a0fcf047f299ce1dccc"
+    },
+    "datasets_sealed": false,
+    "real_probe_requests_completed": 770,
+    "probe_model_failures": 0,
+    "probe_startup_failures_without_model_requests": 3,
+    "consumed_allocated_gpu_hours": 3.2538161689659404,
+    "consumed_input_tokens": 1448879,
+    "consumed_output_tokens": 178514,
+    "consumption_snapshot_note": "Validated 700 archived requests plus the completed 70-request Qwen native-context cost boundary. All prior calls and three zero-request startup failures remain charged. The remaining 140 optional native-context calls were not started after the measured-subset budget forecast exceeded the protective GPU-hour ceiling.",
+    "confirmed_gpu_quota": {
+      "user_delegated_usage_choice": true,
+      "safe_allocation": "one existing RTX A6000, sequential models; preserve unrelated GPU workloads",
+      "paid_api_usd": 0,
+      "protective_gpu_hours_ceiling": 1000,
+      "note": "No new cloud rental. Resource gate failed for the frozen model/execution/count assumptions; no further inference is launched. Numerical headroom is not a newly confirmed server quota."
+    },
+    "forecast": "results/summary/g0/model-boundary-budget-v1.json",
+    "terminal_status": "research/FINAL_STATUS.json",
+    "g0_passed": false,
+    "native_context_calibration_complete": false,
+    "native_context_remaining_calls_not_executed": 140,
+    "paid_calls_authorized": false
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "format": "promptwitness.delta.source-check/v1",
+  "pinned_commit": "da1736e21ffda8cc4b86379d4748b011764d507c",
+  "installed_dspy_version": "3.4.0",
+  "selected_installed_and_pinned_files_byte_identical": true,
+  "matched_sha256": {
+    "teleprompt/bootstrap.py": "583bcc2495355e253552548bbc80fb10b9b6bb73495fe2452ae2f6f289aafba3",
+    "teleprompt/mipro_optimizer_v2.py": "6bf7632836d3a54ab0da3f38a8f1963813472312e9c0e3f2ff19b4377af407f3",
+    "propose/grounded_proposer.py": "c9900b74c0997410f915f2a470d39dcd9d55c1fa8b9cdf35799915ec0b1617e3",
+    "adapters/json_adapter.py": "da1992790eac516c287ffb1da6788ba48cb53951bab1aafc490ccd6bcc0074a3",
+    "adapters/chat_adapter.py": "3bf82a959573e95ea60e4d7ef9c818d67a5066f7c1775cff0423203329f699a8"
+  },
+  "selected_cpu_runtime_versions": {"dspy": "3.4.0", "pydantic": "2.13.5", "litellm": "1.102.1"},
+  "limitations": "Selected file equality, not a full package/dependency audit. No real native proposal workflow or method-effect experiment executed."
+}

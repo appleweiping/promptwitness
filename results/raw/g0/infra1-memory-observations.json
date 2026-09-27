@@ -1,0 +1,20 @@
+{
+  "format": "promptwitness.delta.cost-probe-memory/v1",
+  "source": "Actual probe process completion stdout, not nvidia-smi snapshots",
+  "probe_id": "infra1-torch271",
+  "models": [
+    {
+      "model": "Qwen/Qwen3.5-9B",
+      "peak_allocated_memory_mib": 23978.435546875,
+      "peak_reserved_memory_mib": 29956.0
+    },
+    {
+      "model": "allenai/Olmo-3-7B-Instruct",
+      "peak_allocated_memory_mib": 27078.97021484375,
+      "peak_reserved_memory_mib": 34654.0
+    }
+  ],
+  "scope": "PyTorch allocator peaks in these 100-request training-side cost probes; not whole-process or future 16k-context peaks",
+  "original_probe_peak_memory": null,
+  "accuracy_or_method_scores_computed": false
+}

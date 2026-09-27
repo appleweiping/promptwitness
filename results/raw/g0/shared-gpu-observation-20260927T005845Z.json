@@ -1,0 +1,15 @@
+{
+  "format": "promptwitness.delta.resource-observation/v1",
+  "observed_at_utc": "2026-09-27T00:58:45Z",
+  "task_owned_process": {"pid": 1144168, "gpu": 0, "probe": "mistral@cost-envelope-v1"},
+  "unrelated_workloads_preserved": true,
+  "gpu0": {"used_mib": 32579, "free_mib": 15873, "utilization_percent": 100},
+  "gpu1": {"used_mib": 46288, "free_mib": 2165, "utilization_percent": 22},
+  "unrelated_processes_observed": [
+    {"pid": 3509451, "name": "text-embeddings-router", "gpu0_mib": 432},
+    {"pid": 1167388, "name": "ollama", "gpu0_mib": 644, "gpu1_mib": 588},
+    {"pid": 1171059, "name": "ollama", "gpu0_mib": 7124, "gpu1_mib": 5340},
+    {"pid": 2429797, "name": "python3", "gpu1_mib": 40318}
+  ],
+  "limitations": "A point-in-time shared-server observation; not exclusive GPU throughput. No unrelated process was stopped, reprioritized or reconfigured."
+}

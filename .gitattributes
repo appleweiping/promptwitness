@@ -11,3 +11,12 @@
 *.yaml text eol=lf
 *.yml text eol=lf
 *.png binary
+.gitattributes text eol=lf
+
+# Frozen research evidence uses byte hashes, including its original newlines.
+# Do not silently normalize historical files when committing or checking out.
+configs/research/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+research/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+results/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+reproduce/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
+tests/reproduce/** -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

@@ -1,0 +1,194 @@
+{
+  "before_reserve_measured_subset": {
+    "allocated_gpu_hours": 1858.2278085815788,
+    "input_tokens": 259480755.0,
+    "output_tokens": 61698651.25
+  },
+  "costs_deliberately_not_priced": [
+    "All unmeasured main-model stages and transfer-model stages",
+    "All proposer calls, cold reloads, pilot/G1, retries and future failures",
+    "Already consumed G0 costs, which remain in the separate consumption ledger",
+    "BFCL/HotpotQA four-demonstration task contexts beyond their base-only placeholder"
+  ],
+  "exceeded_by_this_planning_subset": [
+    "allocated_gpu_hours"
+  ],
+  "format": "promptwitness.delta.model-boundary-budget-check/v1",
+  "g0_passed": false,
+  "input_sha256": {
+    "campaign-cost-counts.proposed-v2.json": "d21cd9a1b6caaa80d7cc5a7d68f5e41d422f3d25bd9c2a45191db70c90090f11",
+    "native-context-qwen-boundary-v1.json": "e3807cc3c9713152193c5c80f0acdad8161cccf8da2cd8464c73e0bb31c04d04"
+  },
+  "limitations": [
+    "This forecasts the declared maximum episode allowances, not actual consumption or proof that every possible run spends its maximum.",
+    "A non-exceeded subset cannot approve G0 or price missing stages as zero; a full feasible forecast and remaining readiness checks are still required.",
+    "Instruction context uses measured four-demo cost for two MIPRO configurations of six. Other task contexts use a disclosed base-only placeholder.",
+    "Cost means and 20% reserve are not statistical bounds. Shared load, output distributions and legitimate early stopping can change actual costs.",
+    "Failure applies to this model/execution/count plan, not every alternate protocol. No scientific effectiveness claim is measured."
+  ],
+  "measured_main_model_task_stages": [
+    {
+      "allocated_gpu_hours": 26.26202371909694,
+      "family": "bfcl",
+      "four_demo_instruction_mixture_fraction": 0,
+      "input_tokens": 4911104.0,
+      "model": "Qwen/Qwen3.5-9B",
+      "output_tokens": 916480.0,
+      "requests": 16384,
+      "stage": "mechanism_full_tables"
+    },
+    {
+      "allocated_gpu_hours": 86.17226532828685,
+      "family": "bfcl",
+      "four_demo_instruction_mixture_fraction": 0,
+      "input_tokens": 16114560.0,
+      "model": "Qwen/Qwen3.5-9B",
+      "output_tokens": 3007200.0,
+      "requests": 53760,
+      "stage": "main_nonreference_evaluation"
+    },
+    {
+      "allocated_gpu_hours": 0.4103441206108897,
+      "family": "bfcl",
+      "four_demo_instruction_mixture_fraction": 0,
+      "input_tokens": 76736.0,
+      "model": "Qwen/Qwen3.5-9B",
+      "output_tokens": 14320.0,
+      "requests": 256,
+      "stage": "full_seed_reference_with_optimistic_cache"
+    },
+    {
+      "allocated_gpu_hours": 36.93097085498008,
+      "family": "bfcl",
+      "four_demo_instruction_mixture_fraction": 0,
+      "input_tokens": 6906240.0,
+      "model": "Qwen/Qwen3.5-9B",
+      "output_tokens": 1288800.0,
+      "requests": 23040,
+      "stage": "all_selection_checkpoints"
+    },
+    {
+      "allocated_gpu_hours": 10.29066114969497,
+      "family": "bfcl",
+      "four_demo_instruction_mixture_fraction": 0,
+      "input_tokens": 1924395.0,
+      "model": "Qwen/Qwen3.5-9B",
+      "output_tokens": 359118.75,
+      "requests": 6420,
+      "stage": "one_final_prompt_per_run"
+    },
+    {
+      "allocated_gpu_hours": 7.758313796531587,
+      "family": "hotpotqa",
+      "four_demo_instruction_mixture_fraction": 0,
+      "input_tokens": 24646656.0,
+      "model": "Qwen/Qwen3.5-9B",
+      "output_tokens": 130048.0,
+      "requests": 16384,
+      "stage": "mechanism_full_tables"
+    },
+    {
+      "allocated_gpu_hours": 25.45696714486927,
+      "family": "hotpotqa",
+      "four_demo_instruction_mixture_fraction": 0,
+      "input_tokens": 80871840.0,
+      "model": "Qwen/Qwen3.5-9B",
+      "output_tokens": 426720.0,
+      "requests": 53760,
+      "stage": "main_nonreference_evaluation"
+    },
+    {
+      "allocated_gpu_hours": 0.12122365307080604,
+      "family": "hotpotqa",
+      "four_demo_instruction_mixture_fraction": 0,
+      "input_tokens": 385104.0,
+      "model": "Qwen/Qwen3.5-9B",
+      "output_tokens": 2032.0,
+      "requests": 256,
+      "stage": "full_seed_reference_with_optimistic_cache"
+    },
+    {
+      "allocated_gpu_hours": 10.910128776372545,
+      "family": "hotpotqa",
+      "four_demo_instruction_mixture_fraction": 0,
+      "input_tokens": 34659360.0,
+      "model": "Qwen/Qwen3.5-9B",
+      "output_tokens": 182880.0,
+      "requests": 23040,
+      "stage": "all_selection_checkpoints"
+    },
+    {
+      "allocated_gpu_hours": 3.636709592124182,
+      "family": "hotpotqa",
+      "four_demo_instruction_mixture_fraction": 0,
+      "input_tokens": 11553120.0,
+      "model": "Qwen/Qwen3.5-9B",
+      "output_tokens": 60960.0,
+      "requests": 7680,
+      "stage": "one_final_prompt_per_run"
+    },
+    {
+      "allocated_gpu_hours": 240.10910231452328,
+      "family": "instruction_following",
+      "four_demo_instruction_mixture_fraction": 0,
+      "input_tokens": 3784704.0,
+      "model": "Qwen/Qwen3.5-9B",
+      "output_tokens": 8194048.0,
+      "requests": 16384,
+      "stage": "mechanism_full_tables"
+    },
+    {
+      "allocated_gpu_hours": 881.2237653799625,
+      "family": "instruction_following",
+      "four_demo_instruction_mixture_fraction": 0.3333333333333333,
+      "input_tokens": 46108160.0,
+      "model": "Qwen/Qwen3.5-9B",
+      "output_tokens": 29441440.000000004,
+      "requests": 53760,
+      "stage": "main_nonreference_evaluation"
+    },
+    {
+      "allocated_gpu_hours": 3.7517047236644263,
+      "family": "instruction_following",
+      "four_demo_instruction_mixture_fraction": 0,
+      "input_tokens": 59136.0,
+      "model": "Qwen/Qwen3.5-9B",
+      "output_tokens": 128032.0,
+      "requests": 256,
+      "stage": "full_seed_reference_with_optimistic_cache"
+    },
+    {
+      "allocated_gpu_hours": 377.667328019984,
+      "family": "instruction_following",
+      "four_demo_instruction_mixture_fraction": 0.3333333333333333,
+      "input_tokens": 19760640.0,
+      "model": "Qwen/Qwen3.5-9B",
+      "output_tokens": 12617760.0,
+      "requests": 23040,
+      "stage": "all_selection_checkpoints"
+    },
+    {
+      "allocated_gpu_hours": 147.52630000780624,
+      "family": "instruction_following",
+      "four_demo_instruction_mixture_fraction": 0.3333333333333333,
+      "input_tokens": 7719000.0,
+      "model": "Qwen/Qwen3.5-9B",
+      "output_tokens": 4928812.5,
+      "requests": 9000,
+      "stage": "one_final_prompt_per_run"
+    }
+  ],
+  "protective_ceilings": {
+    "allocated_gpu_hours": 1000,
+    "input_tokens": 2000000000,
+    "output_tokens": 200000000
+  },
+  "resource_gate_failed_under_frozen_count_and_cost_assumptions": true,
+  "script_sha256": "e8cc3437e0b9af23b8d70ad8ddd27e7833e057495e053bc187efa0e733b1f1b3",
+  "status": "MEASURED_SUBSET_PLANNING_CHECK_NOT_A_CERTIFIED_LOWER_BOUND",
+  "with_reserve_measured_subset": {
+    "allocated_gpu_hours": 2229.8733702978943,
+    "input_tokens": 311376906,
+    "output_tokens": 74038382
+  }
+}

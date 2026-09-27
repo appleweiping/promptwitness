@@ -1,0 +1,416 @@
+{
+  "allocated_gpu_hours_all_g0_phases": 2.4007580474448496,
+  "completed_requests_all_g0_phases": 700,
+  "format": "promptwitness.delta.cost-envelope-summary/v1",
+  "input_tokens_all_g0_phases": 1369522,
+  "ledger_sha256": "830e1cd419cd496b7e7dec2ff280a71b178a517db7fef9be04dbd12a58c67852",
+  "limitations": [
+    "Eight demonstrations comprise the four previously recorded unscored training-side Qwen responses, each repeated twice. Not eight independent examples and not accepted MIPRO bootstrap demonstrations.",
+    "Demonstrations and proposer inputs are reserved predictor-fit units; no selection or final-test answer is included.",
+    "A serial rewrite proxy is not an actual native GEPA/MIPRO proposal. Native adapter accounting must still be verified.",
+    "The same frozen requests are measured on all three models. Third-model cost only, not frozen-prompt transfer effectiveness.",
+    "The first 400 requests, failure and time remain charged. This supplement is not a second throughput repair or a method revision."
+  ],
+  "models_envelope_phase": [
+    {
+      "cold_start_seconds": 50.441351362969726,
+      "elapsed_seconds": 2436.6870073720347,
+      "ledger_model": "Qwen/Qwen3.5-9B@cost-envelope-v1",
+      "model": "Qwen/Qwen3.5-9B",
+      "other_warm_seconds": 2.662372923688963,
+      "profiles": [
+        {
+          "family": "bfcl",
+          "generation_allocated_seconds": 3.14255049219355,
+          "max_output_tokens": 28,
+          "mean_input_tokens": 2155.0,
+          "mean_output_tokens": 28.0,
+          "mean_warm_allocated_seconds": 3.1691742214304397,
+          "output_cap_reached": 0,
+          "profile": "serial_training_context_proxy",
+          "requests": 1,
+          "role": "proposer"
+        },
+        {
+          "family": "bfcl",
+          "generation_allocated_seconds": 17.2237307401374,
+          "max_output_tokens": 129,
+          "mean_input_tokens": 316.25,
+          "mean_output_tokens": 49.75,
+          "mean_warm_allocated_seconds": 1.103106900495477,
+          "output_cap_reached": 0,
+          "profile": "base",
+          "requests": 16,
+          "role": "task"
+        },
+        {
+          "family": "bfcl",
+          "generation_allocated_seconds": 44.43224476603791,
+          "max_output_tokens": 177,
+          "mean_input_tokens": 2248.6875,
+          "mean_output_tokens": 53.6875,
+          "mean_warm_allocated_seconds": 2.8036390271142593,
+          "output_cap_reached": 0,
+          "profile": "eight_demo_stress_proxy",
+          "requests": 16,
+          "role": "task"
+        },
+        {
+          "family": "hotpotqa",
+          "generation_allocated_seconds": 10.922968317288905,
+          "max_output_tokens": 20,
+          "mean_input_tokens": 11317.0,
+          "mean_output_tokens": 20.0,
+          "mean_warm_allocated_seconds": 5.488107887881342,
+          "output_cap_reached": 0,
+          "profile": "serial_training_context_proxy",
+          "requests": 2,
+          "role": "proposer"
+        },
+        {
+          "family": "hotpotqa",
+          "generation_allocated_seconds": 8.743688405957073,
+          "max_output_tokens": 8,
+          "mean_input_tokens": 1392.9375,
+          "mean_output_tokens": 6.25,
+          "mean_warm_allocated_seconds": 0.5731042546092067,
+          "output_cap_reached": 0,
+          "profile": "base",
+          "requests": 16,
+          "role": "task"
+        },
+        {
+          "family": "hotpotqa",
+          "generation_allocated_seconds": 77.4493478143122,
+          "max_output_tokens": 16,
+          "mean_input_tokens": 12377.9375,
+          "mean_output_tokens": 6.75,
+          "mean_warm_allocated_seconds": 4.867207967631402,
+          "output_cap_reached": 0,
+          "profile": "eight_demo_stress_proxy",
+          "requests": 16,
+          "role": "task"
+        },
+        {
+          "family": "instruction_following",
+          "generation_allocated_seconds": 128.11970811896026,
+          "max_output_tokens": 2003,
+          "mean_input_tokens": 3958.0,
+          "mean_output_tokens": 2003.0,
+          "mean_warm_allocated_seconds": 128.14633184819715,
+          "output_cap_reached": 0,
+          "profile": "serial_training_context_proxy",
+          "requests": 1,
+          "role": "proposer"
+        },
+        {
+          "family": "instruction_following",
+          "generation_allocated_seconds": 325.95333131588995,
+          "max_output_tokens": 4096,
+          "mean_input_tokens": 281.375,
+          "mean_output_tokens": 417.375,
+          "mean_warm_allocated_seconds": 20.39870693648001,
+          "output_cap_reached": 1,
+          "profile": "base",
+          "requests": 16,
+          "role": "task"
+        },
+        {
+          "family": "instruction_following",
+          "generation_allocated_seconds": 1767.5957131145988,
+          "max_output_tokens": 4096,
+          "mean_input_tokens": 4007.9375,
+          "mean_output_tokens": 1688.4375,
+          "mean_warm_allocated_seconds": 110.50135579889931,
+          "output_cap_reached": 6,
+          "profile": "eight_demo_stress_proxy",
+          "requests": 16,
+          "role": "task"
+        }
+      ],
+      "requests": 100,
+      "revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a"
+    },
+    {
+      "cold_start_seconds": 32.37161598610692,
+      "elapsed_seconds": 2159.4866752990056,
+      "ledger_model": "allenai/Olmo-3-7B-Instruct@cost-envelope-v1",
+      "model": "allenai/Olmo-3-7B-Instruct",
+      "other_warm_seconds": 1.9543680401984602,
+      "profiles": [
+        {
+          "family": "bfcl",
+          "generation_allocated_seconds": 0.787934587104246,
+          "max_output_tokens": 2,
+          "mean_input_tokens": 2168.0,
+          "mean_output_tokens": 2.0,
+          "mean_warm_allocated_seconds": 0.8074782675062306,
+          "output_cap_reached": 0,
+          "profile": "serial_training_context_proxy",
+          "requests": 1,
+          "role": "proposer"
+        },
+        {
+          "family": "bfcl",
+          "generation_allocated_seconds": 5.113791138166562,
+          "max_output_tokens": 74,
+          "mean_input_tokens": 310.4375,
+          "mean_output_tokens": 8.125,
+          "mean_warm_allocated_seconds": 0.3391556265373947,
+          "output_cap_reached": 0,
+          "profile": "base",
+          "requests": 16,
+          "role": "task"
+        },
+        {
+          "family": "bfcl",
+          "generation_allocated_seconds": 7.891220617108047,
+          "max_output_tokens": 3,
+          "mean_input_tokens": 2234.3125,
+          "mean_output_tokens": 2.5625,
+          "mean_warm_allocated_seconds": 0.5127449689712376,
+          "output_cap_reached": 0,
+          "profile": "eight_demo_stress_proxy",
+          "requests": 16,
+          "role": "task"
+        },
+        {
+          "family": "hotpotqa",
+          "generation_allocated_seconds": 6.255144903901964,
+          "max_output_tokens": 6,
+          "mean_input_tokens": 10814.0,
+          "mean_output_tokens": 6.0,
+          "mean_warm_allocated_seconds": 3.147116132352967,
+          "output_cap_reached": 0,
+          "profile": "serial_training_context_proxy",
+          "requests": 2,
+          "role": "proposer"
+        },
+        {
+          "family": "hotpotqa",
+          "generation_allocated_seconds": 5.638660278869793,
+          "max_output_tokens": 6,
+          "mean_input_tokens": 1322.5,
+          "mean_output_tokens": 3.75,
+          "mean_warm_allocated_seconds": 0.37195994783134667,
+          "output_cap_reached": 0,
+          "profile": "base",
+          "requests": 16,
+          "role": "task"
+        },
+        {
+          "family": "hotpotqa",
+          "generation_allocated_seconds": 74.62521810806356,
+          "max_output_tokens": 64,
+          "mean_input_tokens": 11709.0625,
+          "mean_output_tokens": 17.75,
+          "mean_warm_allocated_seconds": 4.683619812155957,
+          "output_cap_reached": 3,
+          "profile": "eight_demo_stress_proxy",
+          "requests": 16,
+          "role": "task"
+        },
+        {
+          "family": "instruction_following",
+          "generation_allocated_seconds": 91.75558000081219,
+          "max_output_tokens": 2048,
+          "mean_input_tokens": 3839.0,
+          "mean_output_tokens": 2048.0,
+          "mean_warm_allocated_seconds": 91.77512368121417,
+          "output_cap_reached": 1,
+          "profile": "serial_training_context_proxy",
+          "requests": 1,
+          "role": "proposer"
+        },
+        {
+          "family": "instruction_following",
+          "generation_allocated_seconds": 79.79557251092046,
+          "max_output_tokens": 1096,
+          "mean_input_tokens": 277.125,
+          "mean_output_tokens": 134.3125,
+          "mean_warm_allocated_seconds": 5.006766962334513,
+          "output_cap_reached": 0,
+          "profile": "base",
+          "requests": 16,
+          "role": "task"
+        },
+        {
+          "family": "instruction_following",
+          "generation_allocated_seconds": 1853.2975691277534,
+          "max_output_tokens": 4096,
+          "mean_input_tokens": 3827.0,
+          "mean_output_tokens": 3450.625,
+          "mean_warm_allocated_seconds": 115.85064175088657,
+          "output_cap_reached": 13,
+          "profile": "eight_demo_stress_proxy",
+          "requests": 16,
+          "role": "task"
+        }
+      ],
+      "requests": 100,
+      "revision": "6e5971d9eba42665f5bd5a0fcf047f299ce1dccc"
+    },
+    {
+      "cold_start_seconds": 31.601432651048526,
+      "elapsed_seconds": 1191.705588356126,
+      "ledger_model": "mistralai/Mistral-7B-Instruct-v0.3@cost-envelope-v1",
+      "model": "mistralai/Mistral-7B-Instruct-v0.3",
+      "other_warm_seconds": 1.613409548299387,
+      "profiles": [
+        {
+          "family": "bfcl",
+          "generation_allocated_seconds": 7.041315514827147,
+          "max_output_tokens": 186,
+          "mean_input_tokens": 2374.0,
+          "mean_output_tokens": 186.0,
+          "mean_warm_allocated_seconds": 7.057449610310141,
+          "output_cap_reached": 0,
+          "profile": "serial_training_context_proxy",
+          "requests": 1,
+          "role": "proposer"
+        },
+        {
+          "family": "bfcl",
+          "generation_allocated_seconds": 25.264538239920512,
+          "max_output_tokens": 380,
+          "mean_input_tokens": 325.0,
+          "mean_output_tokens": 109.875,
+          "mean_warm_allocated_seconds": 1.5951677354780258,
+          "output_cap_reached": 0,
+          "profile": "base",
+          "requests": 16,
+          "role": "task"
+        },
+        {
+          "family": "bfcl",
+          "generation_allocated_seconds": 42.767016174737364,
+          "max_output_tokens": 257,
+          "mean_input_tokens": 2357.3125,
+          "mean_output_tokens": 77.375,
+          "mean_warm_allocated_seconds": 2.6890726064040793,
+          "output_cap_reached": 0,
+          "profile": "eight_demo_stress_proxy",
+          "requests": 16,
+          "role": "task"
+        },
+        {
+          "family": "hotpotqa",
+          "generation_allocated_seconds": 6.357324267970398,
+          "max_output_tokens": 30,
+          "mean_input_tokens": 12513.0,
+          "mean_output_tokens": 30.0,
+          "mean_warm_allocated_seconds": 3.194796229468193,
+          "output_cap_reached": 0,
+          "profile": "serial_training_context_proxy",
+          "requests": 2,
+          "role": "proposer"
+        },
+        {
+          "family": "hotpotqa",
+          "generation_allocated_seconds": 7.788952557137236,
+          "max_output_tokens": 25,
+          "mean_input_tokens": 1527.5,
+          "mean_output_tokens": 9.6875,
+          "mean_warm_allocated_seconds": 0.5029436303040711,
+          "output_cap_reached": 0,
+          "profile": "base",
+          "requests": 16,
+          "role": "task"
+        },
+        {
+          "family": "hotpotqa",
+          "generation_allocated_seconds": 81.81019505835138,
+          "max_output_tokens": 27,
+          "mean_input_tokens": 13622.625,
+          "mean_output_tokens": 9.0625,
+          "mean_warm_allocated_seconds": 5.1292712866299555,
+          "output_cap_reached": 0,
+          "profile": "eight_demo_stress_proxy",
+          "requests": 16,
+          "role": "task"
+        },
+        {
+          "family": "instruction_following",
+          "generation_allocated_seconds": 7.747990458039567,
+          "max_output_tokens": 212,
+          "mean_input_tokens": 4206.0,
+          "mean_output_tokens": 212.0,
+          "mean_warm_allocated_seconds": 7.764124553522561,
+          "output_cap_reached": 0,
+          "profile": "serial_training_context_proxy",
+          "requests": 1,
+          "role": "proposer"
+        },
+        {
+          "family": "instruction_following",
+          "generation_allocated_seconds": 595.0648288547527,
+          "max_output_tokens": 4096,
+          "mean_input_tokens": 307.5625,
+          "mean_output_tokens": 573.5625,
+          "mean_warm_allocated_seconds": 37.20768589890504,
+          "output_cap_reached": 1,
+          "profile": "base",
+          "requests": 16,
+          "role": "task"
+        },
+        {
+          "family": "instruction_following",
+          "generation_allocated_seconds": 384.6485850310419,
+          "max_output_tokens": 1247,
+          "mean_input_tokens": 4194.5625,
+          "mean_output_tokens": 444.3125,
+          "mean_warm_allocated_seconds": 24.05667065992311,
+          "output_cap_reached": 0,
+          "profile": "eight_demo_stress_proxy",
+          "requests": 16,
+          "role": "task"
+        }
+      ],
+      "requests": 100,
+      "revision": "c170c708c41dac9275d15a8fff4eca08d52bab71"
+    }
+  ],
+  "output_tokens_all_g0_phases": 150845,
+  "plan_sha256": "a59b12d61bd8fa1cb26a1f31afe3085a370684815ab60e65c59048006faa021a",
+  "prior_summary_sha256": "97e2947f970aa3d1ba3ad599c69a2249f5cad8bf2ec12df0d9cf12487127503e",
+  "raw_files": [
+    {
+      "bytes": 229177,
+      "file": "qwen-envelope-v1.jsonl",
+      "sha256": "d4e50c57c500928cc826088d2e3acd3cf0da4c03498dbf0268b00df71066b93d"
+    },
+    {
+      "bytes": 280073,
+      "file": "olmo-envelope-v1.jsonl",
+      "sha256": "00d033327453da8d969bf7dfe256968eb49ff833e26f8617e72b3a0eb8444fb7"
+    },
+    {
+      "bytes": 159338,
+      "file": "mistral-envelope-v1.jsonl",
+      "sha256": "1eb5a1786e41ba385a8d35f2a623f4bb6586d42a9ca3cd27c330993fdf1fa02f"
+    }
+  ],
+  "real_model_failures": 0,
+  "scores_or_effectiveness_measured": false,
+  "startup_failures_all_g0_phases": [
+    {
+      "allocated_gpu_hours": 0.0013767787586483691,
+      "elapsed_seconds": 4.956403531134129,
+      "evidence_sha256": "01382b3b24f9c0bce414ff9aad2cce9b3a1f6dc1a92041ede0a11c605e3c12ac",
+      "ledger_model": "Qwen/Qwen3.5-9B@infra1-torch271:startup-failed1",
+      "model_requests": 0
+    },
+    {
+      "elapsed_seconds": 5.081947360886261,
+      "evidence_sha256": "9376d7073c2c58fae57eb29fbbbc7cf5e3e649faeaafee27946bc66fff96f0ae",
+      "ledger_model": "allenai/Olmo-3-7B-Instruct@cost-envelope-v1:startup-failed1",
+      "original_run": "allenai/Olmo-3-7B-Instruct@cost-envelope-v1"
+    },
+    {
+      "elapsed_seconds": 5.089839911088347,
+      "evidence_sha256": "64cb7b517df53d1d5724d8b5557c20a623e8ace21403c08d7e0de9e53e889bde",
+      "ledger_model": "allenai/Olmo-3-7B-Instruct@cost-envelope-v1:startup-failed2",
+      "original_run": "allenai/Olmo-3-7B-Instruct@cost-envelope-v1"
+    }
+  ]
+}

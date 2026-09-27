@@ -1,0 +1,24 @@
+{
+  "format": "promptwitness.delta.security-review/v1.1",
+  "configured_runtime_src_scan": "PASSED_without_new_rule_suppression",
+  "core_findings_before_repairs": [
+    {"rule": "B608", "count": 2, "disposition": "replaced optional SQL string concatenation with one parameterized predicate"},
+    {"rule": "B311", "count": 1, "disposition": "default remains SystemRandom; seeded mechanical fixtures now explicit deterministic hash permutations, never scientific SRSWOR"}
+  ],
+  "retained_v1_helper_scan": {"medium": 4, "low": 2,
+    "review": "results/summary/g0/helper-security-review.json", "scanner_zero": false},
+  "new_full_helper_scan": {"medium": 6, "low": 6, "high": 0, "scanner_zero": false,
+    "rules": {"B615": 5, "B310": 1, "B404": 3, "B603": 3}},
+  "new_helper_findings": [
+    {"rules": ["B615"], "file": "reproduce/run_execution_bench_v1_1.py", "count": 2,
+      "assessment": "offline local_files_only snapshot loading, trust_remote_code=False, fixed verified revision; snapshot provenance is an explicit external assumption"},
+    {"rules": ["B404", "B603"], "file": "reproduce/run_execution_bench_v1_1.py", "count": 2,
+      "assessment": "fixed same-Python/self child argv, no shell; supervisor stops only its owned child; local interpreter/source/environment trust remains"},
+    {"rules": ["B404", "B603"], "file": "reproduce/bounded_g1_command.py", "count": 2,
+      "assessment": "explicit trusted operator argv, no shell; process-tree ownership checked, conservative timeout/core reservation retained; not an untrusted command service"}
+  ],
+  "expanded_ignores": false, "new_nosec": false,
+  "independent_security_audit": false,
+  "residual_risks": ["source/PATH/dependency trust", "existing fixed HTTPS HEAD redirect behavior",
+    "no process-level final-data sandbox yet", "manual source triage is not scanner-zero or independent audit"]
+}

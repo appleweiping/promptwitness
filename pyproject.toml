@@ -29,6 +29,7 @@ dependencies = []
 
 [project.optional-dependencies]
 dev = ["bandit>=1.7", "build>=1.2", "mypy>=1.11", "pytest>=8.2", "pytest-cov>=5", "ruff>=0.6", "twine>=5"]
+research = ["numpy>=1.26,<3", "scipy>=1.15,<2", "scikit-learn>=1.6,<2"]
 
 [project.scripts]
 promptwitness = "promptwitness.cli:main"

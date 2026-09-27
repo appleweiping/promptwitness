@@ -1,0 +1,53 @@
+{
+  "format": "promptwitness.delta.cost-envelope-plan/v1",
+  "status": "FROZEN_BEFORE_ENVELOPE_REQUESTS_NOT_SCIENTIFIC_PREREGISTRATION",
+  "frozen_at_utc": "2026-09-26T23:24:20Z",
+  "probe_id": "cost-envelope-v1",
+  "purpose": "One bounded cost supplement covering larger output caps, diversified BFCL, serial proposer proxies, eight-demo input stress and the third model. No task scoring or method selection.",
+  "script_sha256": "98323e9fac7e5776a064fa85a9ed30771ea29f8d2376f14498df9ab6a471d620",
+  "request_file_sha256": "35956a336dd62e02c5d83bbb92a2278237c53af13c5049c7d652a764545e679d",
+  "training_pool_proposal_sha256": "ae84ed5f48df42d537f12aff472aa71dc29d52fee83d99ce4f4a298dc858d134",
+  "prior_charged_requests": 400,
+  "prior_allocated_gpu_hours": 0.7901883090284213,
+  "maximum_additional_requests": 300,
+  "aggregate_g0_attempt_ceiling": 700,
+  "shared_ledger": true,
+  "request_retries": 0,
+  "paid_api_usd": 0,
+  "maximum_allocated_gpu_hours_per_model": 1,
+  "gpu_allocation": 1,
+  "models_loaded_sequentially": true,
+  "models": [
+    {"id": "Qwen/Qwen3.5-9B", "revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a"},
+    {"id": "allenai/Olmo-3-7B-Instruct", "revision": "6e5971d9eba42665f5bd5a0fcf047f299ce1dccc"},
+    {"id": "mistralai/Mistral-7B-Instruct-v0.3", "revision": "c170c708c41dac9275d15a8fff4eca08d52bab71"}
+  ],
+  "requests_per_model": 100,
+  "per_model_profiles": {
+    "task_base": {"bfcl": 16, "hotpotqa": 16, "instruction_following": 16},
+    "task_eight_demo_stress_proxy": {"bfcl": 16, "hotpotqa": 16, "instruction_following": 16},
+    "serial_proposer_proxy": {"bfcl": 1, "hotpotqa": 2, "instruction_following": 1}
+  },
+  "max_new_tokens": {"bfcl": 1024, "hotpotqa": 64, "instruction_following": 4096, "proposer": 2048},
+  "max_input_tokens": 32768,
+  "truncation_allowed": false,
+  "task_base_batch_size": 8,
+  "task_stress_batch_size": 2,
+  "proposer_batch_size": 1,
+  "cpu_threads": 4,
+  "do_sample": false,
+  "enable_thinking": false,
+  "disable_compile": true,
+  "precision": "bfloat16",
+  "attention": "sdpa",
+  "runtime": {"python": "3.10.15", "torch": "2.7.1+cu118", "transformers": "5.3.0", "click_addition": "8.3.0"},
+  "score_oracle_access": false,
+  "final_test_access": false,
+  "proxy_limitations": [
+    "Eight demonstrations comprise the four previously recorded unscored training-side Qwen responses, each repeated twice. Not eight independent examples and not accepted MIPRO bootstrap demonstrations.",
+    "Demonstrations and proposer inputs are reserved predictor-fit units; no selection or final-test answer is included.",
+    "A serial rewrite proxy is not an actual native GEPA/MIPRO proposal. Native adapter accounting must still be verified.",
+    "The same frozen requests are measured on all three models. Third-model cost only, not frozen-prompt transfer effectiveness.",
+    "The first 400 requests, failure and time remain charged. This supplement is not a second throughput repair or a method revision."
+  ]
+}

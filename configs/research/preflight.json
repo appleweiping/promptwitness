@@ -1,0 +1,75 @@
+{
+  "format": "promptwitness.delta.preflight-plan/v1",
+  "frozen_before_outcomes_at_utc": "2026-09-26T21:51:23Z",
+  "purpose": "G0 measured cost only; not a method experiment",
+  "request_file_sha256": "afa83b3d7aaf8735397b009951faf47a50b00f52c288159591b9f9e2b924190d",
+  "models": [
+    {
+      "id": "Qwen/Qwen3.5-9B",
+      "revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+      "license": "apache-2.0"
+    },
+    {
+      "id": "allenai/Olmo-3-7B-Instruct",
+      "revision": "6e5971d9eba42665f5bd5a0fcf047f299ce1dccc",
+      "license": "apache-2.0"
+    }
+  ],
+  "per_model": {
+    "bfcl_task_requests": 32,
+    "hotpotqa_task_requests": 32,
+    "instruction_following_task_requests": 32,
+    "proposer_requests": 4
+  },
+  "max_real_attempts": 200,
+  "transport_retries": 0,
+  "batch_size": 4,
+  "max_input_tokens": 16384,
+  "max_new_tokens": {
+    "bfcl": 256,
+    "hotpotqa": 64,
+    "instruction_following": 512,
+    "proposer": 512
+  },
+  "do_sample": false,
+  "enable_thinking": false,
+  "score_oracle_access": false,
+  "final_test_access": false,
+  "gpu_allocation": 1,
+  "max_allocated_gpu_hours_per_model_probe": 1,
+  "paid_api_usd": 0,
+  "runtime": {
+    "python": "3.10.15",
+    "torch": "2.5.0+cu118",
+    "transformers": "5.3.0",
+    "huggingface_hub": "1.6.0",
+    "safetensors": "0.8.0",
+    "precision": "bfloat16",
+    "attention": "sdpa"
+  },
+  "training_sources": [
+    {
+      "id": "ShishirPatil/gorilla",
+      "revision": "6ea57973c7a6097fd7c5915698c54c17c5b1b6c8",
+      "path": "berkeley-function-call-leaderboard/bfcl_eval/data/BFCL_v4_simple_python.json",
+      "git_blob_sha1": "356a0db61e54eb1d92d8e10d014463cf2eb513cc"
+    },
+    {
+      "id": "hotpotqa/hotpot_qa",
+      "revision": "1908d6afbbead072334abe2965f91bd2709910ab",
+      "config": "distractor",
+      "split": "train",
+      "sha256": [
+        "76d3bb3048a7cc73c1958107c0c5872a00d7e7d00c105b81e92f6769e7822e68",
+        "713661628434fbb19fff7392e2e321e4ed107e3c7c7784d0690946e5f722763f"
+      ],
+      "mirror_note": "HF Parquet conversion; official CMU raw download unavailable"
+    },
+    {
+      "id": "allenai/IF_multi_constraints_upto5",
+      "revision": "2e3a77407b7fce69f95b248d64a884e3ae1c2423",
+      "split": "train",
+      "sha256": "edb8baed687cd85ce0602911f6c6cc8c8e657da69a7faba036082fa9618008ee"
+    }
+  ]
+}

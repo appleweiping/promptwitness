@@ -1,0 +1,20 @@
+{
+  "format": "promptwitness.delta.restart/v1.1",
+  "authorization_source_sha256": "d56416b82266dd1ec93b14c3c19682e4ab0a2b34b687b44bd53a4d2c055027b7",
+  "base_verified_sha": "acdee7653746987b7d4556a33ef4832a1638874c",
+  "branch": "research/promptwitness-delta-v1",
+  "historical_final_status": "research/FINAL_STATUS.json",
+  "historical_ledger_sha256": "62797c3b673bf78a4b1faa6f0ae99049e826c931662b55d73ec71505efdd54f1",
+  "development_admitted": true,
+  "confirmation_admitted": false,
+  "global_grant": {"calls": 800000, "input_tokens": 2000000000, "output_tokens": 200000000, "gpu_hours": 1000},
+  "unblocking_additional_grant": {"calls": 400, "input_tokens": 20000000, "output_tokens": 2000000, "gpu_hours": 8, "execution_configurations": 4},
+  "offline_additional_grant": {"cpu_core_hours": 80, "maximum_workers": 4, "engineering_review_repair_cycles": 2},
+  "pilot_grant": {"calls": 12000, "gpu_hours": 30, "scientific_method_revisions": 2},
+  "gpu_uuid": "GPU-18ce5833-27a4-ac4b-f952-49cc52045714",
+  "paid_api_usd": 0,
+  "preserve_unrelated_workloads": true,
+  "restart_does_not_reset_usage": true,
+  "no_automatic_remaining_140_v1_calls": true,
+  "scientific_counts_or_thresholds_changed": false
+}

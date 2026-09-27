@@ -1,0 +1,11 @@
+{
+  "format": "promptwitness.delta.process-observation/v1",
+  "model": "Qwen/Qwen3.5-9B",
+  "probe_id": "cost-envelope-v1",
+  "elapsed_seconds_stdout": 2436.5222673311364,
+  "cold_start_seconds": 50.441351362969726,
+  "allocated_gpu_hours_stdout": 0.6768117409253157,
+  "peak_allocated_memory_mib": 24800.05908203125,
+  "peak_reserved_memory_mib": 33414.0,
+  "note": "Exit-time SQLite elapsed includes final serialization and remains the accounting authority; no task scores measured."
+}

@@ -1,0 +1,57 @@
+{
+  "format": "promptwitness.delta.resource-model/v1.1",
+  "status": "COUNT_AUDIT_COMPLETE_FULL_COST_PRICING_UNMEASURED",
+  "historical_usage_recomputed_from_original_ledger": {
+    "calls": 770, "allocated_gpu_hours": 3.2538161689659404,
+    "input_tokens": 1448879, "output_tokens": 178514,
+    "inference_failures": 0, "zero_request_startup_failures": 3
+  },
+  "historical_summary_sha256": "e3807cc3c9713152193c5c80f0acdad8161cccf8da2cd8464c73e0bb31c04d04",
+  "historical_770_ledger_sha256": "62797c3b673bf78a4b1faa6f0ae99049e826c931662b55d73ec71505efdd54f1",
+  "global_ceilings": {"calls": 800000, "allocated_gpu_hours": 1000,
+    "input_tokens": 2000000000, "output_tokens": 200000000, "paid_api_usd": 0},
+  "new_stage_ceilings": {
+    "unblocking": {"calls": 400, "allocated_gpu_hours": 8,
+      "input_tokens": 20000000, "output_tokens": 2000000},
+    "pilot": {"calls": 12000, "allocated_gpu_hours": 30},
+    "offline_core": {"cpu_core_hours": 80, "workers": 4}
+  },
+  "full_maximum_allowance_workload": {
+    "mechanism": {"pairs": 144, "examples": 512,
+      "independent_pair_logical_calls": 147456,
+      "physical_calls_if_each_lineage_has_one_designated_recorded_parent_table": 98304,
+      "condition": "48 parent tables plus 144 candidate tables, identity/provenance checked; not a hypothetical prefix cache hit"},
+    "main_evaluation": {"runs": 180, "total_episodes_per_run": 2048,
+      "logical_episodes": 368640, "physical_calls_without_cross_run_reuse": 368640,
+      "conditional_designated_same_reference_physical_calls": 324096,
+      "note": "The same initial recorded reference unit may be shared only with full identity equality; each independent method still pays its reference logical cost."},
+    "proposers": 23040, "selection": 138240, "final": 46200, "transfer": 9240,
+    "confirmatory_physical_calls_no_cross_run_reuse_with_designated_lineage_parent": 683664,
+    "conditional_recorded_reference_reuse_confirmation_calls": 639120,
+    "predictor_training": "inside separately designed mechanism/fit tables; additional work UNMEASURED",
+    "checkpoint_search_multiplier": 1, "candidate_episode_multiplier": 1,
+    "cold_starts_switches_scoring_failures_rechecks": "UNMEASURED_not_zero"
+  },
+  "four_cost_views": {
+    "actual": "historical usage above plus new physical ledger; never replaced by a plan",
+    "full_maximum_allowance_forecast": "workload counted above; full GPU/input/output forecast UNMEASURED",
+    "evidence_backed_typical": "complete two-model native workflow usage distribution UNMEASURED; cost-only request benchmark cannot supply a native optimizer stopping distribution",
+    "stress": {"physical_calls_if_all_pair_replicates_independent_no_reference_reuse": 732816,
+      "full_gpu_token_upper_bound": "UNMEASURED; sample means are not statistical lower or worst-case upper bounds"}
+  },
+  "v1_subset_retained_not_new_admission_evidence": {
+    "qwen_task_only_gpu_hours_before_reserve": 1858.2278085815788,
+    "with_20_percent_reserve": 2229.8733702978943,
+    "meaning": "frozen v1 sample means times maximum workload; excludes roles/models and does not prove every run spends its maximum"
+  },
+  "allocation_accounting": "union actual reservation windows per GPU UUID; sum devices; include cold/idle/exit; never sum overlapping request latencies",
+  "logical_vs_physical": "method-alone logical queries and symmetric cold cost separate from physical common recorded-unit reuse",
+  "admission_formula": "consumed + 1.20 * remaining_conservative_confirmation_forecast <= each ceiling",
+  "call_admission_without_cross_run_reuse_before_pilot": {"remaining_calls": 683664,
+    "reserve_added_remaining_calls": 820396.8, "ceiling": 800000,
+    "status": "this maximum-allowance no-cross-run-reuse scenario exceeds; not an impossibility theorem for every legal designated-reference schedule"},
+  "confirmation_admitted": false,
+  "unmeasured": ["Olmo complete native task contexts and roles", "Mistral frozen transfer contexts",
+    "BFCL accepted native demonstration contexts", "complete proposer workflow", "scoring isolation",
+    "pilot native optimizer episode/call distribution", "scheduling/cold-switch/failure conservative envelope"]
+}

@@ -1,0 +1,74 @@
+{
+  "format": "promptwitness.delta.cost-count-plan/v2",
+  "status": "PROPOSED_NOT_PREREGISTERED",
+  "method_results_available": false,
+  "mechanism": {
+    "task_model_cells": 6,
+    "independent_lineages_per_cell": 8,
+    "edits_per_lineage": 3,
+    "pairs_per_cell": 24,
+    "examples_per_pair": 512,
+    "parent_response_reuse": "Only identical recorded request/unit and complete provenance",
+    "maximum_unique_model_requests": 98304
+  },
+  "main": {
+    "runs": 180,
+    "max_episodes_per_run": 2048,
+    "reference_pool_per_run": 256,
+    "reference_response_reuse": "Same fixed reference prompt, pool and recorded unit across seeds/configs within each task/model cell; still charge each run its 256 reference episodes",
+    "maximum_unique_evaluation_model_requests": 324096,
+    "max_proposer_calls_per_run": 128,
+    "maximum_proposer_requests": 23040
+  },
+  "selection": {
+    "runs": 180,
+    "budget_checkpoints": [
+      512,
+      1024,
+      2048
+    ],
+    "examples": 256,
+    "maximum_requests": 138240,
+    "note": "All three selection measurements are charged; no free validation. Unreached checkpoints are marked stopped."
+  },
+  "final": {
+    "runs_per_family": 60,
+    "examples": {
+      "bfcl": 214,
+      "hotpotqa": 256,
+      "instruction_following": 300
+    },
+    "maximum_requests": 46200
+  },
+  "transfer": {
+    "model_family": "Mistral",
+    "reoptimization": false,
+    "fixed_main_seed": 11,
+    "frozen_prompts_per_family": 12,
+    "examples": {
+      "bfcl": 214,
+      "hotpotqa": 256,
+      "instruction_following": 300
+    },
+    "maximum_requests": 9240,
+    "scope": "36 transfers, one preselected seed per task/main-model/config cell; not a third 180-run optimization matrix"
+  },
+  "pilot_and_g1_max_requests": 12000,
+  "g0_requests": 910,
+  "total_before_reserve": 652030,
+  "reserve_fraction": 0.2,
+  "total_with_reserve_ceiling": 782436,
+  "global_call_ceiling": 800000,
+  "unestablished": [
+    "Actual grouped data pools and supported scorers",
+    "Measured full two-model token/GPU forecast",
+    "Third-model feasibility and transfer-cost uncertainty",
+    "Runtime baseline accounting and proof that episodes have one model call in the chosen offline task setting"
+  ],
+  "preformal_data_width_note": {
+    "bfcl_legal_final_units": 214,
+    "training_pool_proposal_sha256": "e1f4f8f504b220e2f03fb610e95aa5bad9b1136aa070cfc4d6cefd715db76ef3",
+    "reason": "1240 diversified source rows minus 1024 required fit/search/selection units and two exposed component rows leaves 214 legal derived final units. No borrowing, invention, final labels or budget-driven baseline/seed reduction.",
+    "scientific_pools_sealed": false
+  }
+}

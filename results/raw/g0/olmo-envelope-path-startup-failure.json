@@ -1,0 +1,12 @@
+{
+  "format": "promptwitness.delta.startup-failure/v1",
+  "observed_at_utc": "2026-09-26T23:27:50Z",
+  "ledger_run": "allenai/Olmo-3-7B-Instruct@cost-envelope-v1",
+  "archive_run": "allenai/Olmo-3-7B-Instruct@cost-envelope-v1:startup-failed2",
+  "model_requests_attempted": 0,
+  "cause": "The local Olmo snapshot path in the launch omitted the cache's hub subdirectory. Tokenizer configuration resolution failed before loading model weights or issuing generate.",
+  "resolution": "Read-only find verified the exact revisions for all three model snapshots. Both main model directories are under hf-cache/hub; Mistral is directly under hf-cache. Correct the path without changing weights or frozen probe inputs.",
+  "accounting": "Retain elapsed time under the explicit failure identity. No attempts or previous consumed GPU time are deleted. Do not keep guessing snapshot paths.",
+  "is_method_revision": false,
+  "is_model_runtime_revision": false
+}

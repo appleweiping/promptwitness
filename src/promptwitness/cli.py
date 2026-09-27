@@ -15,6 +15,7 @@ from typing import Any, NoReturn
 from .adapters import AdapterError, AdapterFormat, load_adapted_prompt, render_prompt_json
 from .benchmark import BenchmarkGate, evaluate_benchmark, load_benchmark_cases, load_benchmark_suite
 from .diff import MessageAlignment, compare_prompts
+from .incremental.cli import add_delta_commands
 from .interview_cli import add_interview_commands
 from .invocations import validate_tool_arguments
 from .long_context import LongContextCase, evaluate_long_context
@@ -226,6 +227,7 @@ def build_parser() -> argparse.ArgumentParser:
     add_interview_commands(subparsers)
     add_task_commands(subparsers)
     add_procedure_commands(subparsers)
+    add_delta_commands(subparsers)
     return parser
 
 

@@ -1,0 +1,12 @@
+{
+  "format": "promptwitness.delta.probe-memory-observation/v1",
+  "model": "allenai/Olmo-3-7B-Instruct",
+  "ledger_model": "allenai/Olmo-3-7B-Instruct@cost-envelope-v1",
+  "source": "Completion stdout of the frozen cost-envelope worker; not task scores.",
+  "elapsed_seconds": 2159.419504473917,
+  "cold_start_seconds": 32.37161598610692,
+  "allocated_gpu_hours": 0.5998387512427548,
+  "peak_allocated_memory_mib": 28940.3662109375,
+  "peak_reserved_memory_mib": 36362.0,
+  "note": "Worker atexit may add a small shutdown interval to the ledger elapsed value; authoritative total cost comes from the finished ledger. GPU0 only; unrelated processes preserved."
+}

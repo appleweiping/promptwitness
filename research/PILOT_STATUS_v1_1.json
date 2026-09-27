@@ -1,0 +1,22 @@
+{
+  "format": "promptwitness.delta.pilot-status/v1.1",
+  "status": "NOT_RUN",
+  "real_pilot_calls": 0, "allocated_pilot_gpu_hours": 0,
+  "scientific_revision_cycles_used": 0, "scientific_revision_cycles_maximum": 2,
+  "unblocking_calls_are_not_pilot": 128,
+  "grant": {"calls": 12000, "allocated_gpu_hours": 30},
+  "grant_is_not_a_forecast": true,
+  "own_complete_cost_forecast": "UNMEASURED",
+  "start_prerequisites_not_met": [
+    "Adaptive online finite-table execution semantics are not validated; batch 4 changes 4/32 outputs and batch 8 changes 7/32 vs batch 1.",
+    "Process-level predictor/optimizer/scorer split-access controls remain unsealed; retain the previously disclosed final-card metadata exposure.",
+    "Full native GEPA/MIPRO early-rejection integration and actual no-missing-score accounting are incomplete.",
+    "Official task correctness scorers are not yet end-to-end validated for this scientific pipeline."
+  ],
+  "scientific_questions_unanswered": ["structural signal beyond text-only",
+    "real certifier census dependence", "savings beyond native minibatch screening"],
+  "scientific_GO": false,
+  "scientific_negative_result": false,
+  "confirmatory_admission": false,
+  "reason_not_full_campaign_budget_as_development_precondition": true
+}

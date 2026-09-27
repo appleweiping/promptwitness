@@ -1,0 +1,175 @@
+{
+  "annotation_sha256": "edb8baed687cd85ce0602911f6c6cc8c8e657da69a7faba036082fa9618008ee",
+  "constraint_instances": 1608,
+  "covered_training_keys": {
+    "change_case:capital_word_frequency": 31,
+    "change_case:english_capital": 30,
+    "change_case:english_lowercase": 29,
+    "combination:repeat_prompt": 29,
+    "combination:two_responses": 25,
+    "copy:copy": 21,
+    "copy:copying_multiple": 8,
+    "copy:copying_simple": 21,
+    "copy:repeat_phrase": 35,
+    "count:count_increment_word": 27,
+    "count:count_unique": 31,
+    "count:counting_composition": 24,
+    "count:lowercase_counting": 31,
+    "detectable_content:number_placeholders": 19,
+    "detectable_content:postscript": 35,
+    "detectable_format:bigram_wrapping": 33,
+    "detectable_format:constrained_response": 19,
+    "detectable_format:json_format": 13,
+    "detectable_format:multiple_sections": 26,
+    "detectable_format:number_bullet_lists": 35,
+    "detectable_format:number_highlighted_sections": 41,
+    "detectable_format:sentence_hyphens": 33,
+    "detectable_format:square_brackets": 21,
+    "detectable_format:title": 30,
+    "first_word:first_word_answer": 33,
+    "first_word:first_word_sent": 41,
+    "keywords:exclude_word_harder": 32,
+    "keywords:existence": 26,
+    "keywords:forbidden_words": 30,
+    "keywords:frequency": 24,
+    "keywords:keyword_specific_position": 30,
+    "keywords:letter_frequency": 24,
+    "keywords:no_adjacent_consecutive": 36,
+    "keywords:palindrome": 43,
+    "keywords:start_end": 30,
+    "keywords:word_count_different_numbers": 31,
+    "keywords:word_once": 37,
+    "language:response_language": 34,
+    "last_word:last_word_answer": 34,
+    "last_word:last_word_sent": 32,
+    "length_constraints:nth_paragraph_first_word": 36,
+    "length_constraints:number_paragraphs": 40,
+    "length_constraints:number_sentences": 38,
+    "length_constraints:number_words": 31,
+    "letters:letter_counting": 24,
+    "letters:letter_counting2": 34,
+    "new:copy_span_idx": 12,
+    "paragraphs:paragraphs": 31,
+    "paragraphs:paragraphs2": 34,
+    "punctuation:no_comma": 27,
+    "punctuation:punctuation_dot": 40,
+    "punctuation:punctuation_exclamation": 29,
+    "startend:end_checker": 32,
+    "startend:quotation": 36
+  },
+  "format": "promptwitness.delta.training-verifier-audit/v1",
+  "instruction_registry_keys": 54,
+  "limitations": [
+    "Build-description checks do not establish semantic validity of every verifier or instruction.",
+    "Exact row annotations are preserved. Training reward averaging is not the binary strict prompt metric; all required checks must pass.",
+    "IFBench uses its separately pinned strict scorer for final testing; no IFBench prompt or response is read here."
+  ],
+  "model_responses_or_final_data_scored": false,
+  "pool_proposal_sha256": "ae84ed5f48df42d537f12aff472aa71dc29d52fee83d99ce4f4a298dc858d134",
+  "random_default_constraint_instances": [
+    {
+      "declared_arguments": {
+        "first_word": "teach",
+        "nth_paragraph": 11,
+        "num_paragraphs": 10
+      },
+      "instruction_id": "length_constraints:nth_paragraph_first_word",
+      "states_by_seed": [
+        {
+          "_description_pattern": "There should be {num_paragraphs} paragraphs. Paragraphs and only paragraphs are separated with each other by two new lines as if it was '\\n\\n' in python. Paragraph {nth_paragraph} must start with word {first_word}.",
+          "_first_word": "teach",
+          "_nth_paragraph": 8,
+          "_num_paragraphs": 10,
+          "id": "length_constraints:nth_paragraph_first_word"
+        },
+        {
+          "_description_pattern": "There should be {num_paragraphs} paragraphs. Paragraphs and only paragraphs are separated with each other by two new lines as if it was '\\n\\n' in python. Paragraph {nth_paragraph} must start with word {first_word}.",
+          "_first_word": "teach",
+          "_nth_paragraph": 6,
+          "_num_paragraphs": 10,
+          "id": "length_constraints:nth_paragraph_first_word"
+        }
+      ],
+      "unit": "science.scientific_lay_summarisation_plos_single_doc_summ.4525"
+    },
+    {
+      "declared_arguments": {
+        "first_word": "finding",
+        "nth_paragraph": 9,
+        "num_paragraphs": 8
+      },
+      "instruction_id": "length_constraints:nth_paragraph_first_word",
+      "states_by_seed": [
+        {
+          "_description_pattern": "There should be {num_paragraphs} paragraphs. Paragraphs and only paragraphs are separated with each other by two new lines as if it was '\\n\\n' in python. Paragraph {nth_paragraph} must start with word {first_word}.",
+          "_first_word": "finding",
+          "_nth_paragraph": 8,
+          "_num_paragraphs": 8,
+          "id": "length_constraints:nth_paragraph_first_word"
+        },
+        {
+          "_description_pattern": "There should be {num_paragraphs} paragraphs. Paragraphs and only paragraphs are separated with each other by two new lines as if it was '\\n\\n' in python. Paragraph {nth_paragraph} must start with word {first_word}.",
+          "_first_word": "finding",
+          "_nth_paragraph": 6,
+          "_num_paragraphs": 8,
+          "id": "length_constraints:nth_paragraph_first_word"
+        }
+      ],
+      "unit": "personas_math_easy_v3d3rw5jepcr4s20dlzwarv9"
+    },
+    {
+      "declared_arguments": {
+        "first_word": "physics",
+        "nth_paragraph": 6,
+        "num_paragraphs": 5
+      },
+      "instruction_id": "length_constraints:nth_paragraph_first_word",
+      "states_by_seed": [
+        {
+          "_description_pattern": "There should be {num_paragraphs} paragraphs. Paragraphs and only paragraphs are separated with each other by two new lines as if it was '\\n\\n' in python. Paragraph {nth_paragraph} must start with word {first_word}.",
+          "_first_word": "physics",
+          "_nth_paragraph": 4,
+          "_num_paragraphs": 5,
+          "id": "length_constraints:nth_paragraph_first_word"
+        },
+        {
+          "_description_pattern": "There should be {num_paragraphs} paragraphs. Paragraphs and only paragraphs are separated with each other by two new lines as if it was '\\n\\n' in python. Paragraph {nth_paragraph} must start with word {first_word}.",
+          "_first_word": "physics",
+          "_nth_paragraph": 3,
+          "_num_paragraphs": 5,
+          "id": "length_constraints:nth_paragraph_first_word"
+        }
+      ],
+      "unit": "ai2-adapt-dev/evol_codealpaca_heval_decontaminated_32173"
+    },
+    {
+      "declared_arguments": {
+        "first_word": "pair",
+        "nth_paragraph": 6,
+        "num_paragraphs": 5
+      },
+      "instruction_id": "length_constraints:nth_paragraph_first_word",
+      "states_by_seed": [
+        {
+          "_description_pattern": "There should be {num_paragraphs} paragraphs. Paragraphs and only paragraphs are separated with each other by two new lines as if it was '\\n\\n' in python. Paragraph {nth_paragraph} must start with word {first_word}.",
+          "_first_word": "pair",
+          "_nth_paragraph": 4,
+          "_num_paragraphs": 5,
+          "id": "length_constraints:nth_paragraph_first_word"
+        },
+        {
+          "_description_pattern": "There should be {num_paragraphs} paragraphs. Paragraphs and only paragraphs are separated with each other by two new lines as if it was '\\n\\n' in python. Paragraph {nth_paragraph} must start with word {first_word}.",
+          "_first_word": "pair",
+          "_nth_paragraph": 3,
+          "_num_paragraphs": 5,
+          "id": "length_constraints:nth_paragraph_first_word"
+        }
+      ],
+      "unit": "zv8vnjp"
+    }
+  ],
+  "source_commit": "99b1ee970490a2d0d5664663eb0b1acc410b944c",
+  "status": "UNRESOLVED_VERIFIER_SEMANTICS",
+  "units": 1024,
+  "unsupported": []
+}

@@ -1,0 +1,148 @@
+{
+  "calibration_complete": false,
+  "consumed_all_g0_phases": {
+    "allocated_gpu_hours": 3.2538161689659404,
+    "input_tokens": 1448879,
+    "output_tokens": 178514,
+    "requests": 770
+  },
+  "format": "promptwitness.delta.native-context-summary/v1",
+  "ledger_sha256": "62797c3b673bf78a4b1faa6f0ae99049e826c931662b55d73ec71505efdd54f1",
+  "limitations": [
+    "Four fixed repeats per model are a diagnostic, not proof of a deterministic response table or cross-device stability.",
+    "Valid fit-side demonstrations are a cost fixture, not the native shuffled bootstrap/teacher sequence.",
+    "The two typed proposer inputs use the official formatter with static training-side summaries; full native proposal workflow costs remain unverified.",
+    "No method benefits, held-out task scores, final prompt selection or scientific confidence intervals are measured here."
+  ],
+  "models_native_context_phase": [
+    {
+      "cold_start_seconds": 45.25640829303302,
+      "elapsed_seconds": 3071.009237475926,
+      "model": "Qwen/Qwen3.5-9B",
+      "other_warm_seconds": 1.691740096313879,
+      "profiles": [
+        {
+          "family": "bfcl",
+          "mean_input_tokens": 299.75,
+          "mean_output_tokens": 55.9375,
+          "mean_warm_allocated_seconds": 5.770464196090637,
+          "output_cap_reached": 0,
+          "profile": "base",
+          "requests": 16,
+          "role": "task"
+        },
+        {
+          "family": "hotpotqa",
+          "mean_input_tokens": 6235.0,
+          "mean_output_tokens": 31.0,
+          "mean_warm_allocated_seconds": 7.133715358652574,
+          "output_cap_reached": 0,
+          "profile": "official_json_proposer_cost_fixture",
+          "requests": 1,
+          "role": "proposer"
+        },
+        {
+          "family": "hotpotqa",
+          "mean_input_tokens": 1504.3125,
+          "mean_output_tokens": 7.9375,
+          "mean_warm_allocated_seconds": 1.70470762130821,
+          "output_cap_reached": 0,
+          "profile": "base",
+          "requests": 16,
+          "role": "task"
+        },
+        {
+          "family": "instruction_following",
+          "mean_input_tokens": 2585.0,
+          "mean_output_tokens": 101.0,
+          "mean_warm_allocated_seconds": 12.219592881711598,
+          "output_cap_reached": 0,
+          "profile": "official_json_proposer_cost_fixture",
+          "requests": 1,
+          "role": "proposer"
+        },
+        {
+          "family": "instruction_following",
+          "mean_input_tokens": 231.0,
+          "mean_output_tokens": 500.125,
+          "mean_warm_allocated_seconds": 52.758347676530995,
+          "output_cap_reached": 1,
+          "profile": "base",
+          "requests": 16,
+          "role": "task"
+        },
+        {
+          "family": "instruction_following",
+          "mean_input_tokens": 2111.0,
+          "mean_output_tokens": 642.6875,
+          "mean_warm_allocated_seconds": 71.51486465630546,
+          "output_cap_reached": 2,
+          "profile": "four_valid_demo_cost_context",
+          "requests": 16,
+          "role": "task"
+        }
+      ],
+      "repeat_checks": [
+        {
+          "id": "repeat:hotpotqa:base:5ae117c855429901ffe4ad7b",
+          "identical_text_and_token_counts": true,
+          "repeat_of": "hotpotqa:base:5ae117c855429901ffe4ad7b"
+        },
+        {
+          "id": "repeat:bfcl:base:simple_python_2",
+          "identical_text_and_token_counts": true,
+          "repeat_of": "bfcl:base:simple_python_2"
+        },
+        {
+          "id": "repeat:instruction_following:base:personahub_0zxze6x2hqp2c5442wqi7ddb",
+          "identical_text_and_token_counts": true,
+          "repeat_of": "instruction_following:base:personahub_0zxze6x2hqp2c5442wqi7ddb"
+        },
+        {
+          "id": "repeat:instruction_following:four_valid_demo_cost_context:personahub_0zxze6x2hqp2c5442wqi7ddb",
+          "identical_text_and_token_counts": true,
+          "repeat_of": "instruction_following:four_valid_demo_cost_context:personahub_0zxze6x2hqp2c5442wqi7ddb"
+        }
+      ],
+      "requests": 70,
+      "revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+      "sampled_repeat_consistency": true
+    }
+  ],
+  "plan_sha256": "9bdf8c036ad1f2cc1cc87556d66bd4e23b6f673f1b091ce881e195c25e52ab66",
+  "prior_startup_failures_retained": [
+    {
+      "allocated_gpu_hours": 0.0013767787586483691,
+      "elapsed_seconds": 4.956403531134129,
+      "evidence_sha256": "01382b3b24f9c0bce414ff9aad2cce9b3a1f6dc1a92041ede0a11c605e3c12ac",
+      "ledger_model": "Qwen/Qwen3.5-9B@infra1-torch271:startup-failed1",
+      "model_requests": 0
+    },
+    {
+      "elapsed_seconds": 5.081947360886261,
+      "evidence_sha256": "9376d7073c2c58fae57eb29fbbbc7cf5e3e649faeaafee27946bc66fff96f0ae",
+      "ledger_model": "allenai/Olmo-3-7B-Instruct@cost-envelope-v1:startup-failed1",
+      "original_run": "allenai/Olmo-3-7B-Instruct@cost-envelope-v1"
+    },
+    {
+      "elapsed_seconds": 5.089839911088347,
+      "evidence_sha256": "64cb7b517df53d1d5724d8b5557c20a623e8ace21403c08d7e0de9e53e889bde",
+      "ledger_model": "allenai/Olmo-3-7B-Instruct@cost-envelope-v1:startup-failed2",
+      "original_run": "allenai/Olmo-3-7B-Instruct@cost-envelope-v1"
+    }
+  ],
+  "raw_files": [
+    {
+      "file": "qwen-native-context-v1.jsonl",
+      "sha256": "d6d9dd1edbb6a6096ca259c3a51d5e964a8039938351bfba93fba86142fe5bc7"
+    }
+  ],
+  "real_inference_failures": 0,
+  "remaining_model_costs_not_measured": [
+    "allenai/Olmo-3-7B-Instruct",
+    "mistralai/Mistral-7B-Instruct-v0.3"
+  ],
+  "remaining_planned_calls_not_executed": 140,
+  "status": "COST_MEASUREMENT_NOT_SCIENTIFIC_EFFECTS_OR_G0_APPROVAL",
+  "task_accuracy_or_method_effects_measured": false
+}

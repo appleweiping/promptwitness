@@ -1,0 +1,16 @@
+{
+  "format": "promptwitness.delta.worker-exit-observation/v1",
+  "collected_by_utc": "2026-09-27T02:02:55Z",
+  "probe_id": "native-context-v1",
+  "model": "Qwen/Qwen3.5-9B",
+  "worker_process_exit_code": 0,
+  "charged_attempts": 770,
+  "model_probe_completed": true,
+  "stdout_elapsed_seconds": 3070.8348067810293,
+  "stdout_cold_start_seconds": 45.25640829303302,
+  "stdout_allocated_gpu_hours": 0.8530096685502859,
+  "peak_allocated_memory_mib": 19529.76806640625,
+  "peak_reserved_memory_mib": 20566.0,
+  "ledger_elapsed_seconds": 3071.009237475926,
+  "accounting_note": "The ledger atexit elapsed value includes shutdown overhead and is used by the validated consumption summary; the earlier stdout snapshot is retained, not substituted for it."
+}

@@ -1,0 +1,101 @@
+{
+  "id": "allenai/Olmo-3-7B-Instruct",
+  "sha": "6e5971d9eba42665f5bd5a0fcf047f299ce1dccc",
+  "siblings": [
+    {
+      "rfilename": ".gitattributes",
+      "blobId": "26d213ee7b4500f33df6533007807c6eccfc6059",
+      "size": 1573
+    },
+    {
+      "rfilename": "README.md",
+      "blobId": "53f9006ad6a575eba8a44115ce9cd73b4149c5eb",
+      "size": 12466
+    },
+    {
+      "rfilename": "chat_template.jinja",
+      "blobId": "a21396285102846aa0787dd598623e7b8dbb2b67",
+      "size": 2613
+    },
+    {
+      "rfilename": "config.json",
+      "blobId": "9c118c14e7871ec96335dc859995b4ef554bb097",
+      "size": 1625
+    },
+    {
+      "rfilename": "generation_config.json",
+      "blobId": "0739fd213b7634f1c4b2273bec0d4eb87a552de2",
+      "size": 204
+    },
+    {
+      "rfilename": "merges.txt",
+      "blobId": "354558edcdbd64ca7abd407b8be3d5d09d39d781",
+      "size": 916646
+    },
+    {
+      "rfilename": "model-00001-of-00003.safetensors",
+      "blobId": "29108dfe5e76a9caaab53791e05a13905fc4b5da",
+      "size": 4969984976,
+      "lfs": {
+        "sha256": "e7bd4c8ba52177a815aee5929cb458a116a65799688d3e51402500a1cb77023c",
+        "size": 4969984976,
+        "pointerSize": 135
+      }
+    },
+    {
+      "rfilename": "model-00002-of-00003.safetensors",
+      "blobId": "b063de17072bc8c0c834df819db062b1dad78fa6",
+      "size": 4981161496,
+      "lfs": {
+        "sha256": "ea92aa0499a2ca02400e5d87324009e172bdbfb9809f2ac501485d8224382328",
+        "size": 4981161496,
+        "pointerSize": 135
+      }
+    },
+    {
+      "rfilename": "model-00003-of-00003.safetensors",
+      "blobId": "8ece41afac09fc9c729d24add4bb19783069d287",
+      "size": 4644917240,
+      "lfs": {
+        "sha256": "d50f95e4f2ec5fc4fbce6217cbf54fd1d700928b05e5550c8ee08bf4ba948925",
+        "size": 4644917240,
+        "pointerSize": 135
+      }
+    },
+    {
+      "rfilename": "model.safetensors.index.json",
+      "blobId": "421a80b181a130ccbc579a328fb349d8792a32ce",
+      "size": 29630
+    },
+    {
+      "rfilename": "olmo-instruct.png",
+      "blobId": "ded55adc1a0d1bb97a2bc2aaa31f3e721fe6cc52",
+      "size": 105001,
+      "lfs": {
+        "sha256": "9ae64ca9d1e2a551eb275120ec9d4dd8a3276eb10035ff118e566750d80b0435",
+        "size": 105001,
+        "pointerSize": 131
+      }
+    },
+    {
+      "rfilename": "special_tokens_map.json",
+      "blobId": "9d133a8f4995ff315a8a3e68dbba03409d214a8e",
+      "size": 581
+    },
+    {
+      "rfilename": "tokenizer.json",
+      "blobId": "54b3f7c465454c7878d6e955e44064d23c5a4052",
+      "size": 7137175
+    },
+    {
+      "rfilename": "tokenizer_config.json",
+      "blobId": "277b816675b12d22c3ca0e2b4af1b9dc88e30043",
+      "size": 4318
+    },
+    {
+      "rfilename": "vocab.json",
+      "blobId": "9c2954b1c94c5267dc84a5d0214efbc79ff8c3bd",
+      "size": 1611055
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+claim_id,claim,status,evidence,scope
+E01,Existing PromptDocument preserves immutable prompt structure,SOURCE_CHECKED,src/promptwitness/models.py,Existing engineering only
+E02,Existing tool argument checker implements a bounded schema subset,SOURCE_CHECKED,src/promptwitness/invocations.py,Not a behavior certificate
+E03,Existing task fixtures establish integration rather than benchmark quality,SOURCE_CHECKED,docs/task-suites.md,Existing authored fixtures only
+E04,Base commit has successful historical CI,VERIFIED,https://github.com/appleweiping/promptwitness/actions/runs/34699696102,acdee7653746987b7d4556a33ef4832a1638874c
+E05,Local base tests completed with 1434 passed and 3 skipped,MEASURED,research/G0_BASELINE_AUDIT.md,Base engineering only; not research effects
+E06,400 completed real cost-probe requests and all elapsed costs cross-checked,MEASURED,results/summary/g0/preflight-infra1.json,Cost measurement only; no accuracy or method benefit
+E07,Unmodified native MIPRO bootstrap and selector execute with synthetic outputs,MECHANICAL_CHECK_PASSED,results/summary/g0/mipro-native-mechanical-v4.json,25 synthetic task calls and 4 proposer calls; at most four total demos; zero real inference
+E08,Metadata-isolated derived training pools reach 512/256/256,PROPOSED_NOT_FROZEN,results/summary/g0/training-pools-proposed-v2.json,Exact group IDs are proxies; full final split and semantic isolation unverified
+E09,Replacement instruction pool avoids randomized builder defaults in audited seeds,METADATA_CHECK_PASSED,results/summary/g0/training-verifier-audit-v3.json,1612 constraint instances; no candidate response scoring
+E10,Two of four preselected fit-reserved instruction stress responses pass all constraints,COST_CONTEXT_AUDIT,results/summary/g0/instruction-cost-demonstration-audit-v1.json,Zero new calls; not a benchmark accuracy estimate or a method result
+E11,Cost accounting and isolation helper tests pass,MECHANICAL_CHECK_PASSED,results/summary/g0/helper-tests-independent-rerun.json,93 synthetic fixture tests; independent rerun exit zero; earlier JUnit WMI warning retained
+E12,700 completed real cost requests retain all prior calls and three startup failures,MEASURED,results/summary/g0/cost-envelope-v1.json,2.400758047 allocated GPU hours; eight-demo profile is pressure only
+E13,Four distinct fit-only accepted responses support a bounded cost-context fixture,COST_CONTEXT_AUDIT,results/summary/g0/instruction-envelope-fit-context-audit-v2.json,Seven of sixteen checked responses pass; no new model calls or optimization-benefit claim
+E14,Selected installed DSPy source files match pinned optimizer and formatter files,SOURCE_CHECK_PASSED,results/summary/g0/dspy-cost-formatter-source-check.json,Five files checked; not a complete dependency or runtime audit
+E15,Completed native-context Qwen boundary retains 770 total cost requests,MEASURED,results/summary/g0/native-context-qwen-boundary-v1.json,3.253816169 allocated GPU hours; four matching repeat diagnostics; remaining 140 optional calls not executed
+E16,Measured Qwen task subset exceeds protective GPU-hour forecast ceiling,RESOURCE_GATE_FAILED,results/summary/g0/model-boundary-budget-v1.json,2229.873 GPU hours with 20 percent reserve at declared matrix allowances; planning estimate not a certified lower bound or scientific negative result
+R01,Edit structure predicts behavior transitions beyond text only,NOT_TESTED,,Requires held-out real prompt lineages
+R02,Finite-look paired certificates control errors in one run,PROOF_OUTLINE_ONLY,research/PROTOCOL.md,Implementation and exhaustive checks pending
+R03,Evaluation cost falls against full and strong generic controls,NOT_TESTED,,Requires matched decision quality and measured cost
+R04,Structure contributes the preregistered independent gain,NOT_TESTED,,Requires same-certifier paired text-only ablation
+R05,Equal-budget optimization beats the strongest control,NOT_TESTED,,Requires the fixed 180-run matrix and corrected intervals
+R06,Frozen prompts transfer to a third model family,NOT_TESTED,,Requires isolated transfer evaluation

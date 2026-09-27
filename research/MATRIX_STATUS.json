@@ -1,0 +1,17 @@
+{
+  "format": "promptwitness.delta.scientific-matrix-status/v1",
+  "status": "RESOURCE_BLOCKED_BEFORE_G1_SCIENTIFIC_MATRIX_NOT_STARTED",
+  "terminal_report": "research/FINAL_STATUS.json",
+  "cost_preflight": {"completed_real_requests": 770, "native_context_models_completed": 1, "native_context_models_planned": 3, "remaining_optional_cost_calls_not_executed": 140, "g0_passed": false},
+  "research_implementation": {"M1_predictor": false, "M2_certifier": false, "M3_gate": false, "research_API_CLI": false},
+  "scientific_experiments": {
+    "mechanism_pairs": {"planned": 144, "completed": 0, "independent_lineages_per_cell": 8, "edits_per_lineage": 3},
+    "main_optimization_runs": {"planned": 180, "completed": 0, "families": 3, "models": 2, "seeds": [11, 23, 37, 53, 71], "configurations": 6},
+    "selection_checkpoints": {"maximum_planned": 540, "completed": 0, "budgets": [512, 1024, 2048]},
+    "one_final_prompt_per_run": {"planned": 180, "completed": 0},
+    "third_family_frozen_prompt_transfers": {"planned": 36, "completed": 0, "reoptimization": false},
+    "real_model_pilot": {"completed": false, "method_revision_cycles_used": 0}
+  },
+  "not_counted_as_scientific_results": ["Existing repository tests", "Official-source mechanical tests with synthetic responses", "G0 throughput/cost calls", "Training-side acceptance checks for cost demonstrations", "Input/ledger/accounting fixture tests"],
+  "remaining_prerequisites": ["Feasible representative full resource forecast", "Finalized legal data/scorer and split-access controls", "Minimal M1-M3 implementation and statistical cross-checks", "Real native optimizer accounting and complete actual score vectors", "Independent statistical review before formal freeze", "One frozen confirmation campaign and measured transfer", "Evidence-derived paper/reproduction and same-SHA remote CI"]
+}

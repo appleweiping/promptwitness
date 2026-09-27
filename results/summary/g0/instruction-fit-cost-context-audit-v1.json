@@ -1,0 +1,47 @@
+{
+  "accepted_count": 3,
+  "baseline_accuracy_or_method_effect_measured": false,
+  "final_test_accessed": false,
+  "first_four_accepted_for_cost_context": [
+    "ai2-adapt-dev/evol_codealpaca_heval_decontaminated_39201",
+    "personahub_4g1ukte60joojis3c2gtq3p4",
+    "ai2-adapt-dev/evol_codealpaca_heval_decontaminated_80007"
+  ],
+  "fit_only_units": [
+    {
+      "strict_all_constraints_pass": true,
+      "unit": "ai2-adapt-dev/evol_codealpaca_heval_decontaminated_39201"
+    },
+    {
+      "strict_all_constraints_pass": true,
+      "unit": "personahub_4g1ukte60joojis3c2gtq3p4"
+    },
+    {
+      "strict_all_constraints_pass": false,
+      "unit": "personahub_uiuvt4s1wo19cnc0uip0zb2v"
+    },
+    {
+      "strict_all_constraints_pass": false,
+      "unit": "ai2-adapt-dev/tulu_v3.9_synthetic_finalresp_wildguardmixtrain_decontaminated_50k_23534"
+    },
+    {
+      "strict_all_constraints_pass": true,
+      "unit": "ai2-adapt-dev/evol_codealpaca_heval_decontaminated_80007"
+    }
+  ],
+  "format": "promptwitness.delta.cost-demonstration-audit/v1",
+  "limitations": [
+    "The candidate audit unit set is determined only by previously frozen IDs, fit membership and hash order, before looking at the scores.",
+    "For the optional cost context, taking the first four passing responses resembles native bootstrap acceptance but is not a reproduction of its shuffle/teacher. All failed checks and prior inference costs remain recorded.",
+    "Not the actual randomized native MIPRO bootstrap sequence; acceptance here does not establish the final demonstration distribution or optimization benefit.",
+    "Binary training checks require all constraints, rather than upstream fractional reward. No thinking-text removal or loose whitespace transformation is applied."
+  ],
+  "new_model_calls": 0,
+  "pool_proposal_sha256": "e1f4f8f504b220e2f03fb610e95aa5bad9b1136aa070cfc4d6cefd715db76ef3",
+  "prior_response_file_sha256": "85dec7a533086428c97982b96c41333ecc6f7d29faf78fc0d3ec7334c69f2a4c",
+  "purpose": "Check whether the frozen repeated unscored-response stress context is a native accepted demonstration proxy.",
+  "scoped_to_all_prior_fit_responses": true,
+  "script_sha256": "17f770efc15288f74c9db687dd456da93649232ee27b3d5a1d74ff99c19c6e03",
+  "sentence_resource_sha256": "e57f64187974277726a3417ca6f181ec5403676c717672eef6a748a7b20e0106",
+  "source_commit": "99b1ee970490a2d0d5664663eb0b1acc410b944c"
+}

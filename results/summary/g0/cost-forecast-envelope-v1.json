@@ -1,0 +1,1907 @@
+{
+  "format": "promptwitness.delta.resource-forecast/v1",
+  "g0_passed": false,
+  "measurements_sha256": "c3c18190036ab1946c8f3f7497c6205abd9111aa5e5e5a360cd555b5efac46d0",
+  "plan_sha256": "5cb90c6d6933c9368078edb3f2845586efa6b85e7ed9820212cc3d78946daa77",
+  "scenarios": {
+    "all_stress_proxy": {
+      "before_reserve": {
+        "allocated_gpu_hours": 7104.131987363633,
+        "input_tokens": 4028907698.5,
+        "output_tokens": 551864374.5,
+        "requests": 654844
+      },
+      "ceilings": {
+        "allocated_gpu_hours": 1000,
+        "input_tokens": 2000000000,
+        "output_tokens": 200000000,
+        "requests": 800000
+      },
+      "exceeded": [
+        "input_tokens",
+        "output_tokens",
+        "allocated_gpu_hours"
+      ],
+      "mechanism_stress_fraction": 1,
+      "optimization_stress_fraction": 1,
+      "reference_cache_valid_assumption": true,
+      "stages": [
+        {
+          "allocated_gpu_hours": 12.759672727844452,
+          "eight_demo_proxy_fraction": 1,
+          "family": "bfcl",
+          "input_tokens": 36842496.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 879616.0,
+          "requests": 16384,
+          "role": "task",
+          "stage": "mechanism_full_tables"
+        },
+        {
+          "allocated_gpu_hours": 41.8676761382396,
+          "eight_demo_proxy_fraction": 1,
+          "family": "bfcl",
+          "input_tokens": 120889440.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 2886240.0,
+          "requests": 53760,
+          "role": "task",
+          "stage": "main_nonreference_evaluation"
+        },
+        {
+          "allocated_gpu_hours": 0.07844315736856726,
+          "eight_demo_proxy_fraction": 0,
+          "family": "bfcl",
+          "input_tokens": 80960.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 12736.0,
+          "requests": 256,
+          "role": "task",
+          "stage": "full_seed_reference"
+        },
+        {
+          "allocated_gpu_hours": 3.3804525028591357,
+          "eight_demo_proxy_fraction": null,
+          "family": "bfcl",
+          "input_tokens": 8275200.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 107520.0,
+          "requests": 3840,
+          "role": "proposer",
+          "stage": "main_all_proposer_roles"
+        },
+        {
+          "allocated_gpu_hours": 17.94328977353126,
+          "eight_demo_proxy_fraction": 1,
+          "family": "bfcl",
+          "input_tokens": 51809760.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 1236960.0,
+          "requests": 23040,
+          "role": "task",
+          "stage": "all_selection_checkpoints"
+        },
+        {
+          "allocated_gpu_hours": 5.981096591177087,
+          "eight_demo_proxy_fraction": 1,
+          "family": "bfcl",
+          "input_tokens": 17269920.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 412320.0,
+          "requests": 7680,
+          "role": "task",
+          "stage": "one_final_prompt_per_run"
+        },
+        {
+          "allocated_gpu_hours": 22.151204261575803,
+          "eight_demo_proxy_fraction": 1,
+          "family": "hotpotqa",
+          "input_tokens": 202800128.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 110592.0,
+          "requests": 16384,
+          "role": "task",
+          "stage": "mechanism_full_tables"
+        },
+        {
+          "allocated_gpu_hours": 72.68363898329561,
+          "eight_demo_proxy_fraction": 1,
+          "family": "hotpotqa",
+          "input_tokens": 665437920.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 362880.0,
+          "requests": 53760,
+          "role": "task",
+          "stage": "main_nonreference_evaluation"
+        },
+        {
+          "allocated_gpu_hours": 0.040754080327765806,
+          "eight_demo_proxy_fraction": 0,
+          "family": "hotpotqa",
+          "input_tokens": 356592.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 1600.0,
+          "requests": 256,
+          "role": "task",
+          "stage": "full_seed_reference"
+        },
+        {
+          "allocated_gpu_hours": 5.853981747073432,
+          "eight_demo_proxy_fraction": null,
+          "family": "hotpotqa",
+          "input_tokens": 43457280.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 76800.0,
+          "requests": 3840,
+          "role": "proposer",
+          "stage": "main_all_proposer_roles"
+        },
+        {
+          "allocated_gpu_hours": 31.15013099284097,
+          "eight_demo_proxy_fraction": 1,
+          "family": "hotpotqa",
+          "input_tokens": 285187680.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 155520.0,
+          "requests": 23040,
+          "role": "task",
+          "stage": "all_selection_checkpoints"
+        },
+        {
+          "allocated_gpu_hours": 10.383376997613658,
+          "eight_demo_proxy_fraction": 1,
+          "family": "hotpotqa",
+          "input_tokens": 95062560.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 51840.0,
+          "requests": 7680,
+          "role": "task",
+          "stage": "one_final_prompt_per_run"
+        },
+        {
+          "allocated_gpu_hours": 502.90394816921287,
+          "eight_demo_proxy_fraction": 1,
+          "family": "instruction_following",
+          "input_tokens": 65666048.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 27663360.0,
+          "requests": 16384,
+          "role": "task",
+          "stage": "mechanism_full_tables"
+        },
+        {
+          "allocated_gpu_hours": 1650.1535799302299,
+          "eight_demo_proxy_fraction": 1,
+          "family": "instruction_following",
+          "input_tokens": 215466720.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 90770400.0,
+          "requests": 53760,
+          "role": "task",
+          "stage": "main_nonreference_evaluation"
+        },
+        {
+          "allocated_gpu_hours": 1.450574715483023,
+          "eight_demo_proxy_fraction": 0,
+          "family": "instruction_following",
+          "input_tokens": 72032.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 106848.0,
+          "requests": 256,
+          "role": "task",
+          "stage": "full_seed_reference"
+        },
+        {
+          "allocated_gpu_hours": 136.68942063807697,
+          "eight_demo_proxy_fraction": null,
+          "family": "instruction_following",
+          "input_tokens": 15198720.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 7691520.0,
+          "requests": 3840,
+          "role": "proposer",
+          "stage": "main_all_proposer_roles"
+        },
+        {
+          "allocated_gpu_hours": 707.2086771129556,
+          "eight_demo_proxy_fraction": 1,
+          "family": "instruction_following",
+          "input_tokens": 92342880.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 38901600.0,
+          "requests": 23040,
+          "role": "task",
+          "stage": "all_selection_checkpoints"
+        },
+        {
+          "allocated_gpu_hours": 276.2533894972483,
+          "eight_demo_proxy_fraction": 1,
+          "family": "instruction_following",
+          "input_tokens": 36071437.5,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 15195937.5,
+          "requests": 9000,
+          "role": "task",
+          "stage": "one_final_prompt_per_run"
+        },
+        {
+          "allocated_gpu_hours": 2.333559325451321,
+          "eight_demo_proxy_fraction": 1,
+          "family": "bfcl",
+          "input_tokens": 36606976.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 41984.0,
+          "requests": 16384,
+          "role": "task",
+          "stage": "mechanism_full_tables"
+        },
+        {
+          "allocated_gpu_hours": 7.656991536637148,
+          "eight_demo_proxy_fraction": 1,
+          "family": "bfcl",
+          "input_tokens": 120116640.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 137760.0,
+          "requests": 53760,
+          "role": "task",
+          "stage": "main_nonreference_evaluation"
+        },
+        {
+          "allocated_gpu_hours": 0.02411773344265918,
+          "eight_demo_proxy_fraction": 0,
+          "family": "bfcl",
+          "input_tokens": 79472.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 2080.0,
+          "requests": 256,
+          "role": "task",
+          "stage": "full_seed_reference"
+        },
+        {
+          "allocated_gpu_hours": 0.8613101520066461,
+          "eight_demo_proxy_fraction": null,
+          "family": "bfcl",
+          "input_tokens": 8325120.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 7680.0,
+          "requests": 3840,
+          "role": "proposer",
+          "stage": "main_all_proposer_roles"
+        },
+        {
+          "allocated_gpu_hours": 3.2815678014159206,
+          "eight_demo_proxy_fraction": 1,
+          "family": "bfcl",
+          "input_tokens": 51478560.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 59040.0,
+          "requests": 23040,
+          "role": "task",
+          "stage": "all_selection_checkpoints"
+        },
+        {
+          "allocated_gpu_hours": 1.0938559338053069,
+          "eight_demo_proxy_fraction": 1,
+          "family": "bfcl",
+          "input_tokens": 17159520.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 19680.0,
+          "requests": 7680,
+          "role": "task",
+          "stage": "one_final_prompt_per_run"
+        },
+        {
+          "allocated_gpu_hours": 21.31567416732311,
+          "eight_demo_proxy_fraction": 1,
+          "family": "hotpotqa",
+          "input_tokens": 191841280.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 290816.0,
+          "requests": 16384,
+          "role": "task",
+          "stage": "mechanism_full_tables"
+        },
+        {
+          "allocated_gpu_hours": 69.94205586152896,
+          "eight_demo_proxy_fraction": 1,
+          "family": "hotpotqa",
+          "input_tokens": 629479200.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 954240.0,
+          "requests": 53760,
+          "role": "task",
+          "stage": "main_nonreference_evaluation"
+        },
+        {
+          "allocated_gpu_hours": 0.026450485179117987,
+          "eight_demo_proxy_fraction": 0,
+          "family": "hotpotqa",
+          "input_tokens": 338560.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 960.0,
+          "requests": 256,
+          "role": "task",
+          "stage": "full_seed_reference"
+        },
+        {
+          "allocated_gpu_hours": 3.356923874509831,
+          "eight_demo_proxy_fraction": null,
+          "family": "hotpotqa",
+          "input_tokens": 41525760.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 23040.0,
+          "requests": 3840,
+          "role": "proposer",
+          "stage": "main_all_proposer_roles"
+        },
+        {
+          "allocated_gpu_hours": 29.975166797798124,
+          "eight_demo_proxy_fraction": 1,
+          "family": "hotpotqa",
+          "input_tokens": 269776800.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 408960.0,
+          "requests": 23040,
+          "role": "task",
+          "stage": "all_selection_checkpoints"
+        },
+        {
+          "allocated_gpu_hours": 9.991722265932708,
+          "eight_demo_proxy_fraction": 1,
+          "family": "hotpotqa",
+          "input_tokens": 89925600.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 136320.0,
+          "requests": 7680,
+          "role": "task",
+          "stage": "one_final_prompt_per_run"
+        },
+        {
+          "allocated_gpu_hours": 527.2491429018127,
+          "eight_demo_proxy_fraction": 1,
+          "family": "instruction_following",
+          "input_tokens": 62701568.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 56535040.0,
+          "requests": 16384,
+          "role": "task",
+          "stage": "mechanism_full_tables"
+        },
+        {
+          "allocated_gpu_hours": 1730.036250146573,
+          "eight_demo_proxy_fraction": 1,
+          "family": "instruction_following",
+          "input_tokens": 205739520.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 185505600.0,
+          "requests": 53760,
+          "role": "task",
+          "stage": "main_nonreference_evaluation"
+        },
+        {
+          "allocated_gpu_hours": 0.35603676176600985,
+          "eight_demo_proxy_fraction": 0,
+          "family": "instruction_following",
+          "input_tokens": 70944.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 34384.0,
+          "requests": 256,
+          "role": "task",
+          "stage": "full_seed_reference"
+        },
+        {
+          "allocated_gpu_hours": 97.89346525996179,
+          "eight_demo_proxy_fraction": null,
+          "family": "instruction_following",
+          "input_tokens": 14741760.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 7864320.0,
+          "requests": 3840,
+          "role": "proposer",
+          "stage": "main_all_proposer_roles"
+        },
+        {
+          "allocated_gpu_hours": 741.444107205674,
+          "eight_demo_proxy_fraction": 1,
+          "family": "instruction_following",
+          "input_tokens": 88174080.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 79502400.0,
+          "requests": 23040,
+          "role": "task",
+          "stage": "all_selection_checkpoints"
+        },
+        {
+          "allocated_gpu_hours": 289.62660437721644,
+          "eight_demo_proxy_fraction": 1,
+          "family": "instruction_following",
+          "input_tokens": 34443000.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 31055625.0,
+          "requests": 9000,
+          "role": "task",
+          "stage": "one_final_prompt_per_run"
+        },
+        {
+          "allocated_gpu_hours": 2.294675290798148,
+          "eight_demo_proxy_fraction": 1,
+          "family": "bfcl",
+          "input_tokens": 7241664.0,
+          "model": "mistralai/Mistral-7B-Instruct-v0.3",
+          "output_tokens": 237696.0,
+          "requests": 3072,
+          "role": "task",
+          "stage": "frozen_prompt_transfer_only"
+        },
+        {
+          "allocated_gpu_hours": 4.376978164590896,
+          "eight_demo_proxy_fraction": 1,
+          "family": "hotpotqa",
+          "input_tokens": 41848704.0,
+          "model": "mistralai/Mistral-7B-Instruct-v0.3",
+          "output_tokens": 27840.0,
+          "requests": 3072,
+          "role": "task",
+          "stage": "frozen_prompt_transfer_only"
+        },
+        {
+          "allocated_gpu_hours": 24.05667065992311,
+          "eight_demo_proxy_fraction": 1,
+          "family": "instruction_following",
+          "input_tokens": 15100425.0,
+          "model": "mistralai/Mistral-7B-Instruct-v0.3",
+          "output_tokens": 1599525.0,
+          "requests": 3600,
+          "role": "task",
+          "stage": "frozen_prompt_transfer_only"
+        },
+        {
+          "allocated_gpu_hours": 30,
+          "input_tokens": 148535250.0,
+          "output_tokens": 644250.0,
+          "requests": 12000,
+          "stage": "pilot_and_g1_all_roles"
+        },
+        {
+          "allocated_gpu_hours": 5.604594595885525,
+          "basis": "400 loads at slowest measured cold start; already consumed G0 cold starts separately retained",
+          "loads": 400,
+          "stage": "planned_cold_reloads"
+        }
+      ],
+      "with_reserve": {
+        "allocated_gpu_hours": 8524.95838483636,
+        "input_tokens": 4834689239,
+        "output_tokens": 662237250,
+        "requests": 785813
+      },
+      "within_protective_ceilings_under_assumptions": false
+    },
+    "base_only_optimistic_not_native_context": {
+      "before_reserve": {
+        "allocated_gpu_hours": 1115.0232102707776,
+        "input_tokens": 683395137.0,
+        "output_tokens": 82376483.5,
+        "requests": 654844
+      },
+      "ceilings": {
+        "allocated_gpu_hours": 1000,
+        "input_tokens": 2000000000,
+        "output_tokens": 200000000,
+        "requests": 800000
+      },
+      "exceeded": [
+        "allocated_gpu_hours"
+      ],
+      "mechanism_stress_fraction": 0,
+      "optimization_stress_fraction": 0,
+      "reference_cache_valid_assumption": true,
+      "stages": [
+        {
+          "allocated_gpu_hours": 5.020362071588305,
+          "eight_demo_proxy_fraction": 0,
+          "family": "bfcl",
+          "input_tokens": 5181440.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 815104.0,
+          "requests": 16384,
+          "role": "task",
+          "stage": "mechanism_full_tables"
+        },
+        {
+          "allocated_gpu_hours": 16.473063047399123,
+          "eight_demo_proxy_fraction": 0,
+          "family": "bfcl",
+          "input_tokens": 17001600.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 2674560.0,
+          "requests": 53760,
+          "role": "task",
+          "stage": "main_nonreference_evaluation"
+        },
+        {
+          "allocated_gpu_hours": 0.07844315736856726,
+          "eight_demo_proxy_fraction": 0,
+          "family": "bfcl",
+          "input_tokens": 80960.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 12736.0,
+          "requests": 256,
+          "role": "task",
+          "stage": "full_seed_reference"
+        },
+        {
+          "allocated_gpu_hours": 3.3804525028591357,
+          "eight_demo_proxy_fraction": null,
+          "family": "bfcl",
+          "input_tokens": 8275200.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 107520.0,
+          "requests": 3840,
+          "role": "proposer",
+          "stage": "main_all_proposer_roles"
+        },
+        {
+          "allocated_gpu_hours": 7.059884163171053,
+          "eight_demo_proxy_fraction": 0,
+          "family": "bfcl",
+          "input_tokens": 7286400.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 1146240.0,
+          "requests": 23040,
+          "role": "task",
+          "stage": "all_selection_checkpoints"
+        },
+        {
+          "allocated_gpu_hours": 2.3532947210570176,
+          "eight_demo_proxy_fraction": 0,
+          "family": "bfcl",
+          "input_tokens": 2428800.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 382080.0,
+          "requests": 7680,
+          "role": "task",
+          "stage": "one_final_prompt_per_run"
+        },
+        {
+          "allocated_gpu_hours": 2.6082611409770116,
+          "eight_demo_proxy_fraction": 0,
+          "family": "hotpotqa",
+          "input_tokens": 22821888.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 102400.0,
+          "requests": 16384,
+          "role": "task",
+          "stage": "mechanism_full_tables"
+        },
+        {
+          "allocated_gpu_hours": 8.558356868830819,
+          "eight_demo_proxy_fraction": 0,
+          "family": "hotpotqa",
+          "input_tokens": 74884320.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 336000.0,
+          "requests": 53760,
+          "role": "task",
+          "stage": "main_nonreference_evaluation"
+        },
+        {
+          "allocated_gpu_hours": 0.040754080327765806,
+          "eight_demo_proxy_fraction": 0,
+          "family": "hotpotqa",
+          "input_tokens": 356592.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 1600.0,
+          "requests": 256,
+          "role": "task",
+          "stage": "full_seed_reference"
+        },
+        {
+          "allocated_gpu_hours": 5.853981747073432,
+          "eight_demo_proxy_fraction": null,
+          "family": "hotpotqa",
+          "input_tokens": 43457280.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 76800.0,
+          "requests": 3840,
+          "role": "proposer",
+          "stage": "main_all_proposer_roles"
+        },
+        {
+          "allocated_gpu_hours": 3.6678672294989227,
+          "eight_demo_proxy_fraction": 0,
+          "family": "hotpotqa",
+          "input_tokens": 32093280.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 144000.0,
+          "requests": 23040,
+          "role": "task",
+          "stage": "all_selection_checkpoints"
+        },
+        {
+          "allocated_gpu_hours": 1.222622409832974,
+          "eight_demo_proxy_fraction": 0,
+          "family": "hotpotqa",
+          "input_tokens": 10697760.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 48000.0,
+          "requests": 7680,
+          "role": "task",
+          "stage": "one_final_prompt_per_run"
+        },
+        {
+          "allocated_gpu_hours": 92.83678179091348,
+          "eight_demo_proxy_fraction": 0,
+          "family": "instruction_following",
+          "input_tokens": 4610048.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 6838272.0,
+          "requests": 16384,
+          "role": "task",
+          "stage": "mechanism_full_tables"
+        },
+        {
+          "allocated_gpu_hours": 304.62069025143484,
+          "eight_demo_proxy_fraction": 0,
+          "family": "instruction_following",
+          "input_tokens": 15126720.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 22438080.0,
+          "requests": 53760,
+          "role": "task",
+          "stage": "main_nonreference_evaluation"
+        },
+        {
+          "allocated_gpu_hours": 1.450574715483023,
+          "eight_demo_proxy_fraction": 0,
+          "family": "instruction_following",
+          "input_tokens": 72032.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 106848.0,
+          "requests": 256,
+          "role": "task",
+          "stage": "full_seed_reference"
+        },
+        {
+          "allocated_gpu_hours": 136.68942063807697,
+          "eight_demo_proxy_fraction": null,
+          "family": "instruction_following",
+          "input_tokens": 15198720.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 7691520.0,
+          "requests": 3840,
+          "role": "proposer",
+          "stage": "main_all_proposer_roles"
+        },
+        {
+          "allocated_gpu_hours": 130.55172439347209,
+          "eight_demo_proxy_fraction": 0,
+          "family": "instruction_following",
+          "input_tokens": 6482880.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 9616320.0,
+          "requests": 23040,
+          "role": "task",
+          "stage": "all_selection_checkpoints"
+        },
+        {
+          "allocated_gpu_hours": 50.99676734120003,
+          "eight_demo_proxy_fraction": 0,
+          "family": "instruction_following",
+          "input_tokens": 2532375.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 3756375.0,
+          "requests": 9000,
+          "role": "task",
+          "stage": "one_final_prompt_per_run"
+        },
+        {
+          "allocated_gpu_hours": 1.5435349403301875,
+          "eight_demo_proxy_fraction": 0,
+          "family": "bfcl",
+          "input_tokens": 5086208.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 133120.0,
+          "requests": 16384,
+          "role": "task",
+          "stage": "mechanism_full_tables"
+        },
+        {
+          "allocated_gpu_hours": 5.064724022958428,
+          "eight_demo_proxy_fraction": 0,
+          "family": "bfcl",
+          "input_tokens": 16689120.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 436800.0,
+          "requests": 53760,
+          "role": "task",
+          "stage": "main_nonreference_evaluation"
+        },
+        {
+          "allocated_gpu_hours": 0.02411773344265918,
+          "eight_demo_proxy_fraction": 0,
+          "family": "bfcl",
+          "input_tokens": 79472.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 2080.0,
+          "requests": 256,
+          "role": "task",
+          "stage": "full_seed_reference"
+        },
+        {
+          "allocated_gpu_hours": 0.8613101520066461,
+          "eight_demo_proxy_fraction": null,
+          "family": "bfcl",
+          "input_tokens": 8325120.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 7680.0,
+          "requests": 3840,
+          "role": "proposer",
+          "stage": "main_all_proposer_roles"
+        },
+        {
+          "allocated_gpu_hours": 2.170596009839326,
+          "eight_demo_proxy_fraction": 0,
+          "family": "bfcl",
+          "input_tokens": 7152480.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 187200.0,
+          "requests": 23040,
+          "role": "task",
+          "stage": "all_selection_checkpoints"
+        },
+        {
+          "allocated_gpu_hours": 0.7235320032797755,
+          "eight_demo_proxy_fraction": 0,
+          "family": "bfcl",
+          "input_tokens": 2384160.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 62400.0,
+          "requests": 7680,
+          "role": "task",
+          "stage": "one_final_prompt_per_run"
+        },
+        {
+          "allocated_gpu_hours": 1.6928310514635512,
+          "eight_demo_proxy_fraction": 0,
+          "family": "hotpotqa",
+          "input_tokens": 21667840.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 61440.0,
+          "requests": 16384,
+          "role": "task",
+          "stage": "mechanism_full_tables"
+        },
+        {
+          "allocated_gpu_hours": 5.554601887614777,
+          "eight_demo_proxy_fraction": 0,
+          "family": "hotpotqa",
+          "input_tokens": 71097600.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 201600.0,
+          "requests": 53760,
+          "role": "task",
+          "stage": "main_nonreference_evaluation"
+        },
+        {
+          "allocated_gpu_hours": 0.026450485179117987,
+          "eight_demo_proxy_fraction": 0,
+          "family": "hotpotqa",
+          "input_tokens": 338560.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 960.0,
+          "requests": 256,
+          "role": "task",
+          "stage": "full_seed_reference"
+        },
+        {
+          "allocated_gpu_hours": 3.356923874509831,
+          "eight_demo_proxy_fraction": null,
+          "family": "hotpotqa",
+          "input_tokens": 41525760.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 23040.0,
+          "requests": 3840,
+          "role": "proposer",
+          "stage": "main_all_proposer_roles"
+        },
+        {
+          "allocated_gpu_hours": 2.380543666120619,
+          "eight_demo_proxy_fraction": 0,
+          "family": "hotpotqa",
+          "input_tokens": 30470400.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 86400.0,
+          "requests": 23040,
+          "role": "task",
+          "stage": "all_selection_checkpoints"
+        },
+        {
+          "allocated_gpu_hours": 0.7935145553735397,
+          "eight_demo_proxy_fraction": 0,
+          "family": "hotpotqa",
+          "input_tokens": 10156800.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 28800.0,
+          "requests": 7680,
+          "role": "task",
+          "stage": "one_final_prompt_per_run"
+        },
+        {
+          "allocated_gpu_hours": 22.78635275302463,
+          "eight_demo_proxy_fraction": 0,
+          "family": "instruction_following",
+          "input_tokens": 4540416.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 2200576.0,
+          "requests": 16384,
+          "role": "task",
+          "stage": "mechanism_full_tables"
+        },
+        {
+          "allocated_gpu_hours": 74.76771997086206,
+          "eight_demo_proxy_fraction": 0,
+          "family": "instruction_following",
+          "input_tokens": 14898240.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 7220640.0,
+          "requests": 53760,
+          "role": "task",
+          "stage": "main_nonreference_evaluation"
+        },
+        {
+          "allocated_gpu_hours": 0.35603676176600985,
+          "eight_demo_proxy_fraction": 0,
+          "family": "instruction_following",
+          "input_tokens": 70944.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 34384.0,
+          "requests": 256,
+          "role": "task",
+          "stage": "full_seed_reference"
+        },
+        {
+          "allocated_gpu_hours": 97.89346525996179,
+          "eight_demo_proxy_fraction": null,
+          "family": "instruction_following",
+          "input_tokens": 14741760.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 7864320.0,
+          "requests": 3840,
+          "role": "proposer",
+          "stage": "main_all_proposer_roles"
+        },
+        {
+          "allocated_gpu_hours": 32.043308558940886,
+          "eight_demo_proxy_fraction": 0,
+          "family": "instruction_following",
+          "input_tokens": 6384960.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 3094560.0,
+          "requests": 23040,
+          "role": "task",
+          "stage": "all_selection_checkpoints"
+        },
+        {
+          "allocated_gpu_hours": 12.516917405836281,
+          "eight_demo_proxy_fraction": 0,
+          "family": "instruction_following",
+          "input_tokens": 2494125.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 1208812.5,
+          "requests": 9000,
+          "role": "task",
+          "stage": "one_final_prompt_per_run"
+        },
+        {
+          "allocated_gpu_hours": 1.3612098009412485,
+          "eight_demo_proxy_fraction": 0,
+          "family": "bfcl",
+          "input_tokens": 998400.0,
+          "model": "mistralai/Mistral-7B-Instruct-v0.3",
+          "output_tokens": 337536.0,
+          "requests": 3072,
+          "role": "task",
+          "stage": "frozen_prompt_transfer_only"
+        },
+        {
+          "allocated_gpu_hours": 0.42917856452614067,
+          "eight_demo_proxy_fraction": 0,
+          "family": "hotpotqa",
+          "input_tokens": 4692480.0,
+          "model": "mistralai/Mistral-7B-Instruct-v0.3",
+          "output_tokens": 29760.0,
+          "requests": 3072,
+          "role": "task",
+          "stage": "frozen_prompt_transfer_only"
+        },
+        {
+          "allocated_gpu_hours": 37.20768589890504,
+          "eight_demo_proxy_fraction": 0,
+          "family": "instruction_following",
+          "input_tokens": 1107225.0,
+          "model": "mistralai/Mistral-7B-Instruct-v0.3",
+          "output_tokens": 2064825.0,
+          "requests": 3600,
+          "role": "task",
+          "stage": "frozen_prompt_transfer_only"
+        },
+        {
+          "allocated_gpu_hours": 30,
+          "input_tokens": 148535250.0,
+          "output_tokens": 644250.0,
+          "requests": 12000,
+          "stage": "pilot_and_g1_all_roles"
+        },
+        {
+          "allocated_gpu_hours": 5.604594595885525,
+          "basis": "400 loads at slowest measured cold start; already consumed G0 cold starts separately retained",
+          "loads": 400,
+          "stage": "planned_cold_reloads"
+        }
+      ],
+      "with_reserve": {
+        "allocated_gpu_hours": 1338.027852324933,
+        "input_tokens": 820074165,
+        "output_tokens": 98851781,
+        "requests": 785813
+      },
+      "within_protective_ceilings_under_assumptions": false
+    },
+    "no_cross_run_reference_cache": {
+      "before_reserve": {
+        "allocated_gpu_hours": 3088.522310558098,
+        "input_tokens": 1783145009.5,
+        "output_tokens": 237191204.5,
+        "requests": 699388
+      },
+      "ceilings": {
+        "allocated_gpu_hours": 1000,
+        "input_tokens": 2000000000,
+        "output_tokens": 200000000,
+        "requests": 800000
+      },
+      "exceeded": [
+        "requests",
+        "input_tokens",
+        "output_tokens",
+        "allocated_gpu_hours"
+      ],
+      "mechanism_stress_fraction": 0.25,
+      "optimization_stress_fraction": 0.3333333333333333,
+      "reference_cache_valid_assumption": false,
+      "stages": [
+        {
+          "allocated_gpu_hours": 6.9551897356523416,
+          "eight_demo_proxy_fraction": 0.25,
+          "family": "bfcl",
+          "input_tokens": 13096704.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 831232.0,
+          "requests": 16384,
+          "role": "task",
+          "stage": "mechanism_full_tables"
+        },
+        {
+          "allocated_gpu_hours": 24.937934077679287,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "bfcl",
+          "input_tokens": 51630880.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 2745120.0,
+          "requests": 53760,
+          "role": "task",
+          "stage": "main_nonreference_evaluation"
+        },
+        {
+          "allocated_gpu_hours": 2.3532947210570176,
+          "eight_demo_proxy_fraction": 0,
+          "family": "bfcl",
+          "input_tokens": 2428800.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 382080.0,
+          "requests": 7680,
+          "role": "task",
+          "stage": "full_seed_reference"
+        },
+        {
+          "allocated_gpu_hours": 3.3804525028591357,
+          "eight_demo_proxy_fraction": null,
+          "family": "bfcl",
+          "input_tokens": 8275200.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 107520.0,
+          "requests": 3840,
+          "role": "proposer",
+          "stage": "main_all_proposer_roles"
+        },
+        {
+          "allocated_gpu_hours": 10.687686033291122,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "bfcl",
+          "input_tokens": 22127520.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 1176480.0,
+          "requests": 23040,
+          "role": "task",
+          "stage": "all_selection_checkpoints"
+        },
+        {
+          "allocated_gpu_hours": 3.5625620110970404,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "bfcl",
+          "input_tokens": 7375840.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 392160.0,
+          "requests": 7680,
+          "role": "task",
+          "stage": "one_final_prompt_per_run"
+        },
+        {
+          "allocated_gpu_hours": 7.49399692112671,
+          "eight_demo_proxy_fraction": 0.25,
+          "family": "hotpotqa",
+          "input_tokens": 67816448.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 104448.0,
+          "requests": 16384,
+          "role": "task",
+          "stage": "mechanism_full_tables"
+        },
+        {
+          "allocated_gpu_hours": 29.933450906985744,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "hotpotqa",
+          "input_tokens": 271735519.99999994,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 344960.0,
+          "requests": 53760,
+          "role": "task",
+          "stage": "main_nonreference_evaluation"
+        },
+        {
+          "allocated_gpu_hours": 1.222622409832974,
+          "eight_demo_proxy_fraction": 0,
+          "family": "hotpotqa",
+          "input_tokens": 10697760.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 48000.0,
+          "requests": 7680,
+          "role": "task",
+          "stage": "full_seed_reference"
+        },
+        {
+          "allocated_gpu_hours": 5.853981747073432,
+          "eight_demo_proxy_fraction": null,
+          "family": "hotpotqa",
+          "input_tokens": 43457280.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 76800.0,
+          "requests": 3840,
+          "role": "proposer",
+          "stage": "main_all_proposer_roles"
+        },
+        {
+          "allocated_gpu_hours": 12.828621817279606,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "hotpotqa",
+          "input_tokens": 116458079.99999999,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 147840.0,
+          "requests": 23040,
+          "role": "task",
+          "stage": "all_selection_checkpoints"
+        },
+        {
+          "allocated_gpu_hours": 4.276207272426535,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "hotpotqa",
+          "input_tokens": 38819359.99999999,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 49280.0,
+          "requests": 7680,
+          "role": "task",
+          "stage": "one_final_prompt_per_run"
+        },
+        {
+          "allocated_gpu_hours": 195.35357338548832,
+          "eight_demo_proxy_fraction": 0.25,
+          "family": "instruction_following",
+          "input_tokens": 19874048.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 12044544.0,
+          "requests": 16384,
+          "role": "task",
+          "stage": "mechanism_full_tables"
+        },
+        {
+          "allocated_gpu_hours": 753.1316534776997,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "instruction_following",
+          "input_tokens": 81906719.99999999,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 45215520.0,
+          "requests": 53760,
+          "role": "task",
+          "stage": "main_nonreference_evaluation"
+        },
+        {
+          "allocated_gpu_hours": 43.51724146449069,
+          "eight_demo_proxy_fraction": 0,
+          "family": "instruction_following",
+          "input_tokens": 2160960.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 3205440.0,
+          "requests": 7680,
+          "role": "task",
+          "stage": "full_seed_reference"
+        },
+        {
+          "allocated_gpu_hours": 136.68942063807697,
+          "eight_demo_proxy_fraction": null,
+          "family": "instruction_following",
+          "input_tokens": 15198720.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 7691520.0,
+          "requests": 3840,
+          "role": "proposer",
+          "stage": "main_all_proposer_roles"
+        },
+        {
+          "allocated_gpu_hours": 322.77070863329993,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "instruction_following",
+          "input_tokens": 35102879.99999999,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 19378080.0,
+          "requests": 23040,
+          "role": "task",
+          "stage": "all_selection_checkpoints"
+        },
+        {
+          "allocated_gpu_hours": 126.08230805988278,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "instruction_following",
+          "input_tokens": 13712062.499999998,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 7569562.5,
+          "requests": 9000,
+          "role": "task",
+          "stage": "one_final_prompt_per_run"
+        },
+        {
+          "allocated_gpu_hours": 1.741041036610471,
+          "eight_demo_proxy_fraction": 0.25,
+          "family": "bfcl",
+          "input_tokens": 12966400.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 110336.0,
+          "requests": 16384,
+          "role": "task",
+          "stage": "mechanism_full_tables"
+        },
+        {
+          "allocated_gpu_hours": 5.928813194184669,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "bfcl",
+          "input_tokens": 51164960.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 337120.00000000006,
+          "requests": 53760,
+          "role": "task",
+          "stage": "main_nonreference_evaluation"
+        },
+        {
+          "allocated_gpu_hours": 0.7235320032797755,
+          "eight_demo_proxy_fraction": 0,
+          "family": "bfcl",
+          "input_tokens": 2384160.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 62400.0,
+          "requests": 7680,
+          "role": "task",
+          "stage": "full_seed_reference"
+        },
+        {
+          "allocated_gpu_hours": 0.8613101520066461,
+          "eight_demo_proxy_fraction": null,
+          "family": "bfcl",
+          "input_tokens": 8325120.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 7680.0,
+          "requests": 3840,
+          "role": "proposer",
+          "stage": "main_all_proposer_roles"
+        },
+        {
+          "allocated_gpu_hours": 2.5409199403648577,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "bfcl",
+          "input_tokens": 21927840.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 144480.0,
+          "requests": 23040,
+          "role": "task",
+          "stage": "all_selection_checkpoints"
+        },
+        {
+          "allocated_gpu_hours": 0.8469733134549526,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "bfcl",
+          "input_tokens": 7309280.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 48160.00000000001,
+          "requests": 7680,
+          "role": "task",
+          "stage": "one_final_prompt_per_run"
+        },
+        {
+          "allocated_gpu_hours": 6.598541830428442,
+          "eight_demo_proxy_fraction": 0.25,
+          "family": "hotpotqa",
+          "input_tokens": 64211200.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 118784.0,
+          "requests": 16384,
+          "role": "task",
+          "stage": "mechanism_full_tables"
+        },
+        {
+          "allocated_gpu_hours": 27.01708654558617,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "hotpotqa",
+          "input_tokens": 257224800.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 452479.99999999994,
+          "requests": 53760,
+          "role": "task",
+          "stage": "main_nonreference_evaluation"
+        },
+        {
+          "allocated_gpu_hours": 0.7935145553735397,
+          "eight_demo_proxy_fraction": 0,
+          "family": "hotpotqa",
+          "input_tokens": 10156800.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 28800.0,
+          "requests": 7680,
+          "role": "task",
+          "stage": "full_seed_reference"
+        },
+        {
+          "allocated_gpu_hours": 3.356923874509831,
+          "eight_demo_proxy_fraction": null,
+          "family": "hotpotqa",
+          "input_tokens": 41525760.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 23040.0,
+          "requests": 3840,
+          "role": "proposer",
+          "stage": "main_all_proposer_roles"
+        },
+        {
+          "allocated_gpu_hours": 11.578751376679786,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "hotpotqa",
+          "input_tokens": 110239200.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 193920.0,
+          "requests": 23040,
+          "role": "task",
+          "stage": "all_selection_checkpoints"
+        },
+        {
+          "allocated_gpu_hours": 3.8595837922265956,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "hotpotqa",
+          "input_tokens": 36746400.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 64639.99999999999,
+          "requests": 7680,
+          "role": "task",
+          "stage": "one_final_prompt_per_run"
+        },
+        {
+          "allocated_gpu_hours": 148.9020502902216,
+          "eight_demo_proxy_fraction": 0.25,
+          "family": "instruction_following",
+          "input_tokens": 19080704.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 15784192.0,
+          "requests": 16384,
+          "role": "task",
+          "stage": "mechanism_full_tables"
+        },
+        {
+          "allocated_gpu_hours": 626.523896696099,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "instruction_following",
+          "input_tokens": 78511999.99999999,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 66648960.0,
+          "requests": 53760,
+          "role": "task",
+          "stage": "main_nonreference_evaluation"
+        },
+        {
+          "allocated_gpu_hours": 10.681102852980295,
+          "eight_demo_proxy_fraction": 0,
+          "family": "instruction_following",
+          "input_tokens": 2128320.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 1031520.0,
+          "requests": 7680,
+          "role": "task",
+          "stage": "full_seed_reference"
+        },
+        {
+          "allocated_gpu_hours": 97.89346525996179,
+          "eight_demo_proxy_fraction": null,
+          "family": "instruction_following",
+          "input_tokens": 14741760.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 7864320.0,
+          "requests": 3840,
+          "role": "proposer",
+          "stage": "main_all_proposer_roles"
+        },
+        {
+          "allocated_gpu_hours": 268.5102414411853,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "instruction_following",
+          "input_tokens": 33648000.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 28563840.0,
+          "requests": 23040,
+          "role": "task",
+          "stage": "all_selection_checkpoints"
+        },
+        {
+          "allocated_gpu_hours": 104.886813062963,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "instruction_following",
+          "input_tokens": 13143749.999999998,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 11157750.0,
+          "requests": 9000,
+          "role": "task",
+          "stage": "one_final_prompt_per_run"
+        },
+        {
+          "allocated_gpu_hours": 1.6723649642268819,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "bfcl",
+          "input_tokens": 3079488.0,
+          "model": "mistralai/Mistral-7B-Instruct-v0.3",
+          "output_tokens": 304256.00000000006,
+          "requests": 3072,
+          "role": "task",
+          "stage": "frozen_prompt_transfer_only"
+        },
+        {
+          "allocated_gpu_hours": 1.7451117645477254,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "hotpotqa",
+          "input_tokens": 17077888.0,
+          "model": "mistralai/Mistral-7B-Instruct-v0.3",
+          "output_tokens": 29120.000000000004,
+          "requests": 3072,
+          "role": "task",
+          "stage": "frozen_prompt_transfer_only"
+        },
+        {
+          "allocated_gpu_hours": 32.82401415257773,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "instruction_following",
+          "input_tokens": 5771625.0,
+          "model": "mistralai/Mistral-7B-Instruct-v0.3",
+          "output_tokens": 1909725.0000000002,
+          "requests": 3600,
+          "role": "task",
+          "stage": "frozen_prompt_transfer_only"
+        },
+        {
+          "allocated_gpu_hours": 30,
+          "input_tokens": 148535250.0,
+          "output_tokens": 644250.0,
+          "requests": 12000,
+          "stage": "pilot_and_g1_all_roles"
+        },
+        {
+          "allocated_gpu_hours": 5.604594595885525,
+          "basis": "400 loads at slowest measured cold start; already consumed G0 cold starts separately retained",
+          "loads": 400,
+          "stage": "planned_cold_reloads"
+        }
+      ],
+      "with_reserve": {
+        "allocated_gpu_hours": 3706.2267726697173,
+        "input_tokens": 2139774012,
+        "output_tokens": 284629446,
+        "requests": 839266
+      },
+      "within_protective_ceilings_under_assumptions": false
+    },
+    "proposed_mixed_context_proxy": {
+      "before_reserve": {
+        "allocated_gpu_hours": 3031.2073794846515,
+        "input_tokens": 1754186769.5,
+        "output_tokens": 232591572.5,
+        "requests": 654844
+      },
+      "ceilings": {
+        "allocated_gpu_hours": 1000,
+        "input_tokens": 2000000000,
+        "output_tokens": 200000000,
+        "requests": 800000
+      },
+      "exceeded": [
+        "input_tokens",
+        "output_tokens",
+        "allocated_gpu_hours"
+      ],
+      "mechanism_stress_fraction": 0.25,
+      "optimization_stress_fraction": 0.3333333333333333,
+      "reference_cache_valid_assumption": true,
+      "stages": [
+        {
+          "allocated_gpu_hours": 6.9551897356523416,
+          "eight_demo_proxy_fraction": 0.25,
+          "family": "bfcl",
+          "input_tokens": 13096704.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 831232.0,
+          "requests": 16384,
+          "role": "task",
+          "stage": "mechanism_full_tables"
+        },
+        {
+          "allocated_gpu_hours": 24.937934077679287,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "bfcl",
+          "input_tokens": 51630880.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 2745120.0,
+          "requests": 53760,
+          "role": "task",
+          "stage": "main_nonreference_evaluation"
+        },
+        {
+          "allocated_gpu_hours": 0.07844315736856726,
+          "eight_demo_proxy_fraction": 0,
+          "family": "bfcl",
+          "input_tokens": 80960.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 12736.0,
+          "requests": 256,
+          "role": "task",
+          "stage": "full_seed_reference"
+        },
+        {
+          "allocated_gpu_hours": 3.3804525028591357,
+          "eight_demo_proxy_fraction": null,
+          "family": "bfcl",
+          "input_tokens": 8275200.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 107520.0,
+          "requests": 3840,
+          "role": "proposer",
+          "stage": "main_all_proposer_roles"
+        },
+        {
+          "allocated_gpu_hours": 10.687686033291122,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "bfcl",
+          "input_tokens": 22127520.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 1176480.0,
+          "requests": 23040,
+          "role": "task",
+          "stage": "all_selection_checkpoints"
+        },
+        {
+          "allocated_gpu_hours": 3.5625620110970404,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "bfcl",
+          "input_tokens": 7375840.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 392160.0,
+          "requests": 7680,
+          "role": "task",
+          "stage": "one_final_prompt_per_run"
+        },
+        {
+          "allocated_gpu_hours": 7.49399692112671,
+          "eight_demo_proxy_fraction": 0.25,
+          "family": "hotpotqa",
+          "input_tokens": 67816448.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 104448.0,
+          "requests": 16384,
+          "role": "task",
+          "stage": "mechanism_full_tables"
+        },
+        {
+          "allocated_gpu_hours": 29.933450906985744,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "hotpotqa",
+          "input_tokens": 271735519.99999994,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 344960.0,
+          "requests": 53760,
+          "role": "task",
+          "stage": "main_nonreference_evaluation"
+        },
+        {
+          "allocated_gpu_hours": 0.040754080327765806,
+          "eight_demo_proxy_fraction": 0,
+          "family": "hotpotqa",
+          "input_tokens": 356592.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 1600.0,
+          "requests": 256,
+          "role": "task",
+          "stage": "full_seed_reference"
+        },
+        {
+          "allocated_gpu_hours": 5.853981747073432,
+          "eight_demo_proxy_fraction": null,
+          "family": "hotpotqa",
+          "input_tokens": 43457280.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 76800.0,
+          "requests": 3840,
+          "role": "proposer",
+          "stage": "main_all_proposer_roles"
+        },
+        {
+          "allocated_gpu_hours": 12.828621817279606,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "hotpotqa",
+          "input_tokens": 116458079.99999999,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 147840.0,
+          "requests": 23040,
+          "role": "task",
+          "stage": "all_selection_checkpoints"
+        },
+        {
+          "allocated_gpu_hours": 4.276207272426535,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "hotpotqa",
+          "input_tokens": 38819359.99999999,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 49280.0,
+          "requests": 7680,
+          "role": "task",
+          "stage": "one_final_prompt_per_run"
+        },
+        {
+          "allocated_gpu_hours": 195.35357338548832,
+          "eight_demo_proxy_fraction": 0.25,
+          "family": "instruction_following",
+          "input_tokens": 19874048.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 12044544.0,
+          "requests": 16384,
+          "role": "task",
+          "stage": "mechanism_full_tables"
+        },
+        {
+          "allocated_gpu_hours": 753.1316534776997,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "instruction_following",
+          "input_tokens": 81906719.99999999,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 45215520.0,
+          "requests": 53760,
+          "role": "task",
+          "stage": "main_nonreference_evaluation"
+        },
+        {
+          "allocated_gpu_hours": 1.450574715483023,
+          "eight_demo_proxy_fraction": 0,
+          "family": "instruction_following",
+          "input_tokens": 72032.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 106848.0,
+          "requests": 256,
+          "role": "task",
+          "stage": "full_seed_reference"
+        },
+        {
+          "allocated_gpu_hours": 136.68942063807697,
+          "eight_demo_proxy_fraction": null,
+          "family": "instruction_following",
+          "input_tokens": 15198720.0,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 7691520.0,
+          "requests": 3840,
+          "role": "proposer",
+          "stage": "main_all_proposer_roles"
+        },
+        {
+          "allocated_gpu_hours": 322.77070863329993,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "instruction_following",
+          "input_tokens": 35102879.99999999,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 19378080.0,
+          "requests": 23040,
+          "role": "task",
+          "stage": "all_selection_checkpoints"
+        },
+        {
+          "allocated_gpu_hours": 126.08230805988278,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "instruction_following",
+          "input_tokens": 13712062.499999998,
+          "model": "Qwen/Qwen3.5-9B",
+          "output_tokens": 7569562.5,
+          "requests": 9000,
+          "role": "task",
+          "stage": "one_final_prompt_per_run"
+        },
+        {
+          "allocated_gpu_hours": 1.741041036610471,
+          "eight_demo_proxy_fraction": 0.25,
+          "family": "bfcl",
+          "input_tokens": 12966400.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 110336.0,
+          "requests": 16384,
+          "role": "task",
+          "stage": "mechanism_full_tables"
+        },
+        {
+          "allocated_gpu_hours": 5.928813194184669,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "bfcl",
+          "input_tokens": 51164960.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 337120.00000000006,
+          "requests": 53760,
+          "role": "task",
+          "stage": "main_nonreference_evaluation"
+        },
+        {
+          "allocated_gpu_hours": 0.02411773344265918,
+          "eight_demo_proxy_fraction": 0,
+          "family": "bfcl",
+          "input_tokens": 79472.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 2080.0,
+          "requests": 256,
+          "role": "task",
+          "stage": "full_seed_reference"
+        },
+        {
+          "allocated_gpu_hours": 0.8613101520066461,
+          "eight_demo_proxy_fraction": null,
+          "family": "bfcl",
+          "input_tokens": 8325120.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 7680.0,
+          "requests": 3840,
+          "role": "proposer",
+          "stage": "main_all_proposer_roles"
+        },
+        {
+          "allocated_gpu_hours": 2.5409199403648577,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "bfcl",
+          "input_tokens": 21927840.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 144480.0,
+          "requests": 23040,
+          "role": "task",
+          "stage": "all_selection_checkpoints"
+        },
+        {
+          "allocated_gpu_hours": 0.8469733134549526,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "bfcl",
+          "input_tokens": 7309280.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 48160.00000000001,
+          "requests": 7680,
+          "role": "task",
+          "stage": "one_final_prompt_per_run"
+        },
+        {
+          "allocated_gpu_hours": 6.598541830428442,
+          "eight_demo_proxy_fraction": 0.25,
+          "family": "hotpotqa",
+          "input_tokens": 64211200.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 118784.0,
+          "requests": 16384,
+          "role": "task",
+          "stage": "mechanism_full_tables"
+        },
+        {
+          "allocated_gpu_hours": 27.01708654558617,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "hotpotqa",
+          "input_tokens": 257224800.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 452479.99999999994,
+          "requests": 53760,
+          "role": "task",
+          "stage": "main_nonreference_evaluation"
+        },
+        {
+          "allocated_gpu_hours": 0.026450485179117987,
+          "eight_demo_proxy_fraction": 0,
+          "family": "hotpotqa",
+          "input_tokens": 338560.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 960.0,
+          "requests": 256,
+          "role": "task",
+          "stage": "full_seed_reference"
+        },
+        {
+          "allocated_gpu_hours": 3.356923874509831,
+          "eight_demo_proxy_fraction": null,
+          "family": "hotpotqa",
+          "input_tokens": 41525760.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 23040.0,
+          "requests": 3840,
+          "role": "proposer",
+          "stage": "main_all_proposer_roles"
+        },
+        {
+          "allocated_gpu_hours": 11.578751376679786,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "hotpotqa",
+          "input_tokens": 110239200.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 193920.0,
+          "requests": 23040,
+          "role": "task",
+          "stage": "all_selection_checkpoints"
+        },
+        {
+          "allocated_gpu_hours": 3.8595837922265956,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "hotpotqa",
+          "input_tokens": 36746400.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 64639.99999999999,
+          "requests": 7680,
+          "role": "task",
+          "stage": "one_final_prompt_per_run"
+        },
+        {
+          "allocated_gpu_hours": 148.9020502902216,
+          "eight_demo_proxy_fraction": 0.25,
+          "family": "instruction_following",
+          "input_tokens": 19080704.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 15784192.0,
+          "requests": 16384,
+          "role": "task",
+          "stage": "mechanism_full_tables"
+        },
+        {
+          "allocated_gpu_hours": 626.523896696099,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "instruction_following",
+          "input_tokens": 78511999.99999999,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 66648960.0,
+          "requests": 53760,
+          "role": "task",
+          "stage": "main_nonreference_evaluation"
+        },
+        {
+          "allocated_gpu_hours": 0.35603676176600985,
+          "eight_demo_proxy_fraction": 0,
+          "family": "instruction_following",
+          "input_tokens": 70944.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 34384.0,
+          "requests": 256,
+          "role": "task",
+          "stage": "full_seed_reference"
+        },
+        {
+          "allocated_gpu_hours": 97.89346525996179,
+          "eight_demo_proxy_fraction": null,
+          "family": "instruction_following",
+          "input_tokens": 14741760.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 7864320.0,
+          "requests": 3840,
+          "role": "proposer",
+          "stage": "main_all_proposer_roles"
+        },
+        {
+          "allocated_gpu_hours": 268.5102414411853,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "instruction_following",
+          "input_tokens": 33648000.0,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 28563840.0,
+          "requests": 23040,
+          "role": "task",
+          "stage": "all_selection_checkpoints"
+        },
+        {
+          "allocated_gpu_hours": 104.886813062963,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "instruction_following",
+          "input_tokens": 13143749.999999998,
+          "model": "allenai/Olmo-3-7B-Instruct",
+          "output_tokens": 11157750.0,
+          "requests": 9000,
+          "role": "task",
+          "stage": "one_final_prompt_per_run"
+        },
+        {
+          "allocated_gpu_hours": 1.6723649642268819,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "bfcl",
+          "input_tokens": 3079488.0,
+          "model": "mistralai/Mistral-7B-Instruct-v0.3",
+          "output_tokens": 304256.00000000006,
+          "requests": 3072,
+          "role": "task",
+          "stage": "frozen_prompt_transfer_only"
+        },
+        {
+          "allocated_gpu_hours": 1.7451117645477254,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "hotpotqa",
+          "input_tokens": 17077888.0,
+          "model": "mistralai/Mistral-7B-Instruct-v0.3",
+          "output_tokens": 29120.000000000004,
+          "requests": 3072,
+          "role": "task",
+          "stage": "frozen_prompt_transfer_only"
+        },
+        {
+          "allocated_gpu_hours": 32.82401415257773,
+          "eight_demo_proxy_fraction": 0.3333333333333333,
+          "family": "instruction_following",
+          "input_tokens": 5771625.0,
+          "model": "mistralai/Mistral-7B-Instruct-v0.3",
+          "output_tokens": 1909725.0000000002,
+          "requests": 3600,
+          "role": "task",
+          "stage": "frozen_prompt_transfer_only"
+        },
+        {
+          "allocated_gpu_hours": 30,
+          "input_tokens": 148535250.0,
+          "output_tokens": 644250.0,
+          "requests": 12000,
+          "stage": "pilot_and_g1_all_roles"
+        },
+        {
+          "allocated_gpu_hours": 5.604594595885525,
+          "basis": "400 loads at slowest measured cold start; already consumed G0 cold starts separately retained",
+          "loads": 400,
+          "stage": "planned_cold_reloads"
+        }
+      ],
+      "with_reserve": {
+        "allocated_gpu_hours": 3637.448855381582,
+        "input_tokens": 2105024124,
+        "output_tokens": 279109887,
+        "requests": 785813
+      },
+      "within_protective_ceilings_under_assumptions": false
+    }
+  },
+  "status": "PLANNING_SCENARIOS_NOT_G0_APPROVAL",
+  "unresolved": [
+    "Full production cache-key identity and accounting have not been implemented.",
+    "Eight-demo repeated-response/proposer proxies are not accepted native optimizer contexts; do not equate proxy cost with native achieved accuracy.",
+    "Instruction training examples have verifier annotations but no labeled output strings; native MIPRO cannot receive invented gold demonstrations.",
+    "Actual proposal decoding/caps and grouped final pools are not yet frozen.",
+    "Task output distribution may change across candidate prompts; the 20% reserve is a planning allowance, not a coverage guarantee."
+  ]
+}

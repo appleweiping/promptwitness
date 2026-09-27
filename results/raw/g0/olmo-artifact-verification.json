@@ -1,0 +1,69 @@
+{
+  "checked": [
+    {
+      "digest": "26d213ee7b4500f33df6533007807c6eccfc6059",
+      "file": ".gitattributes"
+    },
+    {
+      "digest": "53f9006ad6a575eba8a44115ce9cd73b4149c5eb",
+      "file": "README.md"
+    },
+    {
+      "digest": "a21396285102846aa0787dd598623e7b8dbb2b67",
+      "file": "chat_template.jinja"
+    },
+    {
+      "digest": "9c118c14e7871ec96335dc859995b4ef554bb097",
+      "file": "config.json"
+    },
+    {
+      "digest": "0739fd213b7634f1c4b2273bec0d4eb87a552de2",
+      "file": "generation_config.json"
+    },
+    {
+      "digest": "354558edcdbd64ca7abd407b8be3d5d09d39d781",
+      "file": "merges.txt"
+    },
+    {
+      "digest": "e7bd4c8ba52177a815aee5929cb458a116a65799688d3e51402500a1cb77023c",
+      "file": "model-00001-of-00003.safetensors"
+    },
+    {
+      "digest": "ea92aa0499a2ca02400e5d87324009e172bdbfb9809f2ac501485d8224382328",
+      "file": "model-00002-of-00003.safetensors"
+    },
+    {
+      "digest": "d50f95e4f2ec5fc4fbce6217cbf54fd1d700928b05e5550c8ee08bf4ba948925",
+      "file": "model-00003-of-00003.safetensors"
+    },
+    {
+      "digest": "421a80b181a130ccbc579a328fb349d8792a32ce",
+      "file": "model.safetensors.index.json"
+    },
+    {
+      "digest": "9ae64ca9d1e2a551eb275120ec9d4dd8a3276eb10035ff118e566750d80b0435",
+      "file": "olmo-instruct.png"
+    },
+    {
+      "digest": "9d133a8f4995ff315a8a3e68dbba03409d214a8e",
+      "file": "special_tokens_map.json"
+    },
+    {
+      "digest": "54b3f7c465454c7878d6e955e44064d23c5a4052",
+      "file": "tokenizer.json"
+    },
+    {
+      "digest": "277b816675b12d22c3ca0e2b4af1b9dc88e30043",
+      "file": "tokenizer_config.json"
+    },
+    {
+      "digest": "9c2954b1c94c5267dc84a5d0214efbc79ff8c3bd",
+      "file": "vocab.json"
+    }
+  ],
+  "failures": [],
+  "format": "promptwitness.delta.artifact-verification/v1",
+  "model": "allenai/Olmo-3-7B-Instruct",
+  "passed": true,
+  "revision": "6e5971d9eba42665f5bd5a0fcf047f299ce1dccc"
+}

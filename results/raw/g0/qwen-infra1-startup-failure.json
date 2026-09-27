@@ -1,0 +1,12 @@
+{
+  "format": "promptwitness.delta.startup-failure/v1",
+  "observed_at_utc": "2026-09-26T22:43:00Z",
+  "ledger_run": "Qwen/Qwen3.5-9B@infra1-torch271",
+  "archive_run": "Qwen/Qwen3.5-9B@infra1-torch271:startup-failed1",
+  "model_requests_attempted": 0,
+  "cause": "Operator supplied a nonexistent local snapshot directory; HFValidationError before tokenizer/model loading and before generate.",
+  "resolution": "Read-only find in this task's remote workspace confirmed the pinned snapshot under hf-cache/hub; correct the path without changing requests, weights, decoding or the frozen repair phase.",
+  "accounting": "Retain the original run's elapsed time and zero attempts in the shared ledger under an explicit startup-failure identity. Do not reset any successful or failed inference attempts.",
+  "is_method_revision": false,
+  "is_throughput_environment_revision": false
+}

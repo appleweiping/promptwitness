@@ -1,0 +1,11 @@
+{
+  "format": "promptwitness.delta.model-manifest-provenance/v1",
+  "origin": "Inference-file digest metadata previously fetched from official Hugging Face HTTPS API on the development machine; then compared to task-owned mirror downloads.",
+  "cached_manifest_artifacts_retained": [
+    {"model": "Qwen/Qwen3.5-9B", "revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a", "file": "qwen-artifacts.json", "sha256": "3743296ebec47a9f250f091963a0568050796e9207f9d238ca6b6f5ca1ce1fd0"},
+    {"model": "allenai/Olmo-3-7B-Instruct", "revision": "6e5971d9eba42665f5bd5a0fcf047f299ce1dccc", "file": "olmo-artifacts.json", "sha256": "5220d6f370a31f04305dbdccc44e63d6259b56c3bf8b8f2fcb092691369fc3be"},
+    {"model": "mistralai/Mistral-7B-Instruct-v0.3", "revision": "c170c708c41dac9275d15a8fff4eca08d52bab71", "file": "mistral-inference-artifacts.json", "sha256": "4c74204ec3492bf8f498d5a68cec766e82170e91325faeb9c01618b0e4a18592"}
+  ],
+  "model_inference_not_executed_by_manifest_copy": true,
+  "limitations": "Retained manifests are provenance, not a substitute for hashing the actual snapshot. Frozen paths, local-only loading and trust_remote_code=False must remain enforced."
+}

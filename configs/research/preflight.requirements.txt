@@ -1,0 +1,5 @@
+# Initial environment proposal; freeze exact installed versions before inference.
+huggingface-hub==1.6.0
+transformers==5.3.0
+accelerate==1.13.0
+safetensors>=0.6,<1

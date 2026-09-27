@@ -1,0 +1,61 @@
+{
+  "bfcl_categories": {
+    "BFCL_v4_irrelevance.json": 240,
+    "BFCL_v4_multiple.json": 200,
+    "BFCL_v4_parallel.json": 200,
+    "BFCL_v4_parallel_multiple.json": 200,
+    "bfcl-simple-python.jsonl": 400
+  },
+  "bfcl_exact_function_groups": {
+    "components": 558,
+    "largest_component_rows": [
+      445,
+      15,
+      14,
+      10,
+      8,
+      8,
+      7,
+      6,
+      6,
+      5
+    ],
+    "rows": 1240
+  },
+  "format": "promptwitness.delta.training-group-audit/v1",
+  "hotpot_all_context_document_groups": {
+    "components": 685,
+    "largest_component_rows": [
+      89687,
+      9,
+      4,
+      4,
+      3,
+      3,
+      2,
+      2,
+      2,
+      2
+    ],
+    "rows": 90447
+  },
+  "if_training_constraint_counts": {
+    "multi": 95373
+  },
+  "if_training_constraint_groups": {
+    "components": 1,
+    "largest_component_rows": [
+      95373
+    ],
+    "rows": 95373
+  },
+  "scores_or_final_test_accessed": false,
+  "source_file_sha256": {
+    "BFCL_v4_irrelevance.json": "2b6ed4c2e992cdcf5f1678a701851f944bef7550ee026ed1ddb89efed5be01a6",
+    "BFCL_v4_multiple.json": "aef168155ebd74b7ac2401198b201343bc7d16d7a3d7e0d4e6d8ee82c6969b2a",
+    "BFCL_v4_parallel.json": "19f51a82eff42e5d62541aa500115a056eb78f437c2ba1f10415fd7c8e5dda84",
+    "BFCL_v4_parallel_multiple.json": "8863ea8433239f55c5f016154cf0830853c89f693c6ea270396a2fa121960579",
+    "bfcl-simple-python.jsonl": "82dd63ba502eb2520c6b5d1d9a5c4b590e03ff261565175561f6228a367d1991"
+  },
+  "warning": "Whole-corpus components are diagnostics, not a frozen split; no labels used."
+}
