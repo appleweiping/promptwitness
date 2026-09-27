@@ -65,3 +65,10 @@ claim. Original NLVR2 image terms/access and exact FashionIQ CDLA/image source,
 visual weights, native parity, sealed final, real costs, M1/Pilot/confirmation and
 manuscript remain pending. Actual1170 cost DB bytes unchanged; no new real cost.
 Default4/scientific0, same run, no timer; other four repos frozen. Goal ACTIVE.
+
+CLIP source audit continued without dataset/weights download: first-party code
+revision d05afc436d78f1c48dc0dbf8e5980a9d471f35f6 actually verified; original
+ViT-L/14 checkpoint candidate is distinct from336px/OpenCLIP. Upstream expected
+artifact identity is not a measured local hash. The original loader transform
+and77-token error semantics must be shared/frozen before actual comparisons.
+No encoder/strong-CIR/scientific qualification follows from this source audit.

@@ -310,3 +310,6 @@
 | 2026-09-27T19:18:39Z | experiment-bridge | refine-logs/EXPERIMENT_RESULTS.md | implementation | 最新机械results副本 |
 | 2026-09-27T19:18:39Z | experiment-bridge | AGENTS.md | implementation | 最新用户实质方向授权/机械事实与访问/数据门禁 |
 | 2026-09-27T19:18:39Z | experiment-bridge | findings.md | implementation | append-only新方向、实际M0与意外公开test接触披露 |
+| 2026-09-27T19:28:06Z | experiment-bridge | research/ICMR_DATA_AUDIT_20260927_192806.md | implementation | CLIP第一方exactrevision/权重候选/预处理/tokenizer长度来源已查，未下载运行 |
+| 2026-09-27T19:28:06Z | experiment-bridge | research/ICMR_DATA_AUDIT.md | implementation | 最新来源审计副本，许可/视觉/native/science仍待准入 |
+| 2026-09-27T19:28:06Z | experiment-bridge | findings.md | implementation | append-only固定背骨来源，不把sourceexpectedhash称本地artifact |
