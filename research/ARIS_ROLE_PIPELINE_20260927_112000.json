@@ -1,0 +1,334 @@
+{
+  "format": "promptwitness.aris.role-pipeline-slice/v1",
+  "recorded_at": "2026-09-27T11:20:00Z",
+  "status": "AUTHORED_NATIVE_FULL_SCORE_IPC_QUALIFIED",
+  "implementation": {
+    "launcher": "policy first line; application JSON and known package loaded only after Landlock",
+    "runtime_grant": "known src/promptwitness code directory only, not repository/data ancestor",
+    "scorer": "actual completed response text; corresponding stage gold; pinned official scorer; no failed/missing to zero",
+    "predictor": "only complete frozen reference, queried parent traces, input and frozen features; no current outcomes",
+    "controller": "durable run/candidate/configuration/execution/predictor/reference freeze; actual full vectors; persisted search/selection ends; no final admission",
+    "original_seed": "original run_frozen identity; actual search reference reused; separate actual selection vector required; caller native choice preserved",
+    "recovery": "unresolved request fails closed; completed reference publication recovered from same original response provenance without requery"
+  },
+  "qualification": {
+    "scope": "AUTHORED_ONLY_NOT_REAL_INFERENCE_OR_RESEARCH_EFFECT",
+    "doc": "reproduce/ROLE_PIPELINE.md",
+    "fresh_agent": "same-family/provisional inherited Codex",
+    "invocations_per_family": 1,
+    "total_workers": 15,
+    "total_actual_native_score_checks": 156,
+    "families": [
+      {
+        "format": "promptwitness.role-pipeline-qualification/v1",
+        "status": "PASS_AUTHORED_ONLY",
+        "family": "bfcl",
+        "units": 33,
+        "native_score_checks": 132,
+        "workers": 5,
+        "distinct_worker_PIDs": [
+          4064653,
+          4064801,
+          4064822,
+          4064958,
+          4065091
+        ],
+        "controller_PID": 4064623,
+        "landlock_ABIs": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "predictor": "UNFITTED_NO_IMPUTED_PROBABILITIES",
+        "actual_stage_order": [
+          "run_frozen",
+          "request",
+          "result",
+          "reference_complete",
+          "candidate_frozen",
+          "request",
+          "result",
+          "request",
+          "result",
+          "search_ended",
+          "request",
+          "result",
+          "request",
+          "result",
+          "selection_ended"
+        ],
+        "CPU_worker_wall_seconds": 22.3129580153618,
+        "selection_ended": "selection_ended",
+        "caller_chosen_seed_retained": true,
+        "final_admission": "NOT_GRANTED_BY_THIS_CONTROLLER",
+        "new_model_calls": 0,
+        "allocated_GPU_hours": 0,
+        "tokens": 0,
+        "paid_API_usd": 0,
+        "real_training_search_reference_generated": false,
+        "real_M1_or_Pilot": false,
+        "online_random_unit_semantics_or_native_optimizer_admitted": false,
+        "whole_scientific_admission": "PARTIAL_NOT_PASSED"
+      },
+      {
+        "format": "promptwitness.role-pipeline-qualification/v1",
+        "status": "PASS_AUTHORED_ONLY",
+        "family": "hotpotqa",
+        "units": 3,
+        "native_score_checks": 12,
+        "workers": 5,
+        "distinct_worker_PIDs": [
+          4066285,
+          4066304,
+          4066316,
+          4066335,
+          4066339
+        ],
+        "controller_PID": 4066268,
+        "landlock_ABIs": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "predictor": "UNFITTED_NO_IMPUTED_PROBABILITIES",
+        "actual_stage_order": [
+          "run_frozen",
+          "request",
+          "result",
+          "reference_complete",
+          "candidate_frozen",
+          "request",
+          "result",
+          "request",
+          "result",
+          "search_ended",
+          "request",
+          "result",
+          "request",
+          "result",
+          "selection_ended"
+        ],
+        "CPU_worker_wall_seconds": 2.87317220447585,
+        "selection_ended": "selection_ended",
+        "caller_chosen_seed_retained": true,
+        "final_admission": "NOT_GRANTED_BY_THIS_CONTROLLER",
+        "new_model_calls": 0,
+        "allocated_GPU_hours": 0,
+        "tokens": 0,
+        "paid_API_usd": 0,
+        "real_training_search_reference_generated": false,
+        "real_M1_or_Pilot": false,
+        "online_random_unit_semantics_or_native_optimizer_admitted": false,
+        "whole_scientific_admission": "PARTIAL_NOT_PASSED"
+      },
+      {
+        "format": "promptwitness.role-pipeline-qualification/v1",
+        "status": "PASS_AUTHORED_ONLY",
+        "family": "instruction_following",
+        "units": 3,
+        "native_score_checks": 12,
+        "workers": 5,
+        "distinct_worker_PIDs": [
+          4067002,
+          4067019,
+          4067025,
+          4067050,
+          4067071
+        ],
+        "controller_PID": 4066985,
+        "landlock_ABIs": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "predictor": "UNFITTED_NO_IMPUTED_PROBABILITIES",
+        "actual_stage_order": [
+          "run_frozen",
+          "request",
+          "result",
+          "reference_complete",
+          "candidate_frozen",
+          "request",
+          "result",
+          "request",
+          "result",
+          "search_ended",
+          "request",
+          "result",
+          "request",
+          "result",
+          "selection_ended"
+        ],
+        "CPU_worker_wall_seconds": 2.823473749915138,
+        "selection_ended": "selection_ended",
+        "caller_chosen_seed_retained": true,
+        "final_admission": "NOT_GRANTED_BY_THIS_CONTROLLER",
+        "new_model_calls": 0,
+        "allocated_GPU_hours": 0,
+        "tokens": 0,
+        "paid_API_usd": 0,
+        "real_training_search_reference_generated": false,
+        "real_M1_or_Pilot": false,
+        "online_random_unit_semantics_or_native_optimizer_admitted": false,
+        "whole_scientific_admission": "PARTIAL_NOT_PASSED"
+      }
+    ],
+    "SSH_exits": {
+      "bfcl": 0,
+      "hotpotqa": 0,
+      "instruction_following": 0
+    },
+    "SSH_wall_seconds": {
+      "bfcl": 26.196983,
+      "hotpotqa": 6.520261,
+      "instruction_following": 6.353936
+    },
+    "stderr": "empty in all three",
+    "decoder_exit_separately_observed": false,
+    "doc_runtime_divergence": false,
+    "retry_or_fix_during_doc": false
+  },
+  "environment": {
+    "BFCL_canonical_spec": "1c3ad127",
+    "text_canonical_spec": "27f974aa",
+    "python": "3.10.15",
+    "builds_or_installs": 0,
+    "GPU": 0,
+    "warm_reuse": true,
+    "source_upload_roundtrip_exact_bytes": true,
+    "code_only_runtime_copy_exact_bytes": true,
+    "shared_CUDA_or_Python_modified": false
+  },
+  "checks": {
+    "format": "promptwitness.role-pipeline-local-checks/v1",
+    "recorded_at": "2026-09-27T11:17:00Z",
+    "whole_helpers": {
+      "exit": 0,
+      "passed": 268,
+      "skipped": 1,
+      "wall_seconds": 18.78,
+      "skip": "Windows cannot execute actual Linux Landlock"
+    },
+    "ruff_check": "PASS",
+    "ruff_format": "PASS_276_FILES",
+    "mypy_src": "PASS_61_FILES",
+    "configured_bandit_src": {
+      "exit": 0,
+      "issues": 0
+    },
+    "new_3_helpers_bandit": {
+      "exit": 1,
+      "low": 1,
+      "medium": 0,
+      "high": 0,
+      "code": "B404",
+      "confidence": "HIGH",
+      "location": "reproduce/pipeline_controller.py:13",
+      "retained": true,
+      "ignore_added": false
+    },
+    "first_review": {
+      "passed": 112,
+      "skipped": 1,
+      "wall_seconds": 8.51,
+      "functional_blocking": 1,
+      "defect": "native incumbent seed could not survive"
+    },
+    "one_followup": {
+      "passed": 114,
+      "skipped": 1,
+      "wall_seconds": 7.51,
+      "functional_blocking": 0,
+      "ruff_format_exit": 1,
+      "format_repair": "one assertion mechanically formatted; full check276 PASS"
+    },
+    "old_code_regression": {
+      "exit": 1,
+      "failed": 2
+    },
+    "first_fixed_fixture_run": {
+      "exit": 1,
+      "failed": 2,
+      "reason": "authored assertion/checker receipt candidate key wrong; correct existing field frozen_prompt"
+    },
+    "native_linux_qualification": "COMPLETED_AUTHORED_ONLY_SEE_qualification",
+    "full_local_package_suite": "NOT_RUN_THIS_SLICE",
+    "local_build": "NOT_RUN_THIS_SLICE_HISTORICAL_FAILURES_RETAINED",
+    "exact_SHA_CI": "PENDING_COMMIT_PUSH",
+    "new_cost": {
+      "model_calls": 0,
+      "allocated_gpu_hours": 0,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "paid_API_usd": 0
+    },
+    "assurance": "same-family/provisional; authored mechanical scope only",
+    "native_linux_qualification_at_local_snapshot": "PENDING_FRESH_DOC"
+  },
+  "review": {
+    "route": "same-family/provisional",
+    "first": "one P1 blocker: original native incumbent could not survive",
+    "single_followup": "no functional blockers; one test assertion formatting fixed mechanically",
+    "traces": "020/021/022 private",
+    "scientific_acceptance": false
+  },
+  "retained_failures": [
+    "Old-code seed regressions failed twice; first fixed assertions/checker used wrong receipt key and failed twice; corrected existing frozen_prompt field.",
+    "Initial Ruff import/line-length failures repaired; follow-up format exit1 corrected by normal formatter.",
+    "New helper Bandit exit1 for one LOW/HIGH-confidence subprocess B404 retained, no ignore added; reviewer's independent Bandit unavailable.",
+    "Historical local full-package timeout1800s and wheel WinError127 unchanged; not rerun as successful."
+  ],
+  "previous_source_verification": {
+    "sha": "20809537900cc8d432468c6e9fbc861f8aa55f59",
+    "CI": 36312943226,
+    "conclusion": "success",
+    "jobs": "15/15",
+    "Ubuntu_Python_3_12_passed": 1789,
+    "wall_seconds": 157.44,
+    "coverage_percent": 94.03
+  },
+  "current_slice_exact_SHA_CI": "PENDING_COMMIT_PUSH_AT_THIS_SNAPSHOT",
+  "real_training_store": "ALL3_PREPARED_512FIT_256SEARCH_256SELECTION_NOT_SCIENTIFIC_FREEZE",
+  "real_search_reference_and_parent": "NOT_GENERATED",
+  "real_selection_and_scientific_config_freeze": "NOT_GENERATED",
+  "online_random_unit_semantics": "NOT_VALIDATED",
+  "native_GEPA_MIPRO_early_rejection": "NOT_IMPLEMENTED",
+  "all_role_physical_cost_integration": "NOT_COMPLETE",
+  "M1": "UNFITTED",
+  "Pilot": "NOT_RUN",
+  "confirmatory": {
+    "pairs_completed": 0,
+    "pairs_planned": 144,
+    "runs_completed": 0,
+    "runs_planned": 180,
+    "transfers_completed": 0,
+    "transfers_planned": 36
+  },
+  "scientific_admission": "PARTIAL_NOT_PASSED",
+  "research_complete": false,
+  "goal": "ACTIVE",
+  "automation": "DELETED_NO_REPLACEMENT",
+  "aris_auto_review_max_rounds": 4,
+  "new_cost": {
+    "model_calls": 0,
+    "allocated_gpu_hours": 0,
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "paid_API_usd": 0
+  },
+  "historical_cross_version_snapshot": {
+    "calls": 898,
+    "allocated_gpu_hours": 3.4812718904634763,
+    "input_tokens": 1758607,
+    "output_tokens": 190976,
+    "paid_API_usd": 0
+  },
+  "other_four_repositories": "FROZEN",
+  "next": "Integrate existing AuditPlan/journal with actual incremental online queries, pinned native optimizer early rejection and actual survivor vectors/all-role costs; then real M1/Pilot/admission/full original matrix, statistics/narrative/default remembered review."
+}

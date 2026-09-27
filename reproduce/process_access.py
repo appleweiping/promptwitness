@@ -194,6 +194,9 @@ def runtime_roots() -> tuple[Path, ...]:
     runtime ancestor/descendant of the registered dataset store or scratch.
     """
     roots = [Path(sys.prefix), Path(sys.base_prefix), Path(__file__).resolve().parent]
+    package = Path(__file__).resolve().parents[1] / "src/promptwitness"
+    if package.is_dir():
+        roots.append(package)  # Package code only, never the checkout/data parent.
     roots.extend(Path(name) for name in ("/usr", "/lib", "/lib64") if Path(name).is_dir())
     return tuple(dict.fromkeys(path.resolve() for path in roots))
 
@@ -207,6 +210,7 @@ def launch_role(
     arguments: Sequence[str] = (),
     *,
     timeout: float = 60,
+    message: dict[str, Any] | None = None,
 ) -> subprocess.CompletedProcess[str]:
     """Launch approved application code with no inherited data descriptors/env.
 
@@ -234,7 +238,9 @@ def launch_role(
     }
     return subprocess.run(
         [sys.executable, "-I", str(Path(__file__).resolve()), "--worker"],
-        input=json.dumps(policy),
+        input=json.dumps(policy)
+        + "\n"
+        + (json.dumps(message, allow_nan=False) if message is not None else ""),
         text=True,
         capture_output=True,
         check=False,
@@ -246,7 +252,9 @@ def launch_role(
 
 
 def worker() -> None:
-    policy = json.load(sys.stdin)
+    # Read only the launcher policy. Application JSON remains unread on the pipe
+    # until after restriction and is consumed by the role's application itself.
+    policy = json.loads(sys.stdin.readline())
     if policy.get("format") != "promptwitness.process-access/v1":
         raise AccessBoundaryError("invalid worker policy")
     # Rebuild grants from role/stage, never trust arbitrary JSON path grants.
@@ -278,6 +286,16 @@ def worker() -> None:
     spec = importlib.machinery.ModuleSpec("reproduce", loader=None, is_package=True)
     spec.submodule_search_locations = [str(Path(__file__).resolve().parent)]
     sys.modules["reproduce"] = importlib.util.module_from_spec(spec)
+    package = Path(__file__).resolve().parents[1] / "src/promptwitness"
+    if package.is_dir():
+        package_spec = importlib.util.spec_from_file_location(
+            "promptwitness", package / "__init__.py", submodule_search_locations=[str(package)]
+        )
+        if package_spec is None or package_spec.loader is None:
+            raise AccessBoundaryError("known package code cannot be loaded")
+        module = importlib.util.module_from_spec(package_spec)
+        sys.modules["promptwitness"] = module
+        package_spec.loader.exec_module(module)
     os.environ["PW_ACCESS_ROLE"] = checked["role"]
     os.environ["PW_ACCESS_STAGE"] = checked["stage"]
     os.environ["PW_LANDLOCK_ABI"] = str(abi)
