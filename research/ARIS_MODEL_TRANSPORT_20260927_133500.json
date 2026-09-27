@@ -1,0 +1,222 @@
+{
+  "format": "promptwitness.aris.model-transport-slice/v1",
+  "recorded_at": "2026-09-27T13:35:00Z",
+  "status": "REAL_MODEL_WIRE_TOKEN_ALLOCATION_PATH_QUALIFIED_NOT_SCIENCE",
+  "implementation": {
+    "backend": "persistent existing fixed Torch worker, single-unit complete literal messages; no response cache, batching, automatic retry or dropped task fields",
+    "input": "actual BFCL question/functions and normalized HotpotQA/IFTrain seed replacement; full original inputs retained, unsupported structures rejected",
+    "identity": "observed model/tokenizer/backend/template/decode profile frozen before task calls",
+    "identity_limits": "transport-only data/scorer/tool digests are not scientific bindings; correctness and native tool execution NOT_RUN",
+    "resource_history": "original closed physical DB read-only, base plus all actual calls and interval union continued; authored ledgers never imported",
+    "roles": "fit/reference/search/selection/proposer/reflection reservation routes exist; only fit and original typed-proposer cost fixtures actually qualified here",
+    "abort": "transport stops exact original child before raising physical failure, failed session cannot execute or reserve again; evaluator INCONCLUSIVE does not suppress cleanup",
+    "failure_costs": "known received tokens retained on validation failure; unknown failures retain cap reservations; allocation stays open until original child proven terminal",
+    "inference_process_data_sandbox": false,
+    "native_optimizer_or_full_proposer_workflow": false
+  },
+  "qualification": {
+    "doc": "reproduce/MODEL_TRANSPORT.md",
+    "invocations": 1,
+    "original_SSH_session": 11030,
+    "SSH_exit": 0,
+    "start_utc": "2026-09-27T13:21:42Z",
+    "observed_terminal_utc": "2026-09-27T13:29:05Z",
+    "observed_SSH_wall_seconds": 443,
+    "decoder_exit_separately_observed": false,
+    "workload": "three preselected input-only fit task units plus two unchanged original typed-proposer fixtures per model; fixed before any output",
+    "proposer_fit_gold_disclosed": true,
+    "proposer_fixtures_are_not_native_bootstrap_or_reflection": true,
+    "models": [
+      {
+        "model": "Qwen/Qwen3.5-9B",
+        "revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+        "requests": 5,
+        "input_tokens": 11024,
+        "output_tokens": 240,
+        "allocated_GPU_hours": 0.05788741793897412
+      },
+      {
+        "model": "allenai/Olmo-3-7B-Instruct",
+        "revision": "6e5971d9eba42665f5bd5a0fcf047f299ce1dccc",
+        "requests": 5,
+        "input_tokens": 10533,
+        "output_tokens": 2026,
+        "allocated_GPU_hours": 0.06377677785025693
+      }
+    ],
+    "request_sha256": "c56391486e9907bec9c610e345cc3fd15cd6fdf7c989b5e357c9a41ce296c59a",
+    "source_archive_sha256": "7f5e236d697d3919e54c3610217c0dd68a99b199b94baca4882933c1e2c38cd4",
+    "scoring_executed": false,
+    "final_body_accessed": false,
+    "method_effects": "NOT_MEASURED",
+    "assurance": "same-family/provisional narrow real doc execution, not clean peer CODE_REVIEW or scientific acceptance"
+  },
+  "environment": {
+    "spec": "configs/research/torch-online-env.json",
+    "canonical_spec_hash": "150b5834",
+    "spec_NOT_RUN_field": "pre-invocation declaration snapshot, not current result; actual qualification is recorded here",
+    "python": "3.10.15",
+    "torch": "2.7.1+cu118",
+    "transformers": "5.3.0",
+    "numpy": "1.26.4",
+    "CPU_threads": 4,
+    "GPUs": 1,
+    "batch_size": 1,
+    "dtype": "bfloat16",
+    "attention": "sdpa",
+    "context_limit": 32768,
+    "task_output_caps": {
+      "bfcl": 1024,
+      "hotpotqa": 64,
+      "instruction_following": 4096
+    },
+    "proposer_cap": 2048,
+    "no_install_or_shared_environment_change": true,
+    "initial_declaration": {
+      "canonical_hash": "33260e04",
+      "declared_pins": 48,
+      "actual_pins": 50,
+      "missing": [
+        "pip==25.2",
+        "setuptools==65.5.0"
+      ],
+      "missing_declared_runtime_packages": 0
+    },
+    "corrected_fresh_metadata_doc": {
+      "exit": 0,
+      "wall_seconds": 4.8427259,
+      "declared_pins": 50,
+      "actual_pins": 50,
+      "exact_pin_match": true,
+      "freeze_sha256": "6c4eb3a750e9f0cd2fd9a02d39aecf01633c73184f52cda5ed893d87a04a8eb2",
+      "extra_model_or_GPU_calls": 0
+    },
+    "historical_freeze_not_replaced": true,
+    "initial_cold_load_slower_than_historical_witness": true,
+    "weight_load_progress_observed_seconds": 145,
+    "whole_cold_idle_exit_cost_included": true,
+    "other_jobs_preserved": true
+  },
+  "accounting": {
+    "old_closed_DB_sha256": "22b0913b411adb65d3b5b0b67aa66e887b1e7169491dd909afbd58a53f420001",
+    "continued_closed_DB_sha256": "cb2360f6be307b9ea64fdb6686dea9d088dfee3f5cbe5faea245477a64d1f048",
+    "copies_verified_against_actual_original": true,
+    "new": {
+      "calls": 10,
+      "input_tokens": 21557,
+      "output_tokens": 2266,
+      "allocated_gpu_hours": 0.12166419578923104,
+      "paid_API_usd": 0
+    },
+    "cross_version": {
+      "calls": 908,
+      "input_tokens": 1780164,
+      "output_tokens": 193242,
+      "gpu_hours": 3.6029360862527073
+    },
+    "original_calls_not_reset": 898,
+    "completed_new_calls": 10,
+    "reserved_new_calls": 0,
+    "open_GPU_allocations": 0,
+    "latest_ledger_unknown_token_cost_calls": 0,
+    "older_base_unknown_cost_count": "NOT_ENCODED_IN_ORIGINAL_BASE_SUMMARY",
+    "GPU_actual_closed_interval_count": 2,
+    "total_ceiling_unchanged": {
+      "calls": 800000,
+      "input_tokens": 2000000000,
+      "output_tokens": 200000000,
+      "gpu_hours": 1000
+    },
+    "new_small_stage_quota": false
+  },
+  "review": {
+    "route": "same-family/provisional",
+    "initial": "P2 abnormal EOF grace; 63 authored tests pass21.21s",
+    "single_followup": "standalone/load abort fixed, same P2 remained when IncrementalPipeline gate catches executor failure;69tests pass22.97s",
+    "final_local_fix": "transport-local immediate abort plus permanent failed state; no third CODE_REVIEW run and no final clean peer CODE_REVIEW verdict",
+    "old_abort_regressions": {
+      "failed": 3,
+      "wall_seconds": 1.78
+    },
+    "old_swallowed_error_regression": {
+      "failed": 1,
+      "wall_seconds": 2.05
+    },
+    "post_fix_targeted": {
+      "passed": 70,
+      "wall_seconds": 23.6
+    },
+    "actual_gate_INCONCLUSIVE_regression": {
+      "passed": 1,
+      "wall_seconds": 1.7,
+      "initial_authored_missing_start_TypeError_retained": true
+    },
+    "private_full_traces": "027/028/029/030",
+    "scientific_rounds_used": 0,
+    "aris_MAX_ROUNDS": 4
+  },
+  "checks": {
+    "whole_helper_and_incremental": {
+      "passed": 422,
+      "skipped": 1,
+      "wall_seconds": 44.19,
+      "exit": 0,
+      "skip": "Windows cannot execute native Linux Landlock"
+    },
+    "ruff_check": "PASS",
+    "ruff_format": "297_FILES_PASS",
+    "mypy_src": "61_FILES_PASS",
+    "configured_Bandit_src": "PASS_NO_ISSUES",
+    "new_helper_Bandit": {
+      "exit": 1,
+      "LOW": 2,
+      "MEDIUM": 1,
+      "HIGH": 0,
+      "codes": [
+        "B404",
+        "B603",
+        "B615"
+      ],
+      "ignore_added": false,
+      "context": "fixed module argv with registered existing absolute interpreter and no shell; fixed snapshot local_files_only/trust_remote_code false; manual findings retained"
+    },
+    "previous_whole_check": {
+      "passed": 414,
+      "skipped": 1,
+      "wall_seconds": 80.25,
+      "Windows_WMI_fatal_log": "0x8007000e retained separately, not a fully clean environment claim"
+    },
+    "full_local_package_and_build_this_slice": "NOT_RUN_HISTORICAL_FAILURES_NOT_ERASED"
+  },
+  "previous_exact_source_CI": {
+    "sha": "135df7574ee745dab5079bea7f078a3de2644001",
+    "run": 36318687624,
+    "conclusion": "success",
+    "jobs": "15/15",
+    "Ubuntu_Python_3_12_passed": 1820,
+    "wall_seconds": 156.68,
+    "coverage_percent": 94.06
+  },
+  "current_exact_SHA_CI": "PENDING_COMMIT_PUSH_AT_SNAPSHOT",
+  "online_certificate": "NOT_VALIDATED",
+  "actual_native_GEPA_MIPRO_early_rejection_engine": "NOT_IMPLEMENTED",
+  "complete_all_role_cost_forecast": "UNMEASURED_NOT_ZERO",
+  "real_reference_parent_selection_config_freeze": "NOT_GENERATED",
+  "independent_statistical_audit": "NOT_COMPLETED",
+  "M1": "UNFITTED",
+  "Pilot": "NOT_RUN",
+  "confirmatory": {
+    "pairs": 0,
+    "pairs_planned": 144,
+    "runs": 0,
+    "runs_planned": 180,
+    "transfers": 0,
+    "transfers_planned": 36
+  },
+  "scientific_admission": "PARTIAL_NOT_PASSED",
+  "research_complete": false,
+  "goal": "ACTIVE",
+  "automation": "DELETED_NO_REPLACEMENT",
+  "other_four_repositories": "FROZEN",
+  "next": "Complete scientific identity and actual role/strict-score/data-sandbox integration, native GEPA/MIPRO early rejection and independent online/statistical validation. Then real M1/Pilot/full cost admission/original confirmation matrix/statistics/narrative/default remembered review."
+}

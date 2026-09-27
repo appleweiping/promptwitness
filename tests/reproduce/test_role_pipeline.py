@@ -7,6 +7,7 @@ import json
 import os
 import subprocess
 from dataclasses import asdict
+from unittest.mock import Mock
 
 import pytest
 
@@ -19,6 +20,7 @@ from reproduce import pipeline_controller as control
 from reproduce import process_access as access
 from reproduce import role_pipeline as roles
 from reproduce.incremental_pipeline import IncrementalPipeline
+from reproduce.persistent_model import PersistentModel, PhysicalCallFailure
 from reproduce.prepare_bfcl_fit import MODEL_REVISIONS, write_jsonl
 from reproduce.strict_scoring import ScoringError
 
@@ -519,7 +521,7 @@ def test_incremental_early_rejection_leaves_unknowns_and_partial_parent(tmp_path
 
 
 @pytest.mark.parametrize(
-    "failure", ["exception", "unknown_tokens", "wrong_unit", "overrun", "scorer"]
+    "failure", ["exception", "unknown_tokens", "wrong_unit", "overrun", "scorer", "physical_known"]
 )
 def test_incremental_failure_charges_no_zero_no_automatic_replay(
     pipeline, tmp_path, monkeypatch, failure
@@ -540,6 +542,10 @@ def test_incremental_failure_charges_no_zero_no_automatic_replay(
         seen.append(request)
         if failure == "exception":
             raise RuntimeError("authored failure")
+        if failure == "physical_known":
+            raise PhysicalCallFailure(
+                "known received cost, bad transport identity", response("other")
+            )
         row = response("other" if failure == "wrong_unit" else "s")
         if failure == "unknown_tokens":
             row.update(input_tokens=None, output_tokens=None)
@@ -560,6 +566,57 @@ def test_incremental_failure_charges_no_zero_no_automatic_replay(
     assert route.evaluate("candidate", execute).status == GateStatus.INCONCLUSIVE
     assert len(seen) == 1  # unchanged failed random unit is not regenerated
     control.PipelineController.resume(controller.store, controller.directory, controller.runtimes)
+    route.close()
+    ledger.close()
+
+
+def test_transport_budget_error_swallowed_by_actual_gate_still_stops_child(
+    pipeline, tmp_path, monkeypatch
+):
+    controller, _ = pipeline
+    controller.reference([response("s")])
+    route, ledger = incremental(controller, tmp_path)
+    plan = freeze_audit(route)
+    process = PersistentModel.__new__(PersistentModel)
+    process.directory = tmp_path / "AUTHORED_MODEL"
+    process.directory.mkdir()
+    process.ledger, process.allocation_id = ledger, "AUTHORED_ALLOCATION"
+    process.profile = {"backend_version": execution()["backend_version"]}
+    process.started, process.failed, process.stderr, process.old_sigterm = True, False, None, None
+    ledger.begin_gpu(process.allocation_id, "authored", "GPU-authored-no-allocation", start=100)
+    monkeypatch.setattr("reproduce.persistent_model.time.time", lambda: 3700)
+    child = Mock(stdin=io.StringIO(), stdout=io.StringIO())
+    child.poll.return_value = None
+
+    def waited(**_):
+        child.poll.return_value = 0
+        return 0
+
+    child.wait.side_effect = waited
+    process.process = child
+
+    def interrupted():
+        raise RuntimeError("AUTHORED GPU budget interruption")
+
+    monkeypatch.setattr(process, "_read", interrupted)
+
+    def execute(request):
+        # Literal authored wire, not a real corpus/model qualification.
+        return process._execute(
+            request["execution"],
+            {"id": request["unit"]["id"], "replicate": request["replicate"]},
+        )
+
+    result = route.evaluate("candidate", execute)
+    assert result.status == GateStatus.INCONCLUSIVE
+    assert route.journal.observations(plan) == {}
+    assert child.terminate.call_count == child.wait.call_count == 1
+    assert process.failed and not process.started
+    assert ledger.usage()["calls"] == 1
+    assert ledger.usage()["calls_with_reserved_or_unknown_token_cost"] == 1
+    process.__exit__(None, None, None)
+    assert child.wait.call_count == 1
+    assert ledger.connection.execute("SELECT end FROM gpu_allocations").fetchone()[0] is not None
     route.close()
     ledger.close()
 

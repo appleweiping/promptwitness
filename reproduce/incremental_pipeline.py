@@ -184,7 +184,10 @@ class IncrementalPipeline:
             if None in tokens:
                 raise ScoringError("completed physical call requires both actual token counts")
         except Exception as exc:
-            known = response is not None and all(
+            if response is None:
+                physical = getattr(exc, "physical_response", None)
+                response = copied(physical) if isinstance(physical, dict) else None
+            known = isinstance(response, dict) and all(
                 type(response.get(k)) is int and response[k] >= 0
                 for k in ("input_tokens", "output_tokens")
             )

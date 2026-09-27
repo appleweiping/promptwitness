@@ -58,6 +58,15 @@ v1.1 解阻已消耗 128 次/0.2274557214975357 GPU-hours/309,728 输入/12,462 
 `consumed + 1.20 * remaining_confirmatory_forecast <= ceiling`。
 不将吞吐基准、合成测试或通过 CI 当成 Pilot 或科学效果。
 
+2026-09-27 13:35 UTC 新快照：实际 Qwen/OLMo transport 各5次，总10次，
+增加0.12166419578923104 allocated GPU-hours/21,557输入/2,266输出；
+跨版本实际908次/3.6029360862527073 GPU-hours/1,780,164输入/193,242输出。
+原898次账本保留；新10次COMPLETED、两个GPU区间关闭，无新增reserved/unknown成本。
+详见 `research/ARIS_MODEL_TRANSPORT.json`。只证明完整wire/token/ownedchild成本路径，
+未评分、未验证ONLINE_PINNED或inference数据sandbox、原生fullworkflow/M1/Pilot。
+最终吞异常中断修复有本地机械回归，但没有最终cleanpeer CODE_REVIEW判定；
+科学门禁与缺失验证不得据此改为通过。环境清单补正不是环境重建或模型重跑。
+
 目标完成须交付可复现代码、有效真实实验、统计分析、局限和研究叙述。
 正结果不是必需条件；缺失实验、INTEGRITY_BLOCKED、技能安装或 CI 不能冒充完成。
 保持 active goal，只有真正完成可核验交付后才结束；ARIS 停止条件本身不是科研成功。

@@ -166,3 +166,28 @@
 | 2026-09-27T12:17:38Z | experiment-bridge | refine-logs/EXPERIMENT_PLAN.md | implementation | 最终fixedprefix authored Linux78workers264checks；真实M1/Pilot/online/native未完成 |
 | 2026-09-27T12:17:38Z | experiment-bridge | refine-logs/EXPERIMENT_RESULTS_20260927_121738.md | implementation | 最终fixedprefix authored Linux78workers264checks；真实M1/Pilot/online/native未完成 |
 | 2026-09-27T12:17:38Z | experiment-bridge | refine-logs/EXPERIMENT_RESULTS.md | implementation | 最终fixedprefix authored Linux78workers264checks；真实M1/Pilot/online/native未完成 |
+
+| 2026-09-27T13:35:00Z | experiment-bridge | AGENTS.md | implementation | 实际Qwen/OLMo10wire连续成本，修复吞异常中断，窄doc资格；M1/Pilot/online/native未完成 |
+| 2026-09-27T13:35:00Z | experiment-bridge | configs/research/torch-online-env.json | implementation | 实际Qwen/OLMo10wire连续成本，修复吞异常中断，窄doc资格；M1/Pilot/online/native未完成 |
+| 2026-09-27T13:35:00Z | experiment-bridge | reproduce/MODEL_TRANSPORT.md | implementation | 实际Qwen/OLMo10wire连续成本，修复吞异常中断，窄doc资格；M1/Pilot/online/native未完成 |
+| 2026-09-27T13:35:00Z | experiment-bridge | reproduce/online_resources.py | implementation | 实际Qwen/OLMo10wire连续成本，修复吞异常中断，窄doc资格；M1/Pilot/online/native未完成 |
+| 2026-09-27T13:35:00Z | experiment-bridge | reproduce/persistent_model.py | implementation | 实际Qwen/OLMo10wire连续成本，修复吞异常中断，窄doc资格；M1/Pilot/online/native未完成 |
+| 2026-09-27T13:35:00Z | experiment-bridge | reproduce/prepare_model_transport.py | implementation | 实际Qwen/OLMo10wire连续成本，修复吞异常中断，窄doc资格；M1/Pilot/online/native未完成 |
+| 2026-09-27T13:35:00Z | experiment-bridge | reproduce/run_model_transport.py | implementation | 实际Qwen/OLMo10wire连续成本，修复吞异常中断，窄doc资格；M1/Pilot/online/native未完成 |
+| 2026-09-27T13:35:00Z | experiment-bridge | reproduce/torch_runtime.py | implementation | 实际Qwen/OLMo10wire连续成本，修复吞异常中断，窄doc资格；M1/Pilot/online/native未完成 |
+| 2026-09-27T13:35:00Z | experiment-bridge | reproduce/incremental_pipeline.py | implementation | 实际Qwen/OLMo10wire连续成本，修复吞异常中断，窄doc资格；M1/Pilot/online/native未完成 |
+| 2026-09-27T13:35:00Z | experiment-bridge | tests/reproduce/test_online_resources.py | implementation | 实际Qwen/OLMo10wire连续成本，修复吞异常中断，窄doc资格；M1/Pilot/online/native未完成 |
+| 2026-09-27T13:35:00Z | experiment-bridge | tests/reproduce/test_persistent_model.py | implementation | 实际Qwen/OLMo10wire连续成本，修复吞异常中断，窄doc资格；M1/Pilot/online/native未完成 |
+| 2026-09-27T13:35:00Z | experiment-bridge | tests/reproduce/test_model_transport.py | implementation | 实际Qwen/OLMo10wire连续成本，修复吞异常中断，窄doc资格；M1/Pilot/online/native未完成 |
+| 2026-09-27T13:35:00Z | experiment-bridge | tests/reproduce/test_torch_runtime.py | implementation | 实际Qwen/OLMo10wire连续成本，修复吞异常中断，窄doc资格；M1/Pilot/online/native未完成 |
+| 2026-09-27T13:35:00Z | experiment-bridge | tests/reproduce/test_role_pipeline.py | implementation | 实际Qwen/OLMo10wire连续成本，修复吞异常中断，窄doc资格；M1/Pilot/online/native未完成 |
+| 2026-09-27T13:35:00Z | experiment-bridge | research/ARIS_MODEL_TRANSPORT_20260927_133500.json | implementation | 实际Qwen/OLMo10wire连续成本，修复吞异常中断，窄doc资格；M1/Pilot/online/native未完成 |
+| 2026-09-27T13:35:00Z | experiment-bridge | research/ARIS_MODEL_TRANSPORT.json | implementation | 实际Qwen/OLMo10wire连续成本，修复吞异常中断，窄doc资格；M1/Pilot/online/native未完成 |
+| 2026-09-27T13:35:00Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260927_133500.md | implementation | 实际Qwen/OLMo10wire连续成本，修复吞异常中断，窄doc资格；M1/Pilot/online/native未完成 |
+| 2026-09-27T13:35:00Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | 实际Qwen/OLMo10wire连续成本，修复吞异常中断，窄doc资格；M1/Pilot/online/native未完成 |
+| 2026-09-27T13:35:00Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260927_133500.md | implementation | 实际Qwen/OLMo10wire连续成本，修复吞异常中断，窄doc资格；M1/Pilot/online/native未完成 |
+| 2026-09-27T13:35:00Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 实际Qwen/OLMo10wire连续成本，修复吞异常中断，窄doc资格；M1/Pilot/online/native未完成 |
+| 2026-09-27T13:35:00Z | experiment-bridge | refine-logs/EXPERIMENT_PLAN_20260927_133500.md | implementation | 实际Qwen/OLMo10wire连续成本，修复吞异常中断，窄doc资格；M1/Pilot/online/native未完成 |
+| 2026-09-27T13:35:00Z | experiment-bridge | refine-logs/EXPERIMENT_PLAN.md | implementation | 实际Qwen/OLMo10wire连续成本，修复吞异常中断，窄doc资格；M1/Pilot/online/native未完成 |
+| 2026-09-27T13:35:00Z | experiment-bridge | refine-logs/EXPERIMENT_RESULTS_20260927_133500.md | implementation | 实际Qwen/OLMo10wire连续成本，修复吞异常中断，窄doc资格；M1/Pilot/online/native未完成 |
+| 2026-09-27T13:35:00Z | experiment-bridge | refine-logs/EXPERIMENT_RESULTS.md | implementation | 实际Qwen/OLMo10wire连续成本，修复吞异常中断，窄doc资格；M1/Pilot/online/native未完成 |
