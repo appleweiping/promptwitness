@@ -475,3 +475,9 @@
 | 2026-09-27T22:58:57Z | experiment-bridge | research/ACCESS_AUDIT_20260927_225857.md | implementation | 访问审计同字节版本快照 |
 | 2026-09-27T22:58:57Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | 分组与角色same-family/provisional审查增量 |
 | 2026-09-27T22:58:57Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260927_225857.md | implementation | 审查记录同字节版本快照 |
+| 2026-09-27T23:10:53Z | experiment-bridge | research/ICMR_M1_CI_20260927_231053.md | implementation | 精确源提交CI15/15与真实Linux authored权限检查 |
+| 2026-09-27T23:10:53Z | experiment-bridge | research/ICMR_M1_CI.md | implementation | 同内容latest copy；M1仍未准入 |
+| 2026-09-27T23:10:53Z | experiment-bridge | AGENTS.md | implementation | 精确CI终态dashboard追加 |
+| 2026-09-27T23:10:53Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 精确CI终态与未准入状态追加 |
+| 2026-09-27T23:10:53Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260927_231053.md | implementation | CI终态tracker同字节版本快照 |
+| 2026-09-27T23:10:53Z | experiment-bridge | findings.md | implementation | exactSHA CI与Linux authored验证发现追加 |

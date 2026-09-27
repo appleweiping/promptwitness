@@ -152,3 +152,8 @@ goalACTIVE/default4scientific0/no timer/other four frozen.
 新增训练侧仅query/reference元数据分组审计和七个检索专用角色，三个非scorer
 无gold；旧文本角色原样。审查same-family/provisional无窄实现blocker，但真实
 Linux、数据store、controller接线、近重复识别和final封存仍未通过。
+
+2026-09-27T23:10:53Z 上述M1权限增量的精确源提交5ba033187a22a3175eae552067c2cf1b301a83ac
+CI run36357426043全15/15成功；Ubuntu3.14的2018pass1skip127warnings含实际
+Linux Landlock sentinel143读/143写机械断言。本机reproduce475pass4skip。
+证据仅限authored权限机制，不解真实store/controller/数据许可/科学准入。

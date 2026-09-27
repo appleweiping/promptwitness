@@ -245,3 +245,9 @@ helper Bandit通过。首df53792 exactCI36354407932确为15/15 success但不代
 fresh same-family/provisional review不授真实数据/进程/科学准入；Windows无法
 实际执行Landlock，CIR controller必须强制新角色。见research/ICMR_M1_ACCESS；
 M1/Pilot仍NOT_ADMITTED，default4/scientific0/原账本/无timer不变。
+
+2026-09-27T23:10:53Z：上一增量源提交5ba033187a22a3175eae552067c2cf1b301a83ac
+已推送且精确SHA CI run36357426043终态success15/15。Ubuntu3.14为2018passed/
+1skipped/127warnings；Linux实际test_real_linux_process_sentinels在通过job中执行，
+覆盖13角色×11leaves=143读/143写检查。本机reproduce475pass4skip。见
+research/ICMR_M1_CI；这不证明CIR controller接线/真实数据/许可证/M1/Pilot。
