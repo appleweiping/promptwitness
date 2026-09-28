@@ -597,3 +597,11 @@
 | 2026-09-28T03:22:04Z | experiment-bridge | research/ACCESS_AUDIT.md | implementation | 最新访问审计 |
 | 2026-09-28T03:22:04Z | experiment-bridge | findings.md | implementation | 真实CPU资格和未准入下一门禁 |
 | 2026-09-28T03:22:04Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard与目标约束 |
+| 2026-09-28T03:35:38Z | experiment-bridge | research/ICMR_REAL_RESTRICTED_CLIP_CI_20260928_033538.md | implementation | bf627a6精确SHA CI15/15与科学门禁 |
+| 2026-09-28T03:35:38Z | experiment-bridge | research/ICMR_REAL_RESTRICTED_CLIP_CI.md | implementation | 同字节latest copy |
+| 2026-09-28T03:35:38Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_033538.md | implementation | CI终态tracker同字节快照 |
+| 2026-09-28T03:35:38Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 精确CI与M1/Pilot未准入 |
+| 2026-09-28T03:35:38Z | experiment-bridge | research/ACCESS_AUDIT_20260928_033538.md | implementation | CI不含真实权重或官方数据快照 |
+| 2026-09-28T03:35:38Z | experiment-bridge | research/ACCESS_AUDIT.md | implementation | 最新访问审计 |
+| 2026-09-28T03:35:38Z | experiment-bridge | findings.md | implementation | CI独立证据与科学门禁 |
+| 2026-09-28T03:35:38Z | experiment-bridge | AGENTS.md | implementation | 工程CI结果与继续约束 |

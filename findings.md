@@ -226,3 +226,8 @@ scorer独立PID，Linux focused45pass1skip。fresh same-family review 的
 失败时丢已完成排序 blocker 已修复并唯一follow-up关闭。自制命中不代表
 正式数据/方法效果；全角色物理成本、captioner/双LLM、官方parity与M1/Pilot
 仍未准入。详见research/ICMR_REAL_RESTRICTED_CLIP_20260928_032204.md。
+
+2026-09-28T03:35:38Z：bf627a6精确CI36373923799全15/15 success；
+Ubuntu3.10/3.14各2057pass2skip，覆盖率94.04/94.05%。CI的 authored
+Landlock/失败回归与私有WSL真实CLIP运行是不同证据，不互相冒充。M1/Pilot/
+论文效果/全角色成本继续未准入。见research/ICMR_REAL_RESTRICTED_CLIP_CI.md。

@@ -337,3 +337,10 @@ Windows full/精确SHA CI另记。fresh same-family/provisional审查发现的
 正式CIR数据/许可、官方parity、captioner、双模型、全角色成本、
 M1/Pilot/论文效果继续NOT_ADMITTED。见research/ICMR_REAL_RESTRICTED_CLIP.md；
 default4/历史账本/无timer/其他四仓冻结不变。
+
+2026-09-28T03:35:38Z：上述受限真实CLIP源码精确提交
+`bf627a6b1be27b0ae06219cf0e0be1a5f30fc876` 已推送；CI run36373923799
+15/15 success，Ubuntu3.10/3.14各2057pass2skip，coverage94.04/94.05%。
+CI不运行932MB真实权重；真实CPU自制输入另由private WSL运行证明。
+官方数据/许可、full-gallery parity、captioner/双LLM、全角色费用、
+M1/Pilot/论文效果仍NOT_ADMITTED。见research/ICMR_REAL_RESTRICTED_CLIP_CI.md。
