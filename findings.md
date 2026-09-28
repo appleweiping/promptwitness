@@ -269,3 +269,9 @@ research/ICMR_DESCRIPTION_TRANSPORT_CI.md。
 或正式 CIR 图像/标注。fresh 审查调用被 agent thread limit 拒绝，仅
 `[local-only]`；SSH 指纹与先前核验不一致，未登录。M1/Pilot/C1–C3
 仍未准入，详见research/ICMR_GENERATED_DESCRIPTION_BRIDGE.md。
+
+2026-09-28T05:56:28Z：生成描述桥 `da9a4ba4b10ad9cca701e7db48d68755bd841231`
+精确CI run36383516624 completed/success15/15；Ubuntu3.10/3.14各
+2076pass2skip/coverage94.04/94.05%。不含真实模型/正式数据/服务器端
+运行，fresh审查与SSH身份仍待完成；M1/Pilot/C1–C3不变。
+见research/ICMR_GENERATED_DESCRIPTION_BRIDGE_CI.md。

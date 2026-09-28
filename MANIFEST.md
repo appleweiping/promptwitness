@@ -653,3 +653,9 @@
 | 2026-09-28T05:45:24Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 同字节latest copy |
 | 2026-09-28T05:45:24Z | experiment-bridge | findings.md | implementation | 生成模型描述接线与未准入边界 |
 | 2026-09-28T05:45:24Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |
+| 2026-09-28T05:56:28Z | experiment-bridge | research/ICMR_GENERATED_DESCRIPTION_BRIDGE_CI_20260928_055628.md | implementation | da9a4ba精确CI15/15与边界 |
+| 2026-09-28T05:56:28Z | experiment-bridge | research/ICMR_GENERATED_DESCRIPTION_BRIDGE_CI.md | implementation | 同字节latest copy |
+| 2026-09-28T05:56:28Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_055628.md | implementation | CI终态tracker快照 |
+| 2026-09-28T05:56:28Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 同字节latest copy |
+| 2026-09-28T05:56:28Z | experiment-bridge | findings.md | implementation | 精确SHA CI与未准入项 |
+| 2026-09-28T05:56:28Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |

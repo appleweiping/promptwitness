@@ -381,3 +381,11 @@ SSH 现行 ED25519 指纹与先前用户核验值不一致，未连接服务器�
 正式captioner、双模型、图像/数据许可、全角色预算、M1/Pilot/C1–C3/
 英文稿仍待准入；见research/ICMR_GENERATED_DESCRIPTION_BRIDGE.md。
 goal仍active，ARIS默认4轮、无timer、其他四仓冻结不变。
+
+2026-09-28T05:56:28Z：生成描述桥源码精确 SHA
+`da9a4ba4b10ad9cca701e7db48d68755bd841231` 已推送；
+CI run36383516624终态success15/15，Ubuntu3.10/3.14各2076pass2skip、
+coverage94.04/94.05%；详见research/ICMR_GENERATED_DESCRIPTION_BRIDGE_CI.md。
+CI只覆盖authored代码/构建，不运行私有Qwen/OLMo、CLIP或正式CIR数据。
+SSH指纹未重新核验，fresh审查因agent thread limit未完成；M1/Pilot/
+C1–C3/全角色预算/稿件仍未准入，goal仍active，default4/无timer不变。
