@@ -26,7 +26,7 @@ from reproduce.retrieval_work_ledger import RetrievalWorkLedger
 
 FORMAT = "promptwitness.retrieval-rank-session/v1"
 ENTRYPOINT = Path(__file__)
-RANK_STAGES = frozenset({"search", "selection"})
+RANK_STAGES = frozenset({"fit", "search", "selection"})
 
 
 def _input_file(directory: Path, relative: object) -> Path:
@@ -150,7 +150,7 @@ def serve(
 
 
 class RestrictedRankerSession:
-    """One live search ranker; its private operation ledger is separate from the bridge."""
+    """One live stage ranker; its private operation ledger is separate from the bridge."""
 
     def __init__(
         self,
@@ -166,7 +166,7 @@ class RestrictedRankerSession:
         stage: str = "search",
     ) -> None:
         if stage not in RANK_STAGES:
-            raise AccessBoundaryError("only search or selection ranking is admitted")
+            raise AccessBoundaryError("only fit, search or selection ranking is admitted")
         if not scratch.is_dir() or not math.isfinite(timeout) or timeout <= 0:
             raise ValueError("existing ranker scratch and positive finite timeout required")
         landlock_abi()

@@ -206,15 +206,16 @@ def test_supplied_description_uses_same_reference_and_distinct_physical_receipts
         ledger.close()
 
 
-def test_selection_ranker_charges_its_own_input_only_stage(tmp_path, monkeypatch):
+@pytest.mark.parametrize("stage", ["fit", "selection"])
+def test_fit_or_selection_ranker_charges_its_own_input_only_stage(tmp_path, monkeypatch, stage):
     monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "")
     _fake_model(monkeypatch)
-    inputs = tmp_path / "selection/inputs"
-    _inputs(inputs, "cirr", [_row("selection-q")], {"cirr": ["reference", "target"]})
+    inputs = tmp_path / stage / "inputs"
+    _inputs(inputs, "cirr", [_row("stage-q")], {"cirr": ["reference", "target"]})
     paths = {name: tmp_path / name for name in ("reference", "target")}
     for path in paths.values():
         path.touch()
-    ledger = RetrievalWorkLedger(tmp_path / "selection-work.sqlite")
+    ledger = RetrievalWorkLedger(tmp_path / f"{stage}-work.sqlite")
     try:
         ranker = DirectClipRanker(
             input_dir=inputs,
@@ -223,25 +224,25 @@ def test_selection_ranker_charges_its_own_input_only_stage(tmp_path, monkeypatch
             checkpoint=tmp_path / "fake.pt",
             image_weight=0.5,
             ledger=ledger,
-            attempt_prefix="authored-selection",
-            stage="selection",
+            attempt_prefix=f"authored-{stage}",
+            stage=stage,
         )
-        assert ranker.rank_one("selection-q") == ("target", "reference")
-        assert ranker.rank_description("selection-q", "child:q", "make it blue") == (
+        assert ranker.rank_one("stage-q") == ("target", "reference")
+        assert ranker.rank_description("stage-q", "child:q", "make it blue") == (
             "target",
             "reference",
         )
         stages = ledger.connection.execute(
             "SELECT DISTINCT stage FROM retrieval_work ORDER BY stage"
         ).fetchall()
-        assert stages == [("selection",), ("shared",)]
+        assert stages == [(stage,), ("shared",)]
     finally:
         ledger.close()
 
 
 def test_final_ranker_is_not_admitted(tmp_path, monkeypatch):
     monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "")
-    with pytest.raises(ValueError, match="only search or selection"):
+    with pytest.raises(ValueError, match="only fit, search or selection"):
         DirectClipRanker(
             input_dir=tmp_path,
             dataset="cirr",

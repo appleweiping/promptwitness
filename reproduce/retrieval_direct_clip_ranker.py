@@ -86,12 +86,12 @@ def load_input_only(
 
 
 class DirectClipRanker:
-    """Build one input-only image index for a search or selection population.
+    """Build one input-only image index for a fit, search or selection population.
 
     Image load and encoding are nested under a durable image-encode receipt;
     encoder cold start and each text forward have their own receipts. The
     audit bridge owns the outer rank callback and restricted scorer receipts.
-    Fit/final ranking roles are not implemented by this component.
+    Final ranking is not implemented by this component.
     The caller must also account for whole-process CPU allocation and sources.
     """
 
@@ -108,8 +108,8 @@ class DirectClipRanker:
         stage: str = "search",
     ) -> None:
         require_cpu()
-        if stage not in {"search", "selection"}:
-            raise ValueError("only search or selection input-only ranking is supported")
+        if stage not in {"fit", "search", "selection"}:
+            raise ValueError("only fit, search or selection input-only ranking is supported")
         if not attempt_prefix or not isinstance(attempt_prefix, str):
             raise ValueError("nonempty attempt prefix required")
         if (

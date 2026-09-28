@@ -36,6 +36,7 @@ def layout(tmp_path):
         ("retrieval_fit_scorer", "fit"),
         ("retrieval_optimizer", "search"),
         ("retrieval_predictor", "search"),
+        ("retrieval_fit_ranker", "fit"),
         ("retrieval_search_ranker", "search"),
         ("retrieval_selection_ranker", "selection"),
         ("retrieval_search_scorer", "search"),
@@ -58,6 +59,7 @@ def test_retrieval_non_scorers_cannot_read_any_gold(tmp_path):
         ("retrieval_fit_learner", "fit"),
         ("retrieval_optimizer", "search"),
         ("retrieval_predictor", "search"),
+        ("retrieval_fit_ranker", "fit"),
         ("retrieval_search_ranker", "search"),
         ("retrieval_selection_ranker", "selection"),
     ):
@@ -76,6 +78,7 @@ def test_retrieval_non_scorers_cannot_read_any_gold(tmp_path):
         ("unknown", "search"),
         ("optimizer", "unknown"),
         ("retrieval_selection_ranker", "search"),
+        ("retrieval_fit_ranker", "selection"),
         ("retrieval_search_ranker", "final"),
     ],
 )
@@ -206,15 +209,16 @@ def test_real_linux_process_sentinels(tmp_path, monkeypatch):
         pytest.skip(str(exc))
     monkeypatch.setenv("PW_SENTINEL_PRIVATE", "not-for-worker")
     result = check(tmp_path / "attempt", tmp_path / "witness.json")
-    assert result["read_checks"] == result["write_checks"] == 165
+    assert result["read_checks"] == result["write_checks"] == 176
     assert result["scientific_admission"] == "PARTIAL_NOT_PASSED"
-    assert len({row["pid"] for row in result["workers"]}) == 15
+    assert len({row["pid"] for row in result["workers"]}) == 16
     assert all(row["helper_import_after_restriction"] for row in result["workers"])
 
 
 @pytest.mark.parametrize(
     "role,stage,random_allowed,cpuinfo_allowed,gold_allowed",
     [
+        ("retrieval_fit_ranker", "fit", True, True, False),
         ("retrieval_search_ranker", "search", True, True, False),
         ("retrieval_selection_ranker", "selection", True, True, False),
         ("retrieval_search_scorer", "search", False, False, True),

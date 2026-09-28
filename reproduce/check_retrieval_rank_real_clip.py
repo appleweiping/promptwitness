@@ -25,8 +25,8 @@ FORMAT = "promptwitness.restricted-real-clip-qualification/v1"
 
 def check(checkpoint: Path, output: Path, *, stage: str = "search") -> dict[str, object]:
     """Run one cold index, two direct queries and one supplied description."""
-    if stage not in {"search", "selection"}:
-        raise ValueError("real-CLIP qualification supports search or selection only")
+    if stage not in {"fit", "search", "selection"}:
+        raise ValueError("real-CLIP qualification supports fit, search or selection only")
     require_cpu()
     checkout = Path(__file__).resolve().parents[1]
     if output.resolve().is_relative_to(checkout):
@@ -234,7 +234,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("checkpoint", type=Path)
     parser.add_argument("new_output", type=Path)
-    parser.add_argument("--stage", choices=("search", "selection"), default="search")
+    parser.add_argument("--stage", choices=("fit", "search", "selection"), default="search")
     args = parser.parse_args()
     print(json.dumps(check(args.checkpoint, args.new_output, stage=args.stage), allow_nan=False))
 

@@ -36,6 +36,7 @@ EXPECTED = {
         "search/reference",
         "search/parent",
     },
+    "retrieval_fit_ranker": {"fit/inputs"},
     "retrieval_search_ranker": {"search/inputs"},
     "retrieval_selection_ranker": {"selection/inputs"},
     "retrieval_search_scorer": {"search/inputs", "search/gold"},
@@ -113,7 +114,12 @@ def check(work: Path, output: Path) -> dict[str, Any]:
         for role in EXPECTED:
             scratch = work / f"scratch-{role}"
             scratch.mkdir()
-            if role in {"fit_learner", "retrieval_fit_learner", "retrieval_fit_scorer"}:
+            if role in {
+                "fit_learner",
+                "retrieval_fit_learner",
+                "retrieval_fit_ranker",
+                "retrieval_fit_scorer",
+            }:
                 stage = "fit"
             elif role in {
                 "selection_scorer",

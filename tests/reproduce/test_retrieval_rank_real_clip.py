@@ -31,7 +31,7 @@ def test_missing_checkpoint_retains_failure_without_model_or_image_import(tmp_pa
 def test_final_stage_is_rejected_before_creating_output(tmp_path, monkeypatch):
     monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "")
     output = tmp_path / "not-created"
-    with pytest.raises(ValueError, match="search or selection only"):
+    with pytest.raises(ValueError, match="fit, search or selection only"):
         qualification.check(tmp_path / "unused.pt", output, stage="final")
     assert not output.exists()
 
@@ -42,6 +42,10 @@ def test_final_stage_is_rejected_before_creating_output(tmp_path, monkeypatch):
         ("search", "none"),
         ("search", "direct_score"),
         ("search", "description_score"),
+        ("fit", "none"),
+        ("fit", "direct_score"),
+        ("fit", "description_score"),
+        ("fit", "second_description_rank"),
         ("selection", "none"),
         ("selection", "direct_score"),
         ("selection", "description_score"),
@@ -168,7 +172,7 @@ def test_authored_qualification_driver_wires_two_process_roles(
         assert (store / score_stage / "inputs/ViT-L-14.pt").samefile(checkpoint)
         assert dataset == "cirr" and score_stage == stage
         expected_ids = {"authored-q-red", "authored-q-blue"}
-        if score_stage == "selection" or scratch.name == "scorer-scratch":
+        if score_stage != "search" or scratch.name == "scorer-scratch":
             assert set(rankings) == expected_ids
         else:
             assert set(rankings) == {"authored-q-red"}

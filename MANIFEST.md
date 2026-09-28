@@ -740,3 +740,15 @@
 | 2026-09-28T09:25:01Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 同字节latest copy |
 | 2026-09-28T09:25:01Z | experiment-bridge | findings.md | implementation | 精确CI与未准入项 |
 | 2026-09-28T09:25:01Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |
+| 2026-09-28T09:55:11Z | experiment-bridge | research/ICMR_FIT_REAL_CLIP_20260928_095511.md | implementation | fit真实CLIP自制资格与限制 |
+| 2026-09-28T09:55:11Z | experiment-bridge | research/ICMR_FIT_REAL_CLIP.md | implementation | 同字节latest copy |
+| 2026-09-28T09:55:11Z | experiment-bridge | research/ICMR_FIT_REAL_CLIP_20260928_095511.json | implementation | 机器可读资格摘要 |
+| 2026-09-28T09:55:11Z | experiment-bridge | research/ICMR_FIT_REAL_CLIP.json | implementation | 同字节latest copy |
+| 2026-09-28T09:55:11Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260928_095511.md | implementation | fit审查及测试补丁限制 |
+| 2026-09-28T09:55:11Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | 同字节latest copy |
+| 2026-09-28T09:55:11Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_095511.md | implementation | fit资格tracker快照 |
+| 2026-09-28T09:55:11Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 同字节latest copy |
+| 2026-09-28T09:55:11Z | experiment-bridge | research/ACCESS_AUDIT_20260928_095511.md | implementation | fit私有权重/自制数据访问快照 |
+| 2026-09-28T09:55:11Z | experiment-bridge | research/ACCESS_AUDIT.md | implementation | 同字节latest copy |
+| 2026-09-28T09:55:11Z | experiment-bridge | findings.md | implementation | fit真实CLIP资格及未准入项 |
+| 2026-09-28T09:55:11Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |

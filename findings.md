@@ -353,3 +353,14 @@ research/ICMR_SELECTION_REAL_CLIP.md/json。
 completed/success15/15。Ubuntu3.10/3.14各2098pass3skip，覆盖率
 94.04/94.05%。CI不运行私有权重/正式图像/真实生成器；M1/Pilot/
 C1–C3仍NOT_ADMITTED。见research/ICMR_SELECTION_REAL_CLIP_CI.md。
+
+2026-09-28T09:55:11Z：fit input-only ranker 与独立受限 scorer 在
+WSL native Landlock/真实第一方 CLIP CPU/自制3图2查询上通过：
+内层12/12操作、7 forwards；外层6/6；失败/未结算0。少查询失败与
+外层收据经审查建议补真实进程测试，Linux最终2pass/10deselected；
+Linux focused94pass1skip，Windows全套2082pass28skip/94.01%
+在该最后测试补丁前收集，最终定向76pass19skip。Ruff/format/mypy61/
+配置Bandit/build/Twine通过，同家族provisional审查无BLOCKING。
+正式数据/许可、双真实生成模型、完整成本/M1/Pilot/C1–C3均未准入，
+SSH指纹冲突未登录；精确SHA CI待提交。见
+research/ICMR_FIT_REAL_CLIP.md/json。

@@ -481,3 +481,14 @@ CI run36402372673精确匹配 completed/success15/15；Ubuntu3.10/3.14
 独立WSL自制资格的哈希与费用见research/ICMR_SELECTION_REAL_CLIP.md/json。
 正式许可/图像/封存、全角色成本/online native/M1/Pilot/C1–C3
 仍NOT_ADMITTED；goalACTIVE/default4/历史账本/无timer/四仓冻结不变。
+
+2026-09-28T09:55:11Z：新增 `retrieval_fit_ranker` input-only/Landlock 角色，
+私有 WSL ext4 第一方 CLIP CPU 在3自制图/2自制查询上跑通完整 fit 人口评分；
+内层12操作/7 forwards、外层6、0失败未结算。Linux focused94pass1skip；
+只读同家族审查0 BLOCKING、1非阻断测试缺口已补，补丁本身未复审，
+Linux补丁用例2pass/10deselected。Windows全套2082pass28skip/94.01%
+在最后测试补丁前收集；最终定向76pass19skip，构建/Twine及质量检查过。
+新源码精确SHA CI待提交核验。没有正式数据/许可/真实Qwen/OLMo描述、
+全角色成本、M1/Pilot/C1–C3；SSH指纹冲突未登录。见
+research/ICMR_FIT_REAL_CLIP.md/json；goalACTIVE/default4/历史账本/
+无timer/其他四仓冻结不变。

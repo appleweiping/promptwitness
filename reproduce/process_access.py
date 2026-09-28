@@ -52,6 +52,7 @@ ROLE_STAGES = {
     "retrieval_fit_scorer": frozenset({"fit"}),
     "retrieval_optimizer": frozenset({"search"}),
     "retrieval_predictor": frozenset({"search"}),
+    "retrieval_fit_ranker": frozenset({"fit"}),
     "retrieval_search_ranker": frozenset({"search"}),
     "retrieval_selection_ranker": frozenset({"selection"}),
     "retrieval_search_scorer": frozenset({"search"}),
@@ -82,6 +83,7 @@ ROLE_LEAVES = {
         "search/reference",
         "search/parent",
     ),
+    "retrieval_fit_ranker": ("fit/inputs",),
     "retrieval_search_ranker": ("search/inputs",),
     "retrieval_selection_ranker": ("selection/inputs",),
     "retrieval_search_scorer": ("search/inputs", "search/gold"),
@@ -212,7 +214,11 @@ def enforce_policy(
         # PyTorch's CPU runtime opens this device and CPU metadata while
         # loading CLIP. Only the ranker needs these file-level read grants;
         # neither /dev nor /proc is traversable through a broad directory rule.
-        if policy["role"] in {"retrieval_search_ranker", "retrieval_selection_ranker"}:
+        if policy["role"] in {
+            "retrieval_fit_ranker",
+            "retrieval_search_ranker",
+            "retrieval_selection_ranker",
+        }:
             grants.append((Path("/dev/urandom"), 1 << 2))
             grants.append((Path("/proc/cpuinfo"), 1 << 2))
         for path, rights in grants:
@@ -302,7 +308,7 @@ def _role_launch(
         # or inherit a credential/cache home outside the granted scratch.
         "HOME": str(scratch.resolve()),
     }
-    if role in {"retrieval_search_ranker", "retrieval_selection_ranker"}:
+    if role in {"retrieval_fit_ranker", "retrieval_search_ranker", "retrieval_selection_ranker"}:
         environment["CUDA_VISIBLE_DEVICES"] = ""  # Fixed CPU CLIP/ranking backend.
     return policy, environment
 

@@ -81,7 +81,7 @@ def test_ranker_session_requires_linux_before_start(tmp_path):
 def test_final_ranker_is_rejected_before_start(tmp_path):
     scratch = tmp_path / "scratch"
     scratch.mkdir()
-    with pytest.raises(AccessBoundaryError, match="only search or selection"):
+    with pytest.raises(AccessBoundaryError, match="only fit, search or selection"):
         RestrictedRankerSession(
             store=tmp_path,
             scratch=scratch,
@@ -369,28 +369,29 @@ def test_description_pipe_preserves_request_identity_and_gold_boundary(tmp_path,
         inner.close()
 
 
-def test_selection_ranker_to_complete_selection_scorer(tmp_path, monkeypatch):
+@pytest.mark.parametrize("stage", ["fit", "selection"])
+def test_fit_or_selection_ranker_to_complete_scorer(tmp_path, monkeypatch, stage):
     if sys.platform != "linux":
-        pytest.skip("real Landlock selection ranker/scorer workers require Linux")
+        pytest.skip("real Landlock fit/selection ranker/scorer workers require Linux")
     monkeypatch.setattr(
         retrieval_rank_role, "ENTRYPOINT", Path(check_retrieval_rank_session.__file__)
     )
     store, rows, _, image_paths = _authored_store(tmp_path)
     selected = rows[:3]
     search_inputs = store / "search/inputs"
-    selection_inputs = store / "selection/inputs"
-    (selection_inputs / "cirr.jsonl").write_text(
+    stage_inputs = store / stage / "inputs"
+    (stage_inputs / "cirr.jsonl").write_text(
         "".join(json.dumps(row) + "\n" for row in selected), encoding="utf-8"
     )
-    (selection_inputs / "cirr-gallery.json").write_bytes(
+    (stage_inputs / "cirr-gallery.json").write_bytes(
         (search_inputs / "cirr-gallery.json").read_bytes()
     )
-    (selection_inputs / "model.pt").write_bytes(b"authored-not-a-model")
+    (stage_inputs / "model.pt").write_bytes(b"authored-not-a-model")
     for relative in image_paths.values():
-        path = selection_inputs / relative
+        path = stage_inputs / relative
         path.parent.mkdir(exist_ok=True)
         path.write_bytes((search_inputs / relative).read_bytes())
-    (store / "selection/gold/cirr.jsonl").write_text(
+    (store / stage / "gold/cirr.jsonl").write_text(
         "".join(
             json.dumps({"id": row["id"], "target_id": "target", "subset": ["reference", "target"]})
             + "\n"
@@ -398,8 +399,8 @@ def test_selection_ranker_to_complete_selection_scorer(tmp_path, monkeypatch):
         ),
         encoding="utf-8",
     )
-    rank_scratch = tmp_path / "selection-rank-scratch"
-    score_scratch = tmp_path / "selection-score-scratch"
+    rank_scratch = tmp_path / f"{stage}-rank-scratch"
+    score_scratch = tmp_path / f"{stage}-score-scratch"
     rank_scratch.mkdir()
     score_scratch.mkdir()
     with RestrictedRankerSession(
@@ -409,23 +410,46 @@ def test_selection_ranker_to_complete_selection_scorer(tmp_path, monkeypatch):
         image_paths=image_paths,
         checkpoint="model.pt",
         image_weight=0.5,
-        attempt_prefix="authored-selection",
-        stage="selection",
+        attempt_prefix=f"authored-{stage}",
+        stage=stage,
     ) as session:
-        assert session.ready["stage"] == "selection"
-        assert session.ready["role"] == "retrieval_selection_ranker"
+        assert session.ready["stage"] == stage
+        assert session.ready["role"] == f"retrieval_{stage}_ranker"
         rankings = {row["id"]: session.rank_one(row["id"]) for row in selected}
-    report = score_rankings_restricted(store, score_scratch, "cirr", "selection", rankings)
-    assert report["role"] == "retrieval_selection_scorer"
+    report = score_rankings_restricted(store, score_scratch, "cirr", stage, rankings)
+    assert report["role"] == f"retrieval_{stage}_scorer"
     assert {row["primary_hit"] for row in report["observations"].values()} == {1}
     inner = RetrievalWorkLedger(rank_scratch / "ranker-work.sqlite")
     try:
         assert inner.summary()["attempts"] == len(selected)
         assert inner.connection.execute("SELECT DISTINCT stage FROM retrieval_work").fetchall() == [
-            ("selection",)
+            (stage,)
         ]
     finally:
         inner.close()
+    if stage == "fit":
+        partial_scratch = tmp_path / "fit-partial-score-scratch"
+        partial_scratch.mkdir()
+        outer = RetrievalWorkLedger(tmp_path / "fit-partial-outer.sqlite")
+        try:
+            with pytest.raises(ValueError, match="restricted retrieval scorer failed"):
+                outer.run(
+                    "fit:incomplete:score",
+                    "fit",
+                    "restricted_score",
+                    lambda: score_rankings_restricted(
+                        store,
+                        partial_scratch,
+                        "cirr",
+                        "fit",
+                        {selected[0]["id"]: rankings[selected[0]["id"]]},
+                    ),
+                )
+            assert outer.summary()["attempts"] == outer.summary()["failed"] == 1
+            assert outer.summary()["unresolved"] == 0
+            assert (partial_scratch / "scorer-stderr.log").is_file()
+        finally:
+            outer.close()
 
 
 def test_incomplete_worker_rank_aborts_and_outer_cost_is_failed(tmp_path, monkeypatch):
