@@ -35,20 +35,3 @@ Qwen/OLMo、GPU 或新的付费模型调用。完整图库/GPU tie parity、官�
 评分、原图许可、FashionIQ 准确许可、captioner、双模型、全角色成本、
 C1–C3/M1/Pilot 与论文效果仍 NOT_ADMITTED。与此前相同的 ARIS run、
 默认 4 轮、历史账本、无定时器和其他四仓冻结均未改变。
-
-## 2026-09-28 07:37:37 UTC：完整本机测试与构建
-
-后续 diff 的 Windows Python 3.12.13 原配置完整套件 exit 0：
-**2058 passed、22 skipped、490.24 秒、coverage 94.03%**，高于项目
-90% 门槛。与此前 `2058 passed/21 skipped` 相比，新增的
-`PW_SEARLE_VALIDATE_PY` 私有源码可选测试在无该文件的 Windows/CI
-环境按设计多跳过 1 项，原有通过数不变；更早 `2059/20` 与
-`2058/21` 的另一项差异仍未归因，不能将其视为通过。
-
-项目级 `ruff check .`、`ruff format --check .`、`mypy src`、配置的
-`bandit -q -c pyproject.toml -r src`、`python -m build` 与
-`twine check dist/*` 都 exit 0。新 checker 的固定 AST `exec`
-在单文件 Bandit B102 检查中仍有已披露的问题；项目配置的 Bandit
-只扫描 `src`，不能把这个 exit 0 解释为该 helper 没有风险。
-新 SHA 远端 CI 需在提交后单独核验；本机通过不代表官方服务器、
-正式数据或方法收益。

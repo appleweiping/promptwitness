@@ -8,6 +8,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import sys
+from pathlib import Path
 
 import pytest
 
@@ -60,3 +63,33 @@ def test_compiled_but_unexecuted_metric_bodies_are_not_claimed(tmp_path, monkeyp
     assert report["error_type"] == "MemoryError"
     assert report["source_metric_function_bodies_executed"] is False
     assert report["authored_cpu_tie_fixture_checked"] is False
+
+
+def test_private_pinned_ties_and_lexical_fault_receipt(tmp_path, monkeypatch):
+    """Optional private-source regression; CI never downloads third-party code."""
+    source_path = os.environ.get("PW_SEARLE_VALIDATE_PY")
+    if sys.platform != "linux" or not source_path:
+        pytest.skip("private pinned source and CPU Torch Linux environment required")
+    monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "")
+    source = Path(source_path)
+    positive = parity.check(source, tmp_path / "positive")
+    tied = positive["authored_cpu_tie_fixture"]
+    assert positive["status"] == "PASS_PINNED_SEARLE_METRIC_BODY_AUTHORED_CPU_TIE_FIXTURE"
+    assert positive["authored_cpu_tie_fixture_checked"] is True
+    assert tied["nonlexical_tie_order_observed"] is True
+    assert tied["complete_rank_order_matched_pinned_batch_expression"] is True
+    subset = tied["cirr_subset_recall"]
+    assert subset["1"]["ours_percent"] < subset["2"]["ours_percent"] < subset["3"]["ours_percent"]
+    assert positive["ties_qualified"] is False
+    assert positive["scientific_result"] is False
+
+    monkeypatch.setattr(parity, "rank_float32_cpu", lambda _query, _gallery, names: names)
+    with pytest.raises(AssertionError, match="did not distinguish"):
+        parity.check(source, tmp_path / "lexical-fault")
+    failed = json.loads((tmp_path / "lexical-fault/qualification.json").read_text(encoding="utf-8"))
+    assert failed["status"] == "FAILED_RETAINED"
+    assert failed["error_type"] == "AssertionError"
+    assert failed["source_metric_function_bodies_executed"] is True
+    assert failed["authored_cpu_tie_fixture_checked"] is False
+    assert failed["ties_qualified"] is False
+    assert failed["scientific_result"] is False

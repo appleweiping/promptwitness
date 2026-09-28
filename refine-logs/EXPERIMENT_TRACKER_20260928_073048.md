@@ -392,12 +392,3 @@ success 15/15。新上下文只读 `gpt-6-astra`/xhigh 审查给出 0 BLOCKING�
 NOT_ADMITTED；SSH 指纹未重新核验，未登录。见
 `research/ICMR_SEARLE_TIE_PARITY_20260928_073048.md` 与
 `refine-logs/EXPERIMENT_CODE_REVIEW_20260928_073048.md`。
-
-## 2026-09-28T07:37:37Z：审查后代码本机完整验证
-
-原配置全套2058pass22skip/490.24s、coverage94.03%，exit0；新增可选
-私有源码用例在Windows/CI无源文件时跳过，WSL私有环境则4pass。
-项目级Ruff/format/mypy/Bandit及build/Twine均通过。单文件固定源码
-`exec` B102仍披露，不因配置Bandit仅扫描`src`而宣称解决。新SHA CI
-待提交后核验，科研门禁不变。见
-`research/ICMR_SEARLE_TIE_PARITY_20260928_073737.md`。

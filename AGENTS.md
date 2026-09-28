@@ -422,3 +422,18 @@ M1/Pilot/C1–C3仍NOT_ADMITTED。见research/ICMR_SEARLE_TIE_PARITY.md；
 2058pass21skip/372.73s/coverage94.03%。相较前一次2059/20
 有一项由pass变skip，原因未在本次原输出中归因；不把它算通过。
 精确新SHA CI仍待提交；正式M1/Pilot科学状态不变。
+
+2026-09-28T07:30:48Z：`b6faa72` 已推送，精确CI run36390612426
+success15/15。新上下文只读同系列review 0 BLOCKING、2 NON-BLOCKING；
+后续本地修正自制CIRR subset cutoff 区分力，R@1/2/3现为20/40/60%，
+新增可选私有固定源码正向/词典序故障回归，WSL 4pass、Windows定向
+43pass1skip。reviewer未复审后续diff；完整本机套件及新SHA CI待验。
+此仍仅自制CPU函数体对照，正式图库/GPU/许可/模型、M1/Pilot/C1–C3
+全部NOT_ADMITTED；SSH指纹未重核验，未连接。见
+research/ICMR_SEARLE_TIE_PARITY.md、refine-logs/EXPERIMENT_CODE_REVIEW.md。
+
+2026-09-28T07:37:37Z：审查后diff本机完整套件exit0，2058pass22skip/
+490.24s/coverage94.03%；新增可选私有源码测试Windows按设计多1skip，
+WSL有固定私有源码时4pass。Ruff/format/mypy src/配置Bandit/build/
+Twine通过，但单文件AST exec B102未消失。新SHA CI待提交后核验；
+正式M1/Pilot科学状态不变，见research/ICMR_SEARLE_TIE_PARITY.md。

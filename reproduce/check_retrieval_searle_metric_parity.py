@@ -101,14 +101,17 @@ def _check_cpu_ties(namespace: dict[str, Any]) -> dict[str, object]:
     cirr_golds = []
     for number, position in enumerate((0, 4, 9, 49, 53)):
         target = eligible[position]
-        distractors = tuple(name for name in eligible if name != target)[:4]
+        before = eligible[:position][:number]
+        after = eligible[position + 1 :][: 4 - number]
+        if len(before) + len(after) != 4:
+            raise AssertionError("tied CIRR subset cannot distinguish all five ranks")
         cirr_golds.append(
             RetrievalGold(
                 f"authored-tie-cirr-query-{number}",
                 "cirr",
                 reference,
                 target,
-                subset=(reference, target, *distractors),
+                subset=(reference, target, *before, *after),
             )
         )
     namespace["cirr_generate_val_predictions"] = lambda *_: (
@@ -125,6 +128,8 @@ def _check_cpu_ties(namespace: dict[str, Any]) -> dict[str, object]:
     )
     cirr_micro = cast(dict[str, float], ours_cirr["query_micro_recall"])
     cirr_subset = cast(dict[str, float], ours_cirr["subset_recall"])
+    if not (cirr_subset["1"] < cirr_subset["2"] < cirr_subset["3"]):
+        raise AssertionError("tied CIRR subset fixture did not separate its cutoffs")
     cirr_checks = {
         key: _compare(f"tied CIRR R@{key}", float(native_cirr[f"cirr_recall_at{key}"]), 100 * value)
         for key, value in cirr_micro.items()

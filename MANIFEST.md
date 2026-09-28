@@ -688,3 +688,17 @@
 | 2026-09-28T07:11:20Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 同字节latest copy |
 | 2026-09-28T07:11:20Z | experiment-bridge | findings.md | implementation | 原配置完整测试实际结果 |
 | 2026-09-28T07:11:20Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |
+| 2026-09-28T07:30:48Z | experiment-bridge | research/ICMR_SEARLE_TIE_PARITY_20260928_073048.md | implementation | 审查后subset cutoff与可选私有源码回归证据及边界 |
+| 2026-09-28T07:30:48Z | experiment-bridge | research/ICMR_SEARLE_TIE_PARITY.md | implementation | 同字节latest copy |
+| 2026-09-28T07:30:48Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260928_073048.md | implementation | same-family审查结论与修正未复审声明 |
+| 2026-09-28T07:30:48Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | 同字节latest copy |
+| 2026-09-28T07:30:48Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_073048.md | implementation | tie审查及修正tracker快照 |
+| 2026-09-28T07:30:48Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 同字节latest copy |
+| 2026-09-28T07:30:48Z | experiment-bridge | findings.md | implementation | 同系列审查与后续未复审边界 |
+| 2026-09-28T07:30:48Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |
+| 2026-09-28T07:37:37Z | experiment-bridge | research/ICMR_SEARLE_TIE_PARITY_20260928_073737.md | implementation | 审查后完整本地测试、构建与风险边界 |
+| 2026-09-28T07:37:37Z | experiment-bridge | research/ICMR_SEARLE_TIE_PARITY.md | implementation | 同字节latest copy |
+| 2026-09-28T07:37:37Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_073737.md | implementation | 完整本地验证tracker快照 |
+| 2026-09-28T07:37:37Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 同字节latest copy |
+| 2026-09-28T07:37:37Z | experiment-bridge | findings.md | implementation | 本机完整测试与build/Twine结果 |
+| 2026-09-28T07:37:37Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |

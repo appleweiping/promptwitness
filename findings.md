@@ -299,3 +299,17 @@ fresh reviewer thread limit使审查仅local-only；无新真实模型/GPU费用
 2026-09-28T07:11:20Z：本机原配置全套2058passed/21skipped、
 372.73s、coverage94.03% exit0；较上次2059/20有一项变skip，
 未归因，不把它宣称为本次通过。见后续版本研究报告。
+
+2026-09-28T07:30:48Z：`b6faa72` 精确CI run36390612426 success15/15。
+新上下文同系列只读审查无BLOCKING、2个NON-BLOCKING，已在后续
+本地改动修正并重跑固定SEARLE私有源码：自制CIRR subset R@1/2/3
+为20/40/60%；可选Linux/private-source正向加词典序故障回归WSL
+4pass，Windows定向43pass1skip。审查不是跨系列独立验收，后续改动
+未复审；完整本地套件和新SHA CI待验。真实图库/GPU/正式数据、双模型、
+M1/Pilot/C1–C3仍未准入。见research/ICMR_SEARLE_TIE_PARITY.md。
+
+2026-09-28T07:37:37Z：后续修正本机原配置全套exit0，2058pass22skip/
+490.24s/coverage94.03%，新私有源码可选测试在Windows预期多1skip。
+Ruff/format/mypy src/配置Bandit/build/Twine均exit0；单文件AST exec
+B102不因配置Bandit仅扫描src而消失。远端新SHA CI待核验，科学状态
+不变。见research/ICMR_SEARLE_TIE_PARITY.md。
