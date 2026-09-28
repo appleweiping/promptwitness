@@ -211,3 +211,8 @@ search 专用 Landlock ranker 角色并把持久 CLIP/index 保持在子进程�
 整帧单调期限已修复。受限 worker 自写 fixture 的 outer/inner 收据设计遵循
 失败不补零及未知不伪零。真实CLIP、官方图像许可、fit/selection/final、
 完整角色成本与线上优化仍未准入；不由工程隔离直接推出 ICMR 方法有效。
+
+2026-09-28T02:34:43Z：769b05a精确CI run36369807411 15/15成功，
+Ubuntu3.10/3.14各2052pass2skip，新增Linux authored受限会话与超时
+收据测试属于同一源码SHA。只关闭此工程Linux待验，不把替身运行写成
+进程内真实CLIP、正式benchmark或论文方法收益。M1/Pilot继续未准入。

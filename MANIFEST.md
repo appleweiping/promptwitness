@@ -575,3 +575,11 @@
 | 2026-09-28T02:15:19Z | experiment-bridge | research/ACCESS_AUDIT.md | implementation | input-only访问边界 |
 | 2026-09-28T02:15:19Z | experiment-bridge | AGENTS.md | implementation | 研究dashboard与科学门禁 |
 | 2026-09-28T02:15:19Z | experiment-bridge | findings.md | implementation | 超时反例和未准入边界 |
+| 2026-09-28T02:34:43Z | experiment-bridge | research/ICMR_RANK_ISOLATION_CI_20260928_023443.md | implementation | 769b05a精确CI15/15和科学门禁 |
+| 2026-09-28T02:34:43Z | experiment-bridge | research/ICMR_RANK_ISOLATION_CI.md | implementation | CI报告同字节latest copy |
+| 2026-09-28T02:34:43Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_023443.md | implementation | CI状态tracker同字节快照 |
+| 2026-09-28T02:34:43Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | CI状态latest tracker |
+| 2026-09-28T02:34:43Z | experiment-bridge | research/ACCESS_AUDIT_20260928_023443.md | implementation | CI访问审计同字节快照 |
+| 2026-09-28T02:34:43Z | experiment-bridge | research/ACCESS_AUDIT.md | implementation | 自写sentinel Linux证据范围 |
+| 2026-09-28T02:34:43Z | experiment-bridge | AGENTS.md | implementation | dashboard精确CI与未准入边界 |
+| 2026-09-28T02:34:43Z | experiment-bridge | findings.md | implementation | 工程Linux关闭、科学仍未准入 |

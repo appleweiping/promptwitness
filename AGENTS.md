@@ -319,3 +319,10 @@ WSL纯管道3pass但完整受限 worker 在 drvfs 路径失败，精确 SHA CI �
 只自制替身，不是新源码真实CLIP或官方数据。M1/Pilot、全角色成本、
 selection/final、ICMR效果仍NOT_ADMITTED。见research/ICMR_RANK_ISOLATION.md；
 历史账本/default4/无timer/其他四仓冻结不变。
+
+2026-09-28T02:34:43Z：ranker隔离源码769b05a736a9c7d8dc7e97188a81cd316efda440
+精确CI run36369807411 success15/15；Ubuntu3.10/3.14各2052pass2skip，
+Linux authored受限ranker/scorer/gate与失败收据已实际执行。本增量只授
+ENGINEERING_PASS_AUTHORED；真实CLIP在该进程、正式数据/许可、全角色成本、
+M1/Pilot/ICMR效果仍NOT_ADMITTED。见research/ICMR_RANK_ISOLATION_CI.md；
+WSL旧失败、历史费用/default4/无timer/四仓冻结不变。
