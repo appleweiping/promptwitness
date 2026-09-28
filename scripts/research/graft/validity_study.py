@@ -6,6 +6,7 @@ forwards of the edited prompts) and with renormalized superposed patching:
   answer       GReaTer: CE(answer | prompt, greedy reasoning, extractor)
   verified     0.5 mean CE(r+) + 0.5 CE(answer | r+), r+ = gold-consistent self reasoning
   contrastive  -[log p(r+) - log p(r-)] (sums over reasoning tokens), r- an incorrect one
+  fork         CE(r+_t) - CE(r-_t) at the first divergence t of r+ and r- (one is greedy)
 Then evaluate the base prompt and every edited prompt on N dev examples with fresh greedy
 reasoning (the shared reader) and correlate objective changes with dev accuracy changes.
 Train rows drive the objectives; dev rows are only the validity target; test is unused.
@@ -127,8 +128,15 @@ def main() -> None:
             w = [0.5 / len(rp)] * len(rp) + [0.0] * len(ext) + [0.5 / len(answers[i])] * len(answers[i])
             out["verified"] = ([], rp + ext + answers[i], w, 1.0)
         if positive[i] is not None and negative[i] is not None:
-            out["contrastive_pos"] = ([], positive[i], [1.0] * len(positive[i]), float(len(positive[i])))
-            out["contrastive_neg"] = ([], negative[i], [1.0] * len(negative[i]), -float(len(negative[i])))
+            rp, rn = positive[i], negative[i]
+            out["contrastive_pos"] = ([], rp, [1.0] * len(rp), float(len(rp)))
+            out["contrastive_neg"] = ([], rn, [1.0] * len(rn), -float(len(rn)))
+            # Fork margin: at the first token where the correct and incorrect reasoning
+            # diverge (one of them is the greedy one), CE(correct) - CE(incorrect).
+            t = next((k for k, (a, b) in enumerate(zip(rp, rn)) if a != b), None)
+            if t is not None:
+                out["fork_pos"] = (rp[:t], [rp[t]], [1.0], 1.0)
+                out["fork_neg"] = (rp[:t], [rn[t]], [1.0], -1.0)
         return out
 
     exact: dict[str, dict[tuple, list[float]]] = {}
@@ -136,7 +144,7 @@ def main() -> None:
     for i, row in enumerate(rows):
         values = {"input": row.question}
         for name, (tail, scored, weights, scale) in objective_specs(i).items():
-            key = "contrastive" if name.startswith("contrastive") else name
+            key = name.rsplit("_", 1)[0] if name.startswith(("contrastive", "fork")) else name
             pairs = [(runner.ids(prompt, row) + tail, scored)]
             pairs += [(runner.ids(apply(prompt, pools, e), row) + tail, scored) for e in edits]
             losses, _ = answer_losses(model, pairs, weights=[weights] * len(pairs))
@@ -163,7 +171,7 @@ def main() -> None:
     for source, table in (("exact", exact), ("patch", patch)):
         for key, per_edit in table.items():
             usable_rows = [i for i in range(len(rows)) if key in objective_specs(i)
-                           or (key == "contrastive" and "contrastive_pos" in objective_specs(i))]
+                           or f"{key}_pos" in objective_specs(i)]
             score = [statistics.mean(per_edit[e][i] for i in usable_rows) if usable_rows else 0.0 for e in edits]
             top = sorted(range(len(edits)), key=lambda j: score[j])[:3]
             summary[f"{source}_{key}"] = {
