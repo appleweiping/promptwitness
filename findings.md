@@ -364,3 +364,11 @@ Linux focused94pass1skip，Windows全套2082pass28skip/94.01%
 正式数据/许可、双真实生成模型、完整成本/M1/Pilot/C1–C3均未准入，
 SSH指纹冲突未登录；精确SHA CI待提交。见
 research/ICMR_FIT_REAL_CLIP.md/json。
+
+2026-09-28T10:07:02Z：fit真实CLIP自制资格源码提交
+`c99aff83ea88064b5a6b86e80d98e2f33a2e241f` 已推送；
+精确[CI run 36406953262](https://github.com/appleweiping/promptwitness/actions/runs/36406953262)
+completed/success15/15。Ubuntu3.10/3.14各2107pass3skip、coverage
+94.04/94.05%。CI包含最后fit失败路径测试，不运行私有权重/官方图像/
+真实生成器；M1/Pilot/C1–C3仍NOT_ADMITTED。见
+research/ICMR_FIT_REAL_CLIP_CI.md。

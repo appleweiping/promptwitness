@@ -492,3 +492,12 @@ Linux补丁用例2pass/10deselected。Windows全套2082pass28skip/94.01%
 全角色成本、M1/Pilot/C1–C3；SSH指纹冲突未登录。见
 research/ICMR_FIT_REAL_CLIP.md/json；goalACTIVE/default4/历史账本/
 无timer/其他四仓冻结不变。
+
+2026-09-28T10:07:02Z：fit资格源SHA
+`c99aff83ea88064b5a6b86e80d98e2f33a2e241f` 已推送；
+CI run36406953262精确匹配 completed/success15/15，Ubuntu3.10/3.14
+各2107pass3skip，覆盖率94.04/94.05%。包含最终fit缺查询测试；
+不含私有权重/正式图像/真实生成模型。M1/Pilot/C1–C3、许可、全角色
+费用、英文稿仍NOT_ADMITTED；SSH指纹仍冲突未登录。见
+research/ICMR_FIT_REAL_CLIP_CI.md；goalACTIVE/default4/历史账本/
+无timer/其他四仓冻结不变。
