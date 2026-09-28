@@ -1,5 +1,21 @@
 # PromptWitness research instructions
 
+## 2026-09-28 direction update (current; supersedes the ICMR focus below for new work)
+
+The user's instruction of 2026-09-28 redirects research to the advisor's suggestion:
+start from GReaTer (ICLR 2025, gradients over reasoning for prompt optimization) and
+move gradient feedback from the brittle token level to the structures PromptWitness
+operates over, without copying, at GReaTer's quality bar, with high novelty, via the
+ARIS workflow, until the work meets a submission standard. Work lives on branch
+`research/graft` (worktree `promptwitness-graft`); the method is GRAFT (superposed
+typed blocks with attention gates and slot RoPE offsets). Living state:
+`research/GRAFT_STATUS.md`. The ICMR/CIR history below is retained unchanged as a
+record; it is paused, not deleted. The frozen structured-gradient pilot keeps running
+unchanged. Standing rules still apply: no commits of data/models/traces/`.aris/`, no
+PR/advisor contact/submission on the user's behalf, do not use other users' GPUs or
+change shared Python/CUDA, 1000 cumulative GPU-hour cap, zero paid API. External
+review uses Codex CLI (GPT-6, a different model family from the author model).
+
 ## Pipeline Status
 
 language: zh

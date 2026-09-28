@@ -22,11 +22,13 @@ from pathlib import Path
 from time import perf_counter
 from typing import Any
 
+from promptwitness import graft_tasks
 from promptwitness.graft_runtime import answer_losses, generate_batch
 from promptwitness.structured_data import load_split
 from promptwitness.structured_prompt import StructuredPrompt
-from promptwitness.structured_search import initial_prompt
+from promptwitness.structured_search import initial_prompt as pilot_prompt
 from promptwitness.superposed_gates import GateScorer, build_superposed, edit_scores
+from promptwitness.superposed_patching import patch_estimates
 
 OPERATORS = (
     "Rephrase it with different wording.",
@@ -38,6 +40,16 @@ OPERATORS = (
     "Make it more explicit about how to use the answer options.",
     "Write an improved version of it.",
 )
+INSERT_OPERATORS = (
+    "Write a short step-by-step procedure for solving such problems.",
+    "Write one instruction that asks to verify the answer before finishing.",
+    "Write one instruction about how to organize intermediate facts.",
+    "Write one instruction warning about a common mistake in such problems.",
+    "Write one instruction about how to compare the answer options.",
+    "Write one instruction that asks to restate the key facts first.",
+    "Write one concise strategy hint for such problems.",
+    "Write one instruction to double-check the final choice.",
+)
 
 
 def propose(model: Any, tokenizer: Any, prompt: StructuredPrompt, block_id: str,
@@ -47,8 +59,18 @@ def propose(model: Any, tokenizer: Any, prompt: StructuredPrompt, block_id: str,
 
     block = next(b for b in prompt.blocks if b.block_id == block_id)
     examples = "\n\n".join(f"Example problem {i + 1}:\n{q}" for i, q in enumerate(questions))
+    context = "".join(b.text for b in prompt.blocks if b.editable)
     requests = []
-    for operator in OPERATORS[:k]:
+    if not block.text:  # empty optional slot: insertion proposals
+        for operator in INSERT_OPERATORS[:k]:
+            requests.append(
+                "You are adding one new block to an instruction prompt for a language model.\n"
+                f"Current instructions:\n{context}\n"
+                f"New block type: {block.kind.value}\n{examples}\n\nTask: {operator}\n"
+                "Return only the new block text. Do not solve the examples, do not mention "
+                "specific answers, and do not add placeholders."
+            )
+    for operator in OPERATORS[:k] if block.text else ():
         requests.append(
             "You are improving one block of an instruction prompt for a language model.\n"
             f"Block type: {block.kind.value}\n"
@@ -110,13 +132,16 @@ def spearman(x: list[float], y: list[float]) -> float | None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--model-path", required=True)
-    parser.add_argument("--shard-dir", type=Path, required=True)
-    parser.add_argument("--manifest", type=Path, required=True)
+    parser.add_argument("--protocol", choices=("pilot", "greater"), default="pilot")
+    parser.add_argument("--shard-dir", type=Path)
+    parser.add_argument("--manifest", type=Path)
+    parser.add_argument("--data-dir", type=Path)
     parser.add_argument("--task", default="logical_deduction_three_objects")
     parser.add_argument("--rows", type=int, default=8)
     parser.add_argument("--k", type=int, default=8)
     parser.add_argument("--seed", type=int, default=11)
     parser.add_argument("--max-new-tokens", type=int, default=320)
+    parser.add_argument("--attn", default="sdpa", help="eager for Gemma-2 (softcapping)")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
 
@@ -126,20 +151,29 @@ def main() -> None:
     started = perf_counter()
     tokenizer = AutoTokenizer.from_pretrained(args.model_path)
     model = AutoModelForCausalLM.from_pretrained(
-        args.model_path, dtype=torch.bfloat16, attn_implementation="sdpa"
+        args.model_path, dtype=torch.bfloat16, attn_implementation=args.attn
     ).to("cuda").eval()
     scorer = GateScorer(model)
-    rows = list(load_split(args.shard_dir, args.manifest, args.task, "fit"))
+    if args.protocol == "pilot":
+        rows = list(load_split(args.shard_dir, args.manifest, args.task, "fit"))
+        prompt = pilot_prompt()
+        extractor_text = "\nFinal answer: "
+        task_spec = None
+    else:
+        rows = [r for r in graft_tasks.load_splits(args.data_dir, args.task)["train"]]
+        prompt = graft_tasks.initial_prompt()
+        task_spec = graft_tasks.spec(args.task)
+        extractor_text = task_spec.extractor
     rng = random.Random(args.seed)
     rng.shuffle(rows)
     proposal_rows, rows = rows[:2], rows[2 : 2 + args.rows]
-    prompt = initial_prompt()
     editable = [b.block_id for b in prompt.blocks if b.editable]
+    gold = (lambda a: a) if task_spec is None else task_spec.target  # noqa: E731
     t0 = perf_counter()
     candidates = {b: propose(model, tokenizer, prompt, b, [r.question for r in proposal_rows],
                              args.seed, args.k) for b in editable}
     proposal_seconds = perf_counter() - t0
-    extractor = tokenizer.encode("\nFinal answer: ", add_special_tokens=False)
+    extractor = tokenizer.encode(extractor_text, add_special_tokens=False)
 
     # Edits: every policy-valid, cleanly tokenized replacement plus deletion of
     # non-required blocks. PromptWitness rejects rewrites that drop required literals.
@@ -154,7 +188,8 @@ def main() -> None:
                 rejected.append({"block": b, "index": i})
             else:
                 edits.append((b, i))
-    edits += [(b.block_id, None) for b in prompt.blocks if b.editable and not b.required_literals]
+    edits += [(b.block_id, None) for b in prompt.blocks
+              if b.editable and b.text and not b.required_literals]
 
     def edited(block: str, index: int | None) -> StructuredPrompt | None:
         if index is None:
@@ -162,13 +197,24 @@ def main() -> None:
         return prompt.replace_block(block, candidates[block][index])
 
     values = [{"input": r.question} for r in rows]
-    answers = [tokenizer.encode(r.answer, add_special_tokens=False) for r in rows]
+    answers = [tokenizer.encode(gold(r.answer), add_special_tokens=False) for r in rows]
+
+    def correctness(prompts_ids: list[list[int]], outs: list[Any]) -> list[bool]:
+        """Pilot: strict final line. GReaTer protocol: extractor then short greedy answer."""
+        if task_spec is None:
+            return [score_mc(o.text, r.answer) for o, r in zip(outs, rows)]
+        reads, _, _ = generate_batch(model, tokenizer,
+                                     [p + list(o.token_ids) + extractor for p, o in zip(prompts_ids, outs)],
+                                     max_new_tokens=8)
+        return [task_spec.correct(x.text, r.answer) for x, r in zip(reads, rows)]
     base_ids = [list(prompt.render_tokens(tokenizer, v).input_ids) for v in values]
     gens, gen_seconds, _ = generate_batch(model, tokenizer, base_ids, max_new_tokens=args.max_new_tokens)
-    base_correct = [score_mc(g.text, r.answer) for g, r in zip(gens, rows)]
+    base_correct = correctness(base_ids, gens)
 
     per_row: list[dict[str, Any]] = []
-    timing = {"grad_incumbent": 0.0, "grad_holes": 0.0, "grad_centroid": 0.0, "exact_vertices": 0.0}
+    timing = {"grad_incumbent": 0.0, "grad_holes": 0.0, "grad_centroid": 0.0,
+              "patch": 0.0, "exact_vertices": 0.0}
+    gated = [b.block_id for b in prompt.blocks if b.editable and b.text]
     for row, v, ids, gen, ans in zip(rows, values, base_ids, gens, answers):
         tail = list(gen.token_ids) + extractor
         seq = build_superposed(prompt, tokenizer, v, candidates, tail, ans, mode="exact")
@@ -176,12 +222,16 @@ def main() -> None:
         t = perf_counter(); g0 = scorer.gradients(seq); timing["grad_incumbent"] += perf_counter() - t
         s0 = edit_scores(seq, g0)
         # Estimator without the offset term (ablation).
-        no_offset = {(b, i): g0.gates[seq.gate_for(b, i).gate_id] - g0.gates[seq.gate_for(b, None).gate_id]
+        def incumbent_grad(b: str) -> float:
+            found = [g for g in seq.gates if g.block_id == b and g.kind == "incumbent"]
+            return g0.gates[found[0].gate_id] if found else 0.0
+
+        no_offset = {(b, i): g0.gates[seq.gate_for(b, i).gate_id] - incumbent_grad(b)
                      for (b, i) in edits if i is not None and (b, i, candidates[b][i]) not in seq.unaligned}
         # Hole point per slot: linearize from the deletion vertex.
         hole: dict[tuple[str, int | None], float] = {}
         t = perf_counter()
-        for b in editable:
+        for b in gated:
             gates, offsets = seq.vertex(b, None)
             gh = scorer.gradients(seq, gates, offsets)
             slot = seq.slots.index(b)
@@ -197,7 +247,7 @@ def main() -> None:
         # Joint centroid of every slot simplex; offsets at the weighted mean length change.
         gates_c: dict[int, float] = {}
         offsets_c: dict[int, float] = {}
-        for b in editable:
+        for b in gated:
             members = [g for g in seq.gates if g.block_id == b]
             inc = seq.gate_for(b, None)
             for gate in members:
@@ -206,7 +256,7 @@ def main() -> None:
                 (gate.token_count - inc.token_count) / len(members) for gate in members)
         t = perf_counter(); gc = scorer.gradients(seq, gates_c, offsets_c); timing["grad_centroid"] += perf_counter() - t
         centroid: dict[tuple[str, int | None], float] = {}
-        for b in editable:
+        for b in gated:
             slot = seq.slots.index(b)
             inc = seq.gate_for(b, None)
             ref = gc.gates[inc.gate_id]
@@ -214,6 +264,9 @@ def main() -> None:
                 if gate.kind == "candidate" and gate.block_id == b:
                     centroid[(b, gate.candidate_index)] = (
                         gc.gates[gate.gate_id] - ref + (gate.token_count - inc.token_count) * gc.offsets[slot])
+        t = perf_counter()
+        _, patched = patch_estimates(scorer, seq)
+        timing["patch"] += perf_counter() - t
         # Exact vertices = fixed-reasoning loss of the real edited prompt.
         t = perf_counter()
         exact: dict[tuple[str, int | None], float] = {}
@@ -232,6 +285,7 @@ def main() -> None:
             "incumbent_no_offset": {key(e): no_offset[e] for e in exact if e in no_offset},
             "hole": {key(e): hole[e] for e in exact if e in hole},
             "centroid": {key(e): centroid[e] for e in exact if e in centroid},
+            "patch": {key(e): patched[e] for e in exact if e in patched},
         }
         record["exact"] = {key(e): val for e, val in exact.items()}
         per_row.append(record)
@@ -243,7 +297,7 @@ def main() -> None:
     for (b, i) in edits:
         name = f"{b}:{'del' if i is None else i}"
         if i is None:
-            spans = []
+            spans: list[list[int]] = []
             for v in values:
                 rendered = prompt.render_tokens(tokenizer, v)
                 pos = rendered.block_positions[b]
@@ -256,7 +310,7 @@ def main() -> None:
         outs, _, _ = generate_batch(model, tokenizer, prompts_ids, max_new_tokens=args.max_new_tokens)
         losses, _ = answer_losses(model, [(p + list(o.token_ids) + extractor, a)
                                           for p, o, a in zip(prompts_ids, outs, answers)])
-        fresh[name] = {"accuracy": sum(score_mc(o.text, r.answer) for o, r in zip(outs, rows)) / len(rows),
+        fresh[name] = {"accuracy": sum(correctness(prompts_ids, outs)) / len(rows),
                        "mean_loss": sum(losses) / len(losses)}
     base_losses, _ = answer_losses(model, [(p + list(o.token_ids) + extractor, a)
                                            for p, o, a in zip(base_ids, gens, answers)])
@@ -274,7 +328,7 @@ def main() -> None:
     summary: dict[str, Any] = {"edits": len(names), "base_fresh": base_fresh,
                                "spearman_exact_vs_fresh_loss": spearman(exact_mean, fresh_loss),
                                "spearman_exact_vs_neg_fresh_acc": spearman(exact_mean, [-a for a in fresh_acc])}
-    for method in ("incumbent", "incumbent_no_offset", "hole", "centroid"):
+    for method in ("incumbent", "incumbent_no_offset", "hole", "centroid", "patch"):
         usable = [j for j, n in enumerate(names) if all(n in r["estimates"][method] for r in per_row)]
         est = [sum(r["estimates"][method][names[j]] for r in per_row) / len(per_row) for j in usable]
         pooled_est = [r["estimates"][method][names[j]] for r in per_row for j in usable]
@@ -298,7 +352,8 @@ def main() -> None:
     lengths = [len(tokenizer.encode(candidates[n.split(":")[0]][int(n.split(":")[1])], add_special_tokens=False))
                if not n.endswith("del") else 0 for n in names]
     summary["spearman_length_vs_exact"] = spearman(lengths, exact_mean)
-    result = {"format": "promptwitness.graft-fidelity/v1", "task": args.task, "model_path": args.model_path,
+    result = {"format": "promptwitness.graft-fidelity/v2", "protocol": args.protocol,
+              "task": args.task, "model_path": args.model_path,
               "seed": args.seed, "rows": [r.row_id for r in rows], "candidates": candidates,
               "policy_rejected": rejected,
               "per_row": per_row, "fresh": fresh, "names": names, "summary": summary,

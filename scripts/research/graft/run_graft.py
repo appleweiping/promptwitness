@@ -1,0 +1,349 @@
+"""GRAFT structured prompt search under the GReaTer protocol (one task, model, seed).
+
+Every scorer shares the same label-free proposals, fresh-reasoning verification,
+acceptance rule, dev-set checkpoint selection and a single test evaluation:
+
+  patch   GRAFT: renormalized superposed patching, one forward/backward per example
+  gate    ablation: raw first-order gate derivative (saturates)
+  exact   control: fixed-reasoning loss of every edited prompt (one forward per edit)
+  random  control: random shortlist, no scoring
+
+Only train examples drive search; dev selects among accepted prompts; test is read
+once at the end. Writes a JSON record with the trajectory and a cost ledger.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import random
+from collections.abc import Sequence
+from pathlib import Path
+from time import perf_counter
+from typing import Any
+
+from promptwitness import graft_tasks
+from promptwitness.graft_runtime import answer_losses, generate_batch
+from promptwitness.structured_prompt import StructuredPrompt
+from promptwitness.superposed_gates import (
+    GateScorer,
+    build_superposed,
+    candidate_token_ids,
+    edit_scores,
+)
+from promptwitness.superposed_patching import patch_estimates
+
+REWRITE_OPERATORS = (
+    "Rephrase it with different wording.",
+    "Make it more specific to the kind of problems shown in the examples.",
+    "Add one concrete procedural step that helps solve such problems.",
+    "Make it shorter while keeping every requirement.",
+    "Warn about one common pitfall for such problems and how to avoid it.",
+    "Turn it into a short numbered procedure.",
+    "Make it more explicit about how to reach and state the final answer.",
+    "Write an improved version of it.",
+)
+INSERT_OPERATORS = (
+    "Write a short step-by-step procedure for solving such problems.",
+    "Write one instruction that asks to verify the answer before finishing.",
+    "Write one instruction about how to organize intermediate facts.",
+    "Write one instruction warning about a common mistake in such problems.",
+    "Write one instruction about how to compare the possible answers.",
+    "Write one instruction that asks to restate the key facts first.",
+    "Write one concise strategy hint for such problems.",
+    "Write one instruction to double-check the final answer.",
+)
+Edit = tuple[str, int | None]  # (slot, candidate index) ; None = delete
+
+
+class Ledger:
+    def __init__(self) -> None:
+        self.phases: dict[str, dict[str, float]] = {}
+
+    def add(self, phase: str, seconds: float, **counts: float) -> None:
+        bucket = self.phases.setdefault(phase, {"seconds": 0.0, "calls": 0})
+        bucket["seconds"] += seconds
+        bucket["calls"] += 1
+        for name, value in counts.items():
+            bucket[name] = bucket.get(name, 0) + value
+
+
+class Runner:
+    def __init__(self, model: Any, tokenizer: Any, spec: graft_tasks.TaskSpec, ledger: Ledger,
+                 max_new_tokens: int) -> None:
+        self.model, self.tokenizer, self.spec, self.ledger = model, tokenizer, spec, ledger
+        self.max_new_tokens = max_new_tokens
+        self.extractor = tokenizer.encode(spec.extractor, add_special_tokens=False)
+
+    def ids(self, prompt: StructuredPrompt, example: graft_tasks.Example) -> list[int]:
+        return list(prompt.render_tokens(self.tokenizer, {"input": example.question}).input_ids)
+
+    def target(self, example: graft_tasks.Example) -> list[int]:
+        return self.tokenizer.encode(self.spec.target(example.answer), add_special_tokens=False)
+
+    def evaluate(self, prompt: StructuredPrompt, examples: Sequence[graft_tasks.Example],
+                 phase: str, *, with_loss: bool = False, max_new_tokens: int | None = None
+                 ) -> dict[str, Any]:
+        """Two-stage reader: greedy reasoning, extractor, short greedy answer."""
+        prompts = [self.ids(prompt, e) for e in examples]
+        gens, seconds, tokens = generate_batch(self.model, self.tokenizer, prompts,
+                                               max_new_tokens=max_new_tokens or self.max_new_tokens)
+        self.ledger.add(phase + "_reasoning", seconds, generated=tokens,
+                        prompt_tokens=sum(map(len, prompts)))
+        reads_in = [p + list(g.token_ids) + self.extractor for p, g in zip(prompts, gens)]
+        reads, seconds, tokens = generate_batch(self.model, self.tokenizer, reads_in, max_new_tokens=8)
+        self.ledger.add(phase + "_answer", seconds, generated=tokens)
+        correct = [self.spec.correct(r.text, e.answer) for r, e in zip(reads, examples)]
+        out: dict[str, Any] = {"accuracy": sum(correct) / len(correct), "correct": correct,
+                               "reasoning": [list(g.token_ids) for g in gens],
+                               "truncated": sum(not g.ended for g in gens)}
+        if with_loss:
+            losses, seconds = answer_losses(self.model, [(r, self.target(e)) for r, e in zip(reads_in, examples)])
+            self.ledger.add(phase + "_loss", seconds)
+            out["loss"] = sum(losses) / len(losses)
+        return out
+
+
+def propose(runner: Runner, prompt: StructuredPrompt, slot: str, questions: list[str],
+            seed: int, k: int) -> list[str]:
+    """Label-free, type-conditioned proposals from the task model itself."""
+    import torch
+
+    tokenizer, model = runner.tokenizer, runner.model
+    block = next(b for b in prompt.blocks if b.block_id == slot)
+    examples = "\n\n".join(f"Example problem {i + 1}:\n{q}" for i, q in enumerate(questions))
+    context = "".join(b.text for b in prompt.blocks if b.editable)
+    requests = []
+    if block.text:
+        for operator in REWRITE_OPERATORS[:k]:
+            requests.append(
+                "You are improving one block of an instruction prompt for a language model.\n"
+                f"All current instructions:\n{context}\nBlock to edit ({block.kind.value}): "
+                f"{block.text.strip()}\n{examples}\n\nEdit: {operator}\n"
+                "Return only the new text of this block. Do not solve the examples, do not "
+                "mention specific answers, and do not add placeholders.")
+    else:
+        for operator in INSERT_OPERATORS[:k]:
+            requests.append(
+                "You are adding one new block to an instruction prompt for a language model.\n"
+                f"All current instructions:\n{context}\nNew block type: {block.kind.value}\n"
+                f"{examples}\n\nTask: {operator}\n"
+                "Return only the new block text. Do not solve the examples, do not mention "
+                "specific answers, and do not add placeholders.")
+    encoded = []
+    for request in requests:
+        enc = tokenizer.apply_chat_template([{"role": "user", "content": request}],
+                                            tokenize=True, add_generation_prompt=True)
+        encoded.append(list(enc["input_ids"] if hasattr(enc, "keys") else enc))
+    started = perf_counter()
+    outputs: list[str] = []
+    device = next(model.parameters()).device
+    width = max(map(len, encoded))
+    pad = tokenizer.pad_token_id if tokenizer.pad_token_id is not None else tokenizer.eos_token_id
+    ids = torch.full((len(encoded), width), pad, dtype=torch.long)
+    mask = torch.zeros_like(ids)
+    for row, seq in enumerate(encoded):
+        ids[row, width - len(seq):] = torch.tensor(seq)
+        mask[row, width - len(seq):] = 1
+    torch.manual_seed(seed)
+    with torch.no_grad():
+        gen = model.generate(input_ids=ids.to(device), attention_mask=mask.to(device),
+                             max_new_tokens=96, do_sample=True, temperature=0.8, top_p=0.95,
+                             pad_token_id=pad)
+    for row in gen[:, width:]:
+        text = tokenizer.decode(row, skip_special_tokens=True).strip().strip('"').strip()
+        if text:
+            outputs.append(text if text.endswith("\n") else text + "\n")
+    runner.ledger.add("proposal", perf_counter() - started, generated=int(gen[:, width:].numel()))
+    return outputs
+
+
+def valid_edits(runner: Runner, prompt: StructuredPrompt, pools: dict[str, list[str]],
+                probe: graft_tasks.Example) -> list[Edit]:
+    values = {"input": probe.question}
+    edits: list[Edit] = []
+    for slot, texts in pools.items():
+        block = next(b for b in prompt.blocks if b.block_id == slot)
+        for index, text in enumerate(texts):
+            if text.strip() == block.text.strip() or "{{" in text:
+                continue
+            ids = candidate_token_ids(prompt, runner.tokenizer, values, slot, text)
+            if ids is not None and len(ids) <= 160:
+                edits.append((slot, index))
+        others = [b for b in prompt.blocks if b.editable and b.text and b.block_id != slot]
+        if block.text and not block.required_literals and others:
+            edits.append((slot, None))
+    return edits
+
+
+def apply(prompt: StructuredPrompt, pools: dict[str, list[str]], edit: Edit) -> StructuredPrompt:
+    slot, index = edit
+    if index is None:
+        return delete_block(prompt, slot)
+    return prompt.replace_block(slot, pools[slot][index])
+
+
+def delete_block(prompt: StructuredPrompt, slot: str) -> StructuredPrompt:
+    """Empty a block (it stays as an insertion slot)."""
+    from dataclasses import replace
+
+    old = next(b for b in prompt.blocks if b.block_id == slot)
+    size = len(old.text)
+    blocks = tuple(
+        replace(b, text="", source_end=b.source_start) if b.block_id == slot else
+        replace(b, source_start=b.source_start - size, source_end=b.source_end - size)
+        if b.message_id == old.message_id and b.source_start >= old.source_end else b
+        for b in prompt.blocks)
+    messages = tuple(
+        replace(m, content=m.content[: old.source_start] + m.content[old.source_end:])
+        if m.message_id == old.message_id else m for m in prompt.document.messages)
+    return StructuredPrompt(replace(prompt.document, messages=messages), blocks)
+
+
+def score_edits(method: str, runner: Runner, scorer: GateScorer, prompt: StructuredPrompt,
+                pools: dict[str, list[str]], edits: list[Edit], batch: list[graft_tasks.Example],
+                reasoning: list[list[int]], rng: random.Random) -> dict[Edit, float]:
+    """Estimated loss change per edit (lower is better), averaged over the minibatch."""
+    if method == "random":
+        return {e: rng.random() for e in edits}
+    totals = {e: 0.0 for e in edits}
+    started = perf_counter()
+    if method == "exact":
+        pairs, owners = [], []
+        for example, reason in zip(batch, reasoning):
+            tail = reason + runner.extractor
+            base = runner.ids(prompt, example)
+            pairs.append((base + tail, runner.target(example)))
+            owners.append(None)
+            for edit in edits:
+                pairs.append((runner.ids(apply(prompt, pools, edit), example) + tail, runner.target(example)))
+                owners.append(edit)
+        losses, _ = answer_losses(runner.model, pairs)
+        base_loss = 0.0
+        for owner, loss in zip(owners, losses):
+            if owner is None:
+                base_loss = loss
+            else:
+                totals[owner] += (loss - base_loss) / len(batch)
+        runner.ledger.add("score_exact", perf_counter() - started, forwards=len(pairs),
+                          forward_tokens=sum(len(p) + len(a) for p, a in pairs))
+        return totals
+    candidates = {slot: [text for text in texts] for slot, texts in pools.items()}
+    tokens = 0
+    for example, reason in zip(batch, reasoning):
+        seq = build_superposed(prompt, runner.tokenizer, {"input": example.question}, candidates,
+                               reason + runner.extractor, runner.target(example), mode="exact")
+        tokens += len(seq.input_ids)
+        if method == "patch":
+            _, est = patch_estimates(scorer, seq)
+        else:
+            flat = edit_scores(seq, scorer.gradients(seq))
+            est = {(s, i): v for s, d in flat["replacement"].items() for i, v in d.items()}
+            est.update({(s, None): v for s, v in flat["deletion"].items()})
+        for edit in edits:
+            totals[edit] += est.get(edit, 0.0) / len(batch)
+    runner.ledger.add(f"score_{method}", perf_counter() - started, forwards=len(batch),
+                      backwards=len(batch), forward_tokens=tokens)
+    return totals
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--task", required=True)
+    parser.add_argument("--model-path", required=True)
+    parser.add_argument("--data-dir", type=Path, required=True)
+    parser.add_argument("--method", choices=("patch", "gate", "exact", "random"), required=True)
+    parser.add_argument("--seed", type=int, default=1)
+    parser.add_argument("--rounds", type=int, default=12)
+    parser.add_argument("--batch", type=int, default=8)
+    parser.add_argument("--k", type=int, default=6)
+    parser.add_argument("--mu", type=int, default=3)
+    parser.add_argument("--max-new-tokens", type=int, default=384)
+    parser.add_argument("--eval-max-new-tokens", type=int, default=512)
+    parser.add_argument("--attn", default="sdpa")
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+
+    import torch
+    from transformers import AutoModelForCausalLM, AutoTokenizer
+
+    started = perf_counter()
+    tokenizer = AutoTokenizer.from_pretrained(args.model_path)
+    model = AutoModelForCausalLM.from_pretrained(args.model_path, dtype=torch.bfloat16,
+                                                 attn_implementation=args.attn).to("cuda").eval()
+    torch.cuda.reset_peak_memory_stats()
+    scorer = GateScorer(model)
+    spec = graft_tasks.spec(args.task)
+    splits = graft_tasks.load_splits(args.data_dir, args.task)
+    ledger = Ledger()
+    runner = Runner(model, tokenizer, spec, ledger, args.max_new_tokens)
+    rng = random.Random(args.seed)
+    prompt = graft_tasks.initial_prompt()
+    accepted: list[dict[str, Any]] = [{"round": 0, "text": prompt.document.messages[0].content}]
+    prompts: dict[str, StructuredPrompt] = {accepted[0]["text"]: prompt}
+    trajectory: list[dict[str, Any]] = []
+
+    for round_index in range(1, args.rounds + 1):
+        batch = rng.sample(splits["train"], args.batch)
+        incumbent = runner.evaluate(prompt, batch, "incumbent", with_loss=True)
+        slots = [b.block_id for b in prompt.blocks if b.editable]
+        questions = [e.question for e in rng.sample(splits["train"], 2)]
+        pools = {slot: propose(runner, prompt, slot, questions, args.seed * 1000 + round_index * 10 + j, args.k)
+                 for j, slot in enumerate(slots)}
+        edits = valid_edits(runner, prompt, pools, batch[0])
+        record: dict[str, Any] = {"round": round_index, "incumbent_acc": incumbent["accuracy"],
+                                  "incumbent_loss": incumbent["loss"], "edits": len(edits),
+                                  "pools": pools}
+        if not edits:
+            trajectory.append({**record, "accepted": None})
+            continue
+        estimates = score_edits(args.method, runner, scorer, prompt, pools, edits, batch,
+                                incumbent["reasoning"], rng)
+        shortlist = sorted(edits, key=lambda e: estimates[e])[: args.mu]
+        checks = []
+        for edit in shortlist:
+            candidate = apply(prompt, pools, edit)
+            result = runner.evaluate(candidate, batch, "verify", with_loss=True)
+            checks.append({"edit": list(edit), "estimate": estimates[edit],
+                           "accuracy": result["accuracy"], "loss": result["loss"]})
+        best = max(checks, key=lambda c: (c["accuracy"], -c["loss"]))
+        take = (best["accuracy"] > incumbent["accuracy"] or
+                (best["accuracy"] == incumbent["accuracy"] and best["loss"] < incumbent["loss"] - 1e-3))
+        record.update({"estimates": {f"{s}:{'del' if i is None else i}": v for (s, i), v in estimates.items()},
+                       "checks": checks, "accepted": best["edit"] if take else None})
+        if take:
+            prompt = apply(prompt, pools, tuple(best["edit"]))
+            text = prompt.document.messages[0].content
+            prompts[text] = prompt
+            accepted.append({"round": round_index, "text": text})
+        trajectory.append(record)
+        print(json.dumps({"round": round_index, "inc_acc": incumbent["accuracy"],
+                          "accepted": record["accepted"], "best_acc": best["accuracy"]}), flush=True)
+    search_seconds = perf_counter() - started
+
+    dev_scores = []
+    for entry in accepted:
+        dev = runner.evaluate(prompts[entry["text"]], splits["dev"], "dev",
+                              max_new_tokens=args.eval_max_new_tokens)
+        dev_scores.append(dev["accuracy"])
+        entry["dev_accuracy"] = dev["accuracy"]
+    chosen = max(range(len(accepted)), key=lambda i: (dev_scores[i], i))
+    test = runner.evaluate(prompts[accepted[chosen]["text"]], splits["test"], "test",
+                           max_new_tokens=args.eval_max_new_tokens)
+    result = {"format": "promptwitness.graft-run/v1", "task": args.task, "method": args.method,
+              "seed": args.seed, "model_path": args.model_path, "config": vars(args) | {
+                  "data_dir": str(args.data_dir), "output": str(args.output)},
+              "trajectory": trajectory, "accepted": accepted, "selected": chosen,
+              "selected_text": accepted[chosen]["text"], "test_accuracy": test["accuracy"],
+              "test_correct": test["correct"], "test_truncated": test["truncated"],
+              "cost": ledger.phases, "search_seconds": search_seconds,
+              "wall_seconds": perf_counter() - started,
+              "peak_memory_gb": torch.cuda.max_memory_allocated() / 2**30}
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    print(json.dumps({"test_accuracy": test["accuracy"], "selected_round": accepted[chosen]["round"],
+                      "dev": dev_scores, "wall": result["wall_seconds"]}))
+
+
+if __name__ == "__main__":
+    main()

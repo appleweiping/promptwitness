@@ -90,6 +90,8 @@ class SuperposedSequence:
     slots: list[str] = field(default_factory=list)  # offset index -> block id
     offset_matrix: Any = None  # torch.FloatTensor [T, S]; token t moves by M[t] @ w
     mode: str = "exact"
+    orig: list[int] = field(default_factory=list)  # logical order; -1 for candidates
+    owner: list[str | None] = field(default_factory=list)  # candidate slot per token
 
     def base_values(self) -> list[float]:
         return [1.0] + [gate.base_value for gate in self.gates]
@@ -106,10 +108,18 @@ class SuperposedSequence:
     def vertex(
         self, block_id: str, candidate_index: int | None
     ) -> tuple[dict[int, float], dict[int, float]]:
-        """Gate and offset overrides that replace (or, with ``None``, delete) a block."""
-        incumbent = self.gate_for(block_id, None)
-        gates = {incumbent.gate_id: 0.0}
-        delta = -incumbent.token_count
+        """Gate and offset overrides that replace (or, with ``None``, delete) a block.
+
+        For an empty insertion slot there is no incumbent: the vertex inserts.
+        """
+        incumbents = [g for g in self.gates if g.block_id == block_id and g.kind == "incumbent"]
+        gates: dict[int, float] = {}
+        delta = 0
+        if incumbents:
+            gates[incumbents[0].gate_id] = 0.0
+            delta = -incumbents[0].token_count
+        elif candidate_index is None:
+            raise ValueError("an empty slot cannot be deleted")
         if candidate_index is not None:
             candidate = self.gate_for(block_id, candidate_index)
             gates[candidate.gate_id] = 1.0
@@ -143,6 +153,7 @@ class _GateContext:
         self.gate_matrix = gate_values[gate_index].float()
         self.cos: Any = None
         self.sin: Any = None
+        self.patch: Any = None  # set by superposed_patching for renormalized estimates
         if offsets is not None and offset_matrix is not None and offset_matrix.shape[1]:
             shift = offset_matrix.float() @ offsets.float()  # [T]
             angles = shift[:, None] * inv_freq.float()[None, :]  # [T, D/2]
@@ -153,10 +164,23 @@ class _GateContext:
 def _block_token_span(
     prompt: StructuredPrompt, tokenizer: Any, values: Mapping[str, object], block_id: str
 ) -> tuple[tuple[int, ...], int, int]:
+    """Token span ``[lo, hi)`` of a block; an empty block gives ``lo == hi``.
+
+    An empty (optional) block marks an insertion point and must fall on a clean
+    token boundary.
+    """
     rendered = prompt.render_tokens(tokenizer, values)
     positions = rendered.block_positions[block_id]
     if not positions:
-        raise ValueError(f"block {block_id!r} has no whole token")
+        char_lo, char_hi = rendered.block_char_spans[block_id]
+        if char_lo != char_hi:
+            raise ValueError(f"block {block_id!r} has no whole token")
+        for index, (start, end) in enumerate(rendered.token_offsets):
+            if start >= char_lo:
+                if index and rendered.token_offsets[index - 1][1] > char_lo:
+                    raise ValueError(f"insertion slot {block_id!r} splits a token")
+                return rendered.input_ids, index, index
+        return rendered.input_ids, len(rendered.input_ids), len(rendered.input_ids)
     lo, hi = positions[0], positions[-1] + 1
     if tuple(range(lo, hi)) != positions:
         raise ValueError(f"block {block_id!r} tokens are not contiguous")
@@ -213,15 +237,17 @@ def build_superposed(
         raise ValueError("answer tokens are required")
     base_ids = list(prompt.render_tokens(tokenizer, values).input_ids)
     n_prompt = len(base_ids)
-    editable = [block.block_id for block in prompt.blocks if block.editable]
+    editable = [block.block_id for block in prompt.blocks if block.editable and block.text]
     gated_blocks = list(gate_incumbents) if gate_incumbents is not None else editable
-    missing = set(candidates) - set(gated_blocks)
-    if missing:
-        raise ValueError(f"candidate slots need a gated incumbent: {sorted(missing)}")
     spans: dict[str, tuple[int, int]] = {}
-    for block_id in gated_blocks:
+    for block_id in list(dict.fromkeys(list(gated_blocks) + list(candidates))):
         _, lo, hi = _block_token_span(prompt, tokenizer, values, block_id)
         spans[block_id] = (lo, hi)
+    if any(spans[block_id][0] == spans[block_id][1] for block_id in gated_blocks):
+        raise ValueError("an empty insertion slot has no incumbent to gate")
+    ungated = [b for b in candidates if spans[b][0] != spans[b][1] and b not in gated_blocks]
+    if ungated:
+        raise ValueError(f"non-empty slots with candidates must be gated: {ungated}")
 
     gates: list[GateSpec] = []
     unaligned: list[tuple[str, int, str]] = []
@@ -266,16 +292,17 @@ def build_superposed(
     answer_start = tail_start + len(tail_ids)
     total = len(input_ids)
 
-    slots = sorted(spans, key=lambda block_id: spans[block_id][0])
+    slots = sorted(spans, key=lambda block_id: (spans[block_id][0], spans[block_id][1]))
+    order = {block_id: rank for rank, block_id in enumerate(slots)}
     offset_matrix = torch.zeros((total, len(slots)))
     if mode == "exact":
         for column, block_id in enumerate(slots):
-            lo, hi = spans[block_id]
+            hi = spans[block_id][1]
             for index in range(total):
                 owner = cand_block[index]
                 # Prompt/tail tokens after the slot move with it; a candidate moves with
-                # every slot that ends before its own slot starts.
-                moved = orig[index] >= hi if owner is None else spans[owner][1] <= lo
+                # every *other* slot that precedes its own slot in document order.
+                moved = orig[index] >= hi if owner is None else order[block_id] < order[owner]
                 if moved:
                     offset_matrix[index, column] = 1.0
 
@@ -284,9 +311,11 @@ def build_superposed(
     is_cand = orig_t < 0
     block_lo = torch.full((total,), -1, dtype=torch.long)
     block_hi = torch.full((total,), -1, dtype=torch.long)
+    slot_rank = torch.full((total,), -1, dtype=torch.long)
     for index, block_id in enumerate(cand_block):
         if block_id is not None:
             block_lo[index], block_hi[index] = spans[block_id]
+            slot_rank[index] = order[block_id]
 
     q = torch.arange(total)[:, None]
     k = torch.arange(total)[None, :]
@@ -300,7 +329,7 @@ def build_superposed(
     same_seg = seg_t[:, None] == seg_t[None, :]
     visible |= q_cand & k_cand & same_seg & (k <= q)
     # Rule 3b: a candidate sees candidates of strictly earlier slots (gated).
-    visible |= q_cand & k_cand & (block_hi[None, :] <= block_lo[:, None])
+    visible |= q_cand & k_cand & (slot_rank[None, :] < slot_rank[:, None])
     # Rule 4: downstream non-candidates read candidates after the incumbent slot end.
     visible |= (~q_cand) & k_cand & (q_orig >= block_hi[None, :])
     gate_index = torch.where(
@@ -319,6 +348,8 @@ def build_superposed(
         slots,
         offset_matrix,
         mode,
+        orig,
+        cand_block,
     )
 
 
@@ -357,6 +388,8 @@ def gated_attention_forward(
         value = value[:, :, None].expand(batch, heads, groups, length, dim).reshape(
             batch, heads * groups, length, dim
         )
+    if context.patch is not None:
+        context.patch.observe(module, query, key, value, scaling, kwargs.get("softcap"))
     scores = torch.matmul(query, key.transpose(2, 3)) * scaling
     softcap = kwargs.get("softcap")
     if softcap is not None:
@@ -368,8 +401,10 @@ def gated_attention_forward(
     shifted = torch.exp(s - s.amax(dim=-1, keepdim=True))
     weighted = shifted * context.gate_matrix
     weights = (weighted / weighted.sum(dim=-1, keepdim=True)).to(value.dtype)
-    output = torch.matmul(weights, value).transpose(1, 2).contiguous()
-    return output.to(out_dtype), None
+    output = torch.matmul(weights, value).transpose(1, 2).contiguous().to(out_dtype)
+    if context.patch is not None:
+        context.patch.attach(module, output)
+    return output, None
 
 
 class gated_mode:  # noqa: N801 - used as a context manager
@@ -544,17 +579,20 @@ def edit_scores(seq: SuperposedSequence, grad: GateGradient) -> dict[str, Any]:
         block: -grad.gates[g.gate_id] - g.token_count * offset_grad(block)
         for block, g in incumbents.items()
     }
+    # Replacement for gated slots, pure insertion for empty slots.
     replacement: dict[str, dict[int, float]] = {}
     insertion: dict[str, dict[int, float]] = {}
     for gate in seq.gates:
         if gate.kind != "candidate" or gate.candidate_index is None:
             continue
-        incumbent = incumbents[gate.block_id]
-        insertion.setdefault(gate.block_id, {})[gate.candidate_index] = grad.gates[gate.gate_id]
-        delta = gate.token_count - incumbent.token_count
+        incumbent = incumbents.get(gate.block_id)
+        insertion.setdefault(gate.block_id, {})[gate.candidate_index] = grad.gates[
+            gate.gate_id
+        ] + gate.token_count * offset_grad(gate.block_id)
+        delta = gate.token_count - (incumbent.token_count if incumbent else 0)
         replacement.setdefault(gate.block_id, {})[gate.candidate_index] = (
             grad.gates[gate.gate_id]
-            - grad.gates[incumbent.gate_id]
+            - (grad.gates[incumbent.gate_id] if incumbent else 0.0)
             + delta * offset_grad(gate.block_id)
         )
     return {"deletion": deletion, "insertion": insertion, "replacement": replacement}
