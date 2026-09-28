@@ -26,7 +26,14 @@ from time import perf_counter
 from typing import Any
 
 from promptwitness import graft_tasks
-from promptwitness.graft_runtime import answer_losses, generate_batch
+from promptwitness.graft_runtime import (
+    Generation,
+    ScoredTarget,
+    answer_losses,
+    answer_target,
+    generate_batch,
+    verified_targets,
+)
 from promptwitness.structured_prompt import StructuredPrompt
 from promptwitness.superposed_gates import (
     GateScorer,
@@ -247,23 +254,28 @@ def delete_block(prompt: StructuredPrompt, slot: str) -> StructuredPrompt:
 
 def score_edits(method: str, runner: Runner, scorer: GateScorer, prompt: StructuredPrompt,  # noqa: PLR0913
                 pools: dict[str, list[str]], edits: list[Edit], batch: list[graft_tasks.Example],
-                reasoning: list[list[int]], rng: random.Random) -> dict[Edit, float]:
-    """Estimated loss change per edit (lower is better), averaged over the minibatch."""
+                targets: list[ScoredTarget], rng: random.Random) -> dict[Edit, float]:
+    """Estimated objective change per edit (lower is better), averaged over the minibatch.
+
+    ``targets`` fix, per example, the unscored tail and the weighted scored tokens
+    (GReaTer's answer objective or the verified-reasoning objective).
+    """
     if method == "random":
         return {e: rng.random() for e in edits}
     totals = {e: 0.0 for e in edits}
     started = perf_counter()
     if method == "exact":
-        pairs, owners = [], []
-        for example, reason in zip(batch, reasoning):
-            tail = (reason if runner.use_reasoning else []) + runner.extractor
-            base = runner.ids(prompt, example)
-            pairs.append((base + tail, runner.target(example)))
+        pairs, owners, weights = [], [], []
+        for example, target in zip(batch, targets):
+            tail, scored = list(target.tail), list(target.scored)
+            pairs.append((runner.ids(prompt, example) + tail, scored))
             owners.append(None)
+            weights.append(target.weights)
             for edit in edits:
-                pairs.append((runner.ids(apply(prompt, pools, edit), example) + tail, runner.target(example)))
+                pairs.append((runner.ids(apply(prompt, pools, edit), example) + tail, scored))
                 owners.append(edit)
-        losses, _ = answer_losses(runner.model, pairs)
+                weights.append(target.weights)
+        losses, _ = answer_losses(runner.model, pairs, weights=weights)
         base_loss = 0.0
         for owner, loss in zip(owners, losses):
             if owner is None:
@@ -271,7 +283,7 @@ def score_edits(method: str, runner: Runner, scorer: GateScorer, prompt: Structu
             else:
                 totals[owner] += (loss - base_loss) / len(batch)
         runner.ledger.add("score_exact", perf_counter() - started, forwards=len(pairs),
-                          forward_tokens=sum(len(p) + len(a) for p, a in pairs))
+                          forward_tokens=sum(len(c) + len(a) for c, a in pairs))
         return totals
     # Superposed passes of bounded size; indices stay stable via None placeholders.
     replacements = [e for e in edits if e[1] is not None]
@@ -282,10 +294,10 @@ def score_edits(method: str, runner: Runner, scorer: GateScorer, prompt: Structu
         members = set(chunk)
         candidates = {slot: [text if (slot, i) in members else None for i, text in enumerate(texts)]
                       for slot, texts in pools.items()}
-        for example, reason in zip(batch, reasoning):
+        for example, target in zip(batch, targets):
             seq = build_superposed(prompt, runner.tokenizer, {"input": example.question}, candidates,
-                                   (reason if runner.use_reasoning else []) + runner.extractor,
-                                   runner.target(example), mode="exact")
+                                   list(target.tail), list(target.scored), mode="exact",
+                                   answer_weights=list(target.weights))
             tokens += len(seq.input_ids)
             passes += 1
             if method == "patch":
@@ -301,6 +313,23 @@ def score_edits(method: str, runner: Runner, scorer: GateScorer, prompt: Structu
     runner.ledger.add(f"score_{method}", perf_counter() - started, forwards=passes,
                       backwards=passes, forward_tokens=tokens)
     return totals
+
+
+def build_targets(args: argparse.Namespace, runner: Runner, prompt: StructuredPrompt,
+                  batch: list[graft_tasks.Example], incumbent: dict[str, Any]) -> list[ScoredTarget]:
+    reasoning = incumbent["reasoning"]
+    answers = [runner.target(e) for e in batch]
+    if args.objective == "answer":
+        return [answer_target(r if runner.use_reasoning else [], runner.extractor, a)
+                for r, a in zip(reasoning, answers)]
+    started = perf_counter()
+    targets, _ = verified_targets(
+        runner.model, runner.tokenizer, [runner.ids(prompt, e) for e in batch],
+        [Generation(tuple(r), "", True) for r in reasoning], incumbent["correct"],
+        runner.extractor, answers, lambda i, text: runner.spec.correct(text, batch[i].answer),
+        samples=args.verify_samples, max_new_tokens=args.max_new_tokens, seed=args.seed)
+    runner.ledger.add("verified_targets", perf_counter() - started)
+    return targets
 
 
 def main() -> None:
@@ -319,6 +348,9 @@ def main() -> None:
     parser.add_argument("--eval-max-new-tokens", type=int, default=512)
     parser.add_argument("--dev-checkpoints", type=int, default=3)
     parser.add_argument("--candidates-per-pass", type=int, default=32)
+    parser.add_argument("--objective", choices=("answer", "verified"), default="answer",
+                        help="GReaTer's answer loss, or verified reasoning plus answer")
+    parser.add_argument("--verify-samples", type=int, default=4)
     parser.add_argument("--no-reasoning-scores", action="store_true",
                         help="ablation: score edits without reasoning in the tail")
     parser.add_argument("--attn", default="sdpa")
@@ -371,8 +403,10 @@ def main() -> None:
         if not edits:
             trajectory.append({**record, "accepted": None})
             continue
-        estimates = score_edits(scoring, runner, scorer, prompt, pools, edits, batch,
-                                incumbent["reasoning"], rng)
+        targets = (build_targets(args, runner, prompt, batch, incumbent)
+                   if scoring != "random" else [])
+        record["target_sources"] = [t.source for t in targets]
+        estimates = score_edits(scoring, runner, scorer, prompt, pools, edits, batch, targets, rng)
         shortlist = sorted(edits, key=lambda e: estimates[e])[: args.mu]
         checks = []
         for edit in shortlist:
