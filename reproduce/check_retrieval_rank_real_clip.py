@@ -1,4 +1,4 @@
-"""Qualify the restricted search ranker with real CLIP on authored images only.
+"""Qualify direct and supplied-description CLIP ranking on authored images.
 
 This is not a CIRR result: all images, query text and labels are generated here.
 The checkpoint must be an already obtained first-party ViT-L/14 file. The new
@@ -24,7 +24,7 @@ FORMAT = "promptwitness.restricted-real-clip-qualification/v1"
 
 
 def check(checkpoint: Path, output: Path) -> dict[str, object]:
-    """Run one cold index and two singleton queries inside the Landlock worker."""
+    """Run one cold index, two direct queries and one supplied description."""
     require_cpu()
     checkout = Path(__file__).resolve().parents[1]
     if output.resolve().is_relative_to(checkout):
@@ -44,6 +44,7 @@ def check(checkpoint: Path, output: Path) -> dict[str, object]:
         "fusion_weight_scientifically_frozen": False,
         "official_evaluator_parity_established": False,
         "whole_process_cpu_allocation_measured": False,
+        "supplied_description_from_real_generator": False,
     }
     try:
         weight = checkpoint.resolve(strict=True)
@@ -98,8 +99,10 @@ def check(checkpoint: Path, output: Path) -> dict[str, object]:
         )
         rank_scratch = output / "ranker-scratch"
         score_scratch = output / "scorer-scratch"
+        description_score_scratch = output / "description-scorer-scratch"
         rank_scratch.mkdir()
         score_scratch.mkdir()
+        description_score_scratch.mkdir()
         outer = RetrievalWorkLedger(output / "outer-work.sqlite")
         with RestrictedRankerSession(
             store=store,
@@ -131,6 +134,17 @@ def check(checkpoint: Path, output: Path) -> dict[str, object]:
                 result["full_rankings"] = {
                     identifier: list(ranking) for identifier, ranking in rankings.items()
                 }
+            description_ranking = outer.run(
+                "outer:rank-description:authored-red",
+                "search",
+                "rank_callback",
+                lambda: session.rank_description(
+                    "authored-q-red",
+                    "authored-description-red",
+                    "a blue square on a white background",
+                ),
+            )
+            result["supplied_description_full_ranking"] = list(description_ranking)
         score = outer.run(
             "outer:score:authored-pair",
             "search",
@@ -139,21 +153,38 @@ def check(checkpoint: Path, output: Path) -> dict[str, object]:
         )
         result["scorer_pid"] = score["worker_pid"]
         result["observations"] = score["observations"]
+        description_score = outer.run(
+            "outer:score-description:authored-red",
+            "search",
+            "restricted_score",
+            lambda: score_rankings_restricted(
+                store,
+                description_score_scratch,
+                "cirr",
+                "search",
+                {"authored-q-red": description_ranking},
+            ),
+        )
+        result["description_scorer_pid"] = description_score["worker_pid"]
+        result["supplied_description_observation"] = description_score["observations"][
+            "authored-q-red"
+        ]
         inner = RetrievalWorkLedger(rank_scratch / "ranker-work.sqlite")
         try:
             inner_summary = inner.summary()
         finally:
             inner.close()
         if (
-            inner_summary["attempts"] != 8
-            or inner_summary["completed"] != 8
+            inner_summary["attempts"] != 10
+            or inner_summary["completed"] != 10
             or inner_summary["unresolved"] != 0
-            or inner_summary["known_forward_calls"] != 5
+            or inner_summary["known_forward_calls"] != 6
             or score["worker_pid"] == ranker_pid
+            or description_score["worker_pid"] == ranker_pid
         ):
             raise ValueError("restricted real-CLIP work receipts or role identity are incomplete")
         result.update(
-            status="PASS_AUTHORED_REAL_CLIP_RESTRICTED_SEARCH_AND_SCORER",
+            status="PASS_AUTHORED_REAL_CLIP_DESCRIPTION_RESTRICTED_SEARCH_AND_SCORER",
             gallery_size=len(pool),
             query_count=len(queries),
             inner_operation_ledger=inner_summary,

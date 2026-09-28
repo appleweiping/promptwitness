@@ -352,3 +352,13 @@ default4/历史账本/无timer/其他四仓冻结不变。
 CI不运行932MB真实权重；真实CPU自制输入另由private WSL运行证明。
 官方数据/许可、full-gallery parity、captioner/双LLM、全角色费用、
 M1/Pilot/论文效果仍NOT_ADMITTED。见research/ICMR_REAL_RESTRICTED_CLIP_CI.md。
+
+2026-09-28T04:37:25Z：ranker 新增 caller-supplied target description 数据
+路径，真实 WSL CPU 第一方 CLIP/Landlock 在三张自制图上跑通直检和描述检索，
+独立 scorer 与重放/身份失败测试通过；详见
+research/ICMR_DESCRIPTION_TRANSPORT.md。描述是作者自写，绝不可称为
+Qwen/OLMo 生成或正式 CIRR/FashionIQ 结果；本地全套2046pass20skip、
+coverage94.03%，精确SHA CI待记。
+M1/Pilot/C1–C3、正式数据许可、full-gallery/tie parity、captioner、
+双模型与全角色物理成本仍 NOT_ADMITTED；ARIS 默认4轮、历史预算、无timer、
+另外四仓冻结的覆盖指令不变。

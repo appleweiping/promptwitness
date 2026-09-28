@@ -168,3 +168,37 @@ class DirectClipRanker:
         return self.ledger.run(
             f"{self.attempt_prefix}:query:{query_id}", "search", "rank_callback", rank
         )
+
+    def rank_description(
+        self, query_id: str, request_id: str, target_description: str
+    ) -> tuple[str, ...]:
+        """Rank a supplied target description against the same frozen image index.
+
+        The original reference image/category still comes only from input data.
+        A distinct request ID charges each supplied text and ranking once;
+        repeating an ID is a failed replay, not a cache hit or free model call.
+        This method does not generate the description or authenticate its source.
+        """
+        if query_id not in self.queries:
+            raise ValueError("query is outside the input-only population")
+        if not isinstance(request_id, str) or not request_id.strip():
+            raise ValueError("nonempty description request ID required")
+        if not isinstance(target_description, str) or not target_description.strip():
+            raise ValueError("nonempty target description required")
+
+        def rank() -> tuple[str, ...]:
+            reference_id, _, category = self.queries[query_id]
+            text = self.encoder.encode_text(
+                f"{self.attempt_prefix}:description:{request_id}:text", target_description
+            )
+            return rank_direct_composed(
+                self.index[category],
+                self.galleries[category],
+                reference_id,
+                text,
+                self.image_weight,
+            )
+
+        return self.ledger.run(
+            f"{self.attempt_prefix}:description:{request_id}:rank", "search", "rank_callback", rank
+        )

@@ -43,6 +43,22 @@ class AuthoredRanker:
             authored_rank,
         )
 
+    def rank_description(self, query_id, request_id, target_description):
+        if query_id not in self.queries or not request_id or not target_description:
+            raise ValueError("authored description request is incomplete")
+        _, _, category = self.queries[query_id]
+        pool = self.galleries[category]
+        return self.ledger.run(
+            f"{self.attempt_prefix}:description:{request_id}:rank",
+            "search",
+            "rank_callback",
+            lambda: (
+                ("target", *(item for item in pool if item != "target"))
+                if target_description == "authored target first"
+                else (*(item for item in pool if item != "target"), "target")
+            ),
+        )
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:

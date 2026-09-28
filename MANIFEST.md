@@ -620,3 +620,20 @@
 | 2026-09-28T04:12:43Z | experiment-bridge | research/ACCESS_AUDIT_20260928_041243.md | implementation | CI无正式数据访问快照 |
 | 2026-09-28T04:12:43Z | experiment-bridge | AGENTS.md | implementation | 精确CI与科学门禁dashboard |
 | 2026-09-28T04:12:43Z | experiment-bridge | findings.md | implementation | CI和官方评测门禁 |
+| 2026-09-28T04:37:25Z | experiment-bridge | reproduce/retrieval_direct_clip_ranker.py | implementation | caller-supplied target description 的物理CLIP检索与重放拒绝 |
+| 2026-09-28T04:37:25Z | experiment-bridge | reproduce/retrieval_rank_role.py | implementation | 受限ranker描述帧和身份核验 |
+| 2026-09-28T04:37:25Z | experiment-bridge | reproduce/check_retrieval_rank_session.py | implementation | 描述请求的authored角色夹具 |
+| 2026-09-28T04:37:25Z | experiment-bridge | reproduce/check_retrieval_rank_real_clip.py | implementation | 私有真实CLIP的描述检索资格 |
+| 2026-09-28T04:37:25Z | experiment-bridge | tests/reproduce/test_retrieval_direct_clip_ranker.py | implementation | 描述编码与重复请求断言 |
+| 2026-09-28T04:37:25Z | experiment-bridge | tests/reproduce/test_retrieval_rank_role.py | implementation | 帧身份错误和受限角色回归 |
+| 2026-09-28T04:37:25Z | experiment-bridge | tests/reproduce/test_retrieval_rank_real_clip.py | implementation | 正向和失败收据测试 |
+| 2026-09-28T04:37:25Z | experiment-bridge | research/ICMR_DESCRIPTION_TRANSPORT_20260928_043725.md | implementation | 私有CLIP资格与未准入边界 |
+| 2026-09-28T04:37:25Z | experiment-bridge | research/ICMR_DESCRIPTION_TRANSPORT.md | implementation | 同字节latest copy |
+| 2026-09-28T04:37:25Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_043725.md | implementation | tracker快照 |
+| 2026-09-28T04:37:25Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 最新工程资格与门禁 |
+| 2026-09-28T04:37:25Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260928_043725.md | implementation | 审查快照 |
+| 2026-09-28T04:37:25Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | 最新同家族审查与限制 |
+| 2026-09-28T04:37:25Z | experiment-bridge | research/ACCESS_AUDIT_20260928_043725.md | implementation | 自制样例且无正式数据访问快照 |
+| 2026-09-28T04:37:25Z | experiment-bridge | research/ACCESS_AUDIT.md | implementation | 最新数据访问审计 |
+| 2026-09-28T04:37:25Z | experiment-bridge | findings.md | implementation | 描述检索和科学门禁 |
+| 2026-09-28T04:37:25Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |

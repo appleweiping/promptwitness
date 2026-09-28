@@ -244,3 +244,12 @@ Landlock/失败回归与私有WSL真实CLIP运行是不同证据，不互相冒�
 3.14保留127warnings。本地最终2043pass19skip。CI没有固定上游源码、
 正式图像/标注或模型；WSL私有17项差分不能替代官方server/full-gallery/tie
 或方法效果。M1/Pilot保持未准入。见research/ICMR_SEARLE_METRIC_PARITY_CI.md。
+
+2026-09-28T04:37:25Z：受限 CLIP 检索已接收独立的 caller-supplied
+target description，并保留原 direct 路径；request ID 重放在再次编码前拒绝。
+原生 WSL CPU 用第一方 CLIP、三张自制图、两次原文查询和一次自写描述查询
+走通完整排序与隔离 scorer；inner10/10、6 known encoder forwards、outer5/5。
+同家族 provisional 审查无 BLOCKING，Linux focused18pass1skip；
+Windows本地2046pass20skip/coverage94.03%，构建通过，精确SHA CI待记。
+**未使用真实生成模型或正式数据**，不授 M1/Pilot/方法收益，
+全角色成本和图像许可继续未关闭。见research/ICMR_DESCRIPTION_TRANSPORT.md。

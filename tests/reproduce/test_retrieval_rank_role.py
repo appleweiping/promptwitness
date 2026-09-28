@@ -160,6 +160,37 @@ def test_timeout_aborts_ranker_process(tmp_path):
     assert process.poll() is not None
 
 
+def test_description_response_request_identity_mismatch_aborts(monkeypatch):
+    session = object.__new__(RestrictedRankerSession)
+    session.timeout = 1.0
+    sent = []
+    aborted = []
+    monkeypatch.setattr(session, "_send", lambda frame, _deadline: sent.append(frame))
+    monkeypatch.setattr(
+        session,
+        "_receive",
+        lambda _deadline: {
+            "format": retrieval_rank_role.FORMAT,
+            "op": "ranking",
+            "query_id": "q0",
+            "request_id": "different-child:q0",
+            "ranking": ["reference", "target"],
+        },
+    )
+    monkeypatch.setattr(session, "close", lambda *, abort: aborted.append(abort))
+    with pytest.raises(ValueError, match="invalid full-rank frame"):
+        session.rank_description("q0", "child:q0", "authored description")
+    assert sent == [
+        {
+            "op": "rank_description",
+            "query_id": "q0",
+            "request_id": "child:q0",
+            "target_description": "authored description",
+        }
+    ]
+    assert aborted == [True]
+
+
 def test_stalled_restricted_rank_keeps_failure_and_unknown_receipts(tmp_path, monkeypatch):
     if sys.platform != "linux":
         pytest.skip("actual Landlock worker and persistent receipt require Linux")
@@ -270,3 +301,52 @@ def test_restricted_live_ranker_to_scorer_and_gate(tmp_path, monkeypatch):
     finally:
         outer_ledger.close()
         journal.close()
+
+
+def test_description_pipe_preserves_request_identity_and_gold_boundary(tmp_path, monkeypatch):
+    if sys.platform != "linux":
+        pytest.skip("real Landlock ranker/scorer workers require Linux")
+    monkeypatch.setattr(
+        retrieval_rank_role, "ENTRYPOINT", Path(check_retrieval_rank_session.__file__)
+    )
+    store, _, pool, image_paths = _authored_store(tmp_path)
+    rank_scratch = tmp_path / "ranker-scratch"
+    rank_scratch.mkdir()
+    first_score_scratch = tmp_path / "first-score-scratch"
+    first_score_scratch.mkdir()
+    second_score_scratch = tmp_path / "second-score-scratch"
+    second_score_scratch.mkdir()
+    with RestrictedRankerSession(
+        store=store,
+        scratch=rank_scratch,
+        dataset="cirr",
+        image_paths=image_paths,
+        checkpoint="model.pt",
+        image_weight=0.5,
+        attempt_prefix="authored-description",
+    ) as session:
+        first = session.rank_description("q0", "candidate-a:q0", "authored target first")
+        second = session.rank_description("q0", "candidate-b:q0", "authored target last")
+        assert first == ("target", *(item for item in pool if item != "target"))
+        assert second == (*(item for item in pool if item != "target"), "target")
+        assert (
+            score_rankings_restricted(store, first_score_scratch, "cirr", "search", {"q0": first})[
+                "observations"
+            ]["q0"]["primary_hit"]
+            == 1
+        )
+        assert (
+            score_rankings_restricted(
+                store, second_score_scratch, "cirr", "search", {"q0": second}
+            )["observations"]["q0"]["primary_hit"]
+            == 0
+        )
+        with pytest.raises(ValueError, match="exited"):
+            session.rank_description("q0", "candidate-a:q0", "authored target last")
+        assert session._closed
+    inner = RetrievalWorkLedger(rank_scratch / "ranker-work.sqlite")
+    try:
+        assert inner.summary()["attempts"] == 2
+        assert inner.summary()["unresolved"] == 0
+    finally:
+        inner.close()

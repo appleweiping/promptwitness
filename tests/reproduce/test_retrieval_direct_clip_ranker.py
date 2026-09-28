@@ -155,6 +155,53 @@ def test_full_gallery_index_query_and_replay_receipts(tmp_path, monkeypatch):
         ledger.close()
 
 
+def test_supplied_description_uses_same_reference_and_distinct_physical_receipts(
+    tmp_path, monkeypatch
+):
+    monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "")
+    _fake_model(monkeypatch)
+    seen = []
+
+    def fake_rank(gallery, ids, reference, text, weight):
+        seen.append((gallery, ids, reference, text, weight))
+        return ("target", "reference")
+
+    monkeypatch.setattr(ranker_module, "rank_direct_composed", fake_rank)
+    inputs = tmp_path / "inputs"
+    _inputs(inputs, "cirr", [_row("q1")], {"cirr": ["reference", "target"]})
+    paths = {name: tmp_path / name for name in ("reference", "target")}
+    for path in paths.values():
+        path.touch()
+    ledger = RetrievalWorkLedger(tmp_path / "work.sqlite")
+    try:
+        ranker = DirectClipRanker(
+            input_dir=inputs,
+            dataset="cirr",
+            image_paths=paths,
+            checkpoint=tmp_path / "fake.pt",
+            image_weight=0.5,
+            ledger=ledger,
+            attempt_prefix="authored",
+        )
+        assert ranker.rank_description("q1", "child-a:q1", "a blue square") == (
+            "target",
+            "reference",
+        )
+        assert seen == [
+            (("reference", "target"), ("reference", "target"), "reference", "a blue square", 0.5)
+        ]
+        with pytest.raises(ValueError, match="replayed"):
+            ranker.rank_description("q1", "child-a:q1", "a red square")
+        assert len(seen) == 1
+        with pytest.raises(ValueError, match="nonempty target description"):
+            ranker.rank_description("q1", "child-b:q1", "   ")
+        summary = ledger.summary()
+        assert (summary["attempts"], summary["known_forward_calls"]) == (5, 3)
+        assert summary["failed"] == summary["unresolved"] == 0
+    finally:
+        ledger.close()
+
+
 def test_fashioniq_uses_only_each_category_full_pool(tmp_path, monkeypatch):
     monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "")
     _fake_model(monkeypatch)

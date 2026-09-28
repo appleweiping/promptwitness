@@ -1,7 +1,8 @@
 """Persistent input-only CIR search ranker behind the existing Landlock role.
 
-The worker owns its CLIP model and full gallery index for the session. Only
-query IDs and complete rankings cross the pipe. The caller must supply a
+The worker owns its CLIP model and full gallery index for the session. Query
+IDs and optional caller-supplied target descriptions enter by pipe; complete
+rankings return. Scorer gold never enters this role. The caller must supply a
 qualified input-only image/weight source and account for whole-process cost.
 """
 
@@ -101,17 +102,30 @@ def serve(
         )
         for line in sys.stdin:
             request = json.loads(line)
-            if not isinstance(request, dict) or set(request) != {"op", "query_id"}:
+            if not isinstance(request, dict) or not isinstance(request.get("query_id"), str):
                 raise ValueError("invalid rank request")
-            if request["op"] != "rank" or not isinstance(request["query_id"], str):
-                raise ValueError("only query-ID rank requests are supported")
-            ranking = ranker.rank_one(request["query_id"])
+            if request.get("op") == "rank" and set(request) == {"op", "query_id"}:
+                ranking = ranker.rank_one(request["query_id"])
+                identity = {}
+            elif request.get("op") == "rank_description" and set(request) == {
+                "op",
+                "query_id",
+                "request_id",
+                "target_description",
+            }:
+                ranking = ranker.rank_description(
+                    request["query_id"], request["request_id"], request["target_description"]
+                )
+                identity = {"request_id": request["request_id"]}
+            else:
+                raise ValueError("invalid rank request")
             print(
                 json.dumps(
                     {
                         "format": FORMAT,
                         "op": "ranking",
                         "query_id": request["query_id"],
+                        **identity,
                         "ranking": ranking,
                     },
                     allow_nan=False,
@@ -239,18 +253,20 @@ class RestrictedRankerSession:
             raise ValueError("restricted ranker returned a non-object frame")
         return result
 
-    def rank_one(self, query_id: str) -> tuple[str, ...]:
-        if not isinstance(query_id, str) or not query_id:
-            raise ValueError("nonempty query ID required")
+    def _rank(self, request: dict[str, str]) -> tuple[str, ...]:
         try:
             deadline = time.monotonic() + self.timeout
-            self._send({"op": "rank", "query_id": query_id}, deadline)
+            self._send(request, deadline)
             result = self._receive(deadline)
             ranking = result.get("ranking")
             if (
-                result.get("format") != FORMAT
+                set(result)
+                != {"format", "op", "query_id", "ranking"}
+                | ({"request_id"} if "request_id" in request else set())
+                or result.get("format") != FORMAT
                 or result.get("op") != "ranking"
-                or result.get("query_id") != query_id
+                or result.get("query_id") != request["query_id"]
+                or ("request_id" in request and result.get("request_id") != request["request_id"])
                 or not isinstance(ranking, list)
                 or not ranking
                 or any(not isinstance(item, str) or not item for item in ranking)
@@ -261,6 +277,30 @@ class RestrictedRankerSession:
         except BaseException:
             self.close(abort=True)
             raise
+
+    def rank_one(self, query_id: str) -> tuple[str, ...]:
+        if not isinstance(query_id, str) or not query_id:
+            raise ValueError("nonempty query ID required")
+        return self._rank({"op": "rank", "query_id": query_id})
+
+    def rank_description(
+        self, query_id: str, request_id: str, target_description: str
+    ) -> tuple[str, ...]:
+        """Submit a caller-supplied description, without scorer gold, to the ranker."""
+        if not isinstance(query_id, str) or not query_id:
+            raise ValueError("nonempty query ID required")
+        if not isinstance(request_id, str) or not request_id.strip():
+            raise ValueError("nonempty description request ID required")
+        if not isinstance(target_description, str) or not target_description.strip():
+            raise ValueError("nonempty target description required")
+        return self._rank(
+            {
+                "op": "rank_description",
+                "query_id": query_id,
+                "request_id": request_id,
+                "target_description": target_description,
+            }
+        )
 
     def close(self, *, abort: bool = False) -> None:
         if self._closed:
