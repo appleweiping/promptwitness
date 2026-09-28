@@ -372,3 +372,12 @@ completed/success15/15。Ubuntu3.10/3.14各2107pass3skip、coverage
 94.04/94.05%。CI包含最后fit失败路径测试，不运行私有权重/官方图像/
 真实生成器；M1/Pilot/C1–C3仍NOT_ADMITTED。见
 research/ICMR_FIT_REAL_CLIP_CI.md。
+
+2026-09-28：检索原生 MIPRO 适配器在固定 DSPy/Optuna 上完成
+自制 full 与 minibatch 编译：实际评分函数返回完整 survivor vector，
+PRUNED 非零分，脚本化 winner 按构造选中；真实 Example 接口阻断经
+同家族审查发现并修复，静态复审无新阻断。新增11测试通过，Windows
+全套2093pass28skip/94.03%，构建/质量检查过。进程内自制 scorer、
+无官方数据/真实生成器/全角色成本或同次受限在线实验；M1/Pilot/
+C1–C3仍NOT_ADMITTED，SSH指纹冲突未登录。见
+research/ICMR_NATIVE_MIPRO_RETRIEVAL.md/json。

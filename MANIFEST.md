@@ -758,3 +758,15 @@
 | 2026-09-28T10:07:02Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 同字节latest copy |
 | 2026-09-28T10:07:02Z | experiment-bridge | findings.md | implementation | 精确CI与未准入项 |
 | 2026-09-28T10:07:02Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |
+| 2026-09-28T10:57:18Z | experiment-bridge | research/ICMR_NATIVE_MIPRO_RETRIEVAL_20260928_105628.md | implementation | 固定DSPy检索原生MIPRO自制资格与限制 |
+| 2026-09-28T10:57:18Z | experiment-bridge | research/ICMR_NATIVE_MIPRO_RETRIEVAL.md | implementation | 同字节latest copy |
+| 2026-09-28T10:57:18Z | experiment-bridge | research/ICMR_NATIVE_MIPRO_RETRIEVAL_20260928_105628.json | implementation | 自制full/minibatch机器可读摘要 |
+| 2026-09-28T10:57:18Z | experiment-bridge | research/ICMR_NATIVE_MIPRO_RETRIEVAL.json | implementation | 同字节latest copy |
+| 2026-09-28T10:57:18Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260928_105718.md | implementation | 原生Example阻断修复与复审记录 |
+| 2026-09-28T10:57:18Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | 同字节latest copy |
+| 2026-09-28T10:57:18Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_105718.md | implementation | 检索原生MIPRO自制资格tracker快照 |
+| 2026-09-28T10:57:18Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 同字节latest copy |
+| 2026-09-28T10:57:18Z | experiment-bridge | research/ACCESS_AUDIT_20260928_105628.md | implementation | 官方数据未访问与自制资格边界快照 |
+| 2026-09-28T10:57:18Z | experiment-bridge | research/ACCESS_AUDIT.md | implementation | 同字节latest copy |
+| 2026-09-28T10:57:18Z | experiment-bridge | findings.md | implementation | 自制原生资格及未准入项 |
+| 2026-09-28T10:57:18Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |

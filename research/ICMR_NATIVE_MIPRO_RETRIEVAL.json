@@ -1,0 +1,58 @@
+{
+  "format": "promptwitness.icmr-native-mipro-retrieval-qualification/v1",
+  "status": "PASS_AUTHORED_NATIVE_RETRIEVAL_COMPILE",
+  "scientific_result": false,
+  "official_benchmark_data_accessed": false,
+  "real_generator_calls": 0,
+  "new_gpu_hours": 0,
+  "paid_api_usd": 0,
+  "fixed_dspy_revision": "da1736e21ffda8cc4b86379d4748b011764d507c",
+  "private_qualification_sha256": "b8933de1609ac076c763c5a90098525e0b045ed7933cfcece89df0903e46634b",
+  "checker_source_sha256": "5ac6dfe11e746f063e17c364c187a6edb64be86911eca034b101bd04adc5a5ef",
+  "scorer_process_isolation_in_same_native_compile": false,
+  "search_gold_in_optimizer_examples": false,
+  "reference_authored_scores_precomputed_outside_physical_attempt_ledger_per_path": 64,
+  "paths": [
+    {
+      "name": "full",
+      "optuna_complete": 8,
+      "optuna_pruned": 5,
+      "optuna_fail": 0,
+      "scripted_winner_score": 100,
+      "candidate_outer_rank_and_score_attempts": 560,
+      "logical_episodes": 344,
+      "scripted_lm_task_calls": 7,
+      "scripted_lm_proposer_calls": 4
+    },
+    {
+      "name": "minibatch",
+      "optuna_complete": 12,
+      "optuna_pruned": 5,
+      "optuna_fail": 0,
+      "scripted_winner_score": 100,
+      "candidate_outer_rank_and_score_attempts": 560,
+      "logical_episodes": 344,
+      "scripted_lm_task_calls": 7,
+      "scripted_lm_proposer_calls": 4
+    }
+  ],
+  "validation": {
+    "focused_passed": 11,
+    "windows_full_passed": 2093,
+    "windows_full_skipped": 28,
+    "windows_full_coverage_percent": 94.03,
+    "ruff_check_format": "PASS",
+    "mypy_src_61_files": "PASS",
+    "configured_bandit_src": "PASS",
+    "build_and_twine_two_packages": "PASS",
+    "same_family_review": "PROVISIONAL_FOLLOWUP_NO_NEW_BLOCKING",
+    "exact_sha_ci": "PENDING"
+  },
+  "not_admitted": [
+    "official CIRR/FashionIQ images, annotations, licenses, and sealed final",
+    "real Qwen/OLMo generations and same-run restricted scorer/optimizer",
+    "full-role physical cost forecast and online execution semantics",
+    "GEPA original engine and fair strong controls",
+    "M1, Pilot, C1-C3 empirical claims, ICMR manuscript"
+  ]
+}

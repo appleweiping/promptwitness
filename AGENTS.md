@@ -501,3 +501,14 @@ CI run36406953262精确匹配 completed/success15/15，Ubuntu3.10/3.14
 费用、英文稿仍NOT_ADMITTED；SSH指纹仍冲突未登录。见
 research/ICMR_FIT_REAL_CLIP_CI.md；goalACTIVE/default4/历史账本/
 无timer/其他四仓冻结不变。
+
+2026-09-28：新增检索 `RetrievalMIPROGateEvaluator`，将固定原生
+MIPRO 的请求接到 search 的审计与完整实际 survivor vector；失败不补0，
+剪枝进入 Optuna。固定 DSPy 的真实 Example 接口已修正并探针验证；
+自制完整编译 full/minibatch 各自有 COMPLETE/PRUNED、脚本化 winner。
+Windows 2093pass28skip/94.03%；同家族静态复审无新 BLOCKING，
+精确源码 SHA CI 待推送核验。此资格仍是进程内自制 scorer/脚本 LM，
+不是正式 CIRR/FashionIQ、真实 Qwen/OLMo、M1/Pilot、全角色预算或
+论文效果；SSH 指纹冲突未登录。见
+research/ICMR_NATIVE_MIPRO_RETRIEVAL.md/json；goalACTIVE/default4/
+历史账本/无timer/其他四仓冻结不变。
