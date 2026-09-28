@@ -6,7 +6,12 @@ import pytest
 
 from reproduce.prepare_bfcl_fit import MODEL_REVISIONS
 from reproduce.prepare_preflight_requests import SEEDS
-from reproduce.torch_runtime import TASK_CAPS, task_wire
+from reproduce.torch_runtime import (
+    RETRIEVAL_DESCRIPTION_CAP,
+    TASK_CAPS,
+    generation_cap,
+    task_wire,
+)
 
 
 def request(family="hotpotqa"):
@@ -120,3 +125,15 @@ def test_unsupported_or_annotation_messages_not_silently_flattened(change):
         )
     with pytest.raises((ValueError, KeyError)):
         task_wire(r)
+
+
+def test_description_family_is_task_only_and_keeps_legacy_family_caps():
+    assert generation_cap({"family": "cir_description", "role": "task"}) == (
+        RETRIEVAL_DESCRIPTION_CAP
+    )
+    for family, cap in TASK_CAPS.items():
+        assert generation_cap({"family": family, "role": "task"}) == cap
+    with pytest.raises(ValueError, match="task request only"):
+        generation_cap({"family": "cir_description", "role": "proposer"})
+    with pytest.raises(ValueError, match="unknown"):
+        generation_cap({"family": "unknown", "role": "task"})

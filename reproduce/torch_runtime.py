@@ -25,6 +25,7 @@ from reproduce.prepare_native_context import task_messages
 from reproduce.prepare_preflight_requests import SEEDS
 
 TASK_CAPS = {"bfcl": 1024, "hotpotqa": 64, "instruction_following": 4096}
+RETRIEVAL_DESCRIPTION_CAP = 256
 ROLE_CAPS = {"proposer": 2048, "reflection": 2048}
 DECODE = {
     "do_sample": False,
@@ -44,8 +45,23 @@ SETTINGS = {
     "tf32": False,
     "gpu_uuid": GPU,
     "task_caps": TASK_CAPS,
+    "retrieval_description_cap": RETRIEVAL_DESCRIPTION_CAP,
     "role_caps": ROLE_CAPS,
 }
+
+
+def generation_cap(wire: dict) -> int:
+    """Select the frozen cap without extending the legacy text-task family list."""
+    if wire["family"] not in {*TASK_CAPS, "cir_description"} or wire["role"] not in {
+        "task",
+        *ROLE_CAPS,
+    }:
+        raise ValueError("unknown model role/family")
+    if wire["family"] == "cir_description":
+        if wire["role"] != "task":
+            raise ValueError("retrieval description is a task request only")
+        return RETRIEVAL_DESCRIPTION_CAP
+    return TASK_CAPS[wire["family"]] if wire["role"] == "task" else ROLE_CAPS[wire["role"]]
 
 
 def task_wire(request: dict) -> dict:
@@ -207,9 +223,7 @@ class TorchRuntime:
             raise ValueError("loaded template/decoding changed since runtime freeze")
         if set(wire) != {"id", "replicate", "role", "family", "messages", "max_new_tokens"}:
             raise ValueError("complete literal wire fields required")
-        if wire["family"] not in TASK_CAPS or wire["role"] not in {"task", *ROLE_CAPS}:
-            raise ValueError("unknown model role/family")
-        cap = TASK_CAPS[wire["family"]] if wire["role"] == "task" else ROLE_CAPS[wire["role"]]
+        cap = generation_cap(wire)
         if wire["max_new_tokens"] != cap or not wire["id"] or not wire["replicate"]:
             raise ValueError("frozen output cap and actual random unit required")
         if (

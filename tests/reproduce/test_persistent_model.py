@@ -13,6 +13,7 @@ from promptwitness.incremental.budget import ResourceLedger
 from reproduce.online_resources import CEILING, GPU, STAGE
 from reproduce.persistent_model import PersistentModel, PhysicalCallFailure
 from reproduce.prepare_bfcl_fit import MODEL_REVISIONS
+from reproduce.torch_runtime import RETRIEVAL_DESCRIPTION_CAP
 
 
 def identity():
@@ -95,6 +96,22 @@ def test_all_model_roles_charged_once(tmp_path, monkeypatch, purpose):
     assert c.ledger.usage()["output_tokens"] == 3
     with pytest.raises(sqlite3.IntegrityError):
         c.metered("one", identity(), w, purpose=purpose)
+    assert c.ledger.usage()["calls"] == 1
+    c.ledger.close()
+
+
+def test_retrieval_description_charge_uses_real_output_cap_and_rejects_replay(
+    tmp_path, monkeypatch
+):
+    c = client(tmp_path)
+    monkeypatch.setattr(c, "_execute", lambda *_: response())
+    w = {**wire(), "family": "cir_description", "max_new_tokens": RETRIEVAL_DESCRIPTION_CAP}
+    assert c.metered("description-q1", identity(), w, purpose="search") == response()
+    assert c.ledger.usage()["calls"] == 1
+    assert c.ledger.usage()["input_tokens"] == 12
+    assert c.ledger.usage()["output_tokens"] == 3
+    with pytest.raises(sqlite3.IntegrityError):
+        c.metered("description-q1", identity(), w, purpose="search")
     assert c.ledger.usage()["calls"] == 1
     c.ledger.close()
 

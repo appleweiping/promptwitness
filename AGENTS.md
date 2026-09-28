@@ -370,3 +370,14 @@ completed/success15/15；Ubuntu3.10/3.14各2064pass2skip、coverage
 CI 不运行私有 CLIP 或正式数据；描述仍自写，不是Qwen/OLMo结果。
 M1/Pilot/C1–C3以及官方许可/评分/全角色成本继续NOT_ADMITTED；目标
 仍 active。默认4轮、历史预算、无timer、四仓冻结不变。
+
+2026-09-28T05:45:24Z：新增 input-only 固定 caption+修改文本→原双模型
+`PersistentModel.metered`→受限 CLIP 完整排名的 authored 接线，
+`cir_description` task cap 256，旧三个 `TASK_CAPS` 不变；新增 cap 改变新
+backend profile digest，旧历史账本不清零。Windows全套2059pass19skip、
+coverage94.04%，Ruff/format/mypy/configuredBandit/build/Twine通过。
+fresh reviewer 因 agent thread limit 未创建，审查仅`[local-only]`；
+SSH 现行 ED25519 指纹与先前用户核验值不一致，未连接服务器或跑真实模型。
+正式captioner、双模型、图像/数据许可、全角色预算、M1/Pilot/C1–C3/
+英文稿仍待准入；见research/ICMR_GENERATED_DESCRIPTION_BRIDGE.md。
+goal仍active，ARIS默认4轮、无timer、其他四仓冻结不变。

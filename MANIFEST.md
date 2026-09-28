@@ -645,3 +645,11 @@
 | 2026-09-28T05:11:08Z | experiment-bridge | research/ACCESS_AUDIT.md | implementation | 最新访问审计 |
 | 2026-09-28T05:11:08Z | experiment-bridge | findings.md | implementation | 真实CI和未准入项 |
 | 2026-09-28T05:11:08Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |
+| 2026-09-28T05:45:24Z | experiment-bridge | research/ICMR_GENERATED_DESCRIPTION_BRIDGE_20260928_054524.md | implementation | authored生成描述到受限检索桥与未准入边界 |
+| 2026-09-28T05:45:24Z | experiment-bridge | research/ICMR_GENERATED_DESCRIPTION_BRIDGE.md | implementation | 同字节latest copy |
+| 2026-09-28T05:45:24Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260928_054524.md | implementation | fresh审查不可用与local-only检查 |
+| 2026-09-28T05:45:24Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | 同字节latest copy |
+| 2026-09-28T05:45:24Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_054524.md | implementation | authored transport进展与门禁 |
+| 2026-09-28T05:45:24Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 同字节latest copy |
+| 2026-09-28T05:45:24Z | experiment-bridge | findings.md | implementation | 生成模型描述接线与未准入边界 |
+| 2026-09-28T05:45:24Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |

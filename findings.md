@@ -260,3 +260,12 @@ coverage94.04/94.05%，3.14有128warnings。本地配置全套2046pass20skip、
 94.03%；真实 CLIP 自制图资格独立于公开 CI。没有真实生成模型、正式
 图像/标注/许可或方法收益，M1/Pilot仍NOT_ADMITTED。见
 research/ICMR_DESCRIPTION_TRANSPORT_CI.md。
+
+2026-09-28T05:45:24Z：`cir_description` 真实模型调用 wire 与现有
+受限 CLIP `rank_description` 已通过 input-only adapter 接通，并在自制
+账本/替身中验证先计 LLM 调用、再送非空原样描述、重放拒绝。
+旧三文本 family 未改；新增 256-token 上限使新 backend profile digest
+变化。Windows全套2059pass19skip/94.04%；本次没有真实 Qwen/OLMo
+或正式 CIR 图像/标注。fresh 审查调用被 agent thread limit 拒绝，仅
+`[local-only]`；SSH 指纹与先前核验不一致，未登录。M1/Pilot/C1–C3
+仍未准入，详见research/ICMR_GENERATED_DESCRIPTION_BRIDGE.md。
