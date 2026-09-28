@@ -37,6 +37,7 @@ EXPECTED = {
         "search/parent",
     },
     "retrieval_search_ranker": {"search/inputs"},
+    "retrieval_selection_ranker": {"selection/inputs"},
     "retrieval_search_scorer": {"search/inputs", "search/gold"},
     "retrieval_selection_scorer": {"selection/inputs", "selection/gold"},
     "retrieval_final_scorer": {"final/inputs", "final/gold"},
@@ -112,15 +113,18 @@ def check(work: Path, output: Path) -> dict[str, Any]:
         for role in EXPECTED:
             scratch = work / f"scratch-{role}"
             scratch.mkdir()
-            stage = (
-                "fit"
-                if role in {"fit_learner", "retrieval_fit_learner", "retrieval_fit_scorer"}
-                else "selection"
-                if role in {"selection_scorer", "retrieval_selection_scorer"}
-                else "final"
-                if role in {"final_scorer", "retrieval_final_scorer"}
-                else "search"
-            )
+            if role in {"fit_learner", "retrieval_fit_learner", "retrieval_fit_scorer"}:
+                stage = "fit"
+            elif role in {
+                "selection_scorer",
+                "retrieval_selection_ranker",
+                "retrieval_selection_scorer",
+            }:
+                stage = "selection"
+            elif role in {"final_scorer", "retrieval_final_scorer"}:
+                stage = "final"
+            else:
+                stage = "search"
             invocation = launch_role(
                 role, stage, root, scratch, Path(__file__), ["--probe", str(root)]
             )

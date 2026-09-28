@@ -16,7 +16,11 @@ from promptwitness.incremental.sampling import digest, make_plan
 from reproduce import retrieval_direct_clip_ranker as ranker_module
 from reproduce.process_access import LEAVES
 from reproduce.retrieval_audit_bridge import RetrievalAuditBridge
-from reproduce.retrieval_direct_clip_ranker import DirectClipRanker, load_input_only
+from reproduce.retrieval_direct_clip_ranker import (
+    DirectClipRanker,
+    load_input_only,
+    require_complete_ranking,
+)
 from reproduce.retrieval_role_scoring import score_rankings_restricted
 from reproduce.retrieval_work_ledger import RetrievalWorkLedger
 
@@ -198,6 +202,104 @@ def test_supplied_description_uses_same_reference_and_distinct_physical_receipts
         summary = ledger.summary()
         assert (summary["attempts"], summary["known_forward_calls"]) == (5, 3)
         assert summary["failed"] == summary["unresolved"] == 0
+    finally:
+        ledger.close()
+
+
+def test_selection_ranker_charges_its_own_input_only_stage(tmp_path, monkeypatch):
+    monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "")
+    _fake_model(monkeypatch)
+    inputs = tmp_path / "selection/inputs"
+    _inputs(inputs, "cirr", [_row("selection-q")], {"cirr": ["reference", "target"]})
+    paths = {name: tmp_path / name for name in ("reference", "target")}
+    for path in paths.values():
+        path.touch()
+    ledger = RetrievalWorkLedger(tmp_path / "selection-work.sqlite")
+    try:
+        ranker = DirectClipRanker(
+            input_dir=inputs,
+            dataset="cirr",
+            image_paths=paths,
+            checkpoint=tmp_path / "fake.pt",
+            image_weight=0.5,
+            ledger=ledger,
+            attempt_prefix="authored-selection",
+            stage="selection",
+        )
+        assert ranker.rank_one("selection-q") == ("target", "reference")
+        assert ranker.rank_description("selection-q", "child:q", "make it blue") == (
+            "target",
+            "reference",
+        )
+        stages = ledger.connection.execute(
+            "SELECT DISTINCT stage FROM retrieval_work ORDER BY stage"
+        ).fetchall()
+        assert stages == [("selection",), ("shared",)]
+    finally:
+        ledger.close()
+
+
+def test_final_ranker_is_not_admitted(tmp_path, monkeypatch):
+    monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "")
+    with pytest.raises(ValueError, match="only search or selection"):
+        DirectClipRanker(
+            input_dir=tmp_path,
+            dataset="cirr",
+            image_paths={},
+            checkpoint=tmp_path / "missing.pt",
+            image_weight=0.5,
+            ledger=None,
+            attempt_prefix="authored-final",
+            stage="final",
+        )
+
+
+@pytest.mark.parametrize(
+    "ranking",
+    [
+        ("target",),
+        ("reference", "target", "extra"),
+        ("target", "target"),
+        ("reference", "wrong-category"),
+        ["target", "reference"],
+    ],
+)
+def test_incomplete_or_wrong_category_ranking_is_rejected(ranking):
+    with pytest.raises(ValueError, match="complete category gallery"):
+        require_complete_ranking(ranking, ("reference", "target"))
+    assert require_complete_ranking(("target", "reference"), ("reference", "target")) == (
+        "target",
+        "reference",
+    )
+
+
+def test_invalid_selection_ranking_is_charged_as_failed_operation(tmp_path, monkeypatch):
+    monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "")
+    _fake_model(monkeypatch)
+    monkeypatch.setattr(ranker_module, "rank_direct_composed", lambda *_args: ("target",))
+    inputs = tmp_path / "selection/inputs"
+    _inputs(inputs, "cirr", [_row("selection-q")], {"cirr": ["reference", "target"]})
+    paths = {name: tmp_path / name for name in ("reference", "target")}
+    for path in paths.values():
+        path.touch()
+    ledger = RetrievalWorkLedger(tmp_path / "selection-invalid-work.sqlite")
+    try:
+        ranker = DirectClipRanker(
+            input_dir=inputs,
+            dataset="cirr",
+            image_paths=paths,
+            checkpoint=tmp_path / "fake.pt",
+            image_weight=0.5,
+            ledger=ledger,
+            attempt_prefix="authored-selection-invalid",
+            stage="selection",
+        )
+        with pytest.raises(ValueError, match="complete category gallery"):
+            ranker.rank_one("selection-q")
+        assert ledger.summary()["failed"] == 1
+        assert ledger.connection.execute(
+            "SELECT stage,status FROM retrieval_work WHERE kind='rank_callback'"
+        ).fetchall() == [("selection", "failed")]
     finally:
         ledger.close()
 

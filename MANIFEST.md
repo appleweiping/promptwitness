@@ -708,3 +708,11 @@
 | 2026-09-28T07:45:13Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 同字节latest copy |
 | 2026-09-28T07:45:13Z | experiment-bridge | findings.md | implementation | 精确CI与未准入项 |
 | 2026-09-28T07:45:13Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |
+| 2026-09-28T08:27:46Z | experiment-bridge | research/ICMR_SELECTION_RANK_ISOLATION_20260928_082746.md | implementation | selection ranker本地Linux隔离与限制 |
+| 2026-09-28T08:27:46Z | experiment-bridge | research/ICMR_SELECTION_RANK_ISOLATION.md | implementation | 同字节latest copy |
+| 2026-09-28T08:27:46Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260928_082746.md | implementation | 初审缺口、复审结论及同系列限制 |
+| 2026-09-28T08:27:46Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | 同字节latest copy |
+| 2026-09-28T08:27:46Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_082746.md | implementation | 本地验收tracker快照 |
+| 2026-09-28T08:27:46Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 同字节latest copy |
+| 2026-09-28T08:27:46Z | experiment-bridge | findings.md | implementation | 本地证据与未准入项 |
+| 2026-09-28T08:27:46Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |

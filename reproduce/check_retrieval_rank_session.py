@@ -12,8 +12,19 @@ from reproduce.retrieval_rank_role import serve
 
 class AuthoredRanker:
     def __init__(
-        self, *, input_dir, dataset, image_paths, checkpoint, image_weight, ledger, attempt_prefix
+        self,
+        *,
+        input_dir,
+        dataset,
+        image_paths,
+        checkpoint,
+        image_weight,
+        ledger,
+        attempt_prefix,
+        stage,
     ):
+        if input_dir != input_dir.parents[1] / stage / "inputs":
+            raise ValueError("authored ranker received the wrong stage input leaf")
         store = input_dir.parents[1]
         for leaf in ("fit/gold", "search/gold", "selection/gold", "final/gold"):
             try:
@@ -22,8 +33,17 @@ class AuthoredRanker:
                 pass
             else:
                 raise ValueError("ranker unexpectedly read a gold leaf")
+        other_stage = "selection" if stage == "search" else "search"
+        other_inputs = store / other_stage / "inputs/cirr.jsonl"
+        if other_inputs.exists():
+            try:
+                other_inputs.read_text(encoding="utf-8")
+            except PermissionError:
+                pass
+            else:
+                raise ValueError("ranker unexpectedly read another stage's inputs")
         self.queries, self.galleries = load_input_only(input_dir, dataset)
-        self.ledger, self.attempt_prefix = ledger, attempt_prefix
+        self.ledger, self.attempt_prefix, self.stage = ledger, attempt_prefix, stage
 
     def rank_one(self, query_id):
         if query_id not in self.queries:
@@ -34,11 +54,13 @@ class AuthoredRanker:
         def authored_rank():
             if self.attempt_prefix == "authored-stall":
                 time.sleep(3)
+            if self.attempt_prefix == "authored-short":
+                return ("target",)
             return ("target", *(item for item in pool if item != "target"))
 
         return self.ledger.run(
             f"{self.attempt_prefix}:query:{query_id}",
-            "search",
+            self.stage,
             "rank_callback",
             authored_rank,
         )
@@ -50,7 +72,7 @@ class AuthoredRanker:
         pool = self.galleries[category]
         return self.ledger.run(
             f"{self.attempt_prefix}:description:{request_id}:rank",
-            "search",
+            self.stage,
             "rank_callback",
             lambda: (
                 ("target", *(item for item in pool if item != "target"))

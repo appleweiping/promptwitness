@@ -319,3 +319,12 @@ B102不因配置Bandit仅扫描src而消失。远端新SHA CI待核验，科学�
 源码，因此可选测试跳过；WSL另有实际4pass。工程证据不授真实图库/
 GPU/正式数据许可/双模型/科研收益，SSH主机指纹未重核，未登录。
 见research/ICMR_SEARLE_TIE_PARITY_CI.md。
+
+2026-09-28T08:27:46Z：selection 受限 ranker 已接到独立 scorer。
+Windows 原配置全套2070pass26skip/440.39s/coverage94.03%；WSL ext4
+Landlock 定向67pass1skip，最后仅等价路由格式修正后再次exit0。
+Ruff/format/mypy61/configured Bandit/build/Twine通过。新上下文同系列
+静态审查初次指出完整排名缺口，修复后复审无实质发现；不称独立科学验收。
+新SHA CI待核验；正式数据/许可/双模型/全角色成本/M1/Pilot/C1–C3
+NOT_ADMITTED。SSH指纹冲突，未连接。见
+research/ICMR_SELECTION_RANK_ISOLATION.md。

@@ -1,4 +1,4 @@
-"""Persistent input-only CIR search ranker behind the existing Landlock role.
+"""Persistent input-only CIR ranker behind stage-specific Landlock roles.
 
 The worker owns its CLIP model and full gallery index for the session. Query
 IDs and optional caller-supplied target descriptions enter by pipe; complete
@@ -21,11 +21,12 @@ from pathlib import Path
 from typing import Any
 
 from reproduce.process_access import AccessBoundaryError, landlock_abi, start_role
-from reproduce.retrieval_direct_clip_ranker import DirectClipRanker
+from reproduce.retrieval_direct_clip_ranker import DirectClipRanker, require_complete_ranking
 from reproduce.retrieval_work_ledger import RetrievalWorkLedger
 
 FORMAT = "promptwitness.retrieval-rank-session/v1"
 ENTRYPOINT = Path(__file__)
+RANK_STAGES = frozenset({"search", "selection"})
 
 
 def _input_file(directory: Path, relative: object) -> Path:
@@ -42,17 +43,25 @@ def serve(
     ranker_factory: Callable[..., Any] = DirectClipRanker,
 ) -> None:
     """Run after process_access.worker has restricted filesystem access."""
-    if (
-        os.environ.get("PW_ACCESS_ROLE") != "retrieval_search_ranker"
-        or os.environ.get("PW_ACCESS_STAGE") != "search"
-    ):
-        raise AccessBoundaryError("retrieval ranker needs its search-only role")
+    stage = os.environ.get("PW_ACCESS_STAGE")
+    role = os.environ.get("PW_ACCESS_ROLE")
+    if stage not in RANK_STAGES or role != f"retrieval_{stage}_ranker":
+        raise AccessBoundaryError("retrieval ranker needs its stage-specific role")
     initial = json.loads(sys.stdin.readline())
     if (
         not isinstance(initial, dict)
         or set(initial)
-        != {"format", "dataset", "image_paths", "checkpoint", "image_weight", "attempt_prefix"}
+        != {
+            "format",
+            "dataset",
+            "stage",
+            "image_paths",
+            "checkpoint",
+            "image_weight",
+            "attempt_prefix",
+        }
         or initial["format"] != FORMAT
+        or initial["stage"] != stage
     ):
         raise ValueError("invalid retrieval ranker initialization")
     if initial["dataset"] not in {"cirr", "fashioniq"}:
@@ -67,7 +76,7 @@ def serve(
         or not 0 <= initial["image_weight"] <= 1
     ):
         raise ValueError("explicit finite fusion weight required")
-    input_dir = store / "search/inputs"
+    input_dir = store / stage / "inputs"
     paths = {
         image_id: _input_file(input_dir, relative)
         for image_id, relative in initial["image_paths"].items()
@@ -83,6 +92,7 @@ def serve(
             image_weight=initial["image_weight"],
             ledger=ledger,
             attempt_prefix=initial["attempt_prefix"],
+            stage=stage,
         )
         print(
             json.dumps(
@@ -90,7 +100,8 @@ def serve(
                     "format": FORMAT,
                     "op": "ready",
                     "dataset": initial["dataset"],
-                    "role": os.environ["PW_ACCESS_ROLE"],
+                    "stage": stage,
+                    "role": role,
                     "pid": os.getpid(),
                     "landlock_abi": int(os.environ["PW_LANDLOCK_ABI"]),
                     "query_count": len(ranker.queries),
@@ -119,6 +130,8 @@ def serve(
                 identity = {"request_id": request["request_id"]}
             else:
                 raise ValueError("invalid rank request")
+            category = ranker.queries[request["query_id"]][2]
+            ranking = require_complete_ranking(ranking, ranker.galleries[category])
             print(
                 json.dumps(
                     {
@@ -150,19 +163,23 @@ class RestrictedRankerSession:
         image_weight: float,
         attempt_prefix: str,
         timeout: float = 900.0,
+        stage: str = "search",
     ) -> None:
+        if stage not in RANK_STAGES:
+            raise AccessBoundaryError("only search or selection ranking is admitted")
         if not scratch.is_dir() or not math.isfinite(timeout) or timeout <= 0:
             raise ValueError("existing ranker scratch and positive finite timeout required")
         landlock_abi()
         self.timeout = timeout
+        self.stage = stage
         self.process: subprocess.Popen[str] | None = None
         self._closed = False
         self._read_buffer = bytearray()
         self.stderr_path = scratch / "ranker-stderr.log"
         with self.stderr_path.open("xb") as errors:
             self.process = start_role(
-                "retrieval_search_ranker",
-                "search",
+                f"retrieval_{stage}_ranker",
+                stage,
                 store,
                 scratch,
                 ENTRYPOINT,
@@ -182,6 +199,7 @@ class RestrictedRankerSession:
                 {
                     "format": FORMAT,
                     "dataset": dataset,
+                    "stage": stage,
                     "image_paths": dict(image_paths),
                     "checkpoint": checkpoint,
                     "image_weight": image_weight,
@@ -195,7 +213,8 @@ class RestrictedRankerSession:
                 or ready.get("format") != FORMAT
                 or ready.get("op") != "ready"
                 or ready.get("dataset") != dataset
-                or ready.get("role") != "retrieval_search_ranker"
+                or ready.get("stage") != stage
+                or ready.get("role") != f"retrieval_{stage}_ranker"
                 or type(ready.get("landlock_abi")) is not int
                 or ready["landlock_abi"] < 1
                 or type(ready.get("pid")) is not int

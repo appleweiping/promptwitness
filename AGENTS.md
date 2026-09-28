@@ -445,3 +445,12 @@ SEARLE源码，新增可选测试按设计跳过；WSL私有源4pass另记。仅
 same-family静态review未复审修正，SSH指纹仍未从可信渠道核验。
 见research/ICMR_SEARLE_TIE_PARITY_CI.md；default4/历史账本/无timer/
 其他四仓冻结不变。
+
+2026-09-28T08:27:46Z：selection input-only ranker 与受限 scorer
+完成自制 Linux Landlock 端到端回归；Windows 原配置全套2070pass/
+26skip/coverage94.03%，Ruff/format/mypy/Bandit/build/Twine过。
+完整排名在账本内失败记账，worker 发帧前再验证；默认 search 与
+final 禁入不变。same-family 静态复审无实质发现，不是独立科研验收；
+新SHA CI待验。正式图像/许可、真实双模型、全角色成本、M1/Pilot/
+C1–C3仍NOT_ADMITTED。SSH指纹未核验，未登录；default4/历史预算/
+无timer/四仓冻结不变。见research/ICMR_SELECTION_RANK_ISOLATION.md。

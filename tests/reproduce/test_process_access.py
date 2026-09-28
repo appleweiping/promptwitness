@@ -37,6 +37,7 @@ def layout(tmp_path):
         ("retrieval_optimizer", "search"),
         ("retrieval_predictor", "search"),
         ("retrieval_search_ranker", "search"),
+        ("retrieval_selection_ranker", "selection"),
         ("retrieval_search_scorer", "search"),
         ("retrieval_selection_scorer", "selection"),
         ("retrieval_final_scorer", "final"),
@@ -58,6 +59,7 @@ def test_retrieval_non_scorers_cannot_read_any_gold(tmp_path):
         ("retrieval_optimizer", "search"),
         ("retrieval_predictor", "search"),
         ("retrieval_search_ranker", "search"),
+        ("retrieval_selection_ranker", "selection"),
     ):
         policy = access.build_policy(role, stage, data, [code], scratch)
         assert all("gold" not in Path(path).parts for path in policy["data_read"])
@@ -73,6 +75,8 @@ def test_retrieval_non_scorers_cannot_read_any_gold(tmp_path):
         ("selection_scorer", "fit"),
         ("unknown", "search"),
         ("optimizer", "unknown"),
+        ("retrieval_selection_ranker", "search"),
+        ("retrieval_search_ranker", "final"),
     ],
 )
 def test_invalid_role_stage_denied(role, stage):
@@ -202,21 +206,23 @@ def test_real_linux_process_sentinels(tmp_path, monkeypatch):
         pytest.skip(str(exc))
     monkeypatch.setenv("PW_SENTINEL_PRIVATE", "not-for-worker")
     result = check(tmp_path / "attempt", tmp_path / "witness.json")
-    assert result["read_checks"] == result["write_checks"] == 154
+    assert result["read_checks"] == result["write_checks"] == 165
     assert result["scientific_admission"] == "PARTIAL_NOT_PASSED"
-    assert len({row["pid"] for row in result["workers"]}) == 14
+    assert len({row["pid"] for row in result["workers"]}) == 15
     assert all(row["helper_import_after_restriction"] for row in result["workers"])
 
 
 @pytest.mark.parametrize(
-    "role,random_allowed,cpuinfo_allowed,gold_allowed",
+    "role,stage,random_allowed,cpuinfo_allowed,gold_allowed",
     [
-        ("retrieval_search_ranker", True, True, False),
-        ("retrieval_search_scorer", False, False, True),
+        ("retrieval_search_ranker", "search", True, True, False),
+        ("retrieval_selection_ranker", "selection", True, True, False),
+        ("retrieval_search_scorer", "search", False, False, True),
+        ("retrieval_selection_scorer", "selection", False, False, True),
     ],
 )
 def test_real_linux_ranker_device_grant_preserves_role_boundary(
-    tmp_path, monkeypatch, role, random_allowed, cpuinfo_allowed, gold_allowed
+    tmp_path, monkeypatch, role, stage, random_allowed, cpuinfo_allowed, gold_allowed
 ):
     if sys.platform != "linux":
         pytest.skip("actual Landlock device witness requires Linux")
@@ -225,7 +231,7 @@ def test_real_linux_ranker_device_grant_preserves_role_boundary(
     except access.AccessBoundaryError as exc:
         pytest.skip(str(exc))
     data, code, scratch = layout(tmp_path)
-    (data / "search/gold/secret.txt").write_text("authored-gold", encoding="utf-8")
+    (data / stage / "gold/secret.txt").write_text("authored-gold", encoding="utf-8")
     entry = code / "device_probe.py"
     entry.write_text(
         "from pathlib import Path\n"
@@ -235,11 +241,11 @@ def test_real_linux_ranker_device_grant_preserves_role_boundary(
         "    except PermissionError: return False\n"
         "    return True\n"
         "print(readable('/dev/urandom'), readable('/proc/cpuinfo'), "
-        + f"readable({str(data / 'search/gold/secret.txt')!r}), sep=',')\n",
+        + f"readable({str(data / stage / 'gold/secret.txt')!r}), sep=',')\n",
         encoding="utf-8",
     )
     original_roots = access.runtime_roots()
     monkeypatch.setattr(access, "runtime_roots", lambda: (code, *original_roots))
-    outcome = access.launch_role(role, "search", data, scratch, entry)
+    outcome = access.launch_role(role, stage, data, scratch, entry)
     assert outcome.returncode == 0, outcome.stderr
     assert outcome.stdout.strip() == f"{random_allowed},{cpuinfo_allowed},{gold_allowed}"

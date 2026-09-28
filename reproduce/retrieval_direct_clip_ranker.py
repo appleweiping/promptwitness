@@ -18,6 +18,21 @@ from reproduce.retrieval_split_audit import RetrievalInputIdentity
 from reproduce.retrieval_work_ledger import MeteredClipEncoder, RetrievalWorkLedger
 
 
+def require_complete_ranking(ranking: object, pool: tuple[str, ...]) -> tuple[str, ...]:
+    """Reject missing, extra, duplicate or wrong-category IDs before scoring."""
+    if (
+        not isinstance(pool, tuple)
+        or not pool
+        or not isinstance(ranking, tuple)
+        or len(ranking) != len(pool)
+        or any(not isinstance(item, str) or not item for item in ranking)
+        or len(set(ranking)) != len(ranking)
+        or set(ranking) != set(pool)
+    ):
+        raise ValueError("ranker must return the complete category gallery")
+    return ranking
+
+
 def load_input_only(
     input_dir: Path, dataset: str
 ) -> tuple[dict[str, tuple[str, str, str]], dict[str, tuple[str, ...]]]:
@@ -71,12 +86,12 @@ def load_input_only(
 
 
 class DirectClipRanker:
-    """Build one shared image index, then rank each search query once.
+    """Build one input-only image index for a search or selection population.
 
     Image load and encoding are nested under a durable image-encode receipt;
     encoder cold start and each text forward have their own receipts. The
     audit bridge owns the outer rank callback and restricted scorer receipts.
-    Fit/selection roles are not implemented by this search-only baseline.
+    Fit/final ranking roles are not implemented by this component.
     The caller must also account for whole-process CPU allocation and sources.
     """
 
@@ -90,8 +105,11 @@ class DirectClipRanker:
         image_weight: float,
         ledger: RetrievalWorkLedger,
         attempt_prefix: str,
+        stage: str = "search",
     ) -> None:
         require_cpu()
+        if stage not in {"search", "selection"}:
+            raise ValueError("only search or selection input-only ranking is supported")
         if not attempt_prefix or not isinstance(attempt_prefix, str):
             raise ValueError("nonempty attempt prefix required")
         if (
@@ -115,6 +133,7 @@ class DirectClipRanker:
         self.image_weight = image_weight
         self.ledger = ledger
         self.attempt_prefix = attempt_prefix
+        self.stage = stage
         encoder = ledger.run(
             f"{attempt_prefix}:encoder-load",
             "shared",
@@ -122,7 +141,7 @@ class DirectClipRanker:
             lambda: ClipCPUEncoder(checkpoint),
         )
         self.checkpoint_sha256 = encoder.checkpoint_sha256
-        self.encoder = MeteredClipEncoder(encoder, ledger, "search")
+        self.encoder = MeteredClipEncoder(encoder, ledger, stage)
         features = {}
 
         def image_forward_count() -> int:
@@ -157,16 +176,19 @@ class DirectClipRanker:
         def rank():
             reference_id, modification, category = self.queries[query_id]
             text = self.encoder.encode_text(f"{self.attempt_prefix}:text:{query_id}", modification)
-            return rank_direct_composed(
-                self.index[category],
+            return require_complete_ranking(
+                rank_direct_composed(
+                    self.index[category],
+                    self.galleries[category],
+                    reference_id,
+                    text,
+                    self.image_weight,
+                ),
                 self.galleries[category],
-                reference_id,
-                text,
-                self.image_weight,
             )
 
         return self.ledger.run(
-            f"{self.attempt_prefix}:query:{query_id}", "search", "rank_callback", rank
+            f"{self.attempt_prefix}:query:{query_id}", self.stage, "rank_callback", rank
         )
 
     def rank_description(
@@ -191,14 +213,20 @@ class DirectClipRanker:
             text = self.encoder.encode_text(
                 f"{self.attempt_prefix}:description:{request_id}:text", target_description
             )
-            return rank_direct_composed(
-                self.index[category],
+            return require_complete_ranking(
+                rank_direct_composed(
+                    self.index[category],
+                    self.galleries[category],
+                    reference_id,
+                    text,
+                    self.image_weight,
+                ),
                 self.galleries[category],
-                reference_id,
-                text,
-                self.image_weight,
             )
 
         return self.ledger.run(
-            f"{self.attempt_prefix}:description:{request_id}:rank", "search", "rank_callback", rank
+            f"{self.attempt_prefix}:description:{request_id}:rank",
+            self.stage,
+            "rank_callback",
+            rank,
         )
