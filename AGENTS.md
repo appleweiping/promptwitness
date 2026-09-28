@@ -326,3 +326,14 @@ Linux authored受限ranker/scorer/gate与失败收据已实际执行。本增量
 ENGINEERING_PASS_AUTHORED；真实CLIP在该进程、正式数据/许可、全角色成本、
 M1/Pilot/ICMR效果仍NOT_ADMITTED。见research/ICMR_RANK_ISOLATION_CI.md；
 WSL旧失败、历史费用/default4/无timer/四仓冻结不变。
+
+2026-09-28T03:22:04Z：真实 first-party CLIP ViT-L/14 已在 WSL 原生
+Landlock search-only ranker 中执行，3自制图/2自制查询，独立受限
+scorer返回自制hit；inner 8/8、已知encoder forward5，outer3/3，
+58.455116s checker wall。两次前置失败及仅ranker `/dev/urandom`、
+`/proc/cpuinfo` 单文件只读修复均留痕。Linux focused45pass1skip；
+Windows full/精确SHA CI另记。fresh same-family/provisional审查发现的
+失败结果保存blocker经回归与唯一复审关闭。只授 authored 工程资格，
+正式CIR数据/许可、官方parity、captioner、双模型、全角色成本、
+M1/Pilot/论文效果继续NOT_ADMITTED。见research/ICMR_REAL_RESTRICTED_CLIP.md；
+default4/历史账本/无timer/其他四仓冻结不变。

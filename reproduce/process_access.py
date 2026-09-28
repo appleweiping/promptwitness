@@ -207,6 +207,12 @@ def enforce_policy(
             path = Path(name)
             if path.exists():
                 grants.append((path, 1 << 2))
+        # PyTorch's CPU runtime opens this device and CPU metadata while
+        # loading CLIP. Only the ranker needs these file-level read grants;
+        # neither /dev nor /proc is traversable through a broad directory rule.
+        if policy["role"] == "retrieval_search_ranker":
+            grants.append((Path("/dev/urandom"), 1 << 2))
+            grants.append((Path("/proc/cpuinfo"), 1 << 2))
         for path, rights in grants:
             parent_fd = os.open(path, _path_flags())
             try:

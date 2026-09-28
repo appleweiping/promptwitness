@@ -216,3 +216,13 @@ search 专用 Landlock ranker 角色并把持久 CLIP/index 保持在子进程�
 Ubuntu3.10/3.14各2052pass2skip，新增Linux authored受限会话与超时
 收据测试属于同一源码SHA。只关闭此工程Linux待验，不把替身运行写成
 进程内真实CLIP、正式benchmark或论文方法收益。M1/Pilot继续未准入。
+
+2026-09-28T03:22:04Z：在 WSL 原生文件系统中，第一方 hash-verified
+ViT-L/14 真正进入 Linux Landlock input-only search ranker；两次原生
+失败分别暴露 PyTorch `/dev/urandom`、CPU `/proc/cpuinfo` 的最小读权需求，
+均保留 failure JSON/日志，修复只授权 ranker 单文件。第三次自制输入运行
+58.455116s 成功，3图/2查询、内部8次操作5次已知encoder forward，
+scorer独立PID，Linux focused45pass1skip。fresh same-family review 的
+失败时丢已完成排序 blocker 已修复并唯一follow-up关闭。自制命中不代表
+正式数据/方法效果；全角色物理成本、captioner/双LLM、官方parity与M1/Pilot
+仍未准入。详见research/ICMR_REAL_RESTRICTED_CLIP_20260928_032204.md。

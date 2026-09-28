@@ -206,3 +206,40 @@ def test_real_linux_process_sentinels(tmp_path, monkeypatch):
     assert result["scientific_admission"] == "PARTIAL_NOT_PASSED"
     assert len({row["pid"] for row in result["workers"]}) == 14
     assert all(row["helper_import_after_restriction"] for row in result["workers"])
+
+
+@pytest.mark.parametrize(
+    "role,random_allowed,cpuinfo_allowed,gold_allowed",
+    [
+        ("retrieval_search_ranker", True, True, False),
+        ("retrieval_search_scorer", False, False, True),
+    ],
+)
+def test_real_linux_ranker_device_grant_preserves_role_boundary(
+    tmp_path, monkeypatch, role, random_allowed, cpuinfo_allowed, gold_allowed
+):
+    if sys.platform != "linux":
+        pytest.skip("actual Landlock device witness requires Linux")
+    try:
+        access.landlock_abi()
+    except access.AccessBoundaryError as exc:
+        pytest.skip(str(exc))
+    data, code, scratch = layout(tmp_path)
+    (data / "search/gold/secret.txt").write_text("authored-gold", encoding="utf-8")
+    entry = code / "device_probe.py"
+    entry.write_text(
+        "from pathlib import Path\n"
+        "def readable(path):\n"
+        "    try:\n"
+        "        with Path(path).open('rb') as stream: stream.read(1)\n"
+        "    except PermissionError: return False\n"
+        "    return True\n"
+        "print(readable('/dev/urandom'), readable('/proc/cpuinfo'), "
+        + f"readable({str(data / 'search/gold/secret.txt')!r}), sep=',')\n",
+        encoding="utf-8",
+    )
+    original_roots = access.runtime_roots()
+    monkeypatch.setattr(access, "runtime_roots", lambda: (code, *original_roots))
+    outcome = access.launch_role(role, "search", data, scratch, entry)
+    assert outcome.returncode == 0, outcome.stderr
+    assert outcome.stdout.strip() == f"{random_allowed},{cpuinfo_allowed},{gold_allowed}"

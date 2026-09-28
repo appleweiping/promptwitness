@@ -583,3 +583,17 @@
 | 2026-09-28T02:34:43Z | experiment-bridge | research/ACCESS_AUDIT.md | implementation | 自写sentinel Linux证据范围 |
 | 2026-09-28T02:34:43Z | experiment-bridge | AGENTS.md | implementation | dashboard精确CI与未准入边界 |
 | 2026-09-28T02:34:43Z | experiment-bridge | findings.md | implementation | 工程Linux关闭、科学仍未准入 |
+| 2026-09-28T03:22:04Z | experiment-bridge | reproduce/check_retrieval_rank_real_clip.py | implementation | 自制图/真实CLIP受限ranker和独立scorer资格driver、失败保留 |
+| 2026-09-28T03:22:04Z | experiment-bridge | reproduce/process_access.py | implementation | ranker-only `/dev/urandom`与`/proc/cpuinfo`单文件只读grant |
+| 2026-09-28T03:22:04Z | experiment-bridge | tests/reproduce/test_retrieval_rank_real_clip.py | implementation | driver接线及scorer失败时排序保留回归 |
+| 2026-09-28T03:22:04Z | experiment-bridge | tests/reproduce/test_process_access.py | implementation | Linux实worker运行时文件与gold权限边界回归 |
+| 2026-09-28T03:22:04Z | experiment-bridge | research/ICMR_REAL_RESTRICTED_CLIP_20260928_032204.md | implementation | 三次实际资格尝试、首两失败与自制真实CLIP工程结果 |
+| 2026-09-28T03:22:04Z | experiment-bridge | research/ICMR_REAL_RESTRICTED_CLIP.md | implementation | 同字节latest copy |
+| 2026-09-28T03:22:04Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_032204.md | implementation | tracker同字节快照 |
+| 2026-09-28T03:22:04Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | CLIP工程资格与科学门禁 |
+| 2026-09-28T03:22:04Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260928_032204.md | implementation | 失败结果保存blocker和复审快照 |
+| 2026-09-28T03:22:04Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | fresh同家族源码审查与运行时发现 |
+| 2026-09-28T03:22:04Z | experiment-bridge | research/ACCESS_AUDIT_20260928_032204.md | implementation | 官方数据未访问与文件级授权边界快照 |
+| 2026-09-28T03:22:04Z | experiment-bridge | research/ACCESS_AUDIT.md | implementation | 最新访问审计 |
+| 2026-09-28T03:22:04Z | experiment-bridge | findings.md | implementation | 真实CPU资格和未准入下一门禁 |
+| 2026-09-28T03:22:04Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard与目标约束 |
