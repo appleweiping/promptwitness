@@ -1,0 +1,32 @@
+{
+  "format": "promptwitness.structured-gradient-pilot/v1",
+  "status": "frozen_after_real_one_round_calibration",
+  "model": "allenai/Olmo-3-7B-Instruct",
+  "model_snapshot": "6e5971d9eba42665f5bd5a0fcf047f299ce1dccc",
+  "dtype": "bfloat16",
+  "decoding": "greedy",
+  "tasks": ["logical_deduction_three_objects", "date_understanding"],
+  "methods": ["A", "B", "C", "D"],
+  "seeds": [1, 2, 3],
+  "fit_rows_per_task": 32,
+  "validation_rows_per_task": 32,
+  "holdout_rows_per_task": 100,
+  "fit_batch_size": 4,
+  "candidate_evaluation_batch_size": 4,
+  "blocks_selected_per_round": 2,
+  "rewrites_per_block": 3,
+  "max_new_tokens": 320,
+  "rounds": 8,
+  "optimization_budget_seconds": 1800,
+  "budget_overrun_tolerance_seconds": 90,
+  "budget_semantics": "same positive soft optimization wall cap for B/C/D, checked before each operation; validation and holdout are separately metered",
+  "calibration": {
+    "task": "date_understanding",
+    "seed": 1,
+    "rounds": 1,
+    "B_optimization_seconds": 227.790639746003,
+    "C_optimization_seconds": 322.642107380088,
+    "D_optimization_seconds": 309.613637654111
+  },
+  "holdout_policy": "evaluate once after all 24 search artifacts freeze; never use holdout to change search"
+}

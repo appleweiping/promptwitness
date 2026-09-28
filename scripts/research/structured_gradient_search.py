@@ -44,6 +44,7 @@ class CostJournal:
         self.path = path
         self.optimization_started: float | None = None
         self.budget_seconds = 0.0
+        self.model_loaded_at: float | None = None
 
     def save(self) -> None:
         _write(self.path, self.record)
@@ -182,6 +183,7 @@ def _observe_batch(
                 elif stage == "differentiable_forward_completed":
                     _add(bucket, "forward_successes", 1)
                     _add(bucket, "forward_tokens", tokens)
+                    _add(bucket, "forward_seconds", seconds)
                 elif stage == "differentiable_backward_started":
                     _add(bucket, "backward_attempts", 1)
                 elif stage == "differentiable_backward_completed":
@@ -337,6 +339,7 @@ def _run_loaded(args: argparse.Namespace, record: dict[str, Any], journal: CostJ
     with journal.operation("model_load"):
         model, tokenizer = _load_model(args)
     backend = FrozenGradientBackend(model, tokenizer)
+    journal.model_loaded_at = perf_counter()
     parent = initial_prompt()
     initial = parent
     journal.optimization_started = perf_counter()
@@ -367,19 +370,23 @@ def _run_loaded(args: argparse.Namespace, record: dict[str, Any], journal: CostJ
             best_score = parent_score["correct"]
             best_loss = parent_score["mean_conditional_answer_loss"]
             seen: set[tuple[tuple[str, str], ...]] = set()
-            candidate_rows: list[dict[str, Any]] = []
+            candidate_rows: list[dict[str, Any]] = [
+                {
+                    **{key: value for key, value in proposal.items() if key != "prompt"},
+                    "structurally_valid": proposal.get("prompt") is not None,
+                }
+                for proposal in proposals
+            ]
             budget_hit = False
             stage = "candidate_score"
-            for proposal in proposals:
-                entry = {key: value for key, value in proposal.items() if key != "prompt"}
+            for proposal_index, proposal in enumerate(proposals):
+                entry = candidate_rows[proposal_index]
                 candidate = proposal.get("prompt")
                 if candidate is None:
-                    candidate_rows.append(entry)
                     continue
                 signature = tuple(sorted(_prompt_texts(candidate).items()))
                 if signature in seen:
                     entry["rejection"] = "duplicate"
-                    candidate_rows.append(entry)
                     continue
                 seen.add(signature)
                 try:
@@ -398,7 +405,6 @@ def _run_loaded(args: argparse.Namespace, record: dict[str, Any], journal: CostJ
                     break
                 entry["score"] = score
                 entry["block_texts"] = _prompt_texts(candidate)
-                candidate_rows.append(entry)
                 if args.method == "B":
                     if score["mean_conditional_answer_loss"] < best_loss:
                         best = candidate
@@ -488,8 +494,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "optimization_budget_seconds": args.budget_seconds,
         "comparison_mode": "calibration" if args.budget_seconds == 0 else "budget_capped",
         "budget_semantics": (
-            "soft wall cap checked before each model operation; "
-            "one operation may overrun"
+            "soft wall cap checked before each model operation; one operation may overrun"
         ),
         "meter": {},
         "failed_operations": [],
@@ -514,6 +519,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                 else None
             )
         record["process_wall_seconds"] = perf_counter() - started
+        if journal.model_loaded_at is not None:
+            record["gpu_residency_wall_seconds"] = perf_counter() - journal.model_loaded_at
         record["inflight"] = None
         journal.save()
     return record
