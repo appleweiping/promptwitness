@@ -304,6 +304,7 @@ def main() -> None:
     parser.add_argument("--mu", type=int, default=3)
     parser.add_argument("--max-new-tokens", type=int, default=384)
     parser.add_argument("--eval-max-new-tokens", type=int, default=512)
+    parser.add_argument("--dev-checkpoints", type=int, default=3)
     parser.add_argument("--attn", default="sdpa")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
@@ -376,13 +377,23 @@ def main() -> None:
                           "accepted": record["accepted"], "best_acc": best["accuracy"]}), flush=True)
     search_seconds = perf_counter() - started
 
+    # Dev selection among the incumbents at evenly spaced checkpoint rounds
+    # (0, R/k, ..., R), deduplicated; a fixed budget rule shared by all methods.
+    marks = sorted({round(args.rounds * i / args.dev_checkpoints)
+                    for i in range(args.dev_checkpoints + 1)})
+    checkpoints: list[dict[str, Any]] = []
+    for mark in marks:
+        entry = max((a for a in accepted if a["round"] <= mark), key=lambda a: a["round"])
+        if all(entry["text"] != c["text"] for c in checkpoints):
+            checkpoints.append(entry)
     dev_scores = []
-    for entry in accepted:
+    for entry in checkpoints:
         dev = runner.evaluate(prompts[entry["text"]], splits["dev"], "dev",
                               max_new_tokens=args.eval_max_new_tokens)
         dev_scores.append(dev["accuracy"])
         entry["dev_accuracy"] = dev["accuracy"]
-    chosen = max(range(len(accepted)), key=lambda i: (dev_scores[i], i))
+    best = max(range(len(checkpoints)), key=lambda i: (dev_scores[i], i))
+    chosen = accepted.index(checkpoints[best])
     test = runner.evaluate(prompts[accepted[chosen]["text"]], splits["test"], "test",
                            max_new_tokens=args.eval_max_new_tokens)
     result = {"format": "promptwitness.graft-run/v1", "task": args.task, "method": args.method,

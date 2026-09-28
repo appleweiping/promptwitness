@@ -231,10 +231,38 @@ predicted and measured effect.
 \section{Experimental setup}
 \label{sec:setup}
 
-\todo{models, 21 BBH tasks + GSM8K + FOLIO with GReaTer's split sizes; shared
-two-stage reader; baselines: ZS-CoT, GReaTer initial prompt, GReaTer published
-prompts selected on dev, textual gradients with the same model, exact-scoring and
-random-shortlist controls with identical proposals and verification; costs.}
+\paragraph{Models and tasks.} We follow \greater{}'s protocol and models:
+Llama-3-8B-Instruct and Gemma-2-9B-it serve as both task and optimizer model; we add
+OLMo-3-7B-Instruct as a fully open model. Tasks are \greater{}'s 21 BIG-Bench Hard
+tasks \citep{suzgun2023bbh} with 50 train, 100 development and up to 100 test
+examples, GSM8K \citep{cobbe2021gsm8k} with 100/100 and the full 1{,}319-example test
+set, and FOLIO \citep{han2024folio} with 50 train, 100 development and 203 test
+examples, taken from the \greater{} release and split with a fixed seed.
+
+\paragraph{Shared reader.} Every prompt, including baselines, is evaluated in the same
+way: greedy reasoning under the prompt (512 tokens), then the task-typed extractor
+inside the assistant turn and eight greedy answer tokens parsed by answer type
+(option letter, binary label, or integer). This removes answer-format compliance as a
+confound between prompt styles.
+
+\paragraph{Search budget.} All search methods start from \greater{}'s initial
+instruction (``Use proper logical reasoning and think step by step. Finally give the
+actual correct answer.''), split into a strategy block and an output block, with an
+empty procedure slot between them. Each run has 12 rounds with minibatches of 8
+train examples, 6 label-free proposals per slot, and a shortlist of 3 edits verified
+with fresh reasoning. The development set selects among accepted prompts; the test
+set is read once.
+
+\paragraph{Baselines and controls.} Fixed prompts: zero-shot chain of thought
+(ZS-CoT), \greater{}'s initial prompt, and \greater{}'s published optimized prompts
+for the same model (all candidates of the final beam of every released run, at most
+12 selected on our development set, which favors \greater{}). Controls that share
+\graft{}'s proposals, verification and selection and differ only in how the shortlist
+is chosen: \emph{exact scoring} (the fixed-reasoning loss of every edited prompt,
+one forward pass per edit and example, as in PMPO), \emph{random} shortlist, and
+\emph{raw gate} derivatives. A \emph{textual-gradient} baseline uses the same model
+to critique each block from failed examples and rewrite it, as in TextGrad and
+section-local modular prompt optimization.
 
 \section{Results}
 \label{sec:results}
@@ -278,7 +306,21 @@ efficiency. We combine parallel paths, exact positional offsets and exact attent
 to estimate the effect of structural edits for optimization.
 
 \section*{Limitations}
-\todo{fixed-reasoning approximation; first-order through later layers; single-slot estimates; white-box models; tasks with extractable answers; compute from one GPU.}
+
+\graft{} inherits \greater{}'s fixed-reasoning approximation: the loss is
+differentiated with the model's reasoning held fixed, so an edit's effect on the
+reasoning itself is seen only through verification with fresh reasoning. The
+vertices of our relaxation are exact, but the estimator is first order through the
+layers after each attention step and scores single-slot edits; interactions between
+simultaneous edits are handled by sequential acceptance, not by the estimate. The
+method needs white-box access to a model with rotary position embeddings and
+softmax attention; models with other position schemes or recurrent layers would
+need a different offset construction. Edits must tokenize cleanly at block
+boundaries, which excludes a small fraction of proposals. Our tasks have
+extractable answers, as in \greater{}; open-ended generation would need a
+different loss. All experiments ran on a single 48\,GB GPU, which bounds the number
+of seeds and tasks; we report per-task results and seed variation rather than a
+single aggregate.
 
 \bibliography{references}
 

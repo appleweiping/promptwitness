@@ -69,3 +69,10 @@ Python; otherwise report GReaTer's published cost with the hardware difference s
 
 C1 Stage A; C2 Stages C and D; C3 cost ledgers of Stage C and Stage F; C4 Stage E;
 C5 Stage C ablations (gate, random, exact) plus fidelity estimator ablations.
+
+## Amendments
+
+* 2026-09-28, before any optimizer result: dev selection is restricted to the
+  incumbents at checkpoint rounds 0, 4, 8, 12 (deduplicated) instead of every
+  accepted prompt, for all methods alike. Reason: dev re-evaluation of every accepted
+  prompt dominated projected run time on one GPU.
