@@ -59,7 +59,12 @@ the current prompt, an extractor elicits its answer, and the gradient of the
 answer loss with respect to one-hot prompt tokens ranks token substitutions.
 
 Token coordinates are, however, a mismatch for how prompts are built and
-maintained. Practitioners write prompts as structured documents---role, task,
+maintained. The optimized prompts that \greater{} released for Gemma-2-9B on
+date understanding include ``\emph{Use a for a or e or whatever I need help to. or
+understanding.}'', and for Llama-3-8B on navigate ``\emph{Use your reasoning here.
+I would like numbers assigned.. to.. To represent moving.}''\footnote{Final-beam
+prompts from the official repository's processed logs (commit \texttt{42a22d9}).}
+Such prompts can score well, but they are hard to read, review or maintain. Practitioners write prompts as structured documents---role, task,
 strategy, output contract, examples, tool descriptions---and review them as
 structural diffs. A token swap cannot delete a harmful instruction, add a missing
 procedure or replace a sentence by one of a different length, and optimizing
