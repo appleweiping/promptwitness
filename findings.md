@@ -199,3 +199,8 @@ BLOCKING，指出三类别覆盖缺口后补测试。图像open失败进入物�
 重复查询不静默重放。尚未以新路径执行真实CLIP，未接合法正式数据、
 captioner/LLM、独立ranker进程、全角色成本/M1/Pilot；不报ICMR效果。
 详见research/ICMR_DIRECT_BASELINE.md。
+
+2026-09-28T01:43:04Z：c08f5c6精确CI36366650505 15/15成功，Ubuntu3.10/
+3.14各2045pass1skip，Linux-only authored ranker→真实scorer→gate整链已跑。
+这仍是替身编码器/融合，无官方图、真实权重或正式性能；M1/Pilot/全角色
+成本及科学结果未准入。见research/ICMR_DIRECT_BASELINE_CI.md。

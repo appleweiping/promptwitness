@@ -553,3 +553,9 @@
 | 2026-09-28T01:27:19Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | fresh同家族源码审查增量 |
 | 2026-09-28T01:27:19Z | experiment-bridge | AGENTS.md | implementation | 研究dashboard待CI |
 | 2026-09-28T01:27:19Z | experiment-bridge | findings.md | implementation | 已完成与未准入边界 |
+| 2026-09-28T01:43:04Z | experiment-bridge | research/ICMR_DIRECT_BASELINE_CI_20260928_014304.md | implementation | c08f5c6精确CI15/15 |
+| 2026-09-28T01:43:04Z | experiment-bridge | research/ICMR_DIRECT_BASELINE_CI.md | implementation | CI报告同字节latest copy |
+| 2026-09-28T01:43:04Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_014304.md | implementation | CI终态tracker快照 |
+| 2026-09-28T01:43:04Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | CI终态latest tracker |
+| 2026-09-28T01:43:04Z | experiment-bridge | AGENTS.md | implementation | dashboard工程准入 |
+| 2026-09-28T01:43:04Z | experiment-bridge | findings.md | implementation | CI和科学边界 |

@@ -304,3 +304,10 @@ ICMR_SCOPE将paired审计列C2、等预算优化列C3；未改矩阵或科学冻
 已补回归。未运行新源码真实CLIP/benchmark，进程级ranker隔离、合法数据、
 权重/融合科学冻结、captioner、两原模型、全角色forecast/M1/Pilot/效果/稿件
 仍未准入。历史账本/default4/无timer/其他四仓冻结。见research/ICMR_DIRECT_BASELINE.md。
+
+2026-09-28T01:43:04Z：direct baseline源码c08f5c654dd8600ad1ff5ee2cc1afb15380a0183
+已推送，精确SHA CI36366650505 success15/15；Ubuntu3.10/3.14各2045pass1skip，
+后者127warnings。Linux authored 实受限 scorer/gate 集成执行；CLIP/融合仍替身，
+未测正式数据/真实权重/生成模型。只授 ENGINEERING_PASS_AUTHORED，不授
+M1/Pilot/进程级ranker隔离/全角色forecast/ICMR效果/论文。见
+research/ICMR_DIRECT_BASELINE_CI.md；历史费用/default4/无timer/其他四仓不变。
