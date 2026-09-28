@@ -521,3 +521,15 @@ CI run36412935014精确匹配 completed/success15/15，Ubuntu3.10/
 M1/Pilot/C1–C3、许可、全角色费用、英文稿仍NOT_ADMITTED；
 SSH指纹仍冲突未登录。见research/ICMR_NATIVE_MIPRO_RETRIEVAL_CI.md；
 goalACTIVE/default4/历史账本/无timer/其他四仓冻结不变。
+
+2026-09-28：固定原 GEPA native reflective 搜索自制资格已在独立私有
+环境 exit0；proposer 预先冻结、acceptance 完整 minibatch 检查，
+审计后才暴露全64项 actual search survivor。退化候选原生改善仍被审计
+拒绝。Windows2105pass28skip/coverage94.01%、Ruff/format/mypy61/
+配置Bandit/build/Twine通过；同家族复审关闭初轮阻断，无新阻断，
+不能称独立科研准入。精确源码 SHA CI 待推送核验。脚本生成器、进程内
+自制 scorer、预置 reference64 不证明官方成绩或全角色真实成本。
+正式许可/封存、真实双模型、同次受限进程、M1/Pilot/C1–C3 和英文稿
+继续 NOT_ADMITTED；SSH 新指纹未核验未登录。详见
+research/ICMR_NATIVE_GEPA_RETRIEVAL.md/json；goalACTIVE/default4/
+历史账本1170calls不重置/无timer/其余四仓冻结。

@@ -389,3 +389,13 @@ completed/success 15/15；Ubuntu3.10/3.14各2118pass3skip、
 coverage94.04/94.05%。CI不运行私有固定DSPy完整编译、官方图像或
 真实Qwen/OLMo；M1/Pilot/C1–C3和全角色成本继续未准入。见
 research/ICMR_NATIVE_MIPRO_RETRIEVAL_CI.md。
+
+2026-09-28：检索原生 GEPA 在固定上游 reflective engine 上完成
+自制正反搜索资格：冻结先于 child 评分；正例审计后补齐 64 条 search
+向量，退化例即使原生 minibatch 0→8 仍被 INELIGIBLE 拒绝。原生
+metric48/32 与 audit 外层128/8分开计数，均非真实模型调用。
+12 新测试、Windows 全套2105pass28skip/94.01%及构建质量检查通过；
+同家族审查初阻断已修、复审0新阻断，非独立科学验收。脚本提案、
+自制排名、进程内 scorer 不解决正式数据许可、受限同次在线、
+Qwen/OLMo、全角色预算或 M1/Pilot/C1–C3。SSH 指纹冲突未登录，
+新 SHA CI 待验。见 research/ICMR_NATIVE_GEPA_RETRIEVAL.md/json。

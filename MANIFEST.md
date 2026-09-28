@@ -776,3 +776,15 @@
 | 2026-09-28T11:08:15Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 同字节latest copy |
 | 2026-09-28T11:08:15Z | experiment-bridge | findings.md | implementation | 精确CI与未准入项 |
 | 2026-09-28T11:08:15Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |
+| 2026-09-28T11:48:28Z | experiment-bridge | research/ICMR_NATIVE_GEPA_RETRIEVAL_20260928_114828.md | implementation | 固定GEPA检索原生自制资格与科研限制 |
+| 2026-09-28T11:48:28Z | experiment-bridge | research/ICMR_NATIVE_GEPA_RETRIEVAL.md | implementation | 同字节latest copy |
+| 2026-09-28T11:48:28Z | experiment-bridge | research/ICMR_NATIVE_GEPA_RETRIEVAL_20260928_114828.json | implementation | 机器可读自制资格摘要 |
+| 2026-09-28T11:48:28Z | experiment-bridge | research/ICMR_NATIVE_GEPA_RETRIEVAL.json | implementation | 同字节latest copy |
+| 2026-09-28T11:48:28Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260928_114828.md | implementation | 两轮同家族只读审查与遗留范围 |
+| 2026-09-28T11:48:28Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | 同字节latest copy |
+| 2026-09-28T11:48:28Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_114828.md | implementation | GEPA自制资格tracker快照 |
+| 2026-09-28T11:48:28Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 同字节latest copy |
+| 2026-09-28T11:48:28Z | experiment-bridge | research/ACCESS_AUDIT_20260928_114828.md | implementation | 官方数据未访问与自制资格边界快照 |
+| 2026-09-28T11:48:28Z | experiment-bridge | research/ACCESS_AUDIT.md | implementation | 同字节latest copy |
+| 2026-09-28T11:48:28Z | experiment-bridge | findings.md | implementation | 自制GEPA资格与未准入项 |
+| 2026-09-28T11:48:28Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |
