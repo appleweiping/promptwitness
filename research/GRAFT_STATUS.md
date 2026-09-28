@@ -15,7 +15,7 @@ Dec 20, 2026 cycle), GReaTer-level protocol and writing quality.
 | Models (server) | OLMo-3-7B-Instruct (pilot cache); `graft-hf-cache/`: Llama-3-8B-Instruct (NousResearch re-host), Gemma-2-9B-it (unsloth re-host) |
 | Reviewer traces | `.aris/traces/` (not committed) |
 
-Only GPU 0 is usable (GPU 1 hosts another user's vLLM service). Root disk is 99%
+Server connection details are kept outside the repository (`.aris/`). Only GPU 0 is usable (GPU 1 hosts another user's vLLM service). Root disk is 99%
 full; everything lives on `/media/lenovo/data2`.
 
 ## Timeline of findings
@@ -44,6 +44,14 @@ full; everything lives on `/media/lenovo/data2`.
    token-GReaTer B 24.7, random block C 24.3, gradient-norm block D 27.0. D ran
    partly concurrently with GRAFT probes on the same GPU (wall-clock budgets were not
    binding: 1030–1287 s of 1800 s). Holdout and date_understanding pending.
+
+6. **GPU sharing with the frozen pilot.** The pilot batch starts a run only when GPU 0
+   uses < 2 GB, to keep its wall-clock budgets fair; GRAFT jobs made it wait
+   (`waiting_for_gpu_0` after 14/24 runs). Decision: finish the queued GRAFT fidelity
+   and smoke jobs, then launch nothing on GPU 0 until the pilot's 10 remaining runs and
+   holdout finish, then start Stage C.
+7. **Fidelity v2, trimmed rendering (OLMo-3, pilot prompt):** patching rho 0.79; raw
+   gate variants 0.14-0.37. Untrimmed first run: 0.87 vs -0.21-0.26.
 
 ## Next
 

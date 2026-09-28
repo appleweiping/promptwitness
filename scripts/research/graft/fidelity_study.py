@@ -23,7 +23,7 @@ from time import perf_counter
 from typing import Any
 
 from promptwitness import graft_tasks
-from promptwitness.graft_runtime import answer_losses, generate_batch
+from promptwitness.graft_runtime import answer_losses, generate_batch, verified_targets
 from promptwitness.structured_data import load_split
 from promptwitness.structured_prompt import StructuredPrompt
 from promptwitness.structured_search import initial_prompt as pilot_prompt
@@ -142,6 +142,8 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=11)
     parser.add_argument("--max-new-tokens", type=int, default=320)
     parser.add_argument("--attn", default="sdpa", help="eager for Gemma-2 (softcapping)")
+    parser.add_argument("--verified", action="store_true",
+                        help="also score edits under the verified-reasoning objective")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
 
@@ -210,6 +212,14 @@ def main() -> None:
     base_ids = [list(prompt.render_tokens(tokenizer, v).input_ids) for v in values]
     gens, gen_seconds, _ = generate_batch(model, tokenizer, base_ids, max_new_tokens=args.max_new_tokens)
     base_correct = correctness(base_ids, gens)
+    verified: list[Any] = []
+    if args.verified and task_spec is not None:
+        verified, verified_seconds = verified_targets(
+            model, tokenizer, base_ids, gens, base_correct, extractor, answers,
+            lambda i, text: task_spec.correct(text, rows[i].answer),
+            samples=4, max_new_tokens=args.max_new_tokens, seed=args.seed)
+        print(json.dumps({"verified_sources": [t.source for t in verified],
+                          "seconds": round(verified_seconds, 1)}), flush=True)
 
     per_row: list[dict[str, Any]] = []
     timing = {"grad_incumbent": 0.0, "grad_holes": 0.0, "grad_centroid": 0.0,
@@ -288,6 +298,19 @@ def main() -> None:
             "patch": {key(e): patched[e] for e in exact if e in patched},
         }
         record["exact"] = {key(e): val for e, val in exact.items()}
+        if verified:
+            target = verified[len(per_row)]
+            seq_v = build_superposed(prompt, tokenizer, v, candidates, list(target.tail),
+                                     list(target.scored), mode="exact",
+                                     answer_weights=list(target.weights))
+            base_v, patched_v = patch_estimates(scorer, seq_v)
+            exact_v = {}
+            for (b, i) in exact:
+                gates, offsets = seq_v.vertex(b, i)
+                exact_v[key((b, i))] = scorer.value_at(seq_v, gates, offsets) - base_v
+            record["verified_source"] = target.source
+            record["exact_verified"] = exact_v
+            record["estimates"]["patch_verified"] = {key(e): patched_v[e] for e in exact if e in patched_v}
         per_row.append(record)
         print(json.dumps({"row": row.row_id, "base": round(g0.loss, 3)}), flush=True)
 
@@ -328,6 +351,17 @@ def main() -> None:
     summary: dict[str, Any] = {"edits": len(names), "base_fresh": base_fresh,
                                "spearman_exact_vs_fresh_loss": spearman(exact_mean, fresh_loss),
                                "spearman_exact_vs_neg_fresh_acc": spearman(exact_mean, [-a for a in fresh_acc])}
+    if verified:
+        exact_v_mean = [sum(r["exact_verified"][n] for r in per_row) / len(per_row) for n in names]
+        patch_v_mean = [sum(r["estimates"]["patch_verified"][n] for r in per_row) / len(per_row)
+                        for n in names]
+        summary["verified"] = {
+            "sources": [r["verified_source"] for r in per_row],
+            "spearman_exact_vs_fresh_loss": spearman(exact_v_mean, fresh_loss),
+            "spearman_exact_vs_neg_fresh_acc": spearman(exact_v_mean, [-a for a in fresh_acc]),
+            "spearman_patch_vs_exact": spearman(patch_v_mean, exact_v_mean),
+            "spearman_patch_vs_neg_fresh_acc": spearman(patch_v_mean, [-a for a in fresh_acc]),
+        }
     for method in ("incumbent", "incumbent_no_offset", "hole", "centroid", "patch"):
         usable = [j for j, n in enumerate(names) if all(n in r["estimates"][method] for r in per_row)]
         est = [sum(r["estimates"][method][names[j]] for r in per_row) / len(per_row) for j in usable]

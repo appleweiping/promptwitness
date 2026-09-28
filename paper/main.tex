@@ -1,11 +1,10 @@
-\documentclass[11pt]{article}
-\usepackage[review]{acl}
-\usepackage{times}
-\usepackage{latexsym}
+\documentclass{article}
+\usepackage{iclr2027_conference,times}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
-\usepackage{microtype}
-\usepackage{inconsolata}
+\input{math_commands.tex}
+\usepackage{hyperref}
+\usepackage{url}
 \usepackage{graphicx}
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{booktabs}
@@ -18,11 +17,11 @@
 \newcommand{\graft}{\textsc{Graft}}
 \newcommand{\greater}{\textsc{GReaTer}}
 \newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
-\newcommand{\R}{\mathbb{R}}
+\providecommand{\R}{\mathbb{R}}
 
 \title{Beyond Tokens: Exact Structural Gradients for\\ Self-Optimizing Prompts of Small Language Models}
 
-\author{Anonymous ACL submission}
+\author{Anonymous authors\Paper under double-blind review}
 
 \begin{document}
 \maketitle
@@ -305,7 +304,7 @@ Parallel context windows \citep{ratner2023pcw} and superposition prompting
 efficiency. We combine parallel paths, exact positional offsets and exact attention
 to estimate the effect of structural edits for optimization.
 
-\section*{Limitations}
+\section{Limitations}
 
 \graft{} inherits \greater{}'s fixed-reasoning approximation: the loss is
 differentiated with the model's reasoning held fixed, so an edit's effect on the
@@ -322,7 +321,28 @@ different loss. All experiments ran on a single 48\,GB GPU, which bounds the num
 of seeds and tasks; we report per-task results and seed variation rather than a
 single aggregate.
 
+\subsection*{AI use statement}
+\todo{Draft for the authors to verify and edit before submission.} Generative AI
+was used extensively in this work. An autonomous coding agent (Claude, Anthropic),
+directed by the authors, proposed and implemented the method, wrote the
+experiment and analysis code, ran the experiments and drafted the text; a model of a
+different family (GPT, OpenAI, via the Codex CLI) served as an adversarial reviewer
+of the idea and of intermediate results. Related work was checked against the cited
+sources, and every numerical result is produced by scripts that read the recorded
+run outputs. The authors reviewed all AI-assisted work and take responsibility for
+the final content, including text, claims and artifacts.
+
+\subsection*{Reproducibility statement}
+Code for the superposed gated computation, the renormalized estimator, the search
+loop, all baselines and all analyses will be released with the camera-ready
+version and is provided as supplementary material. Exactness propositions are
+proved in Appendix~\ref{app:proofs} and verified numerically
+(Appendix~\ref{app:tests}); data splits are deterministic functions of the public
+\greater{} release (\S\ref{sec:setup}); the preregistered experiment plan and all
+run records are included.
+
 \bibliography{references}
+\bibliographystyle{iclr2027_conference}
 
 \appendix
 \section{Proofs}

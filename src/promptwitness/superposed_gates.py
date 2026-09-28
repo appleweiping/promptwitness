@@ -92,6 +92,7 @@ class SuperposedSequence:
     mode: str = "exact"
     orig: list[int] = field(default_factory=list)  # logical order; -1 for candidates
     owner: list[str | None] = field(default_factory=list)  # candidate slot per token
+    answer_weights: list[float] | None = None  # per-token CE weights over answer_ids
 
     def base_values(self) -> list[float]:
         return [1.0] + [gate.base_value for gate in self.gates]
@@ -224,17 +225,24 @@ def build_superposed(
     *,
     mode: Mode = "exact",
     gate_incumbents: Sequence[str] | None = None,
+    answer_weights: Sequence[float] | None = None,
 ) -> SuperposedSequence:
     """Lay out incumbent prompt, parallel candidate slots, then reasoning+extractor+answer.
 
-    ``tail_ids`` is reasoning followed by the extractor; ``answer_ids`` follow it.
-    ``gate_incumbents`` lists incumbent blocks that receive a gate (deletion effect);
-    by default every editable block.
+    ``tail_ids`` precede the scored tokens ``answer_ids`` (GReaTer: reasoning plus
+    extractor, then the answer). ``answer_weights`` optionally weights the per-token
+    cross-entropy of ``answer_ids`` (e.g. verified reasoning and answer scored, extractor
+    tokens weighted 0). ``gate_incumbents`` lists incumbent blocks that receive a gate
+    (deletion effect); by default every non-empty editable block.
     """
     import torch
 
     if not answer_ids:
         raise ValueError("answer tokens are required")
+    if answer_weights is not None and (
+        len(answer_weights) != len(answer_ids) or not any(answer_weights)
+    ):
+        raise ValueError("answer weights must match the answer and not all be zero")
     base_ids = list(prompt.render_tokens(tokenizer, values).input_ids)
     n_prompt = len(base_ids)
     editable = [block.block_id for block in prompt.blocks if block.editable and block.text]
@@ -282,6 +290,12 @@ def build_superposed(
                 orig.append(-1)
                 segment.append(gate.gate_id)
                 cand_block.append(block_id)
+
+    # Physical layout: prompt[:-1], candidates, prompt[-1], tail. The token physically
+    # before the scored region must be its logical predecessor even when the tail is
+    # empty; visibility is explicit, so physical order is otherwise irrelevant.
+    for store in (input_ids, position_ids, orig, segment, cand_block):
+        store.append(store.pop(n_prompt - 1))
 
     tail_start = len(input_ids)
     tail = list(tail_ids) + list(answer_ids)
@@ -352,6 +366,7 @@ def build_superposed(
         mode,
         orig,
         cand_block,
+        None if answer_weights is None else [float(w) for w in answer_weights],
     )
 
 
@@ -478,7 +493,11 @@ class GateScorer:
         )
         logits = output.logits[0, :-1].float()
         target = torch.tensor(seq.answer_ids, device=device)
-        return functional.cross_entropy(logits, target)
+        if seq.answer_weights is None:
+            return functional.cross_entropy(logits, target)
+        weights = torch.tensor(seq.answer_weights, device=device)
+        per_token = functional.cross_entropy(logits, target, reduction="none")
+        return (per_token * weights).sum() / weights.sum()
 
     def _context(self, seq: SuperposedSequence, gate_values: Any, offsets: Any) -> _GateContext:
         device = self._device()

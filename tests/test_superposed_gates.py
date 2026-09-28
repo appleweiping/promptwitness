@@ -222,3 +222,28 @@ def test_renormalized_patching_tracks_exact_edits(arch: str, tokenizer) -> None:
     # derivative instead saturates by orders of magnitude on real models).
     assert torch.corrcoef(torch.stack([est, true]))[0, 1] > 0.75, (est, true)
     assert 0.33 < float(est.abs().mean() / true.abs().mean()) < 3.0, (est, true)
+
+
+def test_weighted_objective_matches_stock(tokenizer) -> None:
+    """Verified objective: reasoning+answer scored, extractor weighted 0, empty tail."""
+    import torch.nn.functional as F
+
+    model = _model("llama", len(tokenizer))
+    prompt = _prompt()
+    reasoning = tokenizer.encode("Five is larger than three.", add_special_tokens=False)
+    extractor = tokenizer.encode("\nFinal answer: ", add_special_tokens=False)
+    answer = tokenizer.encode("(B)", add_special_tokens=False)
+    scored = reasoning + extractor + answer
+    weights = ([0.5 / len(reasoning)] * len(reasoning) + [0.0] * len(extractor)
+               + [0.5 / len(answer)] * len(answer))
+    seq = build_superposed(prompt, tokenizer, VALUES, CANDIDATES, [], scored,
+                           mode="exact", answer_weights=weights)
+    scorer = GateScorer(model, checkpointing=False)
+    base_ids = list(prompt.render_tokens(tokenizer, VALUES).input_ids)
+    tensor = torch.tensor([base_ids + scored])
+    with torch.no_grad():
+        logits = model(input_ids=tensor, attention_mask=torch.ones_like(tensor)).logits[0]
+    per = F.cross_entropy(logits[len(base_ids) - 1 : -1].float(), torch.tensor(scored),
+                          reduction="none")
+    expected = float((per * torch.tensor(weights)).sum() / sum(weights))
+    assert abs(scorer.gradients(seq).loss - expected) < 1e-4
