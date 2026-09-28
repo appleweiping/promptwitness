@@ -605,3 +605,12 @@
 | 2026-09-28T03:35:38Z | experiment-bridge | research/ACCESS_AUDIT.md | implementation | 最新访问审计 |
 | 2026-09-28T03:35:38Z | experiment-bridge | findings.md | implementation | CI独立证据与科学门禁 |
 | 2026-09-28T03:35:38Z | experiment-bridge | AGENTS.md | implementation | 工程CI结果与继续约束 |
+| 2026-09-28T03:56:38Z | experiment-bridge | reproduce/check_retrieval_searle_metric_parity.py | implementation | 固定上游指标函数体自写无并列差分与失败收据 |
+| 2026-09-28T03:56:38Z | experiment-bridge | tests/reproduce/test_retrieval_searle_metric_parity.py | implementation | 错误SHA/缺失函数与已编译未执行时的失败留痕 |
+| 2026-09-28T03:56:38Z | experiment-bridge | research/ICMR_SEARLE_METRIC_PARITY_20260928_035638.md | implementation | WSL窄正向资格、review与科学未准入 |
+| 2026-09-28T03:56:38Z | experiment-bridge | research/ICMR_SEARLE_METRIC_PARITY.md | implementation | 同字节latest copy |
+| 2026-09-28T03:56:38Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_035638.md | implementation | tracker快照 |
+| 2026-09-28T03:56:38Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260928_035638.md | implementation | 审查与收据修复快照 |
+| 2026-09-28T03:56:38Z | experiment-bridge | research/ACCESS_AUDIT_20260928_035638.md | implementation | 未接触正式数据访问快照 |
+| 2026-09-28T03:56:38Z | experiment-bridge | AGENTS.md | implementation | 窄工程资格dashboard |
+| 2026-09-28T03:56:38Z | experiment-bridge | findings.md | implementation | 函数体一致和官方门禁 |

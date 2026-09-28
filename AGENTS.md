@@ -12,6 +12,10 @@ language: zh
 旧scope.lock/PROTOCOL仍保存数学、总资源与历史事实；不把旧144/180/36转写为已完成。
 同一ARIS run和审查记忆继续，不创建新run重置default4或已发生费用。
 最终交付包含符合ICMR当届要求的英文稿/PDF；不得把旧AUTO_WRITE=false作为省略理由。
+2026-09-28 03:56 UTC 增量：固定 SEARLE 原指标函数体与独立核在
+11 自写无并列查询、55候选上17项匹配；`research/ICMR_SEARLE_METRIC_PARITY.md`
+仅是 M1 前置窄工程资格。已有 tie 反例、官方 server/完整库、原图许可、
+分组封存、双生成模型和全角色预算仍未准入，不得把它写成 ICMR 结果。
 以 `research/PROTOCOL.md`、`research/scope.lock.json`、
 `research/PROTOCOL_v1_1.md` 和实际账本为科学与资源约束来源。
 续推授权以用户最新指令及 `research/ARIS_GOAL.md` 为准；它覆盖下述历史

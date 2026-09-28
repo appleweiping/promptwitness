@@ -231,3 +231,10 @@ scorer独立PID，Linux focused45pass1skip。fresh same-family review 的
 Ubuntu3.10/3.14各2057pass2skip，覆盖率94.04/94.05%。CI的 authored
 Landlock/失败回归与私有WSL真实CLIP运行是不同证据，不互相冒充。M1/Pilot/
 论文效果/全角色成本继续未准入。见research/ICMR_REAL_RESTRICTED_CLIP_CI.md。
+
+2026-09-28T03:56:38Z：新增固定 SEARLE 原指标函数体对照，在 WSL CPU
+11 自写查询/55 候选严格排序上，CIRR 7 项、FIQ 三类 6 项、宏微 4 项共
+17 项匹配。审查故障注入发现“已编译却误报已执行”收据问题，修复并
+复测；当前 helper 失败保留，0 新模型 forward。原 all-tie 反例、
+官方服务器/完整库/正式数据许可/真实方法收益仍未关闭，不授 M1/Pilot。
+见 research/ICMR_SEARLE_METRIC_PARITY_20260928_035638.md。
