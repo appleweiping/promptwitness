@@ -273,3 +273,10 @@ selector人口顺序和混合0/1对齐。本机最终reproduce486pass8skip/119.8
 WSL六项3pass3fail，缺SciPy及既有worker包PermissionError，不算Linux通过。
 待新SHA CI；物理模型成本、完整controller、ONLINE_PINNED、selection/final、
 正式数据/M1/Pilot/论文仍未准入。见research/ICMR_AUDIT_BRIDGE.md。
+
+2026-09-28T00:22:04Z：检索桥提交b1609b75e0276fd93275cf6c9f49e62d35e30b82
+已推送，精确SHA CI run36361517661终态success15/15；Ubuntu3.10
+2033pass1skip，Ubuntu3.14 2033pass1skip128warnings，包含Linux authored
+实worker桥接测试。只关闭工程CI待验；WSL失败、物理成本/完整controller、
+ONLINE_PINNED/selection/final及正式数据/M1/Pilot/ICMR效果仍未准入。
+见research/ICMR_AUDIT_BRIDGE_CI.md。

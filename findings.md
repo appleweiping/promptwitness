@@ -175,3 +175,8 @@ scorer真正连接；自审修正survivor随机顺序导致native selector ID错
 reproduce486pass8skip/119.85s（定向5pass1skip）。WSL实际3pass3fail：
 缺SciPy、既有worker包PermissionError，不能作Linux资格。新SHA CI待跑；
 回调冻结、物理成本、selection/final与正式数据依旧M1门禁。
+
+2026-09-28T00:22:04Z b1609b7精确CI run36361517661全15/15成功，
+Ubuntu3.10 2033pass1skip，Linux authored真实worker桥测试被执行。
+只验证当前逻辑桥的工程运行；先前WSL失败仍保留。尚无正式CIR数据、
+真实模型/物理成本或在线选择结果，不能上报M1/Pilot/ICMR方法收益。

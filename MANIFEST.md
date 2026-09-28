@@ -516,3 +516,9 @@
 | 2026-09-28T00:08:54Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_000854.md | implementation | tracker同字节快照 |
 | 2026-09-28T00:08:54Z | experiment-bridge | AGENTS.md | implementation | 桥接dashboard及WSL失败 |
 | 2026-09-28T00:08:54Z | experiment-bridge | findings.md | implementation | selector顺序修复与未准入门禁 |
+| 2026-09-28T00:22:04Z | experiment-bridge | research/ICMR_AUDIT_BRIDGE_CI_20260928_002204.md | implementation | b1609b7精确CI15/15及科学未准入边界 |
+| 2026-09-28T00:22:04Z | experiment-bridge | research/ICMR_AUDIT_BRIDGE_CI.md | implementation | 精确CI同内容latest copy |
+| 2026-09-28T00:22:04Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 关闭工程CI待验但M1仍未准入 |
+| 2026-09-28T00:22:04Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_002204.md | implementation | tracker同字节快照 |
+| 2026-09-28T00:22:04Z | experiment-bridge | AGENTS.md | implementation | 精确CI dashboard与未准入边界 |
+| 2026-09-28T00:22:04Z | experiment-bridge | findings.md | implementation | Linux authored测试通过，不上报论文收益 |
