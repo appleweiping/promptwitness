@@ -350,6 +350,8 @@ def main() -> None:
     parser.add_argument("--eval-max-new-tokens", type=int, default=512)
     parser.add_argument("--dev-checkpoints", type=int, default=3)
     parser.add_argument("--candidates-per-pass", type=int, default=32)
+    parser.add_argument("--no-checkpointing", action="store_true",
+                        help="keep attention activations instead of recomputing (faster, more memory)")
     parser.add_argument("--objective", choices=("answer", "verified"), default="answer",
                         help="GReaTer's answer loss, or verified reasoning plus answer")
     parser.add_argument("--verify-samples", type=int, default=4)
@@ -367,7 +369,7 @@ def main() -> None:
     model = AutoModelForCausalLM.from_pretrained(args.model_path, dtype=torch.bfloat16,
                                                  attn_implementation=args.attn).to("cuda").eval()
     torch.cuda.reset_peak_memory_stats()
-    scorer = GateScorer(model)
+    scorer = GateScorer(model, checkpointing=not args.no_checkpointing)
     spec = graft_tasks.spec(args.task)
     splits = graft_tasks.load_splits(args.data_dir, args.task)
     ledger = Ledger()
