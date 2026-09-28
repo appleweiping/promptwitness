@@ -512,3 +512,12 @@ Windows 2093pass28skip/94.03%；同家族静态复审无新 BLOCKING，
 论文效果；SSH 指纹冲突未登录。见
 research/ICMR_NATIVE_MIPRO_RETRIEVAL.md/json；goalACTIVE/default4/
 历史账本/无timer/其他四仓冻结不变。
+
+2026-09-28：检索 MIPRO 自制资格源SHA
+`22733777c526e1b6d5f4d7061ddf632ed5f60ed3` 已推送；
+CI run36412935014精确匹配 completed/success15/15，Ubuntu3.10/
+3.14各2118pass3skip。CI无私有固定DSPy完整编译、正式图像或
+真实生成模型；私有资格与哈希见research/ICMR_NATIVE_MIPRO_RETRIEVAL.md/json。
+M1/Pilot/C1–C3、许可、全角色费用、英文稿仍NOT_ADMITTED；
+SSH指纹仍冲突未登录。见research/ICMR_NATIVE_MIPRO_RETRIEVAL_CI.md；
+goalACTIVE/default4/历史账本/无timer/其他四仓冻结不变。

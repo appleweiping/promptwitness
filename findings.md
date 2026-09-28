@@ -381,3 +381,11 @@ PRUNED 非零分，脚本化 winner 按构造选中；真实 Example 接口阻�
 无官方数据/真实生成器/全角色成本或同次受限在线实验；M1/Pilot/
 C1–C3仍NOT_ADMITTED，SSH指纹冲突未登录。见
 research/ICMR_NATIVE_MIPRO_RETRIEVAL.md/json。
+
+2026-09-28：检索 MIPRO 自制资格源码 SHA
+`22733777c526e1b6d5f4d7061ddf632ed5f60ed3` 的
+[CI run 36412935014](https://github.com/appleweiping/promptwitness/actions/runs/36412935014)
+completed/success 15/15；Ubuntu3.10/3.14各2118pass3skip、
+coverage94.04/94.05%。CI不运行私有固定DSPy完整编译、官方图像或
+真实Qwen/OLMo；M1/Pilot/C1–C3和全角色成本继续未准入。见
+research/ICMR_NATIVE_MIPRO_RETRIEVAL_CI.md。
