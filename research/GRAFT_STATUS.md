@@ -66,6 +66,16 @@ full; everything lives on `/media/lenovo/data2`.
 10. **Paper** moved to the ICLR 2027 template (user request): 9-page main text,
     required AI-use statement drafted for the authors to verify.
 
+11. **Stage B smoke (Llama-3, formal_fallacies, 3 rounds; not a result).** The loop
+    runs end to end (search ~2 min/round, peak 18-20 GB). Found and fixed: answers
+    such as `**invalid**` were unparsed (accuracy far below chance), and proposer
+    meta-text ("Here is the revised block: reasoning_policy:") leaked into an
+    accepted prompt (`clean_proposal`). Cost at ~20 edits/round: exact scoring 40 s
+    vs renormalized patching 46 s per 3 rounds, so the efficiency claim needs larger
+    pools (`bench_scoring.py`, K = 4-32 per slot) and a cheaper kernel.
+12. **Compute so far (GRAFT, GPU 0):** about 4 GPU-hours (probes, fidelity v1-v2,
+    smoke); well inside the 1000 GPU-hour cumulative cap.
+
 ## Next
 
 * Fidelity v2 decides the scorer: renormalized patching must beat raw gates and
