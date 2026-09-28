@@ -722,3 +722,15 @@
 | 2026-09-28T08:37:02Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 同字节latest copy |
 | 2026-09-28T08:37:02Z | experiment-bridge | findings.md | implementation | 精确CI与未准入项 |
 | 2026-09-28T08:37:02Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |
+| 2026-09-28T09:10:03Z | experiment-bridge | research/ICMR_SELECTION_REAL_CLIP_20260928_091003.md | implementation | 自制真实CLIP selection/search隔离资格及限制 |
+| 2026-09-28T09:10:03Z | experiment-bridge | research/ICMR_SELECTION_REAL_CLIP.md | implementation | 同字节latest copy |
+| 2026-09-28T09:10:03Z | experiment-bridge | research/ICMR_SELECTION_REAL_CLIP_20260928_091003.json | implementation | 机器可读自制资格摘要 |
+| 2026-09-28T09:10:03Z | experiment-bridge | research/ICMR_SELECTION_REAL_CLIP.json | implementation | 同字节latest copy |
+| 2026-09-28T09:10:03Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260928_091003.md | implementation | 初审阻断、复审与后续未审限制 |
+| 2026-09-28T09:10:03Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | 同字节latest copy |
+| 2026-09-28T09:10:03Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_091003.md | implementation | 自制真实CLIP资格tracker快照 |
+| 2026-09-28T09:10:03Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 同字节latest copy |
+| 2026-09-28T09:10:03Z | experiment-bridge | research/ACCESS_AUDIT_20260928_091003.md | implementation | 私有权重与自制数据访问快照 |
+| 2026-09-28T09:10:03Z | experiment-bridge | research/ACCESS_AUDIT.md | implementation | 同字节latest copy |
+| 2026-09-28T09:10:03Z | experiment-bridge | findings.md | implementation | 自制资格和未准入项 |
+| 2026-09-28T09:10:03Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |

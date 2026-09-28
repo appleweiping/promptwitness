@@ -177,6 +177,7 @@ def score_rankings_restricted(
         message=message,
     )
     if result.returncode:
+        (scratch / "scorer-stderr.log").write_text(result.stderr, encoding="utf-8")
         raise ValueError(f"restricted retrieval scorer failed with exit {result.returncode}")
     report = json.loads(result.stdout)
     if (

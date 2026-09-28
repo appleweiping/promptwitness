@@ -189,3 +189,5 @@ def test_real_linux_bad_full_ranking_is_failure_not_zero(tmp_path):
     scratch.mkdir()
     with pytest.raises(ValueError, match="failed with exit"):
         score_rankings_restricted(data, scratch, "cirr", "search", {"q1": pool[:-1]})
+    stderr = (scratch / "scorer-stderr.log").read_text(encoding="utf-8")
+    assert "ValueError" in stderr and "ranking" in stderr

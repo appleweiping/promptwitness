@@ -336,3 +336,13 @@ completed/success15/15。Ubuntu3.10/3.14各2093pass3skip，覆盖率
 94.04/94.05%。仅工程证据；正式数据/许可/真实双模型/全角色成本/
 M1/Pilot/C1–C3仍NOT_ADMITTED。见
 research/ICMR_SELECTION_RANK_ISOLATION_CI.md。
+
+2026-09-28T09:10:03Z：自制 selection/search 资格在 WSL 真实
+ViT-L/14 CPU、Landlock 受限 worker 与独立 scorer 通过。selection
+内层12次/7 forwards、外层6次；search 10/6、外层5次，均无失败/
+未结算。Linux聚焦85pass1skip，Windows全套2075pass26skip/
+94.01%，项目质量/构建检查过。初审人口阻断修复、复审无阻断，
+其后失败留存补丁未复审；两次审查同系列 provisional。
+私有权重/自制图/账本不提交，正式数据、许可、真实生成描述、
+全角色成本与M1/Pilot/C1–C3仍NOT_ADMITTED。见
+research/ICMR_SELECTION_REAL_CLIP.md/json。

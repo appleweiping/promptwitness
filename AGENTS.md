@@ -462,3 +462,14 @@ CI run36397811924精确匹配，completed/success15/15；Ubuntu
 正式数据/许可/真实模型/全角色预算/M1/Pilot/C1–C3仍待准入。
 SSH指纹冲突，未连接；goalACTIVE/default4/历史账本/无timer/
 其他四仓冻结不变。见research/ICMR_SELECTION_RANK_ISOLATION_CI.md。
+
+2026-09-28T09:10:03Z：selection 的真实第一方 CLIP CPU 仅自制
+资格通过：受限ranker/独立完整人口scorer，内层12操作/7实际forward；
+默认search兼容10/6，均0失败/未结算。Linux Landlock聚焦85pass1skip，
+Windows全套2075pass26skip/94.01%；Ruff/format/mypy61/Bandit/build/
+Twine过。审查初阻断已修、follow-up无阻断；审查后部分失败留存改动
+未再审查，均same-family/provisional。正式CIRR/FIQ原图/许可、
+真实Qwen/OLMo描述、全角色成本/M1/Pilot/C1–C3仍NOT_ADMITTED，
+新源码SHA CI待验。SSH指纹未重新核验，未登录；goalACTIVE/
+default4/历史账本/无timer/四仓冻结不变。详见
+research/ICMR_SELECTION_REAL_CLIP.md/json。

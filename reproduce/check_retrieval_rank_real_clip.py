@@ -23,8 +23,10 @@ from reproduce.retrieval_work_ledger import RetrievalWorkLedger
 FORMAT = "promptwitness.restricted-real-clip-qualification/v1"
 
 
-def check(checkpoint: Path, output: Path) -> dict[str, object]:
+def check(checkpoint: Path, output: Path, *, stage: str = "search") -> dict[str, object]:
     """Run one cold index, two direct queries and one supplied description."""
+    if stage not in {"search", "selection"}:
+        raise ValueError("real-CLIP qualification supports search or selection only")
     require_cpu()
     checkout = Path(__file__).resolve().parents[1]
     if output.resolve().is_relative_to(checkout):
@@ -35,6 +37,7 @@ def check(checkpoint: Path, output: Path) -> dict[str, object]:
     result: dict[str, object] = {
         "format": FORMAT,
         "status": "RUNNING",
+        "stage": stage,
         "benchmark_images_or_annotations": False,
         "scientific_result": False,
         "model": "OpenAI CLIP ViT-L/14",
@@ -54,7 +57,7 @@ def check(checkpoint: Path, output: Path) -> dict[str, object]:
         store = output / "store"
         for leaf in LEAVES:
             (store / leaf).mkdir(parents=True)
-        inputs = store / "search/inputs"
+        inputs = store / stage / "inputs"
         os.link(weight, inputs / "ViT-L-14.pt")
         image_specs = (
             ("authored-red", "red", (301, 225), "RGB"),
@@ -90,7 +93,7 @@ def check(checkpoint: Path, output: Path) -> dict[str, object]:
             encoding="utf-8",
         )
         (inputs / "cirr-gallery.json").write_text(json.dumps({"cirr": pool}), encoding="utf-8")
-        (store / "search/gold/cirr.jsonl").write_text(
+        (store / stage / "gold/cirr.jsonl").write_text(
             "".join(
                 json.dumps({"id": query_id, "target_id": target_id, "subset": pool}) + "\n"
                 for query_id, _, _, target_id in queries
@@ -112,10 +115,14 @@ def check(checkpoint: Path, output: Path) -> dict[str, object]:
             checkpoint="ViT-L-14.pt",
             image_weight=0.5,
             attempt_prefix="authored-real-clip",
+            stage=stage,
         ) as session:
-            if session.ready["query_count"] != len(queries) or session.ready["gallery_sizes"] != {
-                "cirr": len(pool)
-            }:
+            if (
+                session.ready["query_count"] != len(queries)
+                or session.ready["gallery_sizes"] != {"cirr": len(pool)}
+                or session.ready["stage"] != stage
+                or session.ready["role"] != f"retrieval_{stage}_ranker"
+            ):
                 raise ValueError("restricted ranker loaded the wrong authored population")
             ranker_pid = session.ready["pid"]
             result["ranker_pid"] = ranker_pid
@@ -127,64 +134,84 @@ def check(checkpoint: Path, output: Path) -> dict[str, object]:
 
                 rankings[query_id] = outer.run(
                     f"outer:rank:{query_id}",
-                    "search",
+                    stage,
                     "rank_callback",
                     rank_one,
                 )
                 result["full_rankings"] = {
                     identifier: list(ranking) for identifier, ranking in rankings.items()
                 }
-            description_ranking = outer.run(
-                "outer:rank-description:authored-red",
-                "search",
-                "rank_callback",
-                lambda: session.rank_description(
-                    "authored-q-red",
+            descriptions = {
+                "authored-q-red": (
                     "authored-description-red",
                     "a blue square on a white background",
                 ),
-            )
-            result["supplied_description_full_ranking"] = list(description_ranking)
+                "authored-q-blue": (
+                    "authored-description-blue",
+                    "a red square on a white background",
+                ),
+            }
+            description_ids = ("authored-q-red",) if stage == "search" else tuple(descriptions)
+            description_rankings: dict[str, tuple[str, ...]] = {}
+            for query_id in description_ids:
+                request_id, description = descriptions[query_id]
+                description_rankings[query_id] = outer.run(
+                    f"outer:rank-description:{request_id}",
+                    stage,
+                    "rank_callback",
+                    lambda query_id=query_id, request_id=request_id, description=description: (
+                        session.rank_description(query_id, request_id, description)
+                    ),
+                )
+                if query_id == "authored-q-red":
+                    result["supplied_description_full_ranking"] = list(
+                        description_rankings[query_id]
+                    )
+                result["supplied_description_full_rankings"] = {
+                    identifier: list(ranking)
+                    for identifier, ranking in description_rankings.items()
+                }
         score = outer.run(
             "outer:score:authored-pair",
-            "search",
+            stage,
             "restricted_score",
-            lambda: score_rankings_restricted(store, score_scratch, "cirr", "search", rankings),
+            lambda: score_rankings_restricted(store, score_scratch, "cirr", stage, rankings),
         )
         result["scorer_pid"] = score["worker_pid"]
         result["observations"] = score["observations"]
         description_score = outer.run(
             "outer:score-description:authored-red",
-            "search",
+            stage,
             "restricted_score",
             lambda: score_rankings_restricted(
                 store,
                 description_score_scratch,
                 "cirr",
-                "search",
-                {"authored-q-red": description_ranking},
+                stage,
+                description_rankings,
             ),
         )
         result["description_scorer_pid"] = description_score["worker_pid"]
         result["supplied_description_observation"] = description_score["observations"][
             "authored-q-red"
         ]
+        result["supplied_description_observations"] = description_score["observations"]
         inner = RetrievalWorkLedger(rank_scratch / "ranker-work.sqlite")
         try:
             inner_summary = inner.summary()
         finally:
             inner.close()
         if (
-            inner_summary["attempts"] != 10
-            or inner_summary["completed"] != 10
+            inner_summary["attempts"] != (10 if stage == "search" else 12)
+            or inner_summary["completed"] != (10 if stage == "search" else 12)
             or inner_summary["unresolved"] != 0
-            or inner_summary["known_forward_calls"] != 6
+            or inner_summary["known_forward_calls"] != (6 if stage == "search" else 7)
             or score["worker_pid"] == ranker_pid
             or description_score["worker_pid"] == ranker_pid
         ):
             raise ValueError("restricted real-CLIP work receipts or role identity are incomplete")
         result.update(
-            status="PASS_AUTHORED_REAL_CLIP_DESCRIPTION_RESTRICTED_SEARCH_AND_SCORER",
+            status=f"PASS_AUTHORED_REAL_CLIP_DESCRIPTION_RESTRICTED_{stage.upper()}_AND_SCORER",
             gallery_size=len(pool),
             query_count=len(queries),
             inner_operation_ledger=inner_summary,
@@ -207,8 +234,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("checkpoint", type=Path)
     parser.add_argument("new_output", type=Path)
+    parser.add_argument("--stage", choices=("search", "selection"), default="search")
     args = parser.parse_args()
-    print(json.dumps(check(args.checkpoint, args.new_output), allow_nan=False))
+    print(json.dumps(check(args.checkpoint, args.new_output, stage=args.stage), allow_nan=False))
 
 
 if __name__ == "__main__":

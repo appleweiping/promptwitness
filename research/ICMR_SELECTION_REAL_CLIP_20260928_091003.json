@@ -1,0 +1,62 @@
+{
+  "format": "promptwitness.icmr-selection-real-clip/v1",
+  "recorded_at": "2026-09-28T09:10:03Z",
+  "status": "PASS_AUTHORED_REAL_CLIP_SELECTION_AND_SEARCH_COMPATIBILITY",
+  "scientific_result": false,
+  "official_benchmark_data_accessed": false,
+  "real_generator_used": false,
+  "checkpoint_sha256": "b8cca3fd41ae0c99ba7e8951adf17d267cdb84cd88be6f7c2e0eca1737a03836",
+  "checker_source_sha256": "e33a865d3b45a59531236c7304ae393bc988ee79eae35473a3990cce81ba44bb",
+  "scorer_source_sha256": "f9a03747bccab8dfba6a8957c3d46e2802cb42204d50662dd78d3021d0ea9820",
+  "private_source_bytes_match_checkout": true,
+  "device": "cpu",
+  "authored_images": 3,
+  "authored_queries": 2,
+  "fusion_weight_scientifically_frozen": false,
+  "selection": {
+    "qualification_sha256": "3d890d5f8b8fdc9591ac96646ee1ead976a9bb0bbd45fc9b01b0a5df444c07bc",
+    "inner_ledger_sha256": "40c87558baa30c7f6921a4aab5cd914ff061b0e453c1de3076e2cc7897367ba4",
+    "outer_ledger_sha256": "050b5bdec8e9def8b662195907a24d496fccd253216473ee15d8995fdff2d42c",
+    "inner_attempts": 12,
+    "inner_forwards": 7,
+    "inner_shared_attempts": 4,
+    "inner_selection_attempts": 8,
+    "outer_attempts": 6,
+    "failed": 0,
+    "unresolved": 0,
+    "checker_wall_seconds": 37.656570446
+  },
+  "search_compatibility": {
+    "qualification_sha256": "0f1376b4e3a7856b7295e95bfe73996cac6a4e13b18776fcb27cac1ec3dee3fd",
+    "inner_ledger_sha256": "dbc8aec21e50458f527322a19e4e5696701fd90421a30ef0eba9a91ee24ca4c1",
+    "outer_ledger_sha256": "20d7711101f60147a9c514f0ec377f58905f84e46431163b1884f2120fa82c46",
+    "inner_attempts": 10,
+    "inner_forwards": 6,
+    "inner_shared_attempts": 4,
+    "inner_search_attempts": 6,
+    "outer_attempts": 5,
+    "failed": 0,
+    "unresolved": 0,
+    "checker_wall_seconds": 33.16751850700001
+  },
+  "validation": {
+    "linux_passed": 85,
+    "linux_skipped": 1,
+    "windows_full_passed": 2075,
+    "windows_full_skipped": 26,
+    "windows_full_coverage_percent": 94.01,
+    "same_family_review": "PROVISIONAL_FOLLOWUP_NO_BLOCKING_POST_REVIEW_PATCH_UNREVIEWED",
+    "exact_sha_ci": "PENDING"
+  },
+  "not_admitted": [
+    "CIRR/FashionIQ official images and annotations",
+    "data and weight licenses",
+    "official full-gallery parity",
+    "scientifically frozen captioner and fusion weight",
+    "real Qwen/OLMo generated descriptions",
+    "whole-process CPU and full-role cost forecast",
+    "online native optimizer execution",
+    "M1 and Pilot",
+    "C1-C3 empirical claims and manuscript"
+  ]
+}
