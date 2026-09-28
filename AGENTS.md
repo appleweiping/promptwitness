@@ -533,3 +533,12 @@ goalACTIVE/default4/历史账本/无timer/其他四仓冻结不变。
 继续 NOT_ADMITTED；SSH 新指纹未核验未登录。详见
 research/ICMR_NATIVE_GEPA_RETRIEVAL.md/json；goalACTIVE/default4/
 历史账本1170calls不重置/无timer/其余四仓冻结。
+
+2026-09-28：检索 GEPA 自制资格源码SHA
+`d70d317b3039cf2db8c7c1a3971b93ec3673ffc7` 已推送；
+CI run36418174783精确匹配、completed/success15/15，Ubuntu
+3.10/3.14各2130pass3skip，Windows3.10 2110pass23skip。
+CI不含私有固定GEPA原生checker、官方图像/真模型；M1/Pilot/C1–C3、
+正式许可及全角色成本仍NOT_ADMITTED。见
+research/ICMR_NATIVE_GEPA_RETRIEVAL_CI.md；goalACTIVE/default4/
+历史预算与消耗不重置/无timer/四仓冻结，SSH指纹仍冲突未登录。

@@ -399,3 +399,11 @@ metric48/32 与 audit 外层128/8分开计数，均非真实模型调用。
 自制排名、进程内 scorer 不解决正式数据许可、受限同次在线、
 Qwen/OLMo、全角色预算或 M1/Pilot/C1–C3。SSH 指纹冲突未登录，
 新 SHA CI 待验。见 research/ICMR_NATIVE_GEPA_RETRIEVAL.md/json。
+
+2026-09-28：自制 GEPA 原生资格源码SHA
+`d70d317b3039cf2db8c7c1a3971b93ec3673ffc7` 的
+[CI run 36418174783](https://github.com/appleweiping/promptwitness/actions/runs/36418174783)
+精确匹配、completed/success15/15；Ubuntu3.10/3.14各
+2130pass3skip、Windows3.10 2110pass23skip。CI仅授仓库工程证据，
+不运行私有固定GEPA/正式图像/Qwen/OLMo；全角色预算、M1/Pilot/
+C1–C3仍未准入。见 research/ICMR_NATIVE_GEPA_RETRIEVAL_CI.md。
