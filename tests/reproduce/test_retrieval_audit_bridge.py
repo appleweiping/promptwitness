@@ -15,6 +15,16 @@ from reproduce import retrieval_audit_bridge as bridge_module
 from reproduce.process_access import LEAVES
 from reproduce.retrieval_audit_bridge import RetrievalAuditBridge
 from reproduce.retrieval_role_scoring import score_rankings_restricted
+from reproduce.retrieval_work_ledger import RetrievalWorkLedger
+
+
+@pytest.fixture
+def work_ledger(tmp_path):
+    ledger = RetrievalWorkLedger(tmp_path / "retrieval-work.sqlite")
+    try:
+        yield ledger
+    finally:
+        ledger.close()
 
 
 def _plan(reference):
@@ -40,7 +50,7 @@ def _valid_contract():
     return ContractCheck(ContractStatus.VALID, ())
 
 
-def test_fixed_gate_prefix_and_actual_survivor_vector(tmp_path, monkeypatch):
+def test_fixed_gate_prefix_and_actual_survivor_vector(tmp_path, monkeypatch, work_ledger):
     reference = {f"q{i}": 0 for i in range(64)}
     plan = _plan(reference)
     journal = _journal(tmp_path, plan)
@@ -66,6 +76,7 @@ def test_fixed_gate_prefix_and_actual_survivor_vector(tmp_path, monkeypatch):
         dataset="cirr",
         plan=plan,
         journal=journal,
+        work_ledger=work_ledger,
         unit_ids=tuple(reference),
         rank_one=rank_one,
     )
@@ -83,12 +94,15 @@ def test_fixed_gate_prefix_and_actual_survivor_vector(tmp_path, monkeypatch):
         assert len(ranked) == len(scored) == 64 == len(set(ranked))
         assert tuple(ranked[: len(prefix)]) == prefix
         assert journal.consumed_episodes() == 128
+        assert work_ledger.summary()["attempts"] == 128
+        assert work_ledger.summary()["unresolved"] == 0
         resumed = RetrievalAuditBridge(
             store=bridge.store,
             scratch_root=scratch,
             dataset="cirr",
             plan=plan,
             journal=journal,
+            work_ledger=work_ledger,
             unit_ids=tuple(reference),
             rank_one=rank_one,
         )
@@ -101,7 +115,7 @@ def test_fixed_gate_prefix_and_actual_survivor_vector(tmp_path, monkeypatch):
         journal.close()
 
 
-def test_survivor_failure_is_charged_without_replay_or_zero(tmp_path, monkeypatch):
+def test_survivor_failure_is_charged_without_replay_or_zero(tmp_path, monkeypatch, work_ledger):
     plan = _plan({f"q{i}": 0 for i in range(64)})
     journal = _journal(tmp_path, plan)
     scratch = tmp_path / "scratch"
@@ -126,6 +140,7 @@ def test_survivor_failure_is_charged_without_replay_or_zero(tmp_path, monkeypatc
         dataset="cirr",
         plan=plan,
         journal=journal,
+        work_ledger=work_ledger,
         unit_ids=tuple(f"q{i}" for i in range(64)),
         rank_one=rank_one,
     )
@@ -144,11 +159,13 @@ def test_survivor_failure_is_charged_without_replay_or_zero(tmp_path, monkeypatc
         with pytest.raises(ValueError, match="attempt limit"):
             bridge.complete_survivor()
         assert len(calls) == before_retry
+        assert work_ledger.summary()["failed"] == 1
+        assert work_ledger.summary()["unresolved"] == 0
     finally:
         journal.close()
 
 
-def test_failed_rank_is_charged_and_never_imputed_or_replayed(tmp_path, monkeypatch):
+def test_failed_rank_is_charged_and_never_imputed_or_replayed(tmp_path, monkeypatch, work_ledger):
     plan = _plan({f"q{i}": 0 for i in range(64)})
     journal = _journal(tmp_path, plan)
     scratch = tmp_path / "scratch"
@@ -169,6 +186,7 @@ def test_failed_rank_is_charged_and_never_imputed_or_replayed(tmp_path, monkeypa
         dataset="fashioniq",
         plan=plan,
         journal=journal,
+        work_ledger=work_ledger,
         unit_ids=tuple(f"q{i}" for i in range(64)),
         rank_one=rank_one,
     )
@@ -184,11 +202,13 @@ def test_failed_rank_is_charged_and_never_imputed_or_replayed(tmp_path, monkeypa
         assert len(calls) == 1
         with pytest.raises(ValueError, match="eligible"):
             bridge.complete_survivor()
+        assert work_ledger.summary()["attempts"] == 2
+        assert work_ledger.summary()["failed"] == 1
     finally:
         journal.close()
 
 
-def test_unverified_execution_never_calls_ranker(tmp_path):
+def test_unverified_execution_never_calls_ranker(tmp_path, work_ledger):
     plan = _plan({f"q{i}": 0 for i in range(64)})
     journal = _journal(tmp_path, plan)
     scratch = tmp_path / "scratch"
@@ -203,6 +223,7 @@ def test_unverified_execution_never_calls_ranker(tmp_path):
         dataset="cirr",
         plan=plan,
         journal=journal,
+        work_ledger=work_ledger,
         unit_ids=tuple(f"q{i}" for i in range(64)),
         rank_one=rank_one,
     )
@@ -210,11 +231,12 @@ def test_unverified_execution_never_calls_ranker(tmp_path):
         verdict = bridge.evaluate(contract=_valid_contract(), execution_scope="UNVERIFIED")
         assert verdict.status == GateStatus.UNSUPPORTED
         assert journal.consumed_episodes() == 64
+        assert work_ledger.summary()["attempts"] == 0
     finally:
         journal.close()
 
 
-def test_selector_population_must_match_frozen_plan(tmp_path):
+def test_selector_population_must_match_frozen_plan(tmp_path, work_ledger):
     plan = _plan({f"q{i}": 0 for i in range(64)})
     journal = _journal(tmp_path, plan)
     scratch = tmp_path / "scratch"
@@ -227,6 +249,7 @@ def test_selector_population_must_match_frozen_plan(tmp_path):
                 dataset="cirr",
                 plan=plan,
                 journal=journal,
+                work_ledger=work_ledger,
                 unit_ids=("q0",),
                 rank_one=lambda unit: ("target",),
             )
@@ -234,7 +257,7 @@ def test_selector_population_must_match_frozen_plan(tmp_path):
         journal.close()
 
 
-def test_real_linux_scorer_and_gate_on_authored_rankings(tmp_path):
+def test_real_linux_scorer_and_gate_on_authored_rankings(tmp_path, work_ledger):
     if sys.platform != "linux":
         pytest.skip("Linux Landlock worker required")
     store = tmp_path / "store"
@@ -275,6 +298,7 @@ def test_real_linux_scorer_and_gate_on_authored_rankings(tmp_path):
         dataset="cirr",
         plan=plan,
         journal=journal,
+        work_ledger=work_ledger,
         unit_ids=tuple(reference),
         rank_one=lambda unit: ("target", "reference", *pool[2:]),
     )
@@ -283,5 +307,6 @@ def test_real_linux_scorer_and_gate_on_authored_rankings(tmp_path):
         assert verdict.status == GateStatus.ELIGIBLE
         assert bridge.complete_survivor().scores == (1,) * 64
         assert journal.consumed_episodes() == 128
+        assert work_ledger.summary()["attempts"] == 128
     finally:
         journal.close()

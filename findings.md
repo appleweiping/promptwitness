@@ -180,3 +180,9 @@ reproduce486pass8skip/119.85s（定向5pass1skip）。WSL实际3pass3fail：
 Ubuntu3.10 2033pass1skip，Linux authored真实worker桥测试被执行。
 只验证当前逻辑桥的工程运行；先前WSL失败仍保留。尚无正式CIR数据、
 真实模型/物理成本或在线选择结果，不能上报M1/Pilot/ICMR方法收益。
+
+2026-09-28T00:54:13Z 检索侧持久attempt账本接入现有审计桥和authored CLIP
+checker，明确失败/中断未知成本不补零不重放。fresh reviewer抓到嵌套操作耗时
+相加并非物理时长下界，已改为非可加字段并复审关闭。最终本机reproduce
+492pass8skip；新账本未在真实CLIP或正式数据上跑，模型/GPU账本未变，M1/Pilot
+及ICMR科学结果仍待合法数据、全角色计费和完整controller。

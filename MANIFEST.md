@@ -522,3 +522,19 @@
 | 2026-09-28T00:22:04Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_002204.md | implementation | tracker同字节快照 |
 | 2026-09-28T00:22:04Z | experiment-bridge | AGENTS.md | implementation | 精确CI dashboard与未准入边界 |
 | 2026-09-28T00:22:04Z | experiment-bridge | findings.md | implementation | Linux authored测试通过，不上报论文收益 |
+| 2026-09-28T00:54:13Z | experiment-bridge | reproduce/retrieval_work_ledger.py | implementation | 检索侧持久物理操作attempt收据 |
+| 2026-09-28T00:54:13Z | experiment-bridge | reproduce/retrieval_audit_bridge.py | implementation | 审计桥强制记录rank/scorer尝试 |
+| 2026-09-28T00:54:13Z | experiment-bridge | reproduce/check_retrieval_composed_cpu.py | implementation | authored CLIP checker接加载/编码/排名收据 |
+| 2026-09-28T00:54:13Z | experiment-bridge | tests/reproduce/test_retrieval_work_ledger.py | implementation | 失败/恢复/嵌套耗时回归 |
+| 2026-09-28T00:54:13Z | experiment-bridge | tests/reproduce/test_retrieval_audit_bridge.py | implementation | 桥接物理收据验证 |
+| 2026-09-28T00:54:13Z | experiment-bridge | tests/reproduce/test_retrieval_composed_cpu.py | implementation | authored fake encoder接线15操作验证 |
+| 2026-09-28T00:54:13Z | experiment-bridge | research/ICMR_WORK_LEDGER_20260928_005413.md | implementation | 新增操作账本证据和成本/科学限制 |
+| 2026-09-28T00:54:13Z | experiment-bridge | research/ICMR_WORK_LEDGER.md | implementation | 同内容latest copy |
+| 2026-09-28T00:54:13Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | fresh审查真实blocker和复审关闭 |
+| 2026-09-28T00:54:13Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260928_005413.md | implementation | 审查同字节快照 |
+| 2026-09-28T00:54:13Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | M1成本门禁更新 |
+| 2026-09-28T00:54:13Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_005413.md | implementation | tracker同字节快照 |
+| 2026-09-28T00:54:13Z | experiment-bridge | research/ACCESS_AUDIT.md | implementation | 未访问正式数据与反馈风险 |
+| 2026-09-28T00:54:13Z | experiment-bridge | research/ACCESS_AUDIT_20260928_005413.md | implementation | 访问同字节快照 |
+| 2026-09-28T00:54:13Z | experiment-bridge | AGENTS.md | implementation | 研究dashboard和CI待验 |
+| 2026-09-28T00:54:13Z | experiment-bridge | findings.md | implementation | 嵌套耗时反例和未准入事项 |

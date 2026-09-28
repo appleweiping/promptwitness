@@ -1,6 +1,8 @@
 """Composition input contracts, with optional Torch numerical checks."""
 
+import sys
 from pathlib import Path
+from types import ModuleType
 
 import pytest
 
@@ -47,3 +49,56 @@ def test_numeric_composition_on_authored_vectors(monkeypatch):
     )
     with pytest.raises(ValueError, match="already-unit"):
         direct_fusion_query(red, blue, 0.5)
+
+
+def test_checker_persists_authored_operation_receipts(tmp_path, monkeypatch):
+    """A fake encoder exercises the checker wiring, not CLIP numerical behavior."""
+    import reproduce.check_retrieval_composed_cpu as checker
+
+    class Gallery(tuple):
+        shape = (3, 768)
+        dtype = "float32"
+        device = "cpu"
+
+    class FakeDraw:
+        def rectangle(self, *_args, **_kwargs):
+            pass
+
+    class FakeEncoder:
+        def __init__(self, _checkpoint):
+            self.checkpoint_sha256 = "authored-fake"
+            self.load_wall_seconds = 0.0
+            self.costs = {"image_forward_calls": 0, "text_forward_calls": 0}
+
+        def encode_image(self, image):
+            self.costs["image_forward_calls"] += 1
+            return image
+
+        def encode_text(self, value):
+            self.costs["text_forward_calls"] += 1
+            return value
+
+    torch = ModuleType("torch")
+    torch.set_num_threads = lambda _count: None
+    torch.manual_seed = lambda _seed: None
+    torch.stack = lambda values: Gallery(values)
+    torch.equal = lambda left, right: left == right
+    image = ModuleType("Image")
+    image.new = lambda mode, size, color: (mode, size, color)
+    draw = ModuleType("ImageDraw")
+    draw.Draw = lambda _image: FakeDraw()
+    pil = ModuleType("PIL")
+    pil.Image, pil.ImageDraw = image, draw
+    monkeypatch.setitem(sys.modules, "torch", torch)
+    monkeypatch.setitem(sys.modules, "PIL", pil)
+    monkeypatch.setenv("CUDA_VISIBLE_DEVICES", "")
+    monkeypatch.setattr(checker, "ClipCPUEncoder", FakeEncoder)
+    monkeypatch.setattr(checker, "rank_direct_composed", lambda *_args: ("a", "b", "c"))
+    output = tmp_path / "authored-only"
+    report = checker.check(tmp_path / "fake-not-read.pt", output)
+    assert report["status"] == "PASS_AUTHORED_COMPOSED_IMAGE_TEXT_CPU_ONLY"
+    assert report["operation_ledger"]["attempts"] == 15
+    assert report["operation_ledger"]["known_forward_calls"] == 10
+    assert report["operation_ledger"]["forward_count_unmeasured_attempts"] == 5
+    assert report["operation_ledger"]["unresolved"] == 0
+    assert (output / "retrieval-work.sqlite").is_file()

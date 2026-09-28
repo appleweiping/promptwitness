@@ -10,6 +10,7 @@ from pathlib import Path
 
 from reproduce.retrieval_clip_cpu import ClipCPUEncoder, require_cpu
 from reproduce.retrieval_composed_cpu import rank_direct_composed
+from reproduce.retrieval_work_ledger import MeteredClipEncoder, RetrievalWorkLedger
 
 
 def check(checkpoint: Path, output: Path) -> dict:
@@ -17,6 +18,7 @@ def check(checkpoint: Path, output: Path) -> dict:
     output.mkdir(parents=True, exist_ok=False)
     started = time.monotonic()
     encoder = None
+    ledger = None
     result = {
         "format": "promptwitness.composed-cpu-mechanical-qualification/v1",
         "status": "RUNNING",
@@ -47,15 +49,35 @@ def check(checkpoint: Path, output: Path) -> dict:
             ("authored-red", "make the square blue"),
             ("authored-blue", "make the square red"),
         )
-        encoder = ClipCPUEncoder(checkpoint)
-        gallery = torch.stack([encoder.encode_image(image) for image in images])
-        modifications = [encoder.encode_text(text) for _, text in cases]
-        ranks = [
-            rank_direct_composed(gallery, ids, ref, text, 0.5)
-            for (ref, _), text in zip(cases, modifications, strict=True)
+        ledger = RetrievalWorkLedger(output / "retrieval-work.sqlite")
+        encoder = ledger.run(
+            "authored-encoder-load", "shared", "encoder_load", lambda: ClipCPUEncoder(checkpoint)
+        )
+        metered = MeteredClipEncoder(encoder, ledger, "shared")
+        gallery = torch.stack(
+            [metered.encode_image(f"authored-gallery-{i}", image) for i, image in enumerate(images)]
+        )
+        modifications = [
+            metered.encode_text(f"authored-modification-{i}", text)
+            for i, (_, text) in enumerate(cases)
         ]
-        reversed_gallery = [encoder.encode_image(image) for image in reversed(images)]
-        reversed_modifications = [encoder.encode_text(text) for _, text in reversed(cases)]
+        ranks = [
+            ledger.run(
+                f"authored-rank-{i}",
+                "shared",
+                "rank_callback",
+                lambda ref=ref, text=text: rank_direct_composed(gallery, ids, ref, text, 0.5),
+            )
+            for i, ((ref, _), text) in enumerate(zip(cases, modifications, strict=True))
+        ]
+        reversed_gallery = [
+            metered.encode_image(f"authored-gallery-repeat-{i}", image)
+            for i, image in enumerate(reversed(images))
+        ]
+        reversed_modifications = [
+            metered.encode_text(f"authored-modification-repeat-{i}", text)
+            for i, (_, text) in enumerate(reversed(cases))
+        ]
         for original, repeated in zip(gallery, reversed(reversed_gallery), strict=True):
             if not torch.equal(original, repeated):
                 raise ValueError("image encoding changed under reversed singleton traversal")
@@ -63,8 +85,15 @@ def check(checkpoint: Path, output: Path) -> dict:
             if not torch.equal(original, repeated):
                 raise ValueError("modification encoding changed under reversed traversal")
         reranks = [
-            rank_direct_composed(gallery, ids, ref, text, 0.5)
-            for (ref, _), text in zip(cases, reversed(reversed_modifications), strict=True)
+            ledger.run(
+                f"authored-rank-repeat-{i}",
+                "shared",
+                "rank_callback",
+                lambda ref=ref, text=text: rank_direct_composed(gallery, ids, ref, text, 0.5),
+            )
+            for i, ((ref, _), text) in enumerate(
+                zip(cases, reversed(reversed_modifications), strict=True)
+            )
         ]
         if ranks != reranks:
             raise ValueError("complete composed rankings changed under repeat")
@@ -93,6 +122,9 @@ def check(checkpoint: Path, output: Path) -> dict:
             result["inference_costs"] = encoder.costs
         raise
     finally:
+        if ledger is not None:
+            result["operation_ledger"] = ledger.summary()
+            ledger.close()
         result["checker_wall_seconds"] = time.monotonic() - started
         (output / "qualification.json").write_text(
             json.dumps(result, indent=2, allow_nan=False) + "\n", encoding="utf-8"

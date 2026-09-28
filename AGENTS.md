@@ -280,3 +280,12 @@ WSL六项3pass3fail，缺SciPy及既有worker包PermissionError，不算Linux通
 实worker桥接测试。只关闭工程CI待验；WSL失败、物理成本/完整controller、
 ONLINE_PINNED/selection/final及正式数据/M1/Pilot/ICMR效果仍未准入。
 见research/ICMR_AUDIT_BRIDGE_CI.md。
+
+2026-09-28T00:54:13Z：检索侧物理操作收据新增 SQLite reserve/settle、未知费用
+保留与禁止重放；审计桥强制经此记录 rank/scorer，authored CLIP checker 接
+encoder/load/rank。定向18pass2skip，最终reproduce492pass8skip/81.68s；
+全套2029pass11skip始于末两处小调整前，不当最终源码证明，exactSHA CI待验。
+fresh reviewer发现嵌套耗时误称lower bound的BLOCKING，确定性修复并唯一
+follow-up复审关闭，同家族provisional。没有新真实模型/benchmark/GPU/paid；
+全角色成本、正式数据/许可、ONLINE_PINNED、M1/Pilot/ICMR效果仍未准入。
+见research/ICMR_WORK_LEDGER.md；历史账本/default4/无timer不变。

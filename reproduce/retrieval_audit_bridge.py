@@ -19,6 +19,7 @@ from promptwitness.incremental.journal import AuditJournal
 from promptwitness.incremental.optimizers import ActualScoreVector, complete_survivor_scores
 from promptwitness.incremental.sampling import AuditPlan
 from reproduce.retrieval_role_scoring import DATASETS, score_rankings_restricted
+from reproduce.retrieval_work_ledger import RetrievalWorkLedger
 
 
 class RetrievalAuditBridge:
@@ -39,6 +40,7 @@ class RetrievalAuditBridge:
         dataset: str,
         plan: AuditPlan,
         journal: AuditJournal,
+        work_ledger: RetrievalWorkLedger,
         unit_ids: tuple[str, ...],
         rank_one: Callable[[str], tuple[str, ...]],
     ) -> None:
@@ -60,6 +62,7 @@ class RetrievalAuditBridge:
         self.dataset = dataset
         self.plan = plan
         self.journal = journal
+        self.work_ledger = work_ledger
         self.rank_one = rank_one
         self.unit_ids = unit_ids
         self._last_gate: GateResult | None = None
@@ -67,12 +70,26 @@ class RetrievalAuditBridge:
     def _score(self, unit: str) -> int:
         if unit not in self.unit_ids:
             raise ValueError("query is outside the frozen audit population")
-        ranking = self.rank_one(unit)
+        ranking = self.work_ledger.run(
+            f"{self.dataset}:{self.plan.sha256}:{unit}:rank",
+            "search",
+            "rank_callback",
+            lambda: self.rank_one(unit),
+        )
         if not isinstance(ranking, tuple):
             raise ValueError("ranker must return a complete immutable ranking")
-        work = Path(tempfile.mkdtemp(prefix="retrieval-score-", dir=self.scratch_root))
-        report = score_rankings_restricted(
-            self.store, work, self.dataset, "search", {unit: ranking}
+
+        def restricted_score():
+            work = Path(tempfile.mkdtemp(prefix="retrieval-score-", dir=self.scratch_root))
+            return score_rankings_restricted(
+                self.store, work, self.dataset, "search", {unit: ranking}
+            )
+
+        report = self.work_ledger.run(
+            f"{self.dataset}:{self.plan.sha256}:{unit}:score",
+            "search",
+            "restricted_score",
+            restricted_score,
         )
         score = report["observations"][unit]["primary_hit"]
         if type(score) is not int or score not in (0, 1):
