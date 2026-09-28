@@ -265,3 +265,11 @@ CI run36359379065终态success15/15；Ubuntu3.14 2027pass1skip127warnings，
 新Linux实际worker测试在通过增量中。受限scorer仅不直接返回原始target/subset；
 逐查询指标可被反复探测推断标签，控制器预算/journal/selector尚缺，不能宣布
 完全盲评、M1或Pilot。见research/ICMR_RESTRICTED_SCORING.md。
+
+2026-09-28T00:08:54Z：新检索审计桥已将原冻结AuditPlan/AuditJournal/gate
+与检索专用scorer连接；失败不补零/不重放、ELIGIBLE survivor补全、显式
+selector人口顺序和混合0/1对齐。本机最终reproduce486pass8skip/119.85s，
+定向5pass1skip；fresh审查same-family/provisional无本增量blocker。
+WSL六项3pass3fail，缺SciPy及既有worker包PermissionError，不算Linux通过。
+待新SHA CI；物理模型成本、完整controller、ONLINE_PINNED、selection/final、
+正式数据/M1/Pilot/论文仍未准入。见research/ICMR_AUDIT_BRIDGE.md。

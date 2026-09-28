@@ -504,3 +504,15 @@
 | 2026-09-27T23:44:46Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260927_234446.md | implementation | tracker同字节快照 |
 | 2026-09-27T23:44:46Z | experiment-bridge | AGENTS.md | implementation | 精确CI终态与反馈风险dashboard |
 | 2026-09-27T23:44:46Z | experiment-bridge | findings.md | implementation | 反馈探测风险与M1下一门禁 |
+| 2026-09-28T00:08:54Z | experiment-bridge | reproduce/retrieval_audit_bridge.py | implementation | 原冻结gate/journal接检索受限scorer及真实survivor补全 |
+| 2026-09-28T00:08:54Z | experiment-bridge | tests/reproduce/test_retrieval_audit_bridge.py | implementation | authored前缀、混合分数ID顺序、失败收费/不重放及Linux实worker |
+| 2026-09-28T00:08:54Z | experiment-bridge | research/ICMR_AUDIT_BRIDGE_20260928_000854.md | implementation | 窄桥工程证据、WSL失败与科学限制 |
+| 2026-09-28T00:08:54Z | experiment-bridge | research/ICMR_AUDIT_BRIDGE.md | implementation | 同内容latest copy |
+| 2026-09-28T00:08:54Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | fresh同家族审查与WSL失败记录 |
+| 2026-09-28T00:08:54Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260928_000854.md | implementation | 审查同字节快照 |
+| 2026-09-28T00:08:54Z | experiment-bridge | research/ACCESS_AUDIT.md | implementation | authored限定访问及未认证来源说明 |
+| 2026-09-28T00:08:54Z | experiment-bridge | research/ACCESS_AUDIT_20260928_000854.md | implementation | 访问同字节快照 |
+| 2026-09-28T00:08:54Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 桥接状态与精确CI待验 |
+| 2026-09-28T00:08:54Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_000854.md | implementation | tracker同字节快照 |
+| 2026-09-28T00:08:54Z | experiment-bridge | AGENTS.md | implementation | 桥接dashboard及WSL失败 |
+| 2026-09-28T00:08:54Z | experiment-bridge | findings.md | implementation | selector顺序修复与未准入门禁 |

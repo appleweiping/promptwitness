@@ -168,3 +168,10 @@ search抽样与fit/selection完整人口不同。Windows本地套件481pass7skip
 2027pass1skip127warnings，新9项含真实受限scorer。对威胁边界再核：不直接
 返回原始target/subset不等于不可推断；逐查询hit反馈可被自适应探测，正式
 controller仍需调用预算、journal、selector授权和sealed final。M1继续未准入。
+
+2026-09-28T00:08:54Z 新检索桥把固定随机前缀、逻辑episode及restricted
+scorer真正连接；自审修正survivor随机顺序导致native selector ID错配，
+混合0/1 fixture通过。fresh同家族provisional无源码blocker，Windows最终
+reproduce486pass8skip/119.85s（定向5pass1skip）。WSL实际3pass3fail：
+缺SciPy、既有worker包PermissionError，不能作Linux资格。新SHA CI待跑；
+回调冻结、物理成本、selection/final与正式数据依旧M1门禁。
