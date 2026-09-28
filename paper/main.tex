@@ -1,0 +1,342 @@
+\documentclass[11pt]{article}
+\usepackage[review]{acl}
+\usepackage{times}
+\usepackage{latexsym}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{microtype}
+\usepackage{inconsolata}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{xcolor}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+
+\newtheorem{proposition}{Proposition}
+\newcommand{\graft}{\textsc{Graft}}
+\newcommand{\greater}{\textsc{GReaTer}}
+\newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
+\newcommand{\R}{\mathbb{R}}
+
+\title{Beyond Tokens: Exact Structural Gradients for\\ Self-Optimizing Prompts of Small Language Models}
+
+\author{Anonymous ACL submission}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Gradient-based prompt optimization lets a small language model improve its own
+prompt without a larger critic model, but existing methods such as \greater{}
+edit one token at a time. Token coordinates cannot change a prompt's length or
+structure and often yield ungrammatical instructions. We move gradient feedback to
+the level at which prompts are actually engineered: typed instruction blocks.
+\graft{} places every candidate rewrite of every block in a parallel slot of a
+single sequence, connects it to downstream tokens through a differentiable
+attention gate, and moves later tokens by a continuous slot offset realized as an
+extra rotary rotation. Every vertex of this relaxation is exactly a real edited
+prompt---including edits that change length, delete a block or insert a new
+one---so structural edits have the same exact-vertex property that one-hot
+relaxations give tokens. We show that plain first-order gate derivatives are
+unusable because attention saturates, and derive a renormalized superposed
+patching estimator that keeps each layer's attention exact and linearizes only
+through later layers, scoring all single-block edits with one forward and one
+backward pass. \todo{headline results: fidelity, accuracy vs.\ GReaTer, cost, transfer.}
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+
+Automatic prompt optimization is most attractive exactly where it is hardest: for
+small, locally deployed models that cannot rely on a stronger model to critique
+their prompts. \greater{} \citep{das2025greater} showed that such models can
+optimize their own prompts if the optimization signal is a true gradient of the
+task loss computed \emph{over the model's own reasoning}: the model reasons under
+the current prompt, an extractor elicits its answer, and the gradient of the
+answer loss with respect to one-hot prompt tokens ranks token substitutions.
+
+Token coordinates are, however, a mismatch for how prompts are built and
+maintained. Practitioners write prompts as structured documents---role, task,
+strategy, output contract, examples, tool descriptions---and review them as
+structural diffs. A token swap cannot delete a harmful instruction, add a missing
+procedure or replace a sentence by one of a different length, and optimizing
+token by token tends to produce text that is hard to read and brittle
+(\S\ref{sec:brittle}). Recent systems edit larger units but either use gradients
+only to \emph{locate} a segment and then score rewrites by explicit evaluation
+\citep{zhao2026gmpo,chakma2026gradpo}, or replace gradients by textual
+feedback \citep{yuksekgonul2024textgrad,sharma2026mpo}.
+
+We ask whether true gradient feedback can operate directly on typed prompt blocks.
+The obstacle is that alternative blocks have different token lengths, so the
+linearizations behind \greater{} and GCG \citep{zou2023gcg}---which relax a
+token into the simplex over the vocabulary---are undefined. Our contributions:
+
+\begin{itemize}
+\item \textbf{An exact structural edit calculus} (\S\ref{sec:calculus}). All
+candidate rewrites of all blocks share one sequence in parallel slots, gated into
+downstream attention, with a continuous per-slot position offset implemented as an
+extra rotary rotation. Every vertex---replacement, deletion, insertion and
+multi-block combinations---is exactly the corresponding real prompt.
+\item \textbf{A faithful one-pass estimator} (\S\ref{sec:estimator}). We prove
+that first-order gate derivatives saturate and confirm that they do not rank real
+edits; renormalized superposed patching instead keeps attention exact per layer
+and ranks edits closely to exact evaluation at a fraction of its cost.
+\item \textbf{\graft{}}, a \greater{}-style self-optimization loop over typed
+blocks (\S\ref{sec:graft}), evaluated on \greater{}'s protocol with its models
+\todo{results summary}.
+\end{itemize}
+
+\section{Background: gradients over reasoning}
+\label{sec:background}
+
+Let $f_\theta$ be a frozen causal language model, $P$ a prompt with input slot, and
+$(x,y)$ a task example. \greater{} generates reasoning $r\sim f_\theta(\cdot\mid P(x))$,
+appends an extractor $e$ (e.g.\ ``Therefore, the final answer is''), and scores the
+answer by
+\begin{equation}
+\ell(P;x,y,r) = -\log p_\theta\big(y \mid P(x)\oplus r\oplus e\big).
+\label{eq:loss}
+\end{equation}
+Holding $r$ fixed, it differentiates $\ell$ with respect to the one-hot indicator
+$\epsilon_i$ of prompt token $i$, keeps the $k$ candidates proposed by the model's
+own next-token distribution, and ranks them by $\nabla_{\epsilon_i}\ell\cdot(\mathbf e_v-\mathbf e_{p_i})$
+before verifying a few by an actual forward pass. The vertices of the one-hot
+simplex are real tokens, which is what makes the first-order score meaningful.
+We keep \greater{}'s objective and its self-optimization setting and change the
+coordinate from tokens to blocks.
+
+\section{An exact structural edit calculus}
+\label{sec:calculus}
+
+\paragraph{Structured prompts.} A prompt is a sequence of typed blocks
+$P=(b_1,\dots,b_m)$ inside chat messages; each block has a type (task, strategy,
+procedure, output, input, example), an editable flag and required literals, as in
+the PromptWitness document model. An empty editable block is an \emph{insertion
+slot}. The edit space of slot $j$ is its candidate set $C_j$ (rewrites, or new
+blocks for an empty slot) plus deletion.
+
+\paragraph{Superposed sequence.} For one example we build a single token sequence
+containing the incumbent prompt $P(x)$, the tokens of every candidate $c\in C_j$
+for every slot, and the tail $r\oplus e\oplus y$. Candidate tokens of slot $j$ may
+attend only to the prefix before slot $j$ and to earlier tokens of the same
+candidate; tokens after slot $j$ may attend to the incumbent and to all candidates
+of slot $j$. Attention of query $t$ over its visible keys $u$ is
+\begin{equation}
+a_{tu}=\frac{G_{tu}\exp(s_{tu}-m_t)}{\sum_{v}G_{tv}\exp(s_{tv}-m_t)},\qquad
+G_{tu}=g_{\sigma(u)},
+\label{eq:gate}
+\end{equation}
+where $\sigma(u)$ is the segment of key $u$ (an incumbent block or a candidate),
+$g$ is a vector of gates and $G_{tu}=1$ for ungated keys and for keys in the
+query's own segment. Because the gate multiplies after the max-shift, $g=0$
+removes a key exactly and derivatives at $g=0$ are exact one-sided derivatives.
+
+\paragraph{Slot offsets.} Candidates start at their incumbent's first position.
+Each slot $j$ carries a continuous offset $\omega_j$; every token $t$ after the
+slot is moved by $\Omega_t=\sum_j M_{tj}\omega_j$ positions, where $M_{tj}=1$ iff
+$t$ follows slot $j$. Since rotary scores depend only on position differences and
+rotations compose, this is an extra rotation $R(\Omega_t)$ of queries and keys:
+$s_{tu}=\langle R(\Omega_t)\tilde q_t, R(\Omega_u)\tilde k_u\rangle/\sqrt d$, with
+$\tilde q,\tilde k$ the model's rotated vectors.
+
+\begin{proposition}[Exact base point]
+At $g^0$ (incumbents $1$, candidates $0$) and $\omega=0$, every prompt and tail
+token has the hidden states of $f_\theta$ on $P(x)\oplus r\oplus e\oplus y$.
+\end{proposition}
+
+\begin{proposition}[Exact vertices]
+Choose for each slot one of \{keep, delete, candidate $c$\}. Set the chosen
+candidate's gate to $1$, the incumbent's gate to $0$ if it is replaced or deleted,
+and $\omega_j=|c|-|b_j|$ (or $-|b_j|$ for deletion, $|c|$ for insertion). Then the
+superposed computation equals $f_\theta$ on the correspondingly edited prompt.
+\end{proposition}
+
+Proofs are by induction over layers (Appendix~\ref{app:proofs}): at every layer,
+the keys with non-zero gate visible to a non-candidate query are exactly the tokens
+preceding it in the edited prompt, their position differences equal those in the
+edited prompt, and chosen candidates see exactly their edited-prompt prefix. The
+relaxation is therefore the block-level counterpart of the one-hot simplex:
+\greater{}'s vertices are real tokens; ours are real structured prompts, of any
+length. We verify both propositions numerically in fp32 for Llama, Gemma-2 (with
+logit soft-capping) and OLMo-3 architectures, including three simultaneous edits
+(Appendix~\ref{app:tests}).
+
+\section{Estimating structural edits in one pass}
+\label{sec:estimator}
+
+\paragraph{First-order gate derivatives saturate.} The straight line from the base
+point to a replacement vertex gives
+$\widehat{\Delta\ell}_{\text{gate}}(b_j\!\to\!c)=\partial_{g_c}\ell-\partial_{g_{b_j}}\ell+(|c|-|b_j|)\,\partial_{\omega_j}\ell$.
+For one attention row, with $Z_0$ the existing mass and $S_c=\sum_{u\in c}e^{s_{tu}-m_t}$
+the candidate's mass, $\partial o_t/\partial g_c|_{0}=(S_c/Z_0)(\bar v_c-o_t)$ while the
+actual insertion moves the output by $\frac{S_c}{Z_0+S_c}(\bar v_c-o_t)$. The linear
+extrapolation overshoots by the factor $(Z_0+S_c)/Z_0$, which is unbounded when a
+block attracts more mass than the rest of the context---typical for instruction
+blocks read by reasoning tokens. Empirically (\S\ref{sec:fidelity}) the estimates
+reach hundreds of nats for edits whose true effect is below three, and they do not
+rank edits.
+
+\paragraph{Renormalized superposed patching.} The superposed pass already contains,
+at every layer $\ell$, the exact keys and values of every candidate. For a
+downstream query $t$ of slot $j$ and an alternative $a$ (a candidate or nothing), we
+compute the attention output with the slot swapped \emph{exactly},
+\begin{equation}
+o^{\ell}_t(a)=\frac{N^{\ell}_{\mathrm{pre}}(\delta_a)+N^{\ell}_a(\delta_a)+N^{\ell}_{\mathrm{post}}}
+{Z^{\ell}_{\mathrm{pre}}(\delta_a)+Z^{\ell}_a(\delta_a)+Z^{\ell}_{\mathrm{post}}},
+\end{equation}
+where $N,Z$ are value-weighted and total exponentiated scores over prefix keys,
+the alternative's keys and post-slot keys, and $\delta_a$ is the length change,
+applied as an exact rotation of the query against prefix and candidate keys.
+Only the propagation through later layers is linearized:
+\begin{equation}
+\widehat{\Delta\ell}_{\text{patch}}(a)=\sum_{\ell}\sum_{t\in D_j}
+\big\langle \nabla_{o^{\ell}_t}\ell,\; o^{\ell}_t(a)-o^{\ell}_t(b_j)\big\rangle .
+\label{eq:patch}
+\end{equation}
+This carries the key insight of AtP* \citep{kramar2024atp}---keep attention exact,
+linearize elsewhere---from interpretability to prompt search; the superposed
+layout is what makes every candidate's exact keys and values available in a single
+pass. The gradients $\nabla_{o^\ell}\ell$ come from one backward pass, and the extra
+attention arithmetic is small next to the forward pass.
+
+\section{\graft{}: gradient-guided structural self-optimization}
+\label{sec:graft}
+
+\begin{algorithm}[t]
+\caption{\graft{}}
+\label{alg:graft}
+\begin{algorithmic}[1]
+\Require model $f_\theta$, typed prompt $P$, train set $D$, rounds $R$
+\For{$\rho=1,\dots,R$}
+  \State sample minibatch $B\subset D$; reasoning $r_i\sim f_\theta(P(x_i))$
+  \State propose $K$ label-free candidates per slot with $f_\theta$ (unlabeled inputs only)
+  \State filter by PromptWitness policies (required literals, variables, length)
+  \State score every edit by Eq.~\ref{eq:patch}, averaged over $B$ (one fwd/bwd per example)
+  \State verify the top-$\mu$ edits with fresh reasoning on $B$
+  \State accept the best if it improves minibatch accuracy (ties: answer loss)
+\EndFor
+\State select among accepted prompts on dev; evaluate once on test
+\end{algorithmic}
+\end{algorithm}
+
+As in \greater{}, the model optimizes its own prompt, supervision enters only
+through the loss, and candidates come from the model itself: \greater{} uses the
+model's top-$k$ next tokens given task inputs; \graft{} asks the model for
+type-conditioned rewrites or new blocks given unlabeled task inputs.
+Each accepted edit is recorded as a PromptWitness structural diff with its
+predicted and measured effect.
+
+\section{Experimental setup}
+\label{sec:setup}
+
+\todo{models, 21 BBH tasks + GSM8K + FOLIO with GReaTer's split sizes; shared
+two-stage reader; baselines: ZS-CoT, GReaTer initial prompt, GReaTer published
+prompts selected on dev, textual gradients with the same model, exact-scoring and
+random-shortlist controls with identical proposals and verification; costs.}
+
+\section{Results}
+\label{sec:results}
+
+\subsection{Fidelity of structural gradients}
+\label{sec:fidelity}
+\todo{Table: Spearman / normalized regret for patch vs gate variants across models and tasks; cost per example.}
+
+\subsection{Main results}
+\todo{Table: per-task accuracy vs GReaTer and baselines.}
+
+\subsection{Cost}
+\todo{GPU seconds and model calls to reach accuracy.}
+
+\subsection{Readability, robustness and transfer}
+\label{sec:brittle}
+\todo{Transfer across models; perplexity; perturbation sensitivity; examples.}
+
+\section{Related work}
+\label{sec:related}
+
+\paragraph{Gradient-based discrete prompt search.} AutoPrompt \citep{shin2020autoprompt},
+GCG \citep{zou2023gcg}, PEZ \citep{wen2023hard} and \greater{} \citep{das2025greater}
+relax tokens into the vocabulary simplex or embedding space. \graft{} relaxes
+blocks, and its vertices remain exact for length-changing edits.
+
+\paragraph{Segment- and structure-level optimization.} GMPO \citep{zhao2026gmpo},
+PMPO \citep{zhao2025pmpo} and GradPO \citep{chakma2026gradpo} use masking or
+gradients to locate influential segments and score generated rewrites by explicit
+evaluation; SAMMO \citep{schnabel2024sammo}, SPRIG \citep{zhang2024sprig},
+MIPRO \citep{opsahl2024mipro} and modular prompt optimization with section-local
+textual gradients \citep{sharma2026mpo} search over prompt structure without model
+gradients. \graft{} scores the candidate rewrites themselves with one gradient pass.
+
+\paragraph{Attribution and parallel contexts.} Attribution patching and AtP*
+\citep{syed2024atp,kramar2024atp} estimate interventions to first order; ContextCite
+\citep{cohenwang2024contextcite} attributes generations to context sources.
+Parallel context windows \citep{ratner2023pcw} and superposition prompting
+\citep{merth2024superposition} process prompt segments in parallel paths for
+efficiency. We combine parallel paths, exact positional offsets and exact attention
+to estimate the effect of structural edits for optimization.
+
+\section*{Limitations}
+\todo{fixed-reasoning approximation; first-order through later layers; single-slot estimates; white-box models; tasks with extractable answers; compute from one GPU.}
+
+\bibliography{references}
+
+\appendix
+\section{Proofs}
+\label{app:proofs}
+
+\paragraph{Setting.} We consider decoder-only transformers whose token mixing is
+causal softmax attention with rotary position embeddings, possibly with logit
+soft-capping and grouped-query attention; all other sublayers act on tokens
+independently. We require that edits \emph{tokenize cleanly}: the edited prompt's
+token sequence is the incumbent's prefix tokens, the candidate's tokens and the
+incumbent's suffix tokens (edits violating this are excluded, which happens rarely
+because blocks end at line breaks). Sliding windows are assumed to exceed the
+sequence length, which our implementation asserts.
+
+\paragraph{Proof of Proposition 1.} By induction over layers we show that every
+non-candidate token $t$ has the hidden state of the reference computation on
+$P(x)\oplus r\oplus e\oplus y$. At the input, token identities and positions agree
+($\Omega=0$). At a layer, the keys visible to $t$ are the non-candidate tokens that
+precede it in the reference order, with gate $1$, and candidate tokens with gate
+$0$. The latter contribute $0\cdot\exp(s_{tu}-m_t)=0$ to both the numerator and the
+denominator of Eq.~\ref{eq:gate}; the max-shift $m_t$ may include them but softmax
+is shift-invariant. Keys and values of the former equal the reference ones by the
+induction hypothesis, and all other sublayers are tokenwise. \hfill$\square$
+
+\paragraph{Proof of Proposition 2.} Fix a choice $e_j\in\{\text{keep},\text{delete},c_j\}$
+per slot and let $P'$ be the edited prompt. Map every retained non-candidate token
+$t$ and every chosen candidate token to its counterpart in $P'$. Its position in
+$P'$ is its base position plus the cumulative length change of the edits before
+it, $\sum_{k\prec t}(|e_k|-|b_k|)$, which is exactly $\pi_t+\Omega_t$ at
+$\omega_k=|e_k|-|b_k|$ (candidates start at their slot's first position and move
+only with earlier slots). The keys with non-zero gate visible to a mapped query are
+exactly the tokens preceding it in $P'$: removed incumbents and unchosen
+candidates have gate $0$; a chosen candidate of slot $j$ sees the prefix before
+slot $j$ and the chosen candidates of earlier slots; a later token sees retained
+incumbents and chosen candidates. Rotary scores depend only on position
+differences, which agree with $P'$. The induction of Proposition~1 then applies
+verbatim to the mapped tokens, so the loss equals $\ell(P';x,y,r)$. \hfill$\square$
+
+\paragraph{Saturation of gate derivatives.} For one attention row, write the
+current output as $o_0=N_0/Z_0$ with $N_0=\sum_{u\notin c}G_{tu}e^{s_{tu}-m}v_u$,
+$Z_0=\sum_{u\notin c}G_{tu}e^{s_{tu}-m}$, and let $S_c=\sum_{u\in c}e^{s_{tu}-m}$,
+$\bar v_c=S_c^{-1}\sum_{u\in c}e^{s_{tu}-m}v_u$. Then
+$o(g)=\frac{N_0+gS_c\bar v_c}{Z_0+gS_c}$, so
+\begin{equation*}
+\frac{\partial o}{\partial g}\Big|_{0}=\frac{S_c}{Z_0}\,(\bar v_c-o_0),\qquad
+o(1)-o(0)=\frac{S_c}{Z_0+S_c}\,(\bar v_c-o_0).
+\end{equation*}
+The first-order extrapolation exceeds the actual change by the factor
+$1+S_c/Z_0$ in every head and layer, before any downstream nonlinearity. A
+candidate block that competes with an instruction block already holding most of a
+reading token's attention has $S_c/Z_0\gg1$, so raw gate derivatives are dominated
+by attention mass rather than by the effect of the edit. The renormalized estimator
+of Eq.~\ref{eq:patch} uses $o(1)-o(0)$ exactly.
+
+\section{Numerical verification}
+\label{app:tests}
+\todo{fp32 tests: base, replacement, deletion, insertion, combined vertices; finite-difference gate/offset gradients; three architectures and three chat templates.}
+
+\end{document}

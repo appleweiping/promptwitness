@@ -51,6 +51,11 @@ class Example:
     question: str
     answer: str  # canonical gold string: "(B)", "Yes", "12"
 
+    @property
+    def row_id(self) -> str:
+        """Alias used by the structured-gradient pilot record format."""
+        return self.example_id
+
 
 @dataclass(frozen=True, slots=True)
 class TaskSpec:
