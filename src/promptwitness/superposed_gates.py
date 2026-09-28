@@ -267,6 +267,8 @@ def build_superposed(
     for block_id, texts in candidates.items():
         lo, hi = spans[block_id]
         for candidate_index, text in enumerate(texts):
+            if text is None:  # placeholder: keeps indices stable when passes are chunked
+                continue
             ids = candidate_token_ids(prompt, tokenizer, values, block_id, text)
             if ids is None:
                 unaligned.append((block_id, candidate_index, text))

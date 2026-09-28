@@ -76,6 +76,8 @@ class Runner:
                  max_new_tokens: int) -> None:
         self.model, self.tokenizer, self.spec, self.ledger = model, tokenizer, spec, ledger
         self.max_new_tokens = max_new_tokens
+        self.use_reasoning = True  # False: GReaTer's no-reasoning ablation for scoring
+        self.candidates_per_pass = 32
         self.extractor = tokenizer.encode(spec.extractor, add_special_tokens=False)
 
     def ids(self, prompt: StructuredPrompt, example: graft_tasks.Example) -> list[int]:
@@ -118,7 +120,7 @@ def propose(runner: Runner, prompt: StructuredPrompt, slot: str, questions: list
     context = "".join(b.text for b in prompt.blocks if b.editable)
     requests = []
     if block.text:
-        for operator in REWRITE_OPERATORS[:k]:
+        for operator in (REWRITE_OPERATORS[i % len(REWRITE_OPERATORS)] for i in range(k)):
             requests.append(
                 "You are improving one block of an instruction prompt for a language model.\n"
                 f"All current instructions:\n{context}\nBlock to edit ({block.kind.value}): "
@@ -126,7 +128,7 @@ def propose(runner: Runner, prompt: StructuredPrompt, slot: str, questions: list
                 "Return only the new text of this block. Do not solve the examples, do not "
                 "mention specific answers, and do not add placeholders.")
     else:
-        for operator in INSERT_OPERATORS[:k]:
+        for operator in (INSERT_OPERATORS[i % len(INSERT_OPERATORS)] for i in range(k)):
             requests.append(
                 "You are adding one new block to an instruction prompt for a language model.\n"
                 f"All current instructions:\n{context}\nNew block type: {block.kind.value}\n"
@@ -243,7 +245,7 @@ def delete_block(prompt: StructuredPrompt, slot: str) -> StructuredPrompt:
     return StructuredPrompt(replace(prompt.document, messages=messages), blocks)
 
 
-def score_edits(method: str, runner: Runner, scorer: GateScorer, prompt: StructuredPrompt,
+def score_edits(method: str, runner: Runner, scorer: GateScorer, prompt: StructuredPrompt,  # noqa: PLR0913
                 pools: dict[str, list[str]], edits: list[Edit], batch: list[graft_tasks.Example],
                 reasoning: list[list[int]], rng: random.Random) -> dict[Edit, float]:
     """Estimated loss change per edit (lower is better), averaged over the minibatch."""
@@ -254,7 +256,7 @@ def score_edits(method: str, runner: Runner, scorer: GateScorer, prompt: Structu
     if method == "exact":
         pairs, owners = [], []
         for example, reason in zip(batch, reasoning):
-            tail = reason + runner.extractor
+            tail = (reason if runner.use_reasoning else []) + runner.extractor
             base = runner.ids(prompt, example)
             pairs.append((base + tail, runner.target(example)))
             owners.append(None)
@@ -271,22 +273,33 @@ def score_edits(method: str, runner: Runner, scorer: GateScorer, prompt: Structu
         runner.ledger.add("score_exact", perf_counter() - started, forwards=len(pairs),
                           forward_tokens=sum(len(p) + len(a) for p, a in pairs))
         return totals
-    candidates = {slot: [text for text in texts] for slot, texts in pools.items()}
-    tokens = 0
-    for example, reason in zip(batch, reasoning):
-        seq = build_superposed(prompt, runner.tokenizer, {"input": example.question}, candidates,
-                               reason + runner.extractor, runner.target(example), mode="exact")
-        tokens += len(seq.input_ids)
-        if method == "patch":
-            _, est = patch_estimates(scorer, seq)
-        else:
-            flat = edit_scores(seq, scorer.gradients(seq))
-            est = {(s, i): v for s, d in flat["replacement"].items() for i, v in d.items()}
-            est.update({(s, None): v for s, v in flat["deletion"].items()})
-        for edit in edits:
-            totals[edit] += est.get(edit, 0.0) / len(batch)
-    runner.ledger.add(f"score_{method}", perf_counter() - started, forwards=len(batch),
-                      backwards=len(batch), forward_tokens=tokens)
+    # Superposed passes of bounded size; indices stay stable via None placeholders.
+    replacements = [e for e in edits if e[1] is not None]
+    size = max(1, runner.candidates_per_pass)
+    chunks = [replacements[i : i + size] for i in range(0, len(replacements), size)] or [[]]
+    tokens = passes = 0
+    for chunk_index, chunk in enumerate(chunks):
+        members = set(chunk)
+        candidates = {slot: [text if (slot, i) in members else None for i, text in enumerate(texts)]
+                      for slot, texts in pools.items()}
+        for example, reason in zip(batch, reasoning):
+            seq = build_superposed(prompt, runner.tokenizer, {"input": example.question}, candidates,
+                                   (reason if runner.use_reasoning else []) + runner.extractor,
+                                   runner.target(example), mode="exact")
+            tokens += len(seq.input_ids)
+            passes += 1
+            if method == "patch":
+                _, est = patch_estimates(scorer, seq, include_deletions=chunk_index == 0)
+            else:
+                flat = edit_scores(seq, scorer.gradients(seq))
+                est = {(s, i): v for s, d in flat["replacement"].items() for i, v in d.items()}
+                if chunk_index == 0:
+                    est.update({(s, None): v for s, v in flat["deletion"].items()})
+            for edit in edits:
+                if edit in est:
+                    totals[edit] += est[edit] / len(batch)
+    runner.ledger.add(f"score_{method}", perf_counter() - started, forwards=passes,
+                      backwards=passes, forward_tokens=tokens)
     return totals
 
 
@@ -305,6 +318,9 @@ def main() -> None:
     parser.add_argument("--max-new-tokens", type=int, default=384)
     parser.add_argument("--eval-max-new-tokens", type=int, default=512)
     parser.add_argument("--dev-checkpoints", type=int, default=3)
+    parser.add_argument("--candidates-per-pass", type=int, default=32)
+    parser.add_argument("--no-reasoning-scores", action="store_true",
+                        help="ablation: score edits without reasoning in the tail")
     parser.add_argument("--attn", default="sdpa")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
@@ -322,6 +338,8 @@ def main() -> None:
     splits = graft_tasks.load_splits(args.data_dir, args.task)
     ledger = Ledger()
     runner = Runner(model, tokenizer, spec, ledger, args.max_new_tokens)
+    runner.use_reasoning = not args.no_reasoning_scores
+    runner.candidates_per_pass = args.candidates_per_pass
     rng = random.Random(args.seed)
     prompt = graft_tasks.initial_prompt()
     accepted: list[dict[str, Any]] = [{"round": 0, "text": prompt.document.messages[0].content}]
