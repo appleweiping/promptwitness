@@ -189,6 +189,35 @@ def initial_prompt(*, insertion_slot: bool = True) -> StructuredPrompt:
     return StructuredPrompt(document, tuple(blocks))
 
 
+_PREAMBLE = re.compile(
+    r"^\s*(here(?:'s| is| are)|sure|certainly|okay|ok|below is|revised|new|improved|updated|"
+    r"rewritten|the (?:new|revised|improved|updated))\b[^\n]*:\s*$",
+    re.IGNORECASE,
+)
+_LABEL = re.compile(
+    r"^\s*(?:\*\*)?(?:block(?: type)?|new block|revised block|task_instruction|reasoning_policy|"
+    r"output_instruction|strategy|procedure|output|instruction)(?:\*\*)?\s*:\s*(?:\*\*)?\s*$",
+    re.IGNORECASE,
+)
+
+
+def clean_proposal(text: str) -> str:
+    """Strip proposer meta-text so only the block content becomes a candidate.
+
+    Removes chatty preambles ("Here is the revised block:"), bare type labels
+    ("reasoning_policy:"), markdown emphasis, surrounding quotes and code fences.
+    Returns "" when nothing substantive is left.
+    """
+    if "NEW BLOCK:" in text:
+        text = text.split("NEW BLOCK:")[-1]
+    lines = [line.rstrip() for line in text.replace("```", "").splitlines()]
+    kept = [line for line in lines if not _PREAMBLE.match(line) and not _LABEL.match(line)]
+    body = "\n".join(kept).strip().strip('"').strip("'").strip()
+    body = re.sub(r"\*\*(.+?)\*\*", r"\1", body)
+    body = re.sub(r"\n{3,}", "\n\n", body)
+    return body + "\n" if body else ""
+
+
 def flat_prompt(text: str) -> StructuredPrompt:
     """A one-block prompt (for published token-level prompts and ZS-CoT baselines)."""
     content = "{{input}}\n\n" + text.strip() + "\n"

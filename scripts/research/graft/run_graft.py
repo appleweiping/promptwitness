@@ -99,7 +99,8 @@ class Runner:
         """Two-stage reader: greedy reasoning, extractor, short greedy answer."""
         prompts = [self.ids(prompt, e) for e in examples]
         gens, seconds, tokens = generate_batch(self.model, self.tokenizer, prompts,
-                                               max_new_tokens=max_new_tokens or self.max_new_tokens)
+                                               max_new_tokens=max_new_tokens or self.max_new_tokens,
+                                               batch_size=32)
         self.ledger.add(phase + "_reasoning", seconds, generated=tokens,
                         prompt_tokens=sum(map(len, prompts)))
         reads_in = [p + list(g.token_ids) + self.extractor for p, g in zip(prompts, gens)]
@@ -164,9 +165,9 @@ def propose(runner: Runner, prompt: StructuredPrompt, slot: str, questions: list
                              max_new_tokens=96, do_sample=True, temperature=0.8, top_p=0.95,
                              pad_token_id=pad)
     for row in gen[:, width:]:
-        text = tokenizer.decode(row, skip_special_tokens=True).strip().strip('"').strip()
+        text = graft_tasks.clean_proposal(tokenizer.decode(row, skip_special_tokens=True))
         if text:
-            outputs.append(text if text.endswith("\n") else text + "\n")
+            outputs.append(text)
     runner.ledger.add("proposal", perf_counter() - started, generated=int(gen[:, width:].numel()))
     return outputs
 
@@ -205,8 +206,8 @@ def textual_gradient_pools(runner: Runner, prompt: StructuredPrompt, batch: list
                                  do_sample=True, temperature=0.7, top_p=0.95,
                                  pad_token_id=tokenizer.eos_token_id)
         text = tokenizer.decode(gen[0, ids.shape[1]:], skip_special_tokens=True)
-        new = text.split("NEW BLOCK:")[-1].strip().strip('"').strip() if "NEW BLOCK:" in text else ""
-        pools[block.block_id] = [new + "\n"] if new else []
+        new = graft_tasks.clean_proposal(text) if "NEW BLOCK:" in text else ""
+        pools[block.block_id] = [new] if new else []
     runner.ledger.add("textgrad_feedback", perf_counter() - started)
     return pools
 
