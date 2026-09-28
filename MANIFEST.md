@@ -716,3 +716,9 @@
 | 2026-09-28T08:27:46Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 同字节latest copy |
 | 2026-09-28T08:27:46Z | experiment-bridge | findings.md | implementation | 本地证据与未准入项 |
 | 2026-09-28T08:27:46Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |
+| 2026-09-28T08:37:02Z | experiment-bridge | research/ICMR_SELECTION_RANK_ISOLATION_CI_20260928_083702.md | implementation | e0c6dae精确CI15/15与边界 |
+| 2026-09-28T08:37:02Z | experiment-bridge | research/ICMR_SELECTION_RANK_ISOLATION_CI.md | implementation | 同字节latest copy |
+| 2026-09-28T08:37:02Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_083702.md | implementation | CI终态tracker快照 |
+| 2026-09-28T08:37:02Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 同字节latest copy |
+| 2026-09-28T08:37:02Z | experiment-bridge | findings.md | implementation | 精确CI与未准入项 |
+| 2026-09-28T08:37:02Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |

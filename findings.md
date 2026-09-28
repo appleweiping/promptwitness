@@ -328,3 +328,11 @@ Ruff/format/mypy61/configured Bandit/build/Twine通过。新上下文同系列
 新SHA CI待核验；正式数据/许可/双模型/全角色成本/M1/Pilot/C1–C3
 NOT_ADMITTED。SSH指纹冲突，未连接。见
 research/ICMR_SELECTION_RANK_ISOLATION.md。
+
+2026-09-28T08:37:02Z：selection ranker 源码提交
+`e0c6daeb561ea7b9c80234012ed8c09621cea2ee` 已推送；
+精确[CI run 36397811924](https://github.com/appleweiping/promptwitness/actions/runs/36397811924)
+completed/success15/15。Ubuntu3.10/3.14各2093pass3skip，覆盖率
+94.04/94.05%。仅工程证据；正式数据/许可/真实双模型/全角色成本/
+M1/Pilot/C1–C3仍NOT_ADMITTED。见
+research/ICMR_SELECTION_RANK_ISOLATION_CI.md。

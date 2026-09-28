@@ -454,3 +454,11 @@ final 禁入不变。same-family 静态复审无实质发现，不是独立科�
 新SHA CI待验。正式图像/许可、真实双模型、全角色成本、M1/Pilot/
 C1–C3仍NOT_ADMITTED。SSH指纹未核验，未登录；default4/历史预算/
 无timer/四仓冻结不变。见research/ICMR_SELECTION_RANK_ISOLATION.md。
+
+2026-09-28T08:37:02Z：selection ranker 源码SHA
+`e0c6daeb561ea7b9c80234012ed8c09621cea2ee` 已推送；
+CI run36397811924精确匹配，completed/success15/15；Ubuntu
+3.10/3.14各2093pass3skip。CI仅授自制 input-only 工程闭环，
+正式数据/许可/真实模型/全角色预算/M1/Pilot/C1–C3仍待准入。
+SSH指纹冲突，未连接；goalACTIVE/default4/历史账本/无timer/
+其他四仓冻结不变。见research/ICMR_SELECTION_RANK_ISOLATION_CI.md。
