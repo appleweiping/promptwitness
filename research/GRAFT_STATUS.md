@@ -9,7 +9,7 @@ Dec 20, 2026 cycle), GReaTer-level protocol and writing quality.
 | What | Where |
 |---|---|
 | Code (local) | `D:\Company\nlp-original-projects\promptwitness-graft` |
-| Code (server) | `/media/lenovo/data2/promptwitness-graft` (synced by tar, not git) |
+| Code (server) | `/media/lenovo/data2/promptwitness-graft`, a git checkout of `origin/research/graft`; `.aris/sync.sh` pushes, fast-forwards the server and checks local = GitHub = server |
 | Runs (server) | `/media/lenovo/data2/promptwitness-graft-runtime/` |
 | Data (private) | `D:\Company\research-artifacts\graft-data\greater-42a22d9` (+ server copy, SHA256SUMS verified) |
 | Models (server) | OLMo-3-7B-Instruct (pilot cache); `graft-hf-cache/`: Llama-3-8B-Instruct (NousResearch re-host), Gemma-2-9B-it (unsloth re-host) |
@@ -52,6 +52,19 @@ full; everything lives on `/media/lenovo/data2`.
    holdout finish, then start Stage C.
 7. **Fidelity v2, trimmed rendering (OLMo-3, pilot prompt):** patching rho 0.79; raw
    gate variants 0.14-0.37. Untrimmed first run: 0.87 vs -0.21-0.26.
+
+8. **Fidelity v2 on OLMo-3 (4 runs: logical deduction pilot prompt x2 renderings,
+   date_understanding, formal_fallacies under the GReaTer protocol):** renormalized
+   patching mean Spearman 0.78 (0.63-0.87), normalized regret 0.17; raw gate variants
+   0.12-0.38, regret 0.87-1.37. Cost per example: patching 1.8-4.5 s for all edits,
+   per-edit exact vertex evaluation 7.8-21 s. Exact fixed-reasoning change vs fresh
+   loss change: 0.84-0.90 (logical deduction) but 0.19-0.36 (date, fallacies):
+   GReaTer's answer-only objective misses reasoning changes on some tasks.
+9. **Verified-reasoning objective** (`graft_runtime.verified_targets`): score a
+   gold-consistent self-generated reasoning plus the answer. Being measured on
+   Llama-3/Gemma-2 (12 rows) and OLMo date_understanding.
+10. **Paper** moved to the ICLR 2027 template (user request): 9-page main text,
+    required AI-use statement drafted for the authors to verify.
 
 ## Next
 
