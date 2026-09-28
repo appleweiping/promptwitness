@@ -288,3 +288,14 @@ Linux/精确SHA CI仍待验。模型 `_execute` 与ranker均为明确替身，�
 相比上一SHA新增1项Linux通过，覆盖率94.04/94.05%。这不是
 真实Qwen/OLMo或CLIP/正式数据运行，不更新科学门禁或历史费用。
 见research/ICMR_GENERATED_CHAIN_CI.md。
+
+2026-09-28T07:03:20Z：新增固定SEARLE原函数体的自制全并列CPU差分，
+保留旧无并列反例历史但在原定单query Torch backend 上验证完整55-ID
+排序和17项并列指标。私有源码SHA核验、WSL最终exit0/报告hash见
+research/ICMR_SEARLE_TIE_PARITY.md；定向43pass。只消除这一自制数值
+前置不确定性，不授真实图库/GPU/官方server/数据许可/M1/Pilot。
+fresh reviewer thread limit使审查仅local-only；无新真实模型/GPU费用。
+
+2026-09-28T07:11:20Z：本机原配置全套2058passed/21skipped、
+372.73s、coverage94.03% exit0；较上次2059/20有一项变skip，
+未归因，不把它宣称为本次通过。见后续版本研究报告。

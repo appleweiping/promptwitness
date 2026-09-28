@@ -673,3 +673,18 @@
 | 2026-09-28T06:26:24Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 同字节latest copy |
 | 2026-09-28T06:26:24Z | experiment-bridge | findings.md | implementation | Linux authored实worker完成 |
 | 2026-09-28T06:26:24Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |
+| 2026-09-28T07:03:20Z | experiment-bridge | research/ICMR_SEARLE_TIE_PARITY_20260928_070202.md | implementation | 固定函数体自制CPU全并列差分与局限 |
+| 2026-09-28T07:03:20Z | experiment-bridge | research/ICMR_SEARLE_TIE_PARITY.md | implementation | 同字节latest copy |
+| 2026-09-28T07:03:20Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260928_070320.md | implementation | fresh reviewer不可用与local-only检查 |
+| 2026-09-28T07:03:20Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | 同字节latest copy |
+| 2026-09-28T07:03:20Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_070320.md | implementation | CPU tie差分tracker快照 |
+| 2026-09-28T07:03:20Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 同字节latest copy |
+| 2026-09-28T07:03:20Z | experiment-bridge | findings.md | implementation | 自制并列证据及未准入边界 |
+| 2026-09-28T07:03:20Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |
+| 2026-09-28T07:03:20Z | experiment-bridge | research/ACCESS_AUDIT.md | implementation | 来源再核查的公开样例接触与无正式数据访问披露 |
+| 2026-09-28T07:11:20Z | experiment-bridge | research/ICMR_SEARLE_TIE_PARITY_20260928_071120.md | implementation | 完整本机测试补充与未归因skip差异 |
+| 2026-09-28T07:11:20Z | experiment-bridge | research/ICMR_SEARLE_TIE_PARITY.md | implementation | 同字节latest copy |
+| 2026-09-28T07:11:20Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_071120.md | implementation | 完整测试后tracker快照 |
+| 2026-09-28T07:11:20Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 同字节latest copy |
+| 2026-09-28T07:11:20Z | experiment-bridge | findings.md | implementation | 原配置完整测试实际结果 |
+| 2026-09-28T07:11:20Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |

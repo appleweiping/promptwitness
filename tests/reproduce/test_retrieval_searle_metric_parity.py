@@ -22,8 +22,10 @@ def test_wrong_source_is_retained_without_importing_torch(tmp_path, monkeypatch)
     with pytest.raises(ValueError, match="SHA-256 mismatch"):
         parity.check(source, output)
     report = json.loads((output / "qualification.json").read_text(encoding="utf-8"))
+    assert report["format"] == parity.FORMAT
     assert report["status"] == "FAILED_RETAINED"
     assert report["source_metric_function_bodies_executed"] is False
+    assert report["authored_cpu_tie_fixture_checked"] is False
     assert report["model_forward_calls"] == 0
 
 
@@ -39,6 +41,7 @@ def test_missing_metric_body_is_retained_before_importing_torch(tmp_path, monkey
     report = json.loads((output / "qualification.json").read_text(encoding="utf-8"))
     assert report["status"] == "FAILED_RETAINED"
     assert report["source_metric_function_bodies_executed"] is False
+    assert report["authored_cpu_tie_fixture_checked"] is False
 
 
 def test_compiled_but_unexecuted_metric_bodies_are_not_claimed(tmp_path, monkeypatch):
@@ -56,3 +59,4 @@ def test_compiled_but_unexecuted_metric_bodies_are_not_claimed(tmp_path, monkeyp
     assert report["status"] == "FAILED_RETAINED"
     assert report["error_type"] == "MemoryError"
     assert report["source_metric_function_bodies_executed"] is False
+    assert report["authored_cpu_tie_fixture_checked"] is False

@@ -407,3 +407,18 @@ CI run36385678817 completed/success15/15，Ubuntu3.10/3.14各
 均替身；不证明Qwen/OLMo/CLIP/正式CIR数据或科学收益。
 fresh审查与SSH身份未解决；M1/Pilot/C1–C3/完整预算/稿件仍未准入。
 见research/ICMR_GENERATED_CHAIN_CI.md，goalactive/default4/无timer。
+
+2026-09-28T07:03:20Z：固定 SEARLE 函数体对照新增自制 CPU 55-ID
+全并列样例，CIRR5/FashionIQ4查询、17项指标及4次完整排列比较，
+连同原严格排序17项均在私有固定源码上实际通过。WSL Python3.12.3/
+Torch2.7.1+cpu最终run exit0；Windows定向43pass、Ruff/隔离mypy过。
+报告v2保留`ties_qualified=false`与官方/full-gallery parity=false；
+fresh审查因thread limit不可用仅local-only，精确SHA CI待验。
+无benchmark/真实模型/GPU新费用；正式数据许可、全图库/GPU数值、
+M1/Pilot/C1–C3仍NOT_ADMITTED。见research/ICMR_SEARLE_TIE_PARITY.md；
+同一run/default4/历史账本/无timer/四仓冻结不变。
+
+2026-09-28T07:11:20Z：上述本机原配置完整套件 exit0，
+2058pass21skip/372.73s/coverage94.03%。相较前一次2059/20
+有一项由pass变skip，原因未在本次原输出中归因；不把它算通过。
+精确新SHA CI仍待提交；正式M1/Pilot科学状态不变。

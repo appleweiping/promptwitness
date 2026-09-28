@@ -370,10 +370,3 @@ Windows定向43passed，Ruff/格式/隔离mypy过；不隔离mypy暴露旧无类
 新源码尚未提交，精确SHA CI待验；仅自制CPU函数体资格，真实图库/GPU/
 官方server/数据许可/双模型/全角色预算/M1/Pilot/C1–C3均未准入。
 详见 `research/ICMR_SEARLE_TIE_PARITY_20260928_070202.md`。
-
-## 2026-09-28T07:11:20Z：自制 tie 检查提交前完整测试
-
-本机原配置全套 exit0：2058passed/21skipped，372.73s，coverage94.03%。
-上轮2059/20到本轮有1项变skip，未查明原因；不把跳过算通过。
-WSL私有固定原函数体正向验收与本机全套分别记账，CI待新SHA。
-见 `research/ICMR_SEARLE_TIE_PARITY_20260928_071120.md`。

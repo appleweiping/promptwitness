@@ -3,7 +3,7 @@
 No benchmark records, model weights or upstream code are committed. The caller
 supplies a private copy of SEARLE's pinned validate.py. Only its two metric
 function definitions are compiled; their prediction generators are replaced
-with authored, tie-free CPU features. This is not official server parity.
+with authored CPU features. This is not official server parity.
 """
 
 from __future__ import annotations
@@ -18,9 +18,10 @@ import time
 from pathlib import Path
 from typing import Any, cast
 
+from reproduce.retrieval_cpu_ranking import rank_float32_cpu
 from reproduce.retrieval_scoring import RetrievalGold, summarize_rankings
 
-FORMAT = "promptwitness.searle-metric-parity/v1"
+FORMAT = "promptwitness.searle-metric-parity/v2"
 SOURCE_COMMIT = "a9c314ba4b6e6e14be5a9c3fdf6b66e6a0c23e37"
 SOURCE_SHA256 = "83eef3dd2448e82ba9ef59708df8dfa3a88a8f17ec1d4c0f152676dc5dde28fc"
 FUNCTIONS = frozenset({"fiq_compute_val_metrics", "cirr_compute_val_metrics"})
@@ -75,8 +76,149 @@ def _compare(label: str, observed: float, expected: float) -> dict[str, float]:
     return {"upstream_percent": observed, "ours_percent": expected}
 
 
+def _check_cpu_ties(namespace: dict[str, Any]) -> dict[str, object]:
+    """Check a discriminating all-tie fixture with the production CPU ranker.
+
+    Torch's default argsort is not lexical/stable on this 55-row fixture. The
+    pinned native metric body and our one-query ranker must nevertheless give
+    identical cutoff results. This says nothing about GPU or real gallery ties.
+    """
+    torch = namespace["torch"]
+    index = torch.tensor([[1.0, 0.0]] * 55, dtype=torch.float32)
+    query = torch.tensor([1.0, 0.0], dtype=torch.float32)
+    names = tuple(f"authored-tie-cirr-{number:02d}" for number in range(55))
+    ranking = rank_float32_cpu(query, index, names)
+    if ranking == names:
+        raise AssertionError("all-tie fixture did not distinguish Torch from lexical order")
+    native_cirr_distances = (
+        1 - query.repeat(5, 1) @ namespace["F"].normalize(index, dim=-1).float().T
+    )
+    native_cirr_order = tuple(names[i] for i in torch.argsort(native_cirr_distances, dim=-1)[0])
+    if ranking != native_cirr_order:
+        raise AssertionError("single-query CIRR ranking diverged from native batch tie order")
+    reference = names[0]
+    eligible = tuple(name for name in ranking if name != reference)
+    cirr_golds = []
+    for number, position in enumerate((0, 4, 9, 49, 53)):
+        target = eligible[position]
+        distractors = tuple(name for name in eligible if name != target)[:4]
+        cirr_golds.append(
+            RetrievalGold(
+                f"authored-tie-cirr-query-{number}",
+                "cirr",
+                reference,
+                target,
+                subset=(reference, target, *distractors),
+            )
+        )
+    namespace["cirr_generate_val_predictions"] = lambda *_: (
+        query.repeat(len(cirr_golds), 1),
+        [gold.reference_id for gold in cirr_golds],
+        [gold.target_id for gold in cirr_golds],
+        [list(gold.subset) for gold in cirr_golds],
+    )
+    native_cirr = namespace["cirr_compute_val_metrics"](None, None, index, list(names), [], None)
+    ours_cirr = summarize_rankings(
+        cirr_golds,
+        {gold.query_id: ranking for gold in cirr_golds},
+        {"cirr": names},
+    )
+    cirr_micro = cast(dict[str, float], ours_cirr["query_micro_recall"])
+    cirr_subset = cast(dict[str, float], ours_cirr["subset_recall"])
+    cirr_checks = {
+        key: _compare(f"tied CIRR R@{key}", float(native_cirr[f"cirr_recall_at{key}"]), 100 * value)
+        for key, value in cirr_micro.items()
+    }
+    subset_checks = {
+        key: _compare(
+            f"tied CIRR subset R@{key}",
+            float(native_cirr[f"cirr_group_recall_at{key}"]),
+            100 * value,
+        )
+        for key, value in cirr_subset.items()
+    }
+
+    fashion_specs = {"dress": (9, 10), "shirt": (49,), "toptee": (50,)}
+    fashion_golds: list[RetrievalGold] = []
+    fashion_rankings: dict[str, tuple[str, ...]] = {}
+    fashion_pools: dict[str, tuple[str, ...]] = {}
+    fashion_native: dict[str, dict[str, float]] = {}
+    for category, positions in fashion_specs.items():
+        category_names = tuple(f"authored-tie-{category}-{number:02d}" for number in range(55))
+        category_ranking = rank_float32_cpu(query, index, category_names)
+        native_fashion_distances = (
+            1 - query.repeat(len(positions), 1) @ namespace["F"].normalize(index.float()).T
+        )
+        native_fashion_order = tuple(
+            category_names[i] for i in torch.argsort(native_fashion_distances, dim=-1)[0]
+        )
+        if category_ranking != native_fashion_order:
+            raise AssertionError("single-query FashionIQ ranking diverged from native batch ties")
+        fashion_pools[category] = category_names
+        golds = [
+            RetrievalGold(
+                f"authored-tie-{category}-query-{number}",
+                "fashioniq",
+                category_names[0],
+                category_ranking[position],
+                category=category,
+            )
+            for number, position in enumerate(positions)
+        ]
+        fashion_golds.extend(golds)
+        fashion_rankings.update({gold.query_id: category_ranking for gold in golds})
+        namespace["fiq_generate_val_predictions"] = lambda *_, rows=golds: (
+            query.repeat(len(rows), 1),
+            [gold.target_id for gold in rows],
+        )
+        fashion_native[category] = namespace["fiq_compute_val_metrics"](
+            None, None, index, list(category_names), [], None
+        )
+    ours_fashion = summarize_rankings(fashion_golds, fashion_rankings, fashion_pools)
+    fashion_categories = cast(dict[str, dict[str, float]], ours_fashion["category_recalls"])
+    fashion_macro = cast(dict[str, float], ours_fashion["category_macro_recall"])
+    fashion_micro = cast(dict[str, float], ours_fashion["query_micro_recall"])
+    fashion_checks = {
+        category: {
+            key: _compare(
+                f"tied FashionIQ {category} R@{key}",
+                float(values[f"fiq_recall_at{key}"]),
+                100 * fashion_categories[category][key],
+            )
+            for key in ("10", "50")
+        }
+        for category, values in fashion_native.items()
+    }
+    macro_checks = {}
+    micro_checks = {}
+    for key in ("10", "50"):
+        macro = sum(float(row[f"fiq_recall_at{key}"]) for row in fashion_native.values()) / 3
+        micro = sum(
+            float(fashion_native[category][f"fiq_recall_at{key}"]) * len(positions)
+            for category, positions in fashion_specs.items()
+        ) / len(fashion_golds)
+        macro_checks[key] = _compare(
+            f"tied FashionIQ macro R@{key}", macro, 100 * fashion_macro[key]
+        )
+        micro_checks[key] = _compare(
+            f"tied FashionIQ micro R@{key}", micro, 100 * fashion_micro[key]
+        )
+    return {
+        "cirr_queries": len(cirr_golds),
+        "fashioniq_queries": len(fashion_golds),
+        "gallery_size": len(names),
+        "nonlexical_tie_order_observed": True,
+        "complete_rank_order_matched_pinned_batch_expression": True,
+        "cirr_recall": cirr_checks,
+        "cirr_subset_recall": subset_checks,
+        "fashioniq_category_recall": fashion_checks,
+        "fashioniq_macro_recall": macro_checks,
+        "fashioniq_micro_recall": micro_checks,
+    }
+
+
 def check(source: Path, output: Path) -> dict[str, object]:
-    """Run tie-free, authored CIRR/FashionIQ metric-body differentials once."""
+    """Run authored strict-order and all-tie CPU metric differentials once."""
     if os.environ.get("CUDA_VISIBLE_DEVICES") != "":
         raise ValueError("explicit empty CUDA_VISIBLE_DEVICES required")
     if output.resolve().is_relative_to(Path(__file__).resolve().parents[1]):
@@ -93,6 +235,7 @@ def check(source: Path, output: Path) -> dict[str, object]:
         "official_server_parity_established": False,
         "official_full_gallery_parity_established": False,
         "ties_qualified": False,
+        "authored_cpu_tie_fixture_checked": False,
         "model_forward_calls": 0,
         "scientific_result": False,
     }
@@ -201,8 +344,10 @@ def check(source: Path, output: Path) -> dict[str, object]:
             _compare(f"fashioniq macro R@{key}", macro, 100 * fashion_macro[key])
             _compare(f"fashioniq micro R@{key}", micro, 100 * fashion_micro[key])
         report["source_metric_function_bodies_executed"] = True
+        tied = _check_cpu_ties(namespace)
+        report["authored_cpu_tie_fixture_checked"] = True
         report.update(
-            status="PASS_PINNED_SEARLE_METRIC_BODY_AUTHORED_NO_TIES",
+            status="PASS_PINNED_SEARLE_METRIC_BODY_AUTHORED_CPU_TIE_FIXTURE",
             cirr_queries=len(cirr_golds),
             cirr_gallery_size=len(cirr_names),
             fashioniq_queries=len(fashion_golds),
@@ -212,6 +357,7 @@ def check(source: Path, output: Path) -> dict[str, object]:
             fashioniq_category_recall=fashion_checks,
             fashioniq_macro_recall=fashion_macro,
             fashioniq_micro_recall=fashion_micro,
+            authored_cpu_tie_fixture=tied,
         )
         return report
     except BaseException as error:

@@ -286,3 +286,15 @@ SHA-256、操作数及边界。仍不得把自制 primary hit 当作正式检索
 标注，也不访问测试服务器。私有 WSL 实运行仍限三张自制图和自写文字。
 先前公开样例接触披露以及图像/标注许可缺口不变；CI 不授 sealed final。
 详见 `research/ICMR_DESCRIPTION_TRANSPORT_CI_20260928_051108.md`。
+
+## 2026-09-28T07:03:20Z：来源再核查与自制 tie 差分
+
+为核对仍未解决的许可，本轮只读打开 FashionIQ 固定 README、其
+CDLA 版本澄清 issue #22、CIRR 官方许可页及固定 SEARLE 源码页。
+FashionIQ issue 当日仍 open 且无维护者澄清。CIRR 网页工具返回页
+内容时再次自动包含先前已披露的公开 test annotation 示例；本次
+未转录其 ID、文本或成员到源码、fixture、调参或成绩，不新增
+“完全盲态”声明。SEARLE 页面只用函数表达式和固定 revision，
+未读取任何真实 benchmark annotation。WSL 正向 tie 差分仅自制
+55 个向量和自写 target/subset；未下载官方图像/标注、访问 final
+或测试服务器。CIRR 原图条款和 FashionIQ 准确许可仍未准入。
