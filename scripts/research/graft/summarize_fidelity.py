@@ -29,7 +29,9 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("files", nargs="+", type=Path)
     parser.add_argument("--k", type=int, default=3)
+    parser.add_argument("--latex", type=Path, help="write a LaTeX table body (rho / regret)")
     args = parser.parse_args()
+    latex_rows: list[str] = []
     header = ("| run | edits | exact-fresh rho | " +
               " | ".join(f"{m} rho / top{args.k} / regret" for m in METHODS) +
               " | patch s/ex | exact s/ex |")
@@ -58,9 +60,15 @@ def main() -> None:
         t = d["timing"]
         n = len(rows)
         model = Path(d["model_path"]).parts[-3].split("--")[-1] if "snapshots" in d["model_path"] else d["model_path"]
+        latex_rows.append(" & ".join(
+            [model.split("-")[0], d["task"].replace("_", " ")[:24],
+             f"{d['summary']['spearman_exact_vs_fresh_loss']:.2f}"]
+            + [c.split(" / ")[0] + " / " + c.split(" / ")[-1] if c != "–" else "--" for c in cells]) + r" \\")
         print(f"| {model} {d['task'][:18]} | {len(names)} | "
               f"{d['summary']['spearman_exact_vs_fresh_loss']:.2f} | " + " | ".join(cells) +
               f" | {t.get('patch', 0) / n:.1f} | {t['exact_vertices'] / n:.1f} |")
+    if args.latex:
+        args.latex.write_text("\n".join(latex_rows) + "\n", encoding="utf-8")
     print()
     for method, values in pooled.items():
         if values:
