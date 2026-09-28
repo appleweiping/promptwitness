@@ -311,3 +311,11 @@ ICMR_SCOPE将paired审计列C2、等预算优化列C3；未改矩阵或科学冻
 未测正式数据/真实权重/生成模型。只授 ENGINEERING_PASS_AUTHORED，不授
 M1/Pilot/进程级ranker隔离/全角色forecast/ICMR效果/论文。见
 research/ICMR_DIRECT_BASELINE_CI.md；历史费用/default4/无timer/其他四仓不变。
+
+2026-09-28T02:15:19Z：新增 Linux-only search ranker 持久 Landlock 进程，
+只读 search/inputs，模型/图库索引留子进程；独立 scorer 读 gold。
+fresh 审查复现并关闭整帧 timeout BLOCKING；Windows 定向40pass6skip，
+WSL纯管道3pass但完整受限 worker 在 drvfs 路径失败，精确 SHA CI 待验。
+只自制替身，不是新源码真实CLIP或官方数据。M1/Pilot、全角色成本、
+selection/final、ICMR效果仍NOT_ADMITTED。见research/ICMR_RANK_ISOLATION.md；
+历史账本/default4/无timer/其他四仓冻结不变。

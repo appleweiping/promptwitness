@@ -52,6 +52,7 @@ ROLE_STAGES = {
     "retrieval_fit_scorer": frozenset({"fit"}),
     "retrieval_optimizer": frozenset({"search"}),
     "retrieval_predictor": frozenset({"search"}),
+    "retrieval_search_ranker": frozenset({"search"}),
     "retrieval_search_scorer": frozenset({"search"}),
     "retrieval_selection_scorer": frozenset({"selection"}),
     "retrieval_final_scorer": frozenset({"final"}),
@@ -80,6 +81,7 @@ ROLE_LEAVES = {
         "search/reference",
         "search/parent",
     ),
+    "retrieval_search_ranker": ("search/inputs",),
     "retrieval_search_scorer": ("search/inputs", "search/gold"),
     "retrieval_selection_scorer": ("selection/inputs", "selection/gold"),
     "retrieval_final_scorer": ("final/inputs", "final/gold"),
@@ -249,6 +251,30 @@ def launch_role(
     Stdio pipes are the only inherited descriptors; the caller owns messages
     passed through those pipes. App exceptions/nonzero exits are not zero scores.
     """
+    policy, environment = _role_launch(role, stage, data_root, scratch, entrypoint, arguments)
+    return subprocess.run(
+        [sys.executable, "-I", str(Path(__file__).resolve()), "--worker"],
+        input=json.dumps(policy)
+        + "\n"
+        + (json.dumps(message, allow_nan=False) if message is not None else ""),
+        text=True,
+        capture_output=True,
+        check=False,
+        timeout=timeout,
+        close_fds=True,
+        env=environment,
+        cwd=scratch,
+    )
+
+
+def _role_launch(
+    role: str,
+    stage: str,
+    data_root: Path,
+    scratch: Path,
+    entrypoint: Path,
+    arguments: Sequence[str],
+) -> tuple[dict[str, Any], dict[str, str]]:
     policy = build_policy(role, stage, data_root, runtime_roots(), scratch)
     entry = entrypoint.resolve(strict=True)
     if not any(entry.is_relative_to(Path(root)) for root in policy["runtime_read_execute"]):
@@ -268,19 +294,50 @@ def launch_role(
         # or inherit a credential/cache home outside the granted scratch.
         "HOME": str(scratch.resolve()),
     }
-    return subprocess.run(
+    if role == "retrieval_search_ranker":
+        environment["CUDA_VISIBLE_DEVICES"] = ""  # Fixed CPU CLIP/ranking backend.
+    return policy, environment
+
+
+def start_role(
+    role: str,
+    stage: str,
+    data_root: Path,
+    scratch: Path,
+    entrypoint: Path,
+    arguments: Sequence[str] = (),
+    *,
+    stderr: Any,
+) -> subprocess.Popen[str]:
+    """Start a persistent role worker; application reads JSONL after restriction.
+
+    The caller owns the returned process and must close or terminate it. Its
+    stdout is a protocol stream, not a source of trusted scoring labels.
+    """
+    landlock_abi()
+    policy, environment = _role_launch(role, stage, data_root, scratch, entrypoint, arguments)
+    process = subprocess.Popen(
         [sys.executable, "-I", str(Path(__file__).resolve()), "--worker"],
-        input=json.dumps(policy)
-        + "\n"
-        + (json.dumps(message, allow_nan=False) if message is not None else ""),
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=stderr,
         text=True,
-        capture_output=True,
-        check=False,
-        timeout=timeout,
+        bufsize=1,
         close_fds=True,
         env=environment,
         cwd=scratch,
     )
+    if process.stdin is None:
+        process.terminate()
+        raise AccessBoundaryError("role worker has no input pipe")
+    try:
+        process.stdin.write(json.dumps(policy, allow_nan=False) + "\n")
+        process.stdin.flush()
+    except BaseException:
+        process.terminate()
+        process.wait()
+        raise
+    return process
 
 
 def worker() -> None:

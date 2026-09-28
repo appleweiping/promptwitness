@@ -36,6 +36,7 @@ EXPECTED = {
         "search/reference",
         "search/parent",
     },
+    "retrieval_search_ranker": {"search/inputs"},
     "retrieval_search_scorer": {"search/inputs", "search/gold"},
     "retrieval_selection_scorer": {"selection/inputs", "selection/gold"},
     "retrieval_final_scorer": {"final/inputs", "final/gold"},

@@ -559,3 +559,19 @@
 | 2026-09-28T01:43:04Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | CI终态latest tracker |
 | 2026-09-28T01:43:04Z | experiment-bridge | AGENTS.md | implementation | dashboard工程准入 |
 | 2026-09-28T01:43:04Z | experiment-bridge | findings.md | implementation | CI和科学边界 |
+| 2026-09-28T02:15:19Z | experiment-bridge | reproduce/process_access.py | implementation | search ranker持久Landlock角色与清理环境 |
+| 2026-09-28T02:15:19Z | experiment-bridge | reproduce/check_process_access.py | implementation | 独立期望访问矩阵增加ranker |
+| 2026-09-28T02:15:19Z | experiment-bridge | reproduce/retrieval_rank_role.py | implementation | 持久输入侧ranker、整帧deadline和回收 |
+| 2026-09-28T02:15:19Z | experiment-bridge | reproduce/check_retrieval_rank_session.py | implementation | 仅自写替身worker与停顿收据反例 |
+| 2026-09-28T02:15:19Z | experiment-bridge | tests/reproduce/test_process_access.py | implementation | 新角色静态及Linux sentinel验证 |
+| 2026-09-28T02:15:19Z | experiment-bridge | tests/reproduce/test_retrieval_rank_role.py | implementation | authored端到端、半帧、背压及失败收据回归 |
+| 2026-09-28T02:15:19Z | experiment-bridge | research/ICMR_RANK_ISOLATION_20260928_021519.md | implementation | 新进程边界、review和未准入限制 |
+| 2026-09-28T02:15:19Z | experiment-bridge | research/ICMR_RANK_ISOLATION.md | implementation | 同字节latest copy |
+| 2026-09-28T02:15:19Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_021519.md | implementation | tracker同字节快照 |
+| 2026-09-28T02:15:19Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | ranker隔离状态 |
+| 2026-09-28T02:15:19Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260928_021519.md | implementation | review同字节快照 |
+| 2026-09-28T02:15:19Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | fresh审查与复审 |
+| 2026-09-28T02:15:19Z | experiment-bridge | research/ACCESS_AUDIT_20260928_021519.md | implementation | 访问审计同字节快照 |
+| 2026-09-28T02:15:19Z | experiment-bridge | research/ACCESS_AUDIT.md | implementation | input-only访问边界 |
+| 2026-09-28T02:15:19Z | experiment-bridge | AGENTS.md | implementation | 研究dashboard与科学门禁 |
+| 2026-09-28T02:15:19Z | experiment-bridge | findings.md | implementation | 超时反例和未准入边界 |

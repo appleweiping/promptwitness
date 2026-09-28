@@ -204,3 +204,10 @@ captioner/LLM、独立ranker进程、全角色成本/M1/Pilot；不报ICMR效果
 3.14各2045pass1skip，Linux-only authored ranker→真实scorer→gate整链已跑。
 这仍是替身编码器/融合，无官方图、真实权重或正式性能；M1/Pilot/全角色
 成本及科学结果未准入。见research/ICMR_DIRECT_BASELINE_CI.md。
+
+2026-09-28T02:15:19Z：input-only 函数不等于进程无法读取 gold；新增
+search 专用 Landlock ranker 角色并把持久 CLIP/index 保持在子进程。
+审查反例证明首字节可读后 `readline()` 仍能无限等待，或大输入帧会背压；
+整帧单调期限已修复。受限 worker 自写 fixture 的 outer/inner 收据设计遵循
+失败不补零及未知不伪零。真实CLIP、官方图像许可、fit/selection/final、
+完整角色成本与线上优化仍未准入；不由工程隔离直接推出 ICMR 方法有效。

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import io
 import json
 import subprocess
 import sys
@@ -35,6 +36,7 @@ def layout(tmp_path):
         ("retrieval_fit_scorer", "fit"),
         ("retrieval_optimizer", "search"),
         ("retrieval_predictor", "search"),
+        ("retrieval_search_ranker", "search"),
         ("retrieval_search_scorer", "search"),
         ("retrieval_selection_scorer", "selection"),
         ("retrieval_final_scorer", "final"),
@@ -55,6 +57,7 @@ def test_retrieval_non_scorers_cannot_read_any_gold(tmp_path):
         ("retrieval_fit_learner", "fit"),
         ("retrieval_optimizer", "search"),
         ("retrieval_predictor", "search"),
+        ("retrieval_search_ranker", "search"),
     ):
         policy = access.build_policy(role, stage, data, [code], scratch)
         assert all("gold" not in Path(path).parts for path in policy["data_read"])
@@ -136,6 +139,33 @@ def test_launch_has_clean_environment_closed_descriptors_and_no_shell(tmp_path, 
     assert result.returncode == 3  # not replaced by a score
 
 
+def test_persistent_launch_sends_policy_before_application_input(tmp_path, monkeypatch):
+    data, code, scratch = layout(tmp_path)
+    entry = code / "application.py"
+    entry.write_text("pass\n", encoding="utf-8")
+    monkeypatch.setattr(access, "runtime_roots", lambda: (code,))
+    monkeypatch.setattr(access, "landlock_abi", lambda: 1)
+    monkeypatch.setenv("PW_SENTINEL_PRIVATE", "not-for-worker")
+    calls = []
+
+    class FakeProcess:
+        stdin = io.StringIO()
+
+    def popen(command, **kwargs):
+        calls.append((command, kwargs))
+        return FakeProcess()
+
+    monkeypatch.setattr(access.subprocess, "Popen", popen)
+    process = access.start_role(
+        "retrieval_search_ranker", "search", data, scratch, entry, stderr=io.StringIO()
+    )
+    command, kwargs = calls[0]
+    assert command[1] == "-I" and kwargs["close_fds"] is True
+    assert "PW_SENTINEL_PRIVATE" not in kwargs["env"]
+    assert kwargs["env"]["CUDA_VISIBLE_DEVICES"] == ""
+    assert json.loads(process.stdin.getvalue())["data_read"] == [str(data / "search/inputs")]
+
+
 def test_entrypoint_outside_runtime_denied(tmp_path, monkeypatch):
     data, code, scratch = layout(tmp_path)
     entry = tmp_path / "outside.py"
@@ -172,7 +202,7 @@ def test_real_linux_process_sentinels(tmp_path, monkeypatch):
         pytest.skip(str(exc))
     monkeypatch.setenv("PW_SENTINEL_PRIVATE", "not-for-worker")
     result = check(tmp_path / "attempt", tmp_path / "witness.json")
-    assert result["read_checks"] == result["write_checks"] == 143
+    assert result["read_checks"] == result["write_checks"] == 154
     assert result["scientific_admission"] == "PARTIAL_NOT_PASSED"
-    assert len({row["pid"] for row in result["workers"]}) == 13
+    assert len({row["pid"] for row in result["workers"]}) == 14
     assert all(row["helper_import_after_restriction"] for row in result["workers"])
