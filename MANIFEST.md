@@ -614,3 +614,9 @@
 | 2026-09-28T03:56:38Z | experiment-bridge | research/ACCESS_AUDIT_20260928_035638.md | implementation | 未接触正式数据访问快照 |
 | 2026-09-28T03:56:38Z | experiment-bridge | AGENTS.md | implementation | 窄工程资格dashboard |
 | 2026-09-28T03:56:38Z | experiment-bridge | findings.md | implementation | 函数体一致和官方门禁 |
+| 2026-09-28T04:12:43Z | experiment-bridge | research/ICMR_SEARLE_METRIC_PARITY_CI_20260928_041243.md | implementation | 0403138精确CI15/15与未准入边界 |
+| 2026-09-28T04:12:43Z | experiment-bridge | research/ICMR_SEARLE_METRIC_PARITY_CI.md | implementation | 同字节latest copy |
+| 2026-09-28T04:12:43Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_041243.md | implementation | CI终态tracker快照 |
+| 2026-09-28T04:12:43Z | experiment-bridge | research/ACCESS_AUDIT_20260928_041243.md | implementation | CI无正式数据访问快照 |
+| 2026-09-28T04:12:43Z | experiment-bridge | AGENTS.md | implementation | 精确CI与科学门禁dashboard |
+| 2026-09-28T04:12:43Z | experiment-bridge | findings.md | implementation | CI和官方评测门禁 |

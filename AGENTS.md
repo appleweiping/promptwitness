@@ -16,6 +16,10 @@ language: zh
 11 自写无并列查询、55候选上17项匹配；`research/ICMR_SEARLE_METRIC_PARITY.md`
 仅是 M1 前置窄工程资格。已有 tie 反例、官方 server/完整库、原图许可、
 分组封存、双生成模型和全角色预算仍未准入，不得把它写成 ICMR 结果。
+精确源码 `040313894f74a70d15c6ff8e66eba8718625087a` CI run36376271977
+已success15/15；这只关闭该代码的CI待验，不替代私有WSL正向函数体运行，
+更不关闭正式数据/官方server/完整库/tie/M1/Pilot。见
+`research/ICMR_SEARLE_METRIC_PARITY_CI.md`。
 以 `research/PROTOCOL.md`、`research/scope.lock.json`、
 `research/PROTOCOL_v1_1.md` 和实际账本为科学与资源约束来源。
 续推授权以用户最新指令及 `research/ARIS_GOAL.md` 为准；它覆盖下述历史

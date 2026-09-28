@@ -238,3 +238,9 @@ Landlock/失败回归与私有WSL真实CLIP运行是不同证据，不互相冒�
 复测；当前 helper 失败保留，0 新模型 forward。原 all-tie 反例、
 官方服务器/完整库/正式数据许可/真实方法收益仍未关闭，不授 M1/Pilot。
 见 research/ICMR_SEARLE_METRIC_PARITY_20260928_035638.md。
+
+2026-09-28T04:12:43Z：`0403138` 精确CI36376271977 completed/success
+15/15；Ubuntu3.10/3.14各2060pass2skip，coverage94.04/94.05%，
+3.14保留127warnings。本地最终2043pass19skip。CI没有固定上游源码、
+正式图像/标注或模型；WSL私有17项差分不能替代官方server/full-gallery/tie
+或方法效果。M1/Pilot保持未准入。见research/ICMR_SEARLE_METRIC_PARITY_CI.md。
