@@ -313,3 +313,9 @@ M1/Pilot/C1–C3仍未准入。见research/ICMR_SEARLE_TIE_PARITY.md。
 Ruff/format/mypy src/配置Bandit/build/Twine均exit0；单文件AST exec
 B102不因配置Bandit仅扫描src而消失。远端新SHA CI待核验，科学状态
 不变。见research/ICMR_SEARLE_TIE_PARITY.md。
+
+2026-09-28T07:45:13Z：审查后修正提交`5bee65a88e41cd1295c0fb12a11892a0ffe12946`
+精确CI run36392794136 completed/success15/15。公开CI无私有固定
+源码，因此可选测试跳过；WSL另有实际4pass。工程证据不授真实图库/
+GPU/正式数据许可/双模型/科研收益，SSH主机指纹未重核，未登录。
+见research/ICMR_SEARLE_TIE_PARITY_CI.md。

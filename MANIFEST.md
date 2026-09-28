@@ -702,3 +702,9 @@
 | 2026-09-28T07:37:37Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 同字节latest copy |
 | 2026-09-28T07:37:37Z | experiment-bridge | findings.md | implementation | 本机完整测试与build/Twine结果 |
 | 2026-09-28T07:37:37Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |
+| 2026-09-28T07:45:13Z | experiment-bridge | research/ICMR_SEARLE_TIE_PARITY_CI_20260928_074513.md | implementation | 5bee65a精确15/15 CI与科研未准入边界 |
+| 2026-09-28T07:45:13Z | experiment-bridge | research/ICMR_SEARLE_TIE_PARITY_CI.md | implementation | 同字节latest copy |
+| 2026-09-28T07:45:13Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_074513.md | implementation | 精确CI tracker快照 |
+| 2026-09-28T07:45:13Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 同字节latest copy |
+| 2026-09-28T07:45:13Z | experiment-bridge | findings.md | implementation | 精确CI与未准入项 |
+| 2026-09-28T07:45:13Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |

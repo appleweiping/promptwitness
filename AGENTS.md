@@ -437,3 +437,11 @@ research/ICMR_SEARLE_TIE_PARITY.md、refine-logs/EXPERIMENT_CODE_REVIEW.md。
 WSL有固定私有源码时4pass。Ruff/format/mypy src/配置Bandit/build/
 Twine通过，但单文件AST exec B102未消失。新SHA CI待提交后核验；
 正式M1/Pilot科学状态不变，见research/ICMR_SEARLE_TIE_PARITY.md。
+
+2026-09-28T07:45:13Z：审查后修正提交`5bee65a88e41cd1295c0fb12a11892a0ffe12946`
+已推送，精确run36392794136 completed/success15/15。CI无私有固定
+SEARLE源码，新增可选测试按设计跳过；WSL私有源4pass另记。仅工程
+绿色，正式数据/图库/GPU/真实双模型与M1/Pilot/C1–C3未准入；
+same-family静态review未复审修正，SSH指纹仍未从可信渠道核验。
+见research/ICMR_SEARLE_TIE_PARITY_CI.md；default4/历史账本/无timer/
+其他四仓冻结不变。
