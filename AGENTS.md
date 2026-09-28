@@ -398,3 +398,12 @@ agent thread limit未创建，仅`[local-only]`。模拟 `_execute`、虚拟图�
 不是 Qwen/OLMo/CLIP/正式数据结果；M1/Pilot/C1–C3不变。
 详见research/ICMR_GENERATED_CHAIN_AUTHORED.md；服务器SSH指纹未确认，
 未登录，default4/历史账本/无timer/其他四仓冻结不变。
+
+2026-09-28T06:26:24Z：生成描述同计划authored链源码SHA
+`a9707c441694e63646f62feaca1b4fc862d3c279` 已推送；
+CI run36385678817 completed/success15/15，Ubuntu3.10/3.14各
+2077pass2skip，较上个SHA增加1pass而skip不变，Linux用例实际执行。
+只授`PASS_AUTHORED_LINUX_END_TO_END_CHAIN`，模型 `_execute` 与ranker
+均替身；不证明Qwen/OLMo/CLIP/正式CIR数据或科学收益。
+fresh审查与SSH身份未解决；M1/Pilot/C1–C3/完整预算/稿件仍未准入。
+见research/ICMR_GENERATED_CHAIN_CI.md，goalactive/default4/无timer。

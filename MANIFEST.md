@@ -667,3 +667,9 @@
 | 2026-09-28T06:14:38Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 同字节latest copy |
 | 2026-09-28T06:14:38Z | experiment-bridge | findings.md | implementation | 自制完整链路与门禁 |
 | 2026-09-28T06:14:38Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |
+| 2026-09-28T06:26:24Z | experiment-bridge | research/ICMR_GENERATED_CHAIN_CI_20260928_062624.md | implementation | a9707c4精确Linux CI15/15与门禁 |
+| 2026-09-28T06:26:24Z | experiment-bridge | research/ICMR_GENERATED_CHAIN_CI.md | implementation | 同字节latest copy |
+| 2026-09-28T06:26:24Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_062624.md | implementation | CI终态tracker快照 |
+| 2026-09-28T06:26:24Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 同字节latest copy |
+| 2026-09-28T06:26:24Z | experiment-bridge | findings.md | implementation | Linux authored实worker完成 |
+| 2026-09-28T06:26:24Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |

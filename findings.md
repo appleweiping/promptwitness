@@ -282,3 +282,9 @@ research/ICMR_DESCRIPTION_TRANSPORT_CI.md。
 Linux/精确SHA CI仍待验。模型 `_execute` 与ranker均为明确替身，不产生
 真实研究费用或效果；fresh审查请求被thread limit拒绝仅local-only。
 见research/ICMR_GENERATED_CHAIN_AUTHORED.md。
+
+2026-09-28T06:26:24Z：生成描述端到端authored链源码`a9707c4`
+精确CI run36385678817 success15/15；Ubuntu3.10/3.14各2077pass2skip，
+相比上一SHA新增1项Linux通过，覆盖率94.04/94.05%。这不是
+真实Qwen/OLMo或CLIP/正式数据运行，不更新科学门禁或历史费用。
+见research/ICMR_GENERATED_CHAIN_CI.md。
