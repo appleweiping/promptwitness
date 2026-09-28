@@ -57,6 +57,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         row.answer,
         max_letter="C" if args.task == "logical_deduction_three_objects" else "F",
     )
+    parent_truncated = observation.generated_tokens >= args.max_reasoning_tokens
     attempts: list[dict[str, Any]] = []
     for block_id in ranked_blocks(observation.block_sensitivity):
         for rewrite, proposal_tokens, proposal_seconds in propose_block_rewrites(
@@ -86,6 +87,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                 row.answer,
                 max_letter="C" if args.task == "logical_deduction_three_objects" else "F",
             )
+            truncated = response_tokens >= args.max_reasoning_tokens
             diff = compare_prompts(
                 original.document,
                 modified.document,
@@ -97,9 +99,10 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                     "response": response,
                     "response_tokens": response_tokens,
                     "response_seconds": response_seconds,
+                    "truncated": truncated,
                     "score": {
-                        "correct": score.correct,
-                        "format_valid": score.format_valid,
+                        "correct": score.correct and not truncated,
+                        "format_valid": score.format_valid and not truncated,
                         "predicted": score.predicted,
                     },
                     "diff": [
@@ -108,7 +111,11 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                 }
             )
             attempts.append(attempt)
-            if score.correct and not parent_score.correct:
+            if (
+                score.correct
+                and not truncated
+                and not (parent_score.correct and not parent_truncated)
+            ):
                 break
         if any(attempt.get("status") == "scored" for attempt in attempts):
             break
@@ -133,9 +140,10 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "parent": {
             "response": observation.reasoning,
             "answer": row.answer,
+            "truncated": parent_truncated,
             "score": {
-                "correct": parent_score.correct,
-                "format_valid": parent_score.format_valid,
+                "correct": parent_score.correct and not parent_truncated,
+                "format_valid": parent_score.format_valid and not parent_truncated,
                 "predicted": parent_score.predicted,
             },
             "conditional_answer_loss": observation.loss,

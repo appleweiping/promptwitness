@@ -68,6 +68,7 @@ class FrozenGradientBackend:
         with torch.no_grad():
             generated = self.model.generate(
                 input_ids=input_ids,
+                attention_mask=torch.ones_like(input_ids),
                 max_new_tokens=max_new_tokens,
                 do_sample=False,
                 pad_token_id=self.tokenizer.eos_token_id,
@@ -87,11 +88,14 @@ class FrozenGradientBackend:
         *,
         max_reasoning_tokens: int = 96,
         finite_difference_block: str | None = None,
+        finite_difference_epsilon: float = 0.1,
     ) -> GradientObservation:
         import torch
 
         if not gold_answer or max_reasoning_tokens < 1:
             raise ValueError("gold answer and positive reasoning token limit are required")
+        if finite_difference_epsilon <= 0:
+            raise ValueError("finite-difference epsilon must be positive")
         rendered: TokenizedPrompt = prompt.render_tokens(self.tokenizer, values)
         if not rendered.input_ids:
             raise ValueError("rendered prompt has no tokens")
@@ -101,6 +105,7 @@ class FrozenGradientBackend:
         with torch.no_grad():
             generated = self.model.generate(
                 input_ids=prompt_ids,
+                attention_mask=torch.ones_like(prompt_ids),
                 max_new_tokens=max_reasoning_tokens,
                 do_sample=False,
                 pad_token_id=self.tokenizer.eos_token_id,
@@ -153,7 +158,7 @@ class FrozenGradientBackend:
             position = positions[0]
             direction = gradients[position]
             direction = direction / direction.norm()
-            epsilon = 1e-2
+            epsilon = finite_difference_epsilon
             with torch.no_grad():
                 plus = embeddings.detach().clone()
                 minus = embeddings.detach().clone()
@@ -163,7 +168,11 @@ class FrozenGradientBackend:
                 minus_loss = self._loss(minus, answer_start, answer_ids)
             measured = float(((plus_loss - minus_loss) / (2 * epsilon)).float().item())
             predicted = float(gradients[position].dot(direction).item())
-            finite_difference = {"predicted": predicted, "measured": measured}
+            finite_difference = {
+                "epsilon": epsilon,
+                "predicted": predicted,
+                "measured": measured,
+            }
 
         return GradientObservation(
             loss=loss_value,

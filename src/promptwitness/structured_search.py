@@ -116,6 +116,7 @@ def propose_block_rewrites(
         with torch.no_grad():
             output = model.generate(
                 input_ids=input_ids,
+                attention_mask=torch.ones_like(input_ids),
                 max_new_tokens=96,
                 do_sample=False,
                 pad_token_id=tokenizer.eos_token_id,

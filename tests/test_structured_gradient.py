@@ -136,7 +136,7 @@ def test_real_autograd_covers_full_answer_and_leaves_weights_frozen() -> None:
             logits = self.readout(inputs_embeds.cumsum(dim=1))
             return type("Output", (), {"logits": logits})()
 
-        def generate(self, *, input_ids, max_new_tokens, do_sample, pad_token_id):  # type: ignore[no-untyped-def]
+        def generate(self, *, input_ids, attention_mask, max_new_tokens, do_sample, pad_token_id):  # type: ignore[no-untyped-def]
             reason_id = tokenizer.encode("R")[0]
             return torch.cat(
                 [input_ids, torch.tensor([[reason_id]], device=input_ids.device)], dim=1
