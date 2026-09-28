@@ -107,6 +107,7 @@ class Runner:
         self.ledger.add(phase + "_answer", seconds, generated=tokens)
         correct = [self.spec.correct(r.text, e.answer) for r, e in zip(reads, examples)]
         out: dict[str, Any] = {"accuracy": sum(correct) / len(correct), "correct": correct,
+                               "reads": [r.text for r in reads],
                                "reasoning": [list(g.token_ids) for g in gens],
                                "truncated": sum(not g.ended for g in gens)}
         if with_loss:

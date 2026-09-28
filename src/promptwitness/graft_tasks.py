@@ -78,7 +78,9 @@ class TaskSpec:
         return " " + answer
 
     def parse(self, continuation: str) -> str | None:
-        text = continuation.strip()
+        # Tolerate leading markup the reader may emit after the extractor: quotes,
+        # asterisks, backticks, dollar signs and spaces.
+        text = re.sub(r"^[\s\"'`*$]+", "", continuation)
         if self.kind == "mc":
             match = re.match(r"\(?\s*([A-R])\b", text)
             return f"({match.group(1)})" if match else None
