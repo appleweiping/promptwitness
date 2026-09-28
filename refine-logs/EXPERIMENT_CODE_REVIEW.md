@@ -156,3 +156,17 @@ BLOCKING：外层排名回调与内层编码耗时重叠，原汇总名“wall l
 新的具体 blocker。复审者现源码账本测试 5 passed；初审定向三文件
 17 passed/2 skipped。主作者最终三文件 18 passed/2 skipped、reproduce
 492 passed/8 skipped。审核未执行真实模型/benchmark，不授科学准入。
+
+## 2026-09-28T01:27:19Z：input-only direct CLIP ranker 审查
+
+fresh-context gpt-6-astra/xhigh 同家族 provisional、只读审查新 ranker/测试与原
+CLIP、融合、CPU排序、受限scorer、审计桥和账本。结论：本次 authored-only search
+接线未发现 BLOCKING；完整图库顺序/类别、参考图原始特征、融合和失败收据路径
+与既有语义一致。审查者六文件定向实际33 passed/5 skipped，5 skip 为 Linux-only，
+本机 Torch authored 数值检查执行；未跑真实 CLIP 权重或 benchmark。
+
+NON-BLOCKING 之一为当前文本/查询收据固定记 search，已在类文档明确仅此角色；
+若未来接 fit/selection 需另行实现和审查，不能把现代码当多角色。另一个为
+FashionIQ 原只测加载，主作者随后补三类别图库/顺序回归，新文件定向5pass1skip。
+这些更改未经该审查者重新执行，后续 exact SHA CI 才覆盖提交字节；审查仍非
+跨模型/科学接受。ranker 只读 input 的代码事实不证明其进程级无法读 gold。

@@ -546,3 +546,10 @@
 | 2026-09-28T01:03:59Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_010359.md | implementation | tracker同字节快照 |
 | 2026-09-28T01:03:59Z | experiment-bridge | AGENTS.md | implementation | CI与未准入dashboard |
 | 2026-09-28T01:03:59Z | experiment-bridge | findings.md | implementation | claim map错位及修正 |
+| 2026-09-28T01:27:19Z | experiment-bridge | research/ICMR_DIRECT_BASELINE_20260928_012719.md | implementation | input-only直融search基线与边界 |
+| 2026-09-28T01:27:19Z | experiment-bridge | research/ICMR_DIRECT_BASELINE.md | implementation | 同字节latest copy |
+| 2026-09-28T01:27:19Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_012719.md | implementation | baseline状态快照 |
+| 2026-09-28T01:27:19Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | baseline最新tracker |
+| 2026-09-28T01:27:19Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | fresh同家族源码审查增量 |
+| 2026-09-28T01:27:19Z | experiment-bridge | AGENTS.md | implementation | 研究dashboard待CI |
+| 2026-09-28T01:27:19Z | experiment-bridge | findings.md | implementation | 已完成与未准入边界 |

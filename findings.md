@@ -191,3 +191,11 @@ checker，明确失败/中断未知成本不补零不重放。fresh reviewer抓�
 2039pass1skip；这只证实authored账本/进程桥的工程可运行。检查计划发现
 C2/C3编号错位，现按ICMR_SCOPE补C2审计并将等预算优化标C3，不增实验。
 真实数据、CLIP新账本运行、完整物理成本与论文效果继续未准入。
+
+2026-09-28T01:27:19Z：新增 search-only input→真实CLIP接口→全类别图库
+直融排名器，并可接原 AuditPlan/gate/restricted scorer。自写输入/假编码器
+新文件5pass1skip，Linux-only真实worker待新SHA CI；新鲜同家族审查无
+BLOCKING，指出三类别覆盖缺口后补测试。图像open失败进入物理收据，
+重复查询不静默重放。尚未以新路径执行真实CLIP，未接合法正式数据、
+captioner/LLM、独立ranker进程、全角色成本/M1/Pilot；不报ICMR效果。
+详见research/ICMR_DIRECT_BASELINE.md。

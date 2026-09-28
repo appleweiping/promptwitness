@@ -296,3 +296,11 @@ CI run36364121379终态success15/15；Ubuntu3.10 2039pass1skip、Ubuntu3.14
 不授真实CLIP新账本资格/M1/Pilot/ICMR效果。EXPERIMENT_PLAN claim map已按
 ICMR_SCOPE将paired审计列C2、等预算优化列C3；未改矩阵或科学冻结。
 见research/ICMR_WORK_LEDGER_CI.md。无timer/default4/其他四仓冻结不变。
+
+2026-09-28T01:27:19Z：search-only direct CLIP ranker 读取input-only元数据和
+有序全图库、逐图共享索引、逐查询修改文本+参考图融合，可接原固定审计桥。
+自写fixture新文件5pass1skip；reproduce组exit0，Ruff/format通过；全套
+与精确SHA CI待终态。fresh审查同家族provisional无BLOCKING，三类别建议
+已补回归。未运行新源码真实CLIP/benchmark，进程级ranker隔离、合法数据、
+权重/融合科学冻结、captioner、两原模型、全角色forecast/M1/Pilot/效果/稿件
+仍未准入。历史账本/default4/无timer/其他四仓冻结。见research/ICMR_DIRECT_BASELINE.md。
