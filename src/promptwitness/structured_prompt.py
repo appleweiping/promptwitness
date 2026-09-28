@@ -138,18 +138,29 @@ class StructuredPrompt:
         marked_messages: list[dict[str, str]] = []
         markers: list[tuple[str, str, str]] = []
         for message in self.document.messages:
-            plain = render_template(message.content, values)
-            plain_messages.append({"role": message.role, "content": plain})
-            marked_parts: list[str] = []
             parts = sorted(
                 (block for block in self.blocks if block.message_id == message.message_id),
                 key=lambda block: block.source_start,
             )
-            for block in parts:
+            # Several chat templates (Llama-3, Gemma-2) trim message content. Trim at
+            # block level for every model so all templates see identical content and
+            # block markers never sit outside the trimmed text.
+            texts = [render_template(block.text, values) for block in parts]
+            for order in (range(len(texts)), range(len(texts) - 1, -1, -1)):
+                for index in order:
+                    trimmed = (
+                        texts[index].lstrip() if order.step == 1 else texts[index].rstrip()
+                    )
+                    texts[index] = trimmed
+                    if trimmed:
+                        break
+            plain = "".join(texts)
+            plain_messages.append({"role": message.role, "content": plain})
+            marked_parts: list[str] = []
+            for block, rendered in zip(parts, texts, strict=True):
                 index = len(markers)
                 start = f"\ue000PW_START_{index}\ue001"
                 end = f"\ue000PW_END_{index}\ue001"
-                rendered = render_template(block.text, values)
                 if start in plain or end in plain:
                     raise ValueError("marker collision in prompt content")
                 markers.append((block.block_id, start, end))
