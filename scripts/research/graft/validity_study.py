@@ -7,6 +7,7 @@ forwards of the edited prompts) and with renormalized superposed patching:
   verified     0.5 mean CE(r+) + 0.5 CE(answer | r+), r+ = gold-consistent self reasoning
   contrastive  -[log p(r+) - log p(r-)] (sums over reasoning tokens), r- an incorrect one
   fork         CE(r+_t) - CE(r-_t) at the first divergence t of r+ and r- (one is greedy)
+  pg           policy-gradient score of expected accuracy over all judged samples
 Then evaluate the base prompt and every edited prompt on N dev examples with fresh greedy
 reasoning (the shared reader) and correlate objective changes with dev accuracy changes.
 Train rows drive the objectives; dev rows are only the validity target; test is unused.
@@ -112,10 +113,12 @@ def main() -> None:
                                  max_new_tokens=8)
     positive: list[list[int] | None] = []
     negative: list[list[int] | None] = []
+    judged_rows: list[list[tuple[list[int], bool]]] = []
     for i, row in enumerate(rows):
         judged = [(list(greedy["reasoning"][i]), greedy["correct"][i])]
         judged += [(d, spec.correct(reads[i * args.samples + j].text, row.answer))
                    for j, d in enumerate(drafts[i]) if d]
+        judged_rows.append(judged)
         positive.append(next((d for d, ok in judged if ok), None))
         negative.append(next((d for d, ok in judged if not ok), None))
     answers = [runner.tokenizer.encode(spec.target(r.answer), add_special_tokens=False) for r in rows]
@@ -137,14 +140,24 @@ def main() -> None:
             if t is not None:
                 out["fork_pos"] = (rp[:t], [rp[t]], [1.0], 1.0)
                 out["fork_neg"] = (rp[:t], [rn[t]], [1.0], -1.0)
+        # Policy-gradient score of expected accuracy: sum_s (acc_s - b) * dCE_sum(r_s),
+        # b = mean correctness of the judged samples (greedy + sampled) of this row.
+        judged = judged_rows[i]
+        baseline = sum(ok for _, ok in judged) / len(judged)
+        for k, (reasoning, ok) in enumerate(judged):
+            if reasoning and ok != baseline:
+                out[f"pg_{k}"] = ([], reasoning, [1.0] * len(reasoning),
+                                  (float(ok) - baseline) * len(reasoning) / len(judged))
         return out
 
     exact: dict[str, dict[tuple, list[float]]] = {}
     patch: dict[str, dict[tuple, list[float]]] = {}
+    contributing: dict[str, set[int]] = {}
     for i, row in enumerate(rows):
         values = {"input": row.question}
         for name, (tail, scored, weights, scale) in objective_specs(i).items():
-            key = name.rsplit("_", 1)[0] if name.startswith(("contrastive", "fork")) else name
+            key = name.rsplit("_", 1)[0] if name.startswith(("contrastive", "fork", "pg_")) else name
+            contributing.setdefault(key, set()).add(i)
             pairs = [(runner.ids(prompt, row) + tail, scored)]
             pairs += [(runner.ids(apply(prompt, pools, e), row) + tail, scored) for e in edits]
             losses, _ = answer_losses(model, pairs, weights=[weights] * len(pairs))
@@ -170,8 +183,7 @@ def main() -> None:
                                "rows_with_both": sum(p is not None and n is not None for p, n in zip(positive, negative))}
     for source, table in (("exact", exact), ("patch", patch)):
         for key, per_edit in table.items():
-            usable_rows = [i for i in range(len(rows)) if key in objective_specs(i)
-                           or f"{key}_pos" in objective_specs(i)]
+            usable_rows = sorted(contributing.get(key, set()))
             score = [statistics.mean(per_edit[e][i] for i in usable_rows) if usable_rows else 0.0 for e in edits]
             top = sorted(range(len(edits)), key=lambda j: score[j])[:3]
             summary[f"{source}_{key}"] = {
