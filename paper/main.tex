@@ -234,6 +234,25 @@ attention arithmetic is small next to the forward pass.
 \end{algorithmic}
 \end{algorithm}
 
+\paragraph{Which loss to differentiate.} \greater{}'s objective (Eq.~\ref{eq:loss})
+measures how the prompt affects \emph{reading off} the answer from fixed reasoning.
+Once the reasoning has committed to an answer, most of a prompt's effect on accuracy
+flows through the reasoning itself, which that objective cannot see. We therefore
+also consider a \emph{verified-reasoning} objective. For each training example let
+$r^\star$ be a self-generated reasoning that reaches the gold answer---the greedy
+reasoning if it is correct, otherwise the first correct one among $S$ samples---and
+score
+\begin{equation}
+\ell_{\text{ver}}(P)=-\tfrac{1}{2|r^\star|}\log p_\theta(r^\star\mid P(x))
+-\tfrac{1}{2|y|}\log p_\theta(y\mid P(x)\oplus r^\star\oplus e),
+\label{eq:verified}
+\end{equation}
+falling back to Eq.~\ref{eq:loss} when no sample is correct. This is the likelihood
+of rationales used by PMPO \citep{zhao2025pmpo}, but with self-generated rationales
+filtered by the answer as in STaR \citep{zelikman2022star}, so no annotated reasoning
+is needed. Because the reasoning tokens are downstream queries of every slot,
+Eq.~\ref{eq:patch} applies unchanged.
+
 As in \greater{}, the model optimizes its own prompt, supervision enters only
 through the loss, and candidates come from the model itself: \greater{} uses the
 model's top-$k$ next tokens given task inputs; \graft{} asks the model for
