@@ -420,3 +420,12 @@ Windows2110pass28skip/94.03%，质量/构建检查通过；同家族复审
 Qwen/OLMo、全角色成本、M1/Pilot/C1–C3均NOT_ADMITTED。
 SSH指纹冲突未登录；精确SHA CI待推送核验。详见
 research/ICMR_NATIVE_GEPA_RESTRICTED.md/json。
+
+2026-09-28T12:52:26Z：检索 GEPA 受限 scorer 自制资格源码
+`5f6c7249e84692a4b7e5d358269dc78e62c29fe1` 的
+[CI run 36423756566](https://github.com/appleweiping/promptwitness/actions/runs/36423756566)
+精确匹配、completed/success15/15。Ubuntu3.10/3.14各
+2135pass3skip，Windows3.10 2115pass23skip；CI不运行私有
+GEPA/Landlock 完整检查、正式图像或真实生成器，故不改变科学准入。
+全角色成本、优化器/gold隔离、M1/Pilot/C1–C3仍未准入。
+见 research/ICMR_NATIVE_GEPA_RESTRICTED_CI.md。

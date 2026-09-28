@@ -809,3 +809,9 @@
 | 2026-09-28T12:39:15Z | experiment-bridge | research/ACCESS_AUDIT.md | implementation | 同字节latest copy |
 | 2026-09-28T12:39:15Z | experiment-bridge | findings.md | implementation | GEPA受限scorer资格与未准入项 |
 | 2026-09-28T12:39:15Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |
+| 2026-09-28T12:52:26Z | experiment-bridge | research/ICMR_NATIVE_GEPA_RESTRICTED_CI_20260928_125226.md | implementation | 5f6c724精确CI15/15与科学边界 |
+| 2026-09-28T12:52:26Z | experiment-bridge | research/ICMR_NATIVE_GEPA_RESTRICTED_CI.md | implementation | 同字节latest copy |
+| 2026-09-28T12:52:26Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_125226.md | implementation | CI终态tracker快照 |
+| 2026-09-28T12:52:26Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 同字节latest copy |
+| 2026-09-28T12:52:26Z | experiment-bridge | findings.md | implementation | 精确CI与未准入项 |
+| 2026-09-28T12:52:26Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |

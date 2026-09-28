@@ -553,3 +553,12 @@ Ruff/format/mypy/Bandit/build/Twine通过；同家族复审0阻断、1非阻断�
 M1/Pilot/C1–C3 或论文结果。见
 research/ICMR_NATIVE_GEPA_RESTRICTED.md/json；goalACTIVE/default4/
 历史账本不清零/无timer/四仓冻结。SSH 端口可达但指纹冲突未登录。
+
+2026-09-28T12:52:26Z：受限 scorer 自制 GEPA 源码 SHA
+`5f6c7249e84692a4b7e5d358269dc78e62c29fe1` 已推送；
+CI run36423756566 精确匹配 completed/success15/15，Ubuntu
+3.10/3.14各2135pass3skip，Windows3.10 2115pass23skip。
+CI不含私有 WSL 原生检查、正式数据或真实生成器；
+M1/Pilot/C1–C3、优化器/gold隔离和全角色成本仍NOT_ADMITTED。
+见 research/ICMR_NATIVE_GEPA_RESTRICTED_CI.md；goalACTIVE/default4/
+历史账本不重置/无timer/四仓冻结，SSH指纹冲突未登录。
