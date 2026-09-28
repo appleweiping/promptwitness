@@ -542,3 +542,14 @@ CI不含私有固定GEPA原生checker、官方图像/真模型；M1/Pilot/C1–C
 正式许可及全角色成本仍NOT_ADMITTED。见
 research/ICMR_NATIVE_GEPA_RETRIEVAL_CI.md；goalACTIVE/default4/
 历史预算与消耗不重置/无timer/四仓冻结，SSH指纹仍冲突未登录。
+
+2026-09-28T12:39:15Z：固定原生 GEPA 与实际 Landlock scorer 已在
+私有 WSL 自制检索数据同次运行：reference/native/audit 都由受限子进程
+评分；正例成功 worker 收据69、完整 search survivor64，退化例收据8、
+审计 INELIGIBLE。报告故障注入与 Windows2110pass28skip/94.03%、
+Ruff/format/mypy/Bandit/build/Twine通过；同家族复审0阻断、1非阻断，
+精确源码CI待推送。仅 scorer 受限，优化器父进程仍可读自制 gold；
+无官方 CIRR/FashionIQ 数据/许可、真实 CLIP/Qwen/OLMo、全角色成本、
+M1/Pilot/C1–C3 或论文结果。见
+research/ICMR_NATIVE_GEPA_RESTRICTED.md/json；goalACTIVE/default4/
+历史账本不清零/无timer/四仓冻结。SSH 端口可达但指纹冲突未登录。

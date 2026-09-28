@@ -407,3 +407,16 @@ Qwen/OLMo、全角色预算或 M1/Pilot/C1–C3。SSH 指纹冲突未登录，
 2130pass3skip、Windows3.10 2110pass23skip。CI仅授仓库工程证据，
 不运行私有固定GEPA/正式图像/Qwen/OLMo；全角色预算、M1/Pilot/
 C1–C3仍未准入。见 research/ICMR_NATIVE_GEPA_RETRIEVAL_CI.md。
+
+2026-09-28T12:39:15Z：固定 GEPA 原生搜索新增同次真实 Landlock scorer
+自制资格，reference/native/audit 三路都读取受限子进程的实际分数。
+正例 reference64、native48、audit score64、成功 worker 收据69、
+完整 survivor64；退化例 reference64、native32、audit score4、
+成功收据8并在 INELIGIBLE 停止。私有 WSL 最终 exit0；故意注入
+启动前与 reference 后失败，报告保留 false/已完成计数和账本。
+Windows2110pass28skip/94.03%，质量/构建检查通过；同家族复审
+0 BLOCKING、1 NON-BLOCKING（完整报告接线缺自动回归），不等于独立
+科研验收。优化器父进程仍可读自制 gold；正式数据/许可、CLIP/
+Qwen/OLMo、全角色成本、M1/Pilot/C1–C3均NOT_ADMITTED。
+SSH指纹冲突未登录；精确SHA CI待推送核验。详见
+research/ICMR_NATIVE_GEPA_RESTRICTED.md/json。

@@ -794,3 +794,18 @@
 | 2026-09-28T11:58:22Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 同字节latest copy |
 | 2026-09-28T11:58:22Z | experiment-bridge | findings.md | implementation | 精确CI与未准入项 |
 | 2026-09-28T11:58:22Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |
+| 2026-09-28T12:39:15Z | experiment-bridge | reproduce/retrieval_gepa_restricted.py | implementation | 自制人口、三路真实受限scorer与失败计数快照 |
+| 2026-09-28T12:39:15Z | experiment-bridge | reproduce/check_retrieval_gepa_restricted.py | implementation | 固定原生GEPA与Landlock scorer同次资格检查 |
+| 2026-09-28T12:39:15Z | experiment-bridge | tests/reproduce/test_retrieval_gepa_restricted.py | implementation | 5条辅助层及失败账本回归 |
+| 2026-09-28T12:39:15Z | experiment-bridge | research/ICMR_NATIVE_GEPA_RESTRICTED_20260928_123915.md | implementation | 自制原生受限scorer资格、哈希与限制 |
+| 2026-09-28T12:39:15Z | experiment-bridge | research/ICMR_NATIVE_GEPA_RESTRICTED.md | implementation | 同字节latest copy |
+| 2026-09-28T12:39:15Z | experiment-bridge | research/ICMR_NATIVE_GEPA_RESTRICTED_20260928_123915.json | implementation | 机器可读非科学资格摘要 |
+| 2026-09-28T12:39:15Z | experiment-bridge | research/ICMR_NATIVE_GEPA_RESTRICTED.json | implementation | 同字节latest copy |
+| 2026-09-28T12:39:15Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260928_123915.md | implementation | 两轮同家族审查与剩余非阻断项 |
+| 2026-09-28T12:39:15Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | 同字节latest copy |
+| 2026-09-28T12:39:15Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_123915.md | implementation | 受限scorer自制资格tracker快照 |
+| 2026-09-28T12:39:15Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 同字节latest copy |
+| 2026-09-28T12:39:15Z | experiment-bridge | research/ACCESS_AUDIT_20260928_123915.md | implementation | 仅自制输入、父进程仍可读gold的访问边界 |
+| 2026-09-28T12:39:15Z | experiment-bridge | research/ACCESS_AUDIT.md | implementation | 同字节latest copy |
+| 2026-09-28T12:39:15Z | experiment-bridge | findings.md | implementation | GEPA受限scorer资格与未准入项 |
+| 2026-09-28T12:39:15Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |
