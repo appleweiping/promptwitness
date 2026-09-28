@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from time import perf_counter
 from typing import Any
 
+from .gradient_backend import GradientObservation
 from .models import Message, PromptDocument
 from .structured_prompt import BlockKind, PromptBlock, StructuredPrompt
 
@@ -23,6 +24,7 @@ class TaskScore:
 def initial_prompt() -> StructuredPrompt:
     """One stable four-block prompt shared by both BBH pilot tasks."""
     pieces = (
+        ("input", BlockKind.INPUT_DATA, "Question:\n{{input}}\n\n", False, ()),
         (
             "task",
             BlockKind.TASK_INSTRUCTION,
@@ -45,7 +47,6 @@ def initial_prompt() -> StructuredPrompt:
             True,
             ("Final answer: (X)",),
         ),
-        ("input", BlockKind.INPUT_DATA, "\nQuestion:\n{{input}}", False, ()),
     )
     blocks: list[PromptBlock] = []
     content = ""
@@ -80,14 +81,64 @@ def ranked_blocks(sensitivities: dict[str, float], count: int = 2) -> tuple[str,
     )
 
 
+def first_order_rewrite_delta(
+    model: Any,
+    tokenizer: Any,
+    parent: StructuredPrompt,
+    candidate: StructuredPrompt,
+    block_id: str,
+    rows_and_gradients: tuple[tuple[str, GradientObservation], ...],
+) -> float | None:
+    """Mean g·(e_new-e_old), only for truly aligned full-render token positions.
+
+    A changed token count, shifted position, or any changed token outside this
+    block makes the linearization undefined for this implementation.
+    """
+    import torch
+
+    estimates: list[float] = []
+    weights = model.get_input_embeddings().weight.detach()
+    for question, observation in rows_and_gradients:
+        old = parent.render_tokens(tokenizer, {"input": question})
+        new = candidate.render_tokens(tokenizer, {"input": question})
+        positions = old.block_positions[block_id]
+        if (
+            len(old.input_ids) != len(new.input_ids)
+            or positions != new.block_positions[block_id]
+            or len(positions) != len(observation.token_gradients.get(block_id, ()))
+        ):
+            return None
+        selected = set(positions)
+        if any(
+            old_id != new_id
+            for index, (old_id, new_id) in enumerate(zip(old.input_ids, new.input_ids, strict=True))
+            if index not in selected
+        ):
+            return None
+        total = 0.0
+        for index, gradient in zip(positions, observation.token_gradients[block_id], strict=True):
+            direction = (
+                weights[new.input_ids[index]].float() - weights[old.input_ids[index]].float()
+            )
+            total += float(torch.tensor(gradient, device=direction.device).dot(direction).item())
+        estimates.append(total)
+    return sum(estimates) / len(estimates) if estimates else None
+
+
 def propose_block_rewrites(
-    model: Any, tokenizer: Any, prompt: StructuredPrompt, block_id: str, *, count: int = 3
-) -> tuple[tuple[str, int, float], ...]:
+    model: Any,
+    tokenizer: Any,
+    prompt: StructuredPrompt,
+    block_id: str,
+    *,
+    count: int = 3,
+    variant_start: int = 0,
+) -> tuple[tuple[str, int, int, float], ...]:
     """Use the same local model and fixed unlabeled template for every block arm."""
     import torch
 
     block = next(block for block in prompt.blocks if block.block_id == block_id)
-    if not block.editable or count < 1 or count > 3:
+    if not block.editable or count < 1 or variant_start < 0 or variant_start + count > 3:
         raise ValueError("expected an editable block and one to three proposals")
     variants = (
         "Make the instruction shorter while retaining its requirements.",
@@ -95,8 +146,8 @@ def propose_block_rewrites(
         "Rephrase the instruction with different wording while retaining its requirements.",
     )
     device = next(model.parameters()).device
-    proposals: list[tuple[str, int, float]] = []
-    for variant in variants[:count]:
+    proposals: list[tuple[str, int, int, float]] = []
+    for variant in variants[variant_start : variant_start + count]:
         request = (
             "Rewrite exactly one prompt instruction block. Return only the rewritten block text. "
             "Do not add examples, answers, task inputs, tool calls, or new constraints. "
@@ -123,5 +174,5 @@ def propose_block_rewrites(
             )
         new_ids = output[0, input_ids.shape[1] :].tolist()
         text = tokenizer.decode(new_ids, skip_special_tokens=True).strip().strip('"')
-        proposals.append((text, len(new_ids), perf_counter() - started))
+        proposals.append((text, len(ids), len(new_ids), perf_counter() - started))
     return tuple(proposals)

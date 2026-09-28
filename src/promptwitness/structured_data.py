@@ -72,23 +72,75 @@ def make_manifest(data_dir: Path) -> dict[str, Any]:
     }
 
 
-def load_split(data_dir: Path, manifest_path: Path, task: str, split: str) -> tuple[BBHRow, ...]:
+def write_split_shards(
+    data_dir: Path, manifest_path: Path, shard_dir: Path, holdout_dir: Path
+) -> None:
+    """Prepare private, disjoint label shards before launching any optimizer."""
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if manifest.get("format") != "promptwitness.structured-gradient-splits/v1":
+        raise ValueError("wrong split manifest format")
+    shard_dir.mkdir(parents=True, exist_ok=True)
+    holdout_dir.mkdir(parents=True, exist_ok=True)
+    for task in TASKS:
+        source = data_dir / f"{task}.json"
+        task_manifest = manifest["tasks"][task]
+        if _digest(source) != task_manifest["sha256"]:
+            raise ValueError("BBH task bytes differ from pinned manifest")
+        rows = {row.row_id: row for row in read_bbh_rows(source, task)}
+        all_ids = [
+            row_id
+            for split in ("fit", "validation", "holdout")
+            for row_id in task_manifest[f"{split}_ids"]
+        ]
+        if len(all_ids) != len(set(all_ids)) or any(row_id not in rows for row_id in all_ids):
+            raise ValueError("split contains duplicate or unknown IDs")
+        for split in ("fit", "validation", "holdout"):
+            destination_dir = holdout_dir if split == "holdout" else shard_dir
+            destination = destination_dir / f"{task}.{split}.jsonl"
+            lines = [
+                json.dumps(
+                    {
+                        "row_id": row_id,
+                        "question": rows[row_id].question,
+                        "answer": rows[row_id].answer,
+                    },
+                    ensure_ascii=False,
+                )
+                for row_id in task_manifest[f"{split}_ids"]
+            ]
+            destination.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    for destination_dir, splits in (
+        (shard_dir, ("fit", "validation")),
+        (holdout_dir, ("holdout",)),
+    ):
+        hashes = {
+            f"{task}.{split}.jsonl": _digest(destination_dir / f"{task}.{split}.jsonl")
+            for task in TASKS
+            for split in splits
+        }
+        (destination_dir / "shard_manifest.json").write_text(
+            json.dumps({"source_commit": SOURCE_COMMIT, "sha256": hashes}, indent=2) + "\n",
+            encoding="utf-8",
+        )
+
+
+def load_split(shard_dir: Path, manifest_path: Path, task: str, split: str) -> tuple[BBHRow, ...]:
     if task not in TASKS or split not in ("fit", "validation", "holdout"):
         raise ValueError("unknown task or split")
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     if manifest.get("format") != "promptwitness.structured-gradient-splits/v1":
         raise ValueError("wrong split manifest format")
-    path = data_dir / f"{task}.json"
     task_manifest = manifest["tasks"][task]
-    if _digest(path) != task_manifest["sha256"]:
-        raise ValueError("BBH task bytes differ from pinned manifest")
-    rows = {row.row_id: row for row in read_bbh_rows(path, task)}
     ids = task_manifest[f"{split}_ids"]
-    if len(ids) != len(set(ids)) or any(row_id not in rows for row_id in ids):
-        raise ValueError("split contains duplicate or unknown IDs")
-    all_ids = (
-        task_manifest["fit_ids"] + task_manifest["validation_ids"] + task_manifest["holdout_ids"]
-    )
-    if len(all_ids) != len(set(all_ids)):
-        raise ValueError("split sets overlap")
-    return tuple(rows[row_id] for row_id in ids)
+    path = shard_dir / f"{task}.{split}.jsonl"
+    shard_manifest = json.loads((shard_dir / "shard_manifest.json").read_text(encoding="utf-8"))
+    if shard_manifest.get("source_commit") != manifest["source_commit"]:
+        raise ValueError("private shard source commit differs from pinned manifest")
+    if shard_manifest["sha256"].get(path.name) != _digest(path):
+        raise ValueError("private shard bytes differ from prepared digest")
+    rows = [BBHRow(**json.loads(line)) for line in path.read_text(encoding="utf-8").splitlines()]
+    if [row.row_id for row in rows] != ids or len(ids) != len(set(ids)):
+        raise ValueError("private shard does not match pinned split IDs")
+    if any(not row.question or not _ANSWER.fullmatch(row.answer) for row in rows):
+        raise ValueError("private shard has an invalid question or answer")
+    return tuple(rows)

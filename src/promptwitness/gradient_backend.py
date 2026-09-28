@@ -6,6 +6,7 @@ not a gradient through the sampling decisions that produced that reasoning.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from math import isfinite
 from time import perf_counter
@@ -25,6 +26,7 @@ class GradientObservation:
     generation_seconds: float
     gradient_seconds: float
     generated_tokens: int
+    generation_ended: bool
     forward_tokens: int
     backward_tokens: int
     finite_difference: dict[str, float] | None = None
@@ -52,13 +54,44 @@ class FrozenGradientBackend:
             logits.reshape(-1, logits.shape[-1]), answer_ids.reshape(-1)
         )
 
+    def conditional_answer_loss(
+        self,
+        prompt: StructuredPrompt,
+        values: dict[str, object],
+        reasoning_ids: tuple[int, ...],
+        gold_answer: str,
+    ) -> tuple[float, int, float]:
+        """Answer-only CE after this prompt's fresh sampled response, without backward."""
+        import torch
+
+        rendered = prompt.render_tokens(self.tokenizer, values)
+        reasoning_tokens = list(reasoning_ids)
+        eos = self.tokenizer.eos_token_id
+        while reasoning_tokens and eos is not None and reasoning_tokens[-1] == eos:
+            reasoning_tokens.pop()
+        extractor_ids = self.tokenizer.encode(self.extractor, add_special_tokens=False)
+        answer_ids_list = self.tokenizer.encode(gold_answer, add_special_tokens=False)
+        if not extractor_ids or not answer_ids_list:
+            raise ValueError("extractor and gold answer must tokenize to nonempty sequences")
+        prefix = list(rendered.input_ids) + reasoning_tokens + extractor_ids
+        all_ids = torch.tensor([prefix + answer_ids_list], dtype=torch.long, device=self._device())
+        answer_ids = torch.tensor(answer_ids_list, dtype=torch.long, device=self._device())
+        started = perf_counter()
+        with torch.no_grad():
+            embeddings = self.model.get_input_embeddings()(all_ids)
+            loss = self._loss(embeddings, len(prefix), answer_ids)
+        value = float(loss.float().item())
+        if not isfinite(value):
+            raise ValueError("answer loss is non-finite")
+        return value, all_ids.shape[1], perf_counter() - started
+
     def generate_response(
         self,
         prompt: StructuredPrompt,
         values: dict[str, object],
         *,
         max_new_tokens: int = 320,
-    ) -> tuple[str, int, float]:
+    ) -> tuple[str, int, float, bool, tuple[int, ...]]:
         """Generate fresh task output; no gold answer is an input to this method."""
         import torch
 
@@ -74,10 +107,13 @@ class FrozenGradientBackend:
                 pad_token_id=self.tokenizer.eos_token_id,
             )
         output_ids = generated[0, input_ids.shape[1] :].tolist()
+        ended = bool(output_ids and output_ids[-1] == self.tokenizer.eos_token_id)
         return (
             self.tokenizer.decode(output_ids, skip_special_tokens=True),
             len(output_ids),
             perf_counter() - started,
+            ended,
+            tuple(output_ids),
         )
 
     def observe(
@@ -89,6 +125,7 @@ class FrozenGradientBackend:
         max_reasoning_tokens: int = 320,
         finite_difference_block: str | None = None,
         finite_difference_epsilon: float = 0.1,
+        on_stage: Callable[[str, int, float], None] | None = None,
     ) -> GradientObservation:
         import torch
 
@@ -111,10 +148,14 @@ class FrozenGradientBackend:
                 pad_token_id=self.tokenizer.eos_token_id,
             )
         reasoning_ids = generated[0, prompt_ids.shape[1] :].tolist()
+        generated_tokens = len(reasoning_ids)
         eos = self.tokenizer.eos_token_id
+        generation_ended = bool(reasoning_ids and reasoning_ids[-1] == eos)
         while reasoning_ids and eos is not None and reasoning_ids[-1] == eos:
             reasoning_ids.pop()
         generation_seconds = perf_counter() - started
+        if on_stage is not None:
+            on_stage("generation_completed", generated_tokens, generation_seconds)
         reasoning = self.tokenizer.decode(reasoning_ids, skip_special_tokens=True)
         extractor_ids = self.tokenizer.encode(self.extractor, add_special_tokens=False)
         answer_ids_list = self.tokenizer.encode(gold_answer, add_special_tokens=False)
@@ -126,13 +167,29 @@ class FrozenGradientBackend:
         answer_start = len(prefix)
 
         started = perf_counter()
+        if on_stage is not None:
+            on_stage("differentiable_forward_started", len(prefix) + len(answer_ids_list), 0.0)
         with torch.enable_grad():
             embeddings = self.model.get_input_embeddings()(all_ids).detach().requires_grad_(True)
             loss = self._loss(embeddings, answer_start, answer_ids)
+            if on_stage is not None:
+                on_stage(
+                    "differentiable_forward_completed",
+                    len(prefix) + len(answer_ids_list),
+                    perf_counter() - started,
+                )
+                on_stage("differentiable_backward_started", len(prefix) + len(answer_ids_list), 0.0)
+            backward_started = perf_counter()
             loss.backward()
             assert embeddings.grad is not None
             gradients = embeddings.grad[0, : len(rendered.input_ids)].detach().float()
         gradient_seconds = perf_counter() - started
+        if on_stage is not None:
+            on_stage(
+                "differentiable_backward_completed",
+                len(prefix) + len(answer_ids_list),
+                perf_counter() - backward_started,
+            )
         loss_value = float(loss.detach().float().item())
         if not isfinite(loss_value) or not bool(torch.isfinite(gradients).all()):
             raise ValueError("answer loss or input gradients are non-finite")
@@ -155,7 +212,12 @@ class FrozenGradientBackend:
             positions = rendered.block_positions.get(finite_difference_block, ())
             if not positions:
                 raise ValueError("finite-difference block has no editable token")
-            position = positions[0]
+            position = next(
+                (index for index in positions if float(gradients[index].norm().item()) > 0),
+                None,
+            )
+            if position is None:
+                raise ValueError("finite-difference block has no nonzero token gradient")
             direction = gradients[position]
             direction = direction / direction.norm()
             epsilon = finite_difference_epsilon
@@ -168,6 +230,8 @@ class FrozenGradientBackend:
                 minus_loss = self._loss(minus, answer_start, answer_ids)
             measured = float(((plus_loss - minus_loss) / (2 * epsilon)).float().item())
             predicted = float(gradients[position].dot(direction).item())
+            if not isfinite(measured) or not isfinite(predicted):
+                raise ValueError("finite-difference derivative is non-finite")
             finite_difference = {
                 "epsilon": epsilon,
                 "predicted": predicted,
@@ -183,7 +247,8 @@ class FrozenGradientBackend:
             token_positions={key: tuple(value) for key, value in rendered.block_positions.items()},
             generation_seconds=generation_seconds,
             gradient_seconds=gradient_seconds,
-            generated_tokens=len(reasoning_ids),
+            generated_tokens=generated_tokens,
+            generation_ended=generation_ended,
             forward_tokens=len(prefix) + len(answer_ids_list),
             backward_tokens=len(prefix) + len(answer_ids_list),
             finite_difference=finite_difference,

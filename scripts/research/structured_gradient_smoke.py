@@ -25,7 +25,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
 
     if args.device.startswith("cuda") and not torch.cuda.is_available():
         raise RuntimeError("CUDA is unavailable; no real GPU gradient was run")
-    row = load_split(args.data_dir, args.manifest, args.task, "fit")[0]
+    row = load_split(args.shard_dir, args.manifest, args.task, "fit")[0]
     loaded = perf_counter()
     tokenizer = AutoTokenizer.from_pretrained(
         args.model_path, local_files_only=True, use_fast=True, trust_remote_code=False
@@ -52,21 +52,35 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         max_reasoning_tokens=args.max_reasoning_tokens,
         finite_difference_block="reasoning",
     )
+    check = observation.finite_difference
+    if check is None or check["predicted"] <= 0 or check["measured"] <= 0:
+        raise ValueError("finite-difference direction did not confirm the input gradient")
+    if abs(check["predicted"] - check["measured"]) > max(1.0, 0.5 * check["predicted"]):
+        raise ValueError("finite-difference magnitude was inconsistent with the gradient")
     parent_score = score_multiple_choice(
         observation.reasoning,
         row.answer,
         max_letter="C" if args.task == "logical_deduction_three_objects" else "F",
     )
-    parent_truncated = observation.generated_tokens >= args.max_reasoning_tokens
+    parent_truncated = (
+        observation.generated_tokens >= args.max_reasoning_tokens
+        and not observation.generation_ended
+    )
     attempts: list[dict[str, Any]] = []
     for block_id in ranked_blocks(observation.block_sensitivity):
-        for rewrite, proposal_tokens, proposal_seconds in propose_block_rewrites(
+        for (
+            rewrite,
+            proposal_input_tokens,
+            proposal_tokens,
+            proposal_seconds,
+        ) in propose_block_rewrites(
             model, tokenizer, original, block_id, count=args.candidates_per_block
         ):
             attempt: dict[str, Any] = {
                 "block_id": block_id,
                 "rewrite": rewrite,
                 "proposal_tokens": proposal_tokens,
+                "proposal_input_tokens": proposal_input_tokens,
                 "proposal_seconds": proposal_seconds,
                 "block_gradient_mean_norm": observation.block_sensitivity[block_id],
             }
@@ -77,17 +91,19 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                 attempt["error"] = str(error)
                 attempts.append(attempt)
                 continue
-            response, response_tokens, response_seconds = backend.generate_response(
-                modified,
-                {"input": row.question},
-                max_new_tokens=args.max_reasoning_tokens,
+            response, response_tokens, response_seconds, response_ended, _ = (
+                backend.generate_response(
+                    modified,
+                    {"input": row.question},
+                    max_new_tokens=args.max_reasoning_tokens,
+                )
             )
             score = score_multiple_choice(
                 response,
                 row.answer,
                 max_letter="C" if args.task == "logical_deduction_three_objects" else "F",
             )
-            truncated = response_tokens >= args.max_reasoning_tokens
+            truncated = response_tokens >= args.max_reasoning_tokens and not response_ended
             diff = compare_prompts(
                 original.document,
                 modified.document,
@@ -165,7 +181,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model-path", type=Path, required=True)
-    parser.add_argument("--data-dir", type=Path, required=True)
+    parser.add_argument("--shard-dir", type=Path, required=True)
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument("--task", choices=TASKS, required=True)
     parser.add_argument("--device", default="cuda:0")

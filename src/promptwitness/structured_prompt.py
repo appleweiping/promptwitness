@@ -51,6 +51,8 @@ class TokenizedPrompt:
     input_ids: tuple[int, ...]
     block_positions: Mapping[str, tuple[int, ...]]
     boundary_positions: tuple[int, ...]
+    token_offsets: tuple[tuple[int, int], ...]
+    block_char_spans: Mapping[str, tuple[int, int]]
 
 
 @dataclass(frozen=True, slots=True)
@@ -208,4 +210,6 @@ class StructuredPrompt:
             input_ids,
             {key: tuple(value) for key, value in positions.items()},
             tuple(boundary),
+            tuple((int(lo), int(hi)) for lo, hi in encoded["offset_mapping"]),
+            spans,
         )

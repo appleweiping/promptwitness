@@ -119,6 +119,85 @@ def test_multiple_choice_score_requires_final_line() -> None:
     assert not score_multiple_choice("Final answer: (F)", "(F)", max_letter="C").correct
 
 
+def test_search_split_loader_never_needs_holdout_file(tmp_path) -> None:  # type: ignore[no-untyped-def]
+    import hashlib
+    import json
+
+    from promptwitness.structured_data import load_split
+
+    task = "date_understanding"
+    manifest = tmp_path / "manifest.json"
+    manifest.write_text(
+        json.dumps(
+            {
+                "format": "promptwitness.structured-gradient-splits/v1",
+                "source_commit": "test-source",
+                "tasks": {task: {"fit_ids": [f"{task}:001"], "validation_ids": [f"{task}:002"]}},
+            }
+        ),
+        encoding="utf-8",
+    )
+    (tmp_path / f"{task}.fit.jsonl").write_text(
+        json.dumps({"row_id": f"{task}:001", "question": "When?", "answer": "(A)"}) + "\n",
+        encoding="utf-8",
+    )
+    (tmp_path / f"{task}.validation.jsonl").write_text(
+        json.dumps({"row_id": f"{task}:002", "question": "Which date?", "answer": "(B)"}) + "\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "shard_manifest.json").write_text(
+        json.dumps(
+            {
+                "source_commit": "test-source",
+                "sha256": {
+                    f"{task}.{split}.jsonl": hashlib.sha256(
+                        (tmp_path / f"{task}.{split}.jsonl").read_bytes()
+                    ).hexdigest()
+                    for split in ("fit", "validation")
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    assert load_split(tmp_path, manifest, task, "fit")[0].answer == "(A)"
+    assert load_split(tmp_path, manifest, task, "validation")[0].answer == "(B)"
+    assert not (tmp_path / f"{task}.holdout.jsonl").exists()
+    (tmp_path / f"{task}.fit.jsonl").write_text(
+        json.dumps({"row_id": f"{task}:001", "question": "Changed?", "answer": "(A)"}) + "\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(ValueError, match="shard bytes"):
+        load_split(tmp_path, manifest, task, "fit")
+
+
+def test_token_baseline_prefix_contains_the_question() -> None:
+    from promptwitness.structured_search import initial_prompt
+
+    tokenizer = TinyTokenizer()
+    original = initial_prompt()
+    first = original.render_tokens(tokenizer, {"input": "Question one?"})
+    second = original.render_tokens(tokenizer, {"input": "Question two?"})
+    first_position = first.block_positions["task"][0]
+    second_position = second.block_positions["task"][0]
+    assert first.input_ids[:first_position] != second.input_ids[:second_position]
+
+
+def test_cost_journal_keeps_interrupted_attempt(tmp_path) -> None:  # type: ignore[no-untyped-def]
+    import json
+
+    from scripts.research.structured_gradient_search import CostJournal
+
+    record = {"meter": {}, "failed_operations": []}
+    output = tmp_path / "record.json"
+    journal = CostJournal(record, output)
+    with pytest.raises(KeyboardInterrupt), journal.operation("generation", input_tokens=17):
+        raise KeyboardInterrupt
+    persisted = json.loads(output.read_text(encoding="utf-8"))
+    assert persisted["meter"]["generation"]["attempts"] == 1
+    assert persisted["meter"]["generation"]["failures"] == 1
+    assert persisted["failed_operations"][0]["partial_cost_unknown"] is True
+
+
 def test_real_autograd_covers_full_answer_and_leaves_weights_frozen() -> None:
     torch = pytest.importorskip("torch")
     from promptwitness.gradient_backend import FrozenGradientBackend
