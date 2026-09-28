@@ -12,6 +12,8 @@
 \usepackage{xcolor}
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
 
 \newtheorem{proposition}{Proposition}
 \newcommand{\graft}{\textsc{Graft}}
@@ -86,6 +88,18 @@ and ranks edits closely to exact evaluation at a fraction of its cost.
 blocks (\S\ref{sec:graft}), evaluated on \greater{}'s protocol with its models
 \todo{results summary}.
 \end{itemize}
+
+\begin{figure*}[t]
+\centering
+\resizebox{\textwidth}{!}{\input{figures/overview}}
+\caption{\textbf{From token coordinates to typed blocks.} (a) \greater{} relaxes one
+prompt token into the vocabulary simplex; its vertices are real tokens but every
+edit keeps the prompt's length and structure. (b) \graft{} places candidate rewrites
+of every typed block in parallel slots behind attention gates, with continuous
+slot offsets realized as rotary rotations. Every vertex is exactly a real edited
+prompt, and one forward/backward pass scores all single-block edits.}
+\label{fig:overview}
+\end{figure*}
 
 \section{Background: gradients over reasoning}
 \label{sec:background}
