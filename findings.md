@@ -346,3 +346,10 @@ ViT-L/14 CPU、Landlock 受限 worker 与独立 scorer 通过。selection
 私有权重/自制图/账本不提交，正式数据、许可、真实生成描述、
 全角色成本与M1/Pilot/C1–C3仍NOT_ADMITTED。见
 research/ICMR_SELECTION_REAL_CLIP.md/json。
+
+2026-09-28T09:25:01Z：真实CLIP自制资格源码提交
+`ec5e64d7f18317c47e91118a9bb9000bd9974444` 已推送；
+精确[CI run 36402372673](https://github.com/appleweiping/promptwitness/actions/runs/36402372673)
+completed/success15/15。Ubuntu3.10/3.14各2098pass3skip，覆盖率
+94.04/94.05%。CI不运行私有权重/正式图像/真实生成器；M1/Pilot/
+C1–C3仍NOT_ADMITTED。见research/ICMR_SELECTION_REAL_CLIP_CI.md。

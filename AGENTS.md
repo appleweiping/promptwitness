@@ -473,3 +473,11 @@ Twine过。审查初阻断已修、follow-up无阻断；审查后部分失败留
 新源码SHA CI待验。SSH指纹未重新核验，未登录；goalACTIVE/
 default4/历史账本/无timer/四仓冻结不变。详见
 research/ICMR_SELECTION_REAL_CLIP.md/json。
+
+2026-09-28T09:25:01Z：自制真实CLIP资格源码SHA
+`ec5e64d7f18317c47e91118a9bb9000bd9974444` 已推送，
+CI run36402372673精确匹配 completed/success15/15；Ubuntu3.10/3.14
+各2098pass3skip。CI无私有权重、官方数据或真实Qwen/OLMo，
+独立WSL自制资格的哈希与费用见research/ICMR_SELECTION_REAL_CLIP.md/json。
+正式许可/图像/封存、全角色成本/online native/M1/Pilot/C1–C3
+仍NOT_ADMITTED；goalACTIVE/default4/历史账本/无timer/四仓冻结不变。

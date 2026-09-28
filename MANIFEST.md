@@ -734,3 +734,9 @@
 | 2026-09-28T09:10:03Z | experiment-bridge | research/ACCESS_AUDIT.md | implementation | 同字节latest copy |
 | 2026-09-28T09:10:03Z | experiment-bridge | findings.md | implementation | 自制资格和未准入项 |
 | 2026-09-28T09:10:03Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |
+| 2026-09-28T09:25:01Z | experiment-bridge | research/ICMR_SELECTION_REAL_CLIP_CI_20260928_092501.md | implementation | ec5e64d精确CI15/15与科学边界 |
+| 2026-09-28T09:25:01Z | experiment-bridge | research/ICMR_SELECTION_REAL_CLIP_CI.md | implementation | 同字节latest copy |
+| 2026-09-28T09:25:01Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_092501.md | implementation | CI终态tracker快照 |
+| 2026-09-28T09:25:01Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 同字节latest copy |
+| 2026-09-28T09:25:01Z | experiment-bridge | findings.md | implementation | 精确CI与未准入项 |
+| 2026-09-28T09:25:01Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |
