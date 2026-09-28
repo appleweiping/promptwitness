@@ -33,7 +33,7 @@ def initial_prompt() -> StructuredPrompt:
         (
             "reasoning",
             BlockKind.REASONING_POLICY,
-            "Reason through the question step by step.\n",
+            "Give at most two concise reasoning sentences before the final answer.\n",
             True,
             (),
         ),

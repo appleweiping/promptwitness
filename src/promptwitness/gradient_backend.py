@@ -57,7 +57,7 @@ class FrozenGradientBackend:
         prompt: StructuredPrompt,
         values: dict[str, object],
         *,
-        max_new_tokens: int = 96,
+        max_new_tokens: int = 320,
     ) -> tuple[str, int, float]:
         """Generate fresh task output; no gold answer is an input to this method."""
         import torch
@@ -86,7 +86,7 @@ class FrozenGradientBackend:
         values: dict[str, object],
         gold_answer: str,
         *,
-        max_reasoning_tokens: int = 96,
+        max_reasoning_tokens: int = 320,
         finite_difference_block: str | None = None,
         finite_difference_epsilon: float = 0.1,
     ) -> GradientObservation:

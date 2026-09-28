@@ -169,7 +169,7 @@ def main() -> None:
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument("--task", choices=TASKS, required=True)
     parser.add_argument("--device", default="cuda:0")
-    parser.add_argument("--max-reasoning-tokens", type=int, default=96)
+    parser.add_argument("--max-reasoning-tokens", type=int, default=320)
     parser.add_argument("--candidates-per-block", type=int, choices=(1, 2, 3), default=3)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
