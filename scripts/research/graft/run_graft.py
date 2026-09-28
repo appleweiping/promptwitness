@@ -7,6 +7,9 @@ acceptance rule, dev-set checkpoint selection and a single test evaluation:
   gate    ablation: raw first-order gate derivative (saturates)
   exact   control: fixed-reasoning loss of every edited prompt (one forward per edit)
   random  control: random shortlist, no scoring
+  textgrad baseline: section-local textual feedback from the same model on failed
+          minibatch examples (labels visible to the critic, as in TextGrad/MPO), one
+          feedback-driven rewrite per block, then the same verification
 
 Only train examples drive search; dev selects among accepted prompts; test is read
 once at the end. Writes a JSON record with the trajectory and a cost ledger.
@@ -158,6 +161,46 @@ def propose(runner: Runner, prompt: StructuredPrompt, slot: str, questions: list
     return outputs
 
 
+def textual_gradient_pools(runner: Runner, prompt: StructuredPrompt, batch: list[graft_tasks.Example],
+                           incumbent: dict[str, Any], seed: int) -> dict[str, list[str]]:
+    """Section-local textual gradients: critique each block from failures, then rewrite it."""
+    import torch
+
+    tokenizer, model = runner.tokenizer, runner.model
+    failures = [(e, r) for e, r, c in zip(batch, incumbent["reasoning"], incumbent["correct"]) if not c]
+    if not failures:
+        failures = list(zip(batch, incumbent["reasoning"]))[:2]
+    shown = "\n\n".join(
+        f"Problem:\n{e.question}\nModel reasoning:\n"
+        f"{tokenizer.decode(r, skip_special_tokens=True)[-600:]}\n"
+        f"Correct answer: {e.answer}" for e, r in failures[:3])
+    context = "".join(b.text for b in prompt.blocks if b.editable)
+    pools: dict[str, list[str]] = {}
+    started = perf_counter()
+    for index, block in enumerate(b for b in prompt.blocks if b.editable):
+        role = f"the block '{block.text.strip()}'" if block.text else "a new optional block (currently empty)"
+        request = (
+            "An instruction prompt for a language model produced wrong answers.\n"
+            f"Current instructions:\n{context}\nExamples of failures:\n{shown}\n\n"
+            f"First, briefly explain what is wrong or missing in {role} of type {block.kind.value}. "
+            "Then write an improved version of that block that would help on such problems. "
+            "Do not mention the specific answers. End with the line 'NEW BLOCK:' followed by "
+            "only the new block text.")
+        enc = tokenizer.apply_chat_template([{"role": "user", "content": request}],
+                                            tokenize=True, add_generation_prompt=True)
+        ids = torch.tensor([list(enc["input_ids"] if hasattr(enc, "keys") else enc)], device=model.device)
+        torch.manual_seed(seed + index)
+        with torch.no_grad():
+            gen = model.generate(ids, attention_mask=torch.ones_like(ids), max_new_tokens=320,
+                                 do_sample=True, temperature=0.7, top_p=0.95,
+                                 pad_token_id=tokenizer.eos_token_id)
+        text = tokenizer.decode(gen[0, ids.shape[1]:], skip_special_tokens=True)
+        new = text.split("NEW BLOCK:")[-1].strip().strip('"').strip() if "NEW BLOCK:" in text else ""
+        pools[block.block_id] = [new + "\n"] if new else []
+    runner.ledger.add("textgrad_feedback", perf_counter() - started)
+    return pools
+
+
 def valid_edits(runner: Runner, prompt: StructuredPrompt, pools: dict[str, list[str]],
                 probe: graft_tasks.Example) -> list[Edit]:
     values = {"input": probe.question}
@@ -252,7 +295,8 @@ def main() -> None:
     parser.add_argument("--task", required=True)
     parser.add_argument("--model-path", required=True)
     parser.add_argument("--data-dir", type=Path, required=True)
-    parser.add_argument("--method", choices=("patch", "gate", "exact", "random"), required=True)
+    parser.add_argument("--method", choices=("patch", "gate", "exact", "random", "textgrad"),
+                        required=True)
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--rounds", type=int, default=12)
     parser.add_argument("--batch", type=int, default=8)
@@ -288,8 +332,13 @@ def main() -> None:
         incumbent = runner.evaluate(prompt, batch, "incumbent", with_loss=True)
         slots = [b.block_id for b in prompt.blocks if b.editable]
         questions = [e.question for e in rng.sample(splits["train"], 2)]
-        pools = {slot: propose(runner, prompt, slot, questions, args.seed * 1000 + round_index * 10 + j, args.k)
-                 for j, slot in enumerate(slots)}
+        if args.method == "textgrad":
+            pools = textual_gradient_pools(runner, prompt, batch, incumbent,
+                                           args.seed * 1000 + round_index * 10)
+        else:
+            pools = {slot: propose(runner, prompt, slot, questions,
+                                   args.seed * 1000 + round_index * 10 + j, args.k)
+                     for j, slot in enumerate(slots)}
         edits = valid_edits(runner, prompt, pools, batch[0])
         record: dict[str, Any] = {"round": round_index, "incumbent_acc": incumbent["accuracy"],
                                   "incumbent_loss": incumbent["loss"], "edits": len(edits),
@@ -297,7 +346,13 @@ def main() -> None:
         if not edits:
             trajectory.append({**record, "accepted": None})
             continue
-        estimates = score_edits(args.method, runner, scorer, prompt, pools, edits, batch,
+        scoring = "random" if args.method == "textgrad" else args.method
+        if args.method == "textgrad":
+            edits = [e for e in edits if e[1] is not None]  # feedback rewrites only
+        if not edits:
+            trajectory.append({**record, "accepted": None})
+            continue
+        estimates = score_edits(scoring, runner, scorer, prompt, pools, edits, batch,
                                 incumbent["reasoning"], rng)
         shortlist = sorted(edits, key=lambda e: estimates[e])[: args.mu]
         checks = []

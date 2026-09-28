@@ -132,6 +132,32 @@ rounding (a soft, superposed prompt that is still anchored to real text).
   windows, GQA, QK-norm). Unit test: max |logit diff| vs stock model at g0.
 * Compute: single available A6000 (GPU1 is occupied by another user's service).
 
+## 5b. Revision after cross-model review and fidelity v1/v2 (2026-09-28)
+
+The GPT-6 review (PROCEED WITH CAUTION, novelty 6/10) found Prop. 2 false for
+length-changing edits and asked for parity and fidelity evidence first. Changes:
+
+1. **Exact vertices.** Candidates start at their incumbent's first position; each slot
+   has a continuous offset `w_j` that moves every later token by an extra RoPE
+   rotation. Then replacement, deletion, insertion (empty slots) and multi-slot
+   combined vertices equal the real edited prompts (fp32 tests on three
+   architectures; gate and offset gradients match finite differences).
+2. **Raw gate derivatives fail** (fidelity v1/v2 on OLMo-3: Spearman -0.2 to 0.26
+   against exact fixed-reasoning loss changes). Cause: attention saturation; the
+   derivative at `g=0` scales with raw candidate mass `S_c/Z_0`.
+3. **Renormalized superposed patching** keeps each layer's softmax renormalization and
+   RoPE rotation exact for the swapped slot and linearizes only propagation through
+   later layers: `dL ~ sum_l <dL/do_l, o_l(c) - o_l(b)>`. This is the AtP* insight
+   (Kramár et al. 2024: exact attention, linear elsewhere) carried from
+   interpretability to structural prompt search, made possible because the
+   superposed pass already holds every candidate's exact keys/values. Same single
+   forward/backward per example; Spearman 0.87 on the same OLMo-3 pool.
+
+The contribution is therefore framed as: (a) an exact structural edit calculus over
+typed prompt blocks (every vertex is a real prompt, length changes included), and
+(b) a faithful one-pass estimator for all single-slot edits, used as the gradient
+signal in a GReaTer-style self-optimization loop.
+
 ## 6. Pilot evidence so far (frozen pilot, OLMo-3-7B, logical_deduction, 32-item val)
 Baseline A 22/32 (x3); token arm B 26, 23, 25; random-block C 23, 24, (seed 3 pending);
 gradient-norm block D pending. Too small for conclusions; motivates C1 before C2.
