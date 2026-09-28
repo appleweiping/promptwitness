@@ -362,3 +362,11 @@ coverage94.03%，精确SHA CI待记。
 M1/Pilot/C1–C3、正式数据许可、full-gallery/tie parity、captioner、
 双模型与全角色物理成本仍 NOT_ADMITTED；ARIS 默认4轮、历史预算、无timer、
 另外四仓冻结的覆盖指令不变。
+
+2026-09-28T05:11:08Z：caller-supplied description 增量精确 SHA
+`42ba46f4563a78dbf944fd9c0c6282074bb53b76` 的 CI run36380294671
+completed/success15/15；Ubuntu3.10/3.14各2064pass2skip、coverage
+94.04/94.05%。见research/ICMR_DESCRIPTION_TRANSPORT_CI.md。
+CI 不运行私有 CLIP 或正式数据；描述仍自写，不是Qwen/OLMo结果。
+M1/Pilot/C1–C3以及官方许可/评分/全角色成本继续NOT_ADMITTED；目标
+仍 active。默认4轮、历史预算、无timer、四仓冻结不变。

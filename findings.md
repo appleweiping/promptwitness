@@ -253,3 +253,10 @@ target description，并保留原 direct 路径；request ID 重放在再次编�
 Windows本地2046pass20skip/coverage94.03%，构建通过，精确SHA CI待记。
 **未使用真实生成模型或正式数据**，不授 M1/Pilot/方法收益，
 全角色成本和图像许可继续未关闭。见research/ICMR_DESCRIPTION_TRANSPORT.md。
+
+2026-09-28T05:11:08Z：目标描述通道提交`42ba46f`精确CI
+run36380294671 completed/success15/15；Ubuntu3.10/3.14各2064pass2skip，
+coverage94.04/94.05%，3.14有128warnings。本地配置全套2046pass20skip、
+94.03%；真实 CLIP 自制图资格独立于公开 CI。没有真实生成模型、正式
+图像/标注/许可或方法收益，M1/Pilot仍NOT_ADMITTED。见
+research/ICMR_DESCRIPTION_TRANSPORT_CI.md。

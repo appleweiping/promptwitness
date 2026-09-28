@@ -637,3 +637,11 @@
 | 2026-09-28T04:37:25Z | experiment-bridge | research/ACCESS_AUDIT.md | implementation | 最新数据访问审计 |
 | 2026-09-28T04:37:25Z | experiment-bridge | findings.md | implementation | 描述检索和科学门禁 |
 | 2026-09-28T04:37:25Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |
+| 2026-09-28T05:11:08Z | experiment-bridge | research/ICMR_DESCRIPTION_TRANSPORT_CI_20260928_051108.md | implementation | 42ba46f精确SHA CI15/15与未准入边界 |
+| 2026-09-28T05:11:08Z | experiment-bridge | research/ICMR_DESCRIPTION_TRANSPORT_CI.md | implementation | 同字节latest copy |
+| 2026-09-28T05:11:08Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_051108.md | implementation | CI终态tracker快照 |
+| 2026-09-28T05:11:08Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 精确CI与科学门禁 |
+| 2026-09-28T05:11:08Z | experiment-bridge | research/ACCESS_AUDIT_20260928_051108.md | implementation | CI未触正式数据访问快照 |
+| 2026-09-28T05:11:08Z | experiment-bridge | research/ACCESS_AUDIT.md | implementation | 最新访问审计 |
+| 2026-09-28T05:11:08Z | experiment-bridge | findings.md | implementation | 真实CI和未准入项 |
+| 2026-09-28T05:11:08Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |
