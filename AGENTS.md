@@ -389,3 +389,12 @@ coverage94.04/94.05%；详见research/ICMR_GENERATED_DESCRIPTION_BRIDGE_CI.md。
 CI只覆盖authored代码/构建，不运行私有Qwen/OLMo、CLIP或正式CIR数据。
 SSH指纹未重新核验，fresh审查因agent thread limit未完成；M1/Pilot/
 C1–C3/全角色预算/稿件仍未准入，goal仍active，default4/无timer不变。
+
+2026-09-28T06:14:38Z：新增单一 Linux authored 测试，将模拟模型的
+`PersistentModel.metered` 账本→Landlock ranker→受限 scorer→冻结 gate/
+survivor 连成 64 查询的一次实际进程链；Windows全套2059pass20skip/
+coverage94.04%，Linux新用例与精确SHA CI待验。fresh审查仍因
+agent thread limit未创建，仅`[local-only]`。模拟 `_execute`、虚拟图库
+不是 Qwen/OLMo/CLIP/正式数据结果；M1/Pilot/C1–C3不变。
+详见research/ICMR_GENERATED_CHAIN_AUTHORED.md；服务器SSH指纹未确认，
+未登录，default4/历史账本/无timer/其他四仓冻结不变。

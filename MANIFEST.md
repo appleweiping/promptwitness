@@ -659,3 +659,11 @@
 | 2026-09-28T05:56:28Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 同字节latest copy |
 | 2026-09-28T05:56:28Z | experiment-bridge | findings.md | implementation | 精确SHA CI与未准入项 |
 | 2026-09-28T05:56:28Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |
+| 2026-09-28T06:14:38Z | experiment-bridge | research/ICMR_GENERATED_CHAIN_AUTHORED_20260928_061438.md | implementation | 模型账本到受限scorer同计划自制回归 |
+| 2026-09-28T06:14:38Z | experiment-bridge | research/ICMR_GENERATED_CHAIN_AUTHORED.md | implementation | 同字节latest copy |
+| 2026-09-28T06:14:38Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW_20260928_061438.md | implementation | fresh审查不可用与local-only检查 |
+| 2026-09-28T06:14:38Z | experiment-bridge | refine-logs/EXPERIMENT_CODE_REVIEW.md | implementation | 同字节latest copy |
+| 2026-09-28T06:14:38Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_061438.md | implementation | Linux链路待验tracker快照 |
+| 2026-09-28T06:14:38Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | 同字节latest copy |
+| 2026-09-28T06:14:38Z | experiment-bridge | findings.md | implementation | 自制完整链路与门禁 |
+| 2026-09-28T06:14:38Z | experiment-bridge | AGENTS.md | implementation | 当前研究dashboard |

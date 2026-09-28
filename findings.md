@@ -275,3 +275,10 @@ research/ICMR_DESCRIPTION_TRANSPORT_CI.md。
 2076pass2skip/coverage94.04/94.05%。不含真实模型/正式数据/服务器端
 运行，fresh审查与SSH身份仍待完成；M1/Pilot/C1–C3不变。
 见research/ICMR_GENERATED_DESCRIPTION_BRIDGE_CI.md。
+
+2026-09-28T06:14:38Z：此前分段测试未在一条冻结计划中真正组装
+模型账本、受限ranker、独立scorer与完整survivor。新增Linux-only
+64查询自制端到端测试；Windows全套2059pass20skip/coverage94.04%，
+Linux/精确SHA CI仍待验。模型 `_execute` 与ranker均为明确替身，不产生
+真实研究费用或效果；fresh审查请求被thread limit拒绝仅local-only。
+见research/ICMR_GENERATED_CHAIN_AUTHORED.md。
