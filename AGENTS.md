@@ -289,3 +289,10 @@ fresh reviewer发现嵌套耗时误称lower bound的BLOCKING，确定性修复�
 follow-up复审关闭，同家族provisional。没有新真实模型/benchmark/GPU/paid；
 全角色成本、正式数据/许可、ONLINE_PINNED、M1/Pilot/ICMR效果仍未准入。
 见research/ICMR_WORK_LEDGER.md；历史账本/default4/无timer不变。
+
+2026-09-28T01:03:59Z：检索操作账本精确源码83e574a9f615aa24ae5a8851830903a941ec5846
+CI run36364121379终态success15/15；Ubuntu3.10 2039pass1skip、Ubuntu3.14
+2039pass1skip127warnings，authored Linux worker在矩阵内。仅工程CI通过，
+不授真实CLIP新账本资格/M1/Pilot/ICMR效果。EXPERIMENT_PLAN claim map已按
+ICMR_SCOPE将paired审计列C2、等预算优化列C3；未改矩阵或科学冻结。
+见research/ICMR_WORK_LEDGER_CI.md。无timer/default4/其他四仓冻结不变。

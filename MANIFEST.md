@@ -538,3 +538,11 @@
 | 2026-09-28T00:54:13Z | experiment-bridge | research/ACCESS_AUDIT_20260928_005413.md | implementation | 访问同字节快照 |
 | 2026-09-28T00:54:13Z | experiment-bridge | AGENTS.md | implementation | 研究dashboard和CI待验 |
 | 2026-09-28T00:54:13Z | experiment-bridge | findings.md | implementation | 嵌套耗时反例和未准入事项 |
+| 2026-09-28T01:01:47Z | experiment-bridge | refine-logs/EXPERIMENT_PLAN.md | implementation | C2/C3 claim map与ICMR_SCOPE对齐，不改矩阵 |
+| 2026-09-28T01:01:47Z | experiment-bridge | refine-logs/EXPERIMENT_PLAN_20260928_010147.md | implementation | 计划同字节快照 |
+| 2026-09-28T01:03:59Z | experiment-bridge | research/ICMR_WORK_LEDGER_CI_20260928_010359.md | implementation | 83e574a精确CI15/15及科学边界 |
+| 2026-09-28T01:03:59Z | experiment-bridge | research/ICMR_WORK_LEDGER_CI.md | implementation | CI报告同内容latest copy |
+| 2026-09-28T01:03:59Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER.md | implementation | CI终态与claim map修正记录 |
+| 2026-09-28T01:03:59Z | experiment-bridge | refine-logs/EXPERIMENT_TRACKER_20260928_010359.md | implementation | tracker同字节快照 |
+| 2026-09-28T01:03:59Z | experiment-bridge | AGENTS.md | implementation | CI与未准入dashboard |
+| 2026-09-28T01:03:59Z | experiment-bridge | findings.md | implementation | claim map错位及修正 |

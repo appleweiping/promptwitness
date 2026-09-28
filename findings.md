@@ -186,3 +186,8 @@ checker，明确失败/中断未知成本不补零不重放。fresh reviewer抓�
 相加并非物理时长下界，已改为非可加字段并复审关闭。最终本机reproduce
 492pass8skip；新账本未在真实CLIP或正式数据上跑，模型/GPU账本未变，M1/Pilot
 及ICMR科学结果仍待合法数据、全角色计费和完整controller。
+
+2026-09-28T01:03:59Z 83e574a精确CI run36364121379 15/15，Ubuntu3.10
+2039pass1skip；这只证实authored账本/进程桥的工程可运行。检查计划发现
+C2/C3编号错位，现按ICMR_SCOPE补C2审计并将等预算优化标C3，不增实验。
+真实数据、CLIP新账本运行、完整物理成本与论文效果继续未准入。
