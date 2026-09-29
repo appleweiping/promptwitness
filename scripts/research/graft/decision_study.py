@@ -24,13 +24,12 @@ from time import perf_counter
 from typing import Any
 
 from promptwitness import graft_tasks
-from promptwitness.graft_runtime import answer_losses, generate_batch, load_tokenizer
+from promptwitness.graft_runtime import answer_losses, generate_batch, load_tokenizer, sample_reasonings
 from promptwitness.superposed_gates import GateScorer, build_superposed, candidate_token_ids
 from promptwitness.superposed_patching import patch_estimates
 
 from fidelity_study import spearman
 from run_graft import Ledger, Runner, apply, propose
-from validity_study import sample_reasonings
 
 
 def first_divergence(a: list[int], b: list[int]) -> int | None:

@@ -32,7 +32,9 @@ from promptwitness.graft_runtime import (
     ScoredTarget,
     answer_losses,
     answer_target,
+    fork_targets,
     generate_batch,
+    sample_reasonings,
     verified_targets,
 )
 from promptwitness.structured_prompt import StructuredPrompt
@@ -267,27 +269,35 @@ def score_edits(method: str, runner: Runner, scorer: GateScorer, prompt: Structu
         return {e: rng.random() for e in edits}
     totals = {e: 0.0 for e in edits}
     started = perf_counter()
+    per_row: dict[int, list[dict[Edit, float]]] = {}
     if method == "exact":
-        pairs, owners, weights = [], [], []
-        for example, target in zip(batch, targets):
+        pairs, weights = [], []
+        for target in targets:
+            example = batch[target.row]
             tail, scored = list(target.tail), list(target.scored)
-            pairs.append((runner.ids(prompt, example) + tail, scored))
-            owners.append(None)
-            weights.append(target.weights)
-            for edit in edits:
-                pairs.append((runner.ids(apply(prompt, pools, edit), example) + tail, scored))
-                owners.append(edit)
+            for candidate in [prompt] + [apply(prompt, pools, e) for e in edits]:
+                ids = runner.ids(candidate, example) + tail
+                pairs.append((ids, scored))
                 weights.append(target.weights)
+                if target.contrast:
+                    pairs.append((ids, list(target.contrast)))
+                    weights.append(target.weights)
         losses, _ = answer_losses(runner.model, pairs, weights=weights)
-        base_loss = 0.0
-        for owner, loss in zip(owners, losses):
-            if owner is None:
-                base_loss = loss
-            else:
-                totals[owner] += (loss - base_loss) / len(batch)
+        cursor = 0
+        for target in targets:
+            values = []
+            for _ in range(len(edits) + 1):
+                value = losses[cursor]
+                cursor += 1
+                if target.contrast:  # decision margin CE(good) - CE(bad)
+                    value -= losses[cursor]
+                    cursor += 1
+                values.append(value)
+            per_row.setdefault(target.row, []).append(
+                {e: values[j + 1] - values[0] for j, e in enumerate(edits)})
         runner.ledger.add("score_exact", perf_counter() - started, forwards=len(pairs),
                           forward_tokens=sum(len(c) + len(a) for c, a in pairs))
-        return totals
+        return _row_mean(per_row, edits)
     # Superposed passes of bounded size; indices stay stable via None placeholders.
     replacements = [e for e in edits if e[1] is not None]
     size = max(1, runner.candidates_per_pass)
@@ -297,10 +307,12 @@ def score_edits(method: str, runner: Runner, scorer: GateScorer, prompt: Structu
         members = set(chunk)
         candidates = {slot: [text if (slot, i) in members else None for i, text in enumerate(texts)]
                       for slot, texts in pools.items()}
-        for example, target in zip(batch, targets):
+        for target in targets:
+            example = batch[target.row]
             seq = build_superposed(prompt, runner.tokenizer, {"input": example.question}, candidates,
                                    list(target.tail), list(target.scored), mode="exact",
-                                   answer_weights=list(target.weights))
+                                   answer_weights=list(target.weights),
+                                   contrast_ids=list(target.contrast) or None)
             tokens += len(seq.input_ids)
             passes += 1
             if method == "patch":
@@ -310,11 +322,20 @@ def score_edits(method: str, runner: Runner, scorer: GateScorer, prompt: Structu
                 est = {(s, i): v for s, d in flat["replacement"].items() for i, v in d.items()}
                 if chunk_index == 0:
                     est.update({(s, None): v for s, v in flat["deletion"].items()})
-            for edit in edits:
-                if edit in est:
-                    totals[edit] += est[edit] / len(batch)
+            per_row.setdefault(target.row, []).append({e: est[e] for e in edits if e in est})
     runner.ledger.add(f"score_{method}", perf_counter() - started, forwards=passes,
                       backwards=passes, forward_tokens=tokens)
+    return _row_mean(per_row, edits)
+
+
+def _row_mean(per_row: dict[int, list[dict[Edit, float]]], edits: list[Edit]) -> dict[Edit, float]:
+    """Average targets within a row, then rows; edits missing in a target are skipped."""
+    totals = {e: 0.0 for e in edits}
+    for records in per_row.values():
+        for e in edits:
+            values = [r[e] for r in records if e in r]
+            if values:
+                totals[e] += sum(values) / len(values) / len(per_row)
     return totals
 
 
@@ -323,16 +344,28 @@ def build_targets(args: argparse.Namespace, runner: Runner, prompt: StructuredPr
     reasoning = incumbent["reasoning"]
     answers = [runner.target(e) for e in batch]
     if args.objective == "answer":
-        return [answer_target(r if runner.use_reasoning else [], runner.extractor, a)
-                for r, a in zip(reasoning, answers)]
+        return [replace(answer_target(r if runner.use_reasoning else [], runner.extractor, a), row=i)
+                for i, (r, a) in enumerate(zip(reasoning, answers))]
     started = perf_counter()
+    if args.objective == "fork":
+        prompts = [runner.ids(prompt, e) for e in batch]
+        drafts = sample_reasonings(runner.model, runner.tokenizer, prompts, args.verify_samples,
+                                   args.max_new_tokens, args.seed)
+        reads, _, _ = generate_batch(runner.model, runner.tokenizer,
+                                     [p + d + runner.extractor for p, ds in zip(prompts, drafts) for d in ds],
+                                     max_new_tokens=8)
+        judged = [[runner.spec.correct(reads[i * args.verify_samples + j].text, e.answer)
+                   for j in range(args.verify_samples)] for i, e in enumerate(batch)]
+        targets = fork_targets(reasoning, incumbent["correct"], drafts, judged, max_forks=3)
+        runner.ledger.add("fork_targets", perf_counter() - started)
+        return targets
     targets, _ = verified_targets(
         runner.model, runner.tokenizer, [runner.ids(prompt, e) for e in batch],
         [Generation(tuple(r), "", True) for r in reasoning], incumbent["correct"],
         runner.extractor, answers, lambda i, text: runner.spec.correct(text, batch[i].answer),
         samples=args.verify_samples, max_new_tokens=args.max_new_tokens, seed=args.seed)
     runner.ledger.add("verified_targets", perf_counter() - started)
-    return targets
+    return [replace(t, row=i) for i, t in enumerate(targets)]
 
 
 def main() -> None:
@@ -353,8 +386,8 @@ def main() -> None:
     parser.add_argument("--candidates-per-pass", type=int, default=32)
     parser.add_argument("--no-checkpointing", action="store_true",
                         help="keep attention activations instead of recomputing (faster, more memory)")
-    parser.add_argument("--objective", choices=("answer", "verified"), default="answer",
-                        help="GReaTer's answer loss, or verified reasoning plus answer")
+    parser.add_argument("--objective", choices=("answer", "verified", "fork"), default="answer",
+                        help="GReaTer's answer loss, verified reasoning, or decision margin at forks")
     parser.add_argument("--verify-samples", type=int, default=4)
     parser.add_argument("--no-reasoning-scores", action="store_true",
                         help="ablation: score edits without reasoning in the tail")

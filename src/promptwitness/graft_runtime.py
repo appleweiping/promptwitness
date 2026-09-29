@@ -103,7 +103,9 @@ class ScoredTarget:
     tail: tuple[int, ...]
     scored: tuple[int, ...]
     weights: tuple[float, ...]
-    source: str  # "answer", "greedy_correct", "sampled_correct", "fallback"
+    source: str  # "answer", "greedy_correct", "sampled_correct", "fallback", "fork"
+    contrast: tuple[int, ...] = ()  # decision margin: loss = logit[contrast] - logit[scored]
+    row: int = -1  # index of the minibatch example this target belongs to
 
 
 def answer_target(reasoning: Sequence[int], extractor: Sequence[int],
@@ -187,6 +189,68 @@ def verified_targets(
                    + [0.5 / len(answer)] * len(answer))
         targets.append(ScoredTarget((), scored, tuple(weights), sources[index]))
     return targets, perf_counter() - started
+
+
+def sample_reasonings(model: Any, tokenizer: Any, prompts: list[list[int]], samples: int,
+                      max_new_tokens: int, seed: int) -> list[list[list[int]]]:
+    import torch
+
+    eos = tokenizer.eos_token_id
+    pad = tokenizer.pad_token_id if tokenizer.pad_token_id is not None else eos
+    device = next(model.parameters()).device
+    batch = [p for p in prompts for _ in range(samples)]
+    out_all: list[list[int]] = []
+    for begin in range(0, len(batch), 24):
+        chunk = batch[begin:begin + 24]
+        width = max(map(len, chunk))
+        ids = torch.full((len(chunk), width), pad, dtype=torch.long)
+        mask = torch.zeros_like(ids)
+        for row, seq in enumerate(chunk):
+            ids[row, width - len(seq):] = torch.tensor(seq)
+            mask[row, width - len(seq):] = 1
+        torch.manual_seed(seed + begin)
+        with torch.no_grad():
+            gen = model.generate(input_ids=ids.to(device), attention_mask=mask.to(device),
+                                 max_new_tokens=max_new_tokens, do_sample=True, temperature=0.7,
+                                 top_p=0.95, pad_token_id=pad)
+        for row in gen[:, width:].tolist():
+            tokens = []
+            for token in row:
+                if token in (eos, pad):
+                    break
+                tokens.append(token)
+            out_all.append(tokens)
+    return [out_all[i * samples:(i + 1) * samples] for i in range(len(prompts))]
+
+
+def first_divergence(a: Sequence[int], b: Sequence[int]) -> int | None:
+    for index, (x, y) in enumerate(zip(a, b)):
+        if x != y:
+            return index
+    return None
+
+
+def fork_targets(greedy: Sequence[Sequence[int]], greedy_correct: Sequence[bool],
+                 samples: Sequence[Sequence[Sequence[int]]], sample_correct: Sequence[Sequence[bool]],
+                 *, max_forks: int = 3) -> list[ScoredTarget]:
+    """Decision forks between the greedy reasoning and self-samples of opposite correctness.
+
+    If greedy is wrong: its first divergence from each correct sample; if greedy is right:
+    from each incorrect sample. Target: margin CE(correct token) - CE(incorrect token).
+    """
+    targets: list[ScoredTarget] = []
+    for row, (g, g_ok) in enumerate(zip(greedy, greedy_correct)):
+        found: dict[tuple[int, int, int], ScoredTarget] = {}
+        for d, ok in zip(samples[row], sample_correct[row]):
+            if not d or ok == g_ok:
+                continue
+            good, bad = (list(g), list(d)) if g_ok else (list(d), list(g))
+            t = first_divergence(good, bad)
+            if t is not None and t < len(good) and t < len(bad):
+                found.setdefault((t, good[t], bad[t]), ScoredTarget(
+                    tuple(good[:t]), (good[t],), (1.0,), "fork", (bad[t],), row))
+        targets.extend(list(found.values())[:max_forks])
+    return targets
 
 
 def answer_losses(

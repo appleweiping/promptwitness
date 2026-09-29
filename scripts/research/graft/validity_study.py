@@ -33,38 +33,6 @@ from fidelity_study import spearman
 from run_graft import Ledger, Runner, apply, propose
 
 
-def sample_reasonings(model: Any, tokenizer: Any, prompts: list[list[int]], samples: int,
-                      max_new_tokens: int, seed: int) -> list[list[list[int]]]:
-    import torch
-
-    eos = tokenizer.eos_token_id
-    pad = tokenizer.pad_token_id if tokenizer.pad_token_id is not None else eos
-    device = next(model.parameters()).device
-    batch = [p for p in prompts for _ in range(samples)]
-    out_all: list[list[int]] = []
-    for begin in range(0, len(batch), 24):
-        chunk = batch[begin:begin + 24]
-        width = max(map(len, chunk))
-        ids = torch.full((len(chunk), width), pad, dtype=torch.long)
-        mask = torch.zeros_like(ids)
-        for row, seq in enumerate(chunk):
-            ids[row, width - len(seq):] = torch.tensor(seq)
-            mask[row, width - len(seq):] = 1
-        torch.manual_seed(seed + begin)
-        with torch.no_grad():
-            gen = model.generate(input_ids=ids.to(device), attention_mask=mask.to(device),
-                                 max_new_tokens=max_new_tokens, do_sample=True, temperature=0.7,
-                                 top_p=0.95, pad_token_id=pad)
-        for row in gen[:, width:].tolist():
-            tokens = []
-            for token in row:
-                if token in (eos, pad):
-                    break
-                tokens.append(token)
-            out_all.append(tokens)
-    return [out_all[i * samples:(i + 1) * samples] for i in range(len(prompts))]
-
-
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--model-path", required=True)
