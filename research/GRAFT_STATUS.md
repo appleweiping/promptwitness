@@ -132,6 +132,21 @@ full; everything lives on `/media/lenovo/data2`.
     separated (`run_graft --defer-eval`, `select_and_test.py`, vLLM reader) so that every
     method is read by one engine.
 
+21. **Fork causal check, logical_deduction_seven_objects (v3, 32 rows, 6 continuations per
+    arm).** Forcing the correct vs the incorrect first-divergence token changes success
+    probability by +0.085 (Llama-3, 41 forks) and -0.069 (Qwen3, 17 forks); position-matched
+    random divergences change it by |0.19| and |0.14|, and |dP_fork| is 0.20 / 0.19. On this
+    task first divergences between greedy and sampled reasoning are no more decisive than
+    random positions (mostly wording), which fails H-fork's causal premise here and explains
+    the weak fork-margin validity.
+22. **Evaluation engine ready.** vLLM 0.10.2 in its own venv (`graft-vllm`, torch 2.8 cu128
+    on driver 550, transformers pinned to 4.56.2 because 5.x breaks vLLM's tokenizer
+    wrapper). Rendered prompt token ids are identical to the HF venv for Llama-3, Gemma-2
+    and Qwen3 (`render_parity.py`); a GPU smoke test of `VllmReader` passes. Chained queues
+    (`phase2_queue.sh`) start fixed-prompt baselines on all 23 tasks and the token-level
+    validity control (GReaTer-style single-token edits, same seed/tasks/target as the block
+    study) as soon as each GPU's v3 queue finishes.
+
 ## Next
 
 * Fidelity v2 decides the scorer: renormalized patching must beat raw gates and
