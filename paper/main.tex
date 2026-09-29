@@ -119,10 +119,13 @@ answer by
 \end{equation}
 Holding $r$ fixed, it differentiates $\ell$ with respect to the one-hot indicator
 $\epsilon_i$ of prompt token $i$, keeps the $k$ candidates proposed by the model's
-own next-token distribution, and ranks them by $\nabla_{\epsilon_i}\ell\cdot(\mathbf e_v-\mathbf e_{p_i})$
-before verifying a few by an actual forward pass. The vertices of the one-hot
-simplex are real tokens, which is what makes the first-order score meaningful.
-We keep \greater{}'s objective and its self-optimization setting and change the
+own next-token distribution, and ranks them by $\nabla_{\epsilon_i}\ell\cdot(\mathbf e_v-\mathbf e_{p_i})$.
+The gradient thus decides which candidates are tried; the official implementation
+then regenerates the reasoning under every shortlisted candidate and keeps the one
+with the fewest answer errors on the minibatch, plus a small prompt-perplexity
+penalty. The vertices of the one-hot simplex are real tokens, which is what makes
+the first-order shortlist meaningful. We keep \greater{}'s objective, its
+shortlist-then-verify loop and its self-optimization setting, and change the
 coordinate from tokens to blocks.
 
 \section{An exact structural edit calculus}
