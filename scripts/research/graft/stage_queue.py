@@ -44,7 +44,10 @@ def main() -> None:
     parser.add_argument("--yield-to-pilot", action="store_true")
     parser.add_argument("--model", help="only runs of this model key (one queue per GPU and model)")
     parser.add_argument("--gen-server", help="host:port of a graft_genserver serving this model")
+    parser.add_argument("--max-consecutive-failures", type=int, default=3,
+                        help="stop the queue after this many failed runs in a row")
     args = parser.parse_args()
+    failures = 0
     repo = Path(__file__).resolve().parents[3]
     plan = json.loads(args.plan.read_text())
     journal = args.out / "journal.jsonl"
@@ -80,6 +83,10 @@ def main() -> None:
                                      "seconds": time.time() - started,
                                      "finished": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}) + "\n")
         print(json.dumps({"run": name, "exit": code}), flush=True)
+        failures = failures + 1 if code else 0
+        if failures >= args.max_consecutive_failures:
+            print(json.dumps({"stopped": "consecutive failures", "last": name}), flush=True)
+            sys.exit(1)
 
 
 if __name__ == "__main__":
