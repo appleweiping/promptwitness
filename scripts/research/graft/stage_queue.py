@@ -1,7 +1,7 @@
 """Crash-safe sequential queue for GRAFT runs (Stage C/D) on one GPU.
 
 Reads a JSON plan {"runs": [{"task", "model", "method", "seed", "extra": [...]}, ...]},
-skips runs whose output exists, records the git commit and exit status of each run
+skips runs whose output exists or that another queue has claimed (``<run>.lock``), records the git commit and exit status of each run
 in a JSONL journal, and optionally waits while another process (the frozen pilot)
 needs the GPU. Never kills other processes.
 """
@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import time
@@ -55,6 +56,10 @@ def main() -> None:
         output = args.out / f"{name}.json"
         if output.exists():
             continue
+        try:  # claim the run, so queues on several GPUs can share one plan without duplicates
+            os.close(os.open(args.out / f"{name}.lock", os.O_CREAT | os.O_EXCL | os.O_WRONLY))
+        except FileExistsError:
+            continue  # running elsewhere, or failed earlier (delete the lock to retry)
         while args.yield_to_pilot and pilot_active():
             time.sleep(120)
         model_path, attn = MODELS[run["model"]]
