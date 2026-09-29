@@ -25,7 +25,7 @@ from typing import Any
 
 from promptwitness import graft_tasks
 from promptwitness.graft_runtime import answer_losses, generate_batch, load_tokenizer, sample_reasonings
-from promptwitness.superposed_gates import GateScorer, build_superposed, candidate_token_ids
+from promptwitness.superposed_gates import GateScorer, _block_token_span, build_superposed, candidate_token_ids
 from promptwitness.superposed_patching import patch_estimates
 
 from fidelity_study import spearman
@@ -37,6 +37,47 @@ def first_divergence(a: list[int], b: list[int]) -> int | None:
         if x != y:
             return k
     return None
+
+
+def token_pools(model: Any, tokenizer: Any, prompt: Any, rows: list, n_edits: int, top_k: int,
+                rng: random.Random) -> dict[str, list[str]]:
+    """GReaTer-style single-token substitutions in the editable blocks.
+
+    Candidates at a prompt position are the model's own top-k next tokens there given the
+    input and the preceding prompt (log-probabilities averaged over ``rows``), as in
+    GReaTer's candidate proposal; (position, candidate) pairs are sampled uniformly. Only
+    substitutions that re-tokenize to exactly one changed token are kept.
+    """
+    import torch
+
+    slots = [b.block_id for b in prompt.blocks if b.editable and b.text]
+    spans: dict[str, list[int]] = {}
+    logp: dict[str, Any] = {}
+    for slot in slots:
+        total = None
+        for row in rows:
+            ids, lo, hi = _block_token_span(prompt, tokenizer, {"input": row.question}, slot)
+            with torch.no_grad():
+                logits = model(input_ids=torch.tensor([list(ids)], device=model.device)).logits[0]
+            step = logits[lo - 1: hi - 1].float().log_softmax(-1)
+            total = step if total is None else total + step
+            spans[slot] = list(ids[lo:hi])
+        logp[slot] = total / len(rows)
+    positions = [(slot, k) for slot in slots for k in range(len(spans[slot]))]
+    pools: dict[str, list[str]] = {slot: [] for slot in slots}
+    attempts = 0
+    while sum(map(len, pools.values())) < n_edits and attempts < 100 * n_edits:
+        attempts += 1
+        slot, k = rng.choice(positions)
+        ranked = [t for t in logp[slot][k].topk(top_k + 1).indices.tolist() if t != spans[slot][k]][:top_k]
+        new = spans[slot][:k] + [rng.choice(ranked)] + spans[slot][k + 1:]
+        text = tokenizer.decode(new)
+        if text in pools[slot]:
+            continue
+        if candidate_token_ids(prompt, tokenizer, {"input": rows[0].question}, slot, text) != tuple(new):
+            continue
+        pools[slot].append(text)
+    return pools
 
 
 def main() -> None:
@@ -55,6 +96,11 @@ def main() -> None:
     parser.add_argument("--dev-offset", type=int, default=0, help="first dev index (dev slices)")
     parser.add_argument("--state-seed", type=int, default=None,
                         help="start from a non-initial prompt: apply one proposal drawn with this seed")
+    parser.add_argument("--edit-kind", choices=("block", "token"), default="block",
+                        help="block: label-free block rewrites/insertions (+ deletions); "
+                             "token: GReaTer-style single-token substitutions")
+    parser.add_argument("--token-edits", type=int, default=24)
+    parser.add_argument("--token-top-k", type=int, default=10)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
 
@@ -85,12 +131,17 @@ def main() -> None:
                 prompt, state_edit = prompt.replace_block("procedure", text), text
                 break
     slots = [b.block_id for b in prompt.blocks if b.editable]
-    pools = {s: propose(runner, prompt, s, [r.question for r in proposal_rows], args.seed * 100 + j, args.k)
-             for j, s in enumerate(slots)}
-    probe = {"input": rows[0].question}
-    edits = [(s, i) for s, texts in pools.items() for i, t in enumerate(texts)
-             if candidate_token_ids(prompt, tokenizer, probe, s, t) is not None]
-    edits += [(b.block_id, None) for b in prompt.blocks if b.editable and b.text]
+    if args.edit_kind == "token":
+        pools = token_pools(model, tokenizer, prompt, proposal_rows, args.token_edits, args.token_top_k,
+                            random.Random(args.seed * 100))
+        edits = [(s, i) for s, texts in pools.items() for i in range(len(texts))]
+    else:
+        pools = {s: propose(runner, prompt, s, [r.question for r in proposal_rows], args.seed * 100 + j, args.k)
+                 for j, s in enumerate(slots)}
+        probe = {"input": rows[0].question}
+        edits = [(s, i) for s, texts in pools.items() for i, t in enumerate(texts)
+                 if candidate_token_ids(prompt, tokenizer, probe, s, t) is not None]
+        edits += [(b.block_id, None) for b in prompt.blocks if b.editable and b.text]
     ext = runner.extractor
     cost: dict[str, float] = {}
 
@@ -218,7 +269,7 @@ def main() -> None:
               "seed": args.seed, "rows": [r.example_id for r in rows], "pools": pools, "edits": names,
               "dev_delta": delta, "predictors": {k: [v[e] for e in edits] for k, v in predictors.items()},
               "forks_per_row": [len(f) for f in forks], "summary": summary,
-              "state_edit": state_edit, "dev_offset": args.dev_offset,
+              "state_edit": state_edit, "dev_offset": args.dev_offset, "edit_kind": args.edit_kind,
               "raw": {"answer_exact": {n: answer_exact[e] for n, e in zip(names, edits)},
                       "answer_patch": {n: answer_patch[e] for n, e in zip(names, edits)},
                       "fork_rows": eligible,

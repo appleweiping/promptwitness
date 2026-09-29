@@ -26,7 +26,7 @@ COST = {"answer_exact": ("answer_exact",), "answer_patch": ("answer_patch",),
 
 def label(run: dict) -> str:
     model = MODELS.get(Path(run["model_path"]).parts[-3].split("--")[-1], "?")
-    state = "$^\\ast$" if run.get("state_edit") else ""
+    state = ("$^\\ast$" if run.get("state_edit") else "") + ("$^t$" if run.get("edit_kind") == "token" else "")
     return f"{TASKS.get(run['task'], run['task'])}-{model}{state}"
 
 
@@ -66,8 +66,8 @@ def main() -> None:
     order = {name: i for i, name in enumerate(summary["runs"])}
     by_run = []
     for run in runs:
-        state = "/state" if run.get("state_edit") else ""
-        key = f"{run['task']}/{Path(run['model_path']).parts[-3].split('--')[-1]}/s{run['seed']}{state}"
+        state = ("/state" if run.get("state_edit") else "") + ("/token" if run.get("edit_kind") == "token" else "")
+        key =f"{run['task']}/{Path(run['model_path']).parts[-3].split('--')[-1]}/s{run['seed']}{state}"
         by_run.append(f"{ceil[order[key]]:.2f}")
     lines.append("Ceiling $\\sqrt{\\kappa}$ & " + " & ".join(by_run) + " & & \\\\")
     lines += ["\\bottomrule", "\\end{tabular}"]

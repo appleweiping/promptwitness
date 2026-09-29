@@ -90,7 +90,8 @@ def diagnostics(run: dict, rng: random.Random, splits: int = 500) -> dict[str, f
 
 def run_name(run: dict) -> str:
     state = "/state" if run.get("state_edit") else ""
-    return f"{run['task']}/{Path(run['model_path']).parts[-3].split('--')[-1]}/s{run['seed']}{state}"
+    kind = "/token" if run.get("edit_kind") == "token" else ""
+    return f"{run['task']}/{Path(run['model_path']).parts[-3].split('--')[-1]}/s{run['seed']}{state}{kind}"
 
 
 def main() -> None:
