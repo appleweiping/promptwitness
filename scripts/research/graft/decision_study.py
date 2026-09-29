@@ -167,10 +167,16 @@ def main() -> None:
         forks.append(list(found.values())[: args.max_forks])
     cost["reasoning_material"] = perf_counter() - t0
     answers = [tokenizer.encode(spec.target(r.answer), add_special_tokens=False) for r in rows]
+    # Mechanism probe (not a predictor, not timed): the model's own extracted answer per row.
+    own: list[list[int] | None] = []
+    for i in range(len(rows)):
+        parsed = spec.parse(greedy["reads"][i])
+        own.append(tokenizer.encode(spec.target(parsed), add_special_tokens=False) if parsed is not None else None)
 
     # --- answer objective (GReaTer), exact and patch ---
     answer_exact = {e: [] for e in edits}
     answer_patch = {e: [] for e in edits}
+    own_exact: dict = {e: [] for e in edits}  # loss change of the model's own answer (wrong rows)
     t_exact = t_patch = 0.0
     for i, row in enumerate(rows):
         tail = list(greedy["reasoning"][i]) + ext
@@ -186,6 +192,15 @@ def main() -> None:
         for j, e in enumerate(edits):
             answer_exact[e].append(losses[j + 1] - losses[0])
             answer_patch[e].append(est.get(e, 0.0))
+        if own[i] is not None and own[i] != answers[i]:
+            own_pairs = [(runner.ids(prompt, row) + tail, own[i])]
+            own_pairs += [(runner.ids(apply(prompt, pools, e), row) + tail, own[i]) for e in edits]
+            own_losses, _ = answer_losses(model, own_pairs)
+            for j, e in enumerate(edits):
+                own_exact[e].append(own_losses[j + 1] - own_losses[0])
+        else:
+            for e in edits:
+                own_exact[e].append(None)
     cost["answer_exact"], cost["answer_patch"] = t_exact, t_patch
 
     # --- fork margin, exact and patch ---
@@ -272,6 +287,7 @@ def main() -> None:
               "state_edit": state_edit, "dev_offset": args.dev_offset, "edit_kind": args.edit_kind,
               "raw": {"answer_exact": {n: answer_exact[e] for n, e in zip(names, edits)},
                       "answer_patch": {n: answer_patch[e] for n, e in zip(names, edits)},
+                      "own_exact": {n: own_exact[e] for n, e in zip(names, edits)},
                       "fork_rows": eligible,
                       "fork_exact": {n: fork_exact[e] for n, e in zip(names, edits)},
                       "fork_patch": {n: fork_patch[e] for n, e in zip(names, edits)},
