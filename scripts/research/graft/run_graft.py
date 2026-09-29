@@ -21,6 +21,7 @@ import argparse
 import json
 import random
 from collections.abc import Sequence
+from dataclasses import replace
 from pathlib import Path
 from time import perf_counter
 from typing import Any
