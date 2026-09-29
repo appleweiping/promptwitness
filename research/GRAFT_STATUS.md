@@ -93,6 +93,14 @@ full; everything lives on `/media/lenovo/data2`.
     softmax attention, non-thinking mode) replaces OLMo-3. Qwen3.5-9B is unsuitable: 24
     of 32 layers are linear-attention recurrences where slots and gates are undefined.
 
+16. **Decision study, Gemma-2 date_understanding (24 rows, 12 forks on 7 rows, 26 edits,
+    60 dev examples).** Spearman with dev-accuracy change: fork margin exact 0.48, one-pass
+    patching 0.46 (best-5 edits +0.057 vs mean +0.042); GReaTer answer loss -0.26 / 0.08;
+    fresh accuracy on 8 train rows 0.13 (483 s), on all 24 rows 0.16 (1449 s). The fork
+    estimate costs 78 s plus 380 s of shared sampling that does not grow with the number
+    of candidates. Consequence: the runner gains `--objective fork` and
+    `--accept margin` (shortlist by one-pass estimate, exact re-score, no generation).
+
 ## Next
 
 * Fidelity v2 decides the scorer: renormalized patching must beat raw gates and
