@@ -377,6 +377,16 @@ MIPRO \citep{opsahl2024mipro} and modular prompt optimization with section-local
 textual gradients \citep{sharma2026mpo} search over prompt structure without model
 gradients. \graft{} scores the candidate rewrites themselves with one gradient pass.
 
+\paragraph{Decision points in reasoning.} Sampled reasoning of one model often
+branches at a few tokens that decide the outcome: forking tokens
+\citep{bigelow2025forking,jia2026forking}, critical tokens \citep{lin2024critical},
+pivotal tokens used for preference data \citep{abdin2024phi4}, and decision tokens
+whose correction restores reasoning \citep{shen2026decision}. These works analyze or
+train the model; we use such forks as a differentiable objective for a frozen model's
+prompt. ContraPrompt \citep{rishav2026contraprompt} and contrastive reflection
+\citep{koh2026contrastive} contrast successful and failed traces too, but in text,
+through a reflecting LLM that writes the prompt edit.
+
 \paragraph{Attribution and parallel contexts.} Attribution patching and AtP*
 \citep{syed2024atp,kramar2024atp} estimate interventions to first order; ContextCite
 \citep{cohenwang2024contextcite} attributes generations to context sources.
