@@ -165,6 +165,18 @@ full; everything lives on `/media/lenovo/data2`.
     `dataclasses.replace` without importing it, which would have crashed every Stage C run
     with the answer or fork objective.
 
+25. **GReaTer's loop, as implemented.** The official code shortlists token candidates by
+    the fixed-reasoning gradient, then regenerates reasoning under every shortlisted
+    candidate and keeps the one with the fewest answer errors on the minibatch plus a
+    prompt-perplexity penalty (`Total = Mistakes + 0.02 * ControlLoss` in its logs). The
+    gradient therefore only decides which candidates are tried; `patch` vs `random`
+    shortlists in Stage C isolate exactly that contribution at the block level.
+26. **Queued pipeline (server, chained):** v3 -> phase 2 (fixed-prompt baselines on 23
+    tasks with vLLM; token-level validity control on LD7/TS7) -> phase 3 (one real-model
+    smoke run with the generation server, then Stage C: 357 runs, Llama-3 on GPU 0,
+    Qwen3 on GPU 1, then Gemma-2 shared). Stage F (official GReaTer on our train split,
+    Llama-3, timed) is scripted (`greater_rerun.sh`) and waits for free GPU time.
+
 ## Next
 
 * Fidelity v2 decides the scorer: renormalized patching must beat raw gates and
