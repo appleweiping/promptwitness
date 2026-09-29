@@ -194,11 +194,10 @@ _PREAMBLE = re.compile(
     r"rewritten|the (?:new|revised|improved|updated))\b[^\n]*:\s*$",
     re.IGNORECASE,
 )
-_LABEL = re.compile(
-    r"^\s*(?:\*\*)?(?:block(?: type)?|new block|revised block|task_instruction|reasoning_policy|"
-    r"output_instruction|strategy|procedure|output|instruction)(?:\*\*)?\s*:\s*(?:\*\*)?\s*$",
-    re.IGNORECASE,
-)
+_TYPES = (r"block(?: type)?|new block|revised block|task[_ ]instruction|reasoning[_ ]policy|"
+          r"output[_ ]instruction|strategy|procedure|output|instruction")
+_LABEL = re.compile(rf"^\s*(?:\*\*)?(?:{_TYPES})(?:\*\*)?\s*:?\s*(?:\*\*)?\s*$", re.IGNORECASE)
+_INLINE_LABEL = re.compile(rf"^\s*(?:\*\*)?(?:{_TYPES})(?:\*\*)?\s*:\s*(?:\*\*)?\s*", re.IGNORECASE)
 
 
 def clean_proposal(text: str) -> str:
@@ -213,6 +212,9 @@ def clean_proposal(text: str) -> str:
     lines = [line.rstrip() for line in text.replace("```", "").splitlines()]
     kept = [line for line in lines if not _PREAMBLE.match(line) and not _LABEL.match(line)]
     body = "\n".join(kept).strip().strip('"').strip("'").strip()
+    stripped = _INLINE_LABEL.sub("", body, count=1)  # "Reasoning_policy: When ..." -> "When ..."
+    if stripped != body and stripped:
+        body = stripped[0].upper() + stripped[1:]
     body = re.sub(r"\*\*(.+?)\*\*", r"\1", body)
     body = re.sub(r"\n{3,}", "\n\n", body)
     return body + "\n" if body else ""

@@ -93,6 +93,7 @@ class SuperposedSequence:
     orig: list[int] = field(default_factory=list)  # logical order; -1 for candidates
     owner: list[str | None] = field(default_factory=list)  # candidate slot per token
     answer_weights: list[float] | None = None  # per-token CE weights over answer_ids
+    contrast_ids: list[int] | None = None  # if set: loss = mean(logit[contrast] - logit[answer])
 
     def base_values(self) -> list[float]:
         return [1.0] + [gate.base_value for gate in self.gates]
@@ -226,6 +227,7 @@ def build_superposed(
     mode: Mode = "exact",
     gate_incumbents: Sequence[str] | None = None,
     answer_weights: Sequence[float] | None = None,
+    contrast_ids: Sequence[int] | None = None,
 ) -> SuperposedSequence:
     """Lay out incumbent prompt, parallel candidate slots, then reasoning+extractor+answer.
 
@@ -367,6 +369,7 @@ def build_superposed(
         orig,
         cand_block,
         None if answer_weights is None else [float(w) for w in answer_weights],
+        None if contrast_ids is None else [int(t) for t in contrast_ids],
     )
 
 
@@ -493,6 +496,13 @@ class GateScorer:
         )
         logits = output.logits[0, :-1].float()
         target = torch.tensor(seq.answer_ids, device=device)
+        if seq.contrast_ids is not None:
+            # Decision margin: CE(answer) - CE(contrast) at the same positions equals the
+            # logit difference, because the log-partition cancels.
+            contrast = torch.tensor(seq.contrast_ids, device=device)
+            picked = logits.gather(1, target[:, None])[:, 0]
+            rival = logits.gather(1, contrast[:, None])[:, 0]
+            return (rival - picked).mean()
         if seq.answer_weights is None:
             return functional.cross_entropy(logits, target)
         weights = torch.tensor(seq.answer_weights, device=device)

@@ -247,3 +247,27 @@ def test_weighted_objective_matches_stock(tokenizer) -> None:
                           reduction="none")
     expected = float((per * torch.tensor(weights)).sum() / sum(weights))
     assert abs(scorer.gradients(seq).loss - expected) < 1e-4
+
+
+def test_decision_margin_matches_stock(tokenizer) -> None:
+    """Contrast loss: logit[bad] - logit[good] at the fork, at the base and at a vertex."""
+    model = _model("gemma2", len(tokenizer))
+    prompt = _prompt()
+    prefix = tokenizer.encode("Five is", add_special_tokens=False)
+    good = tokenizer.encode(" larger", add_special_tokens=False)[:1]
+    bad = tokenizer.encode(" smaller", add_special_tokens=False)[:1]
+    seq = build_superposed(prompt, tokenizer, VALUES, CANDIDATES, prefix, good, mode="exact",
+                           contrast_ids=bad)
+    scorer = GateScorer(model, checkpointing=False)
+
+    def stock_margin(ids):
+        tensor = torch.tensor([ids])
+        with torch.no_grad():
+            logits = model(input_ids=tensor, attention_mask=torch.ones_like(tensor)).logits[0, -1]
+        return float(logits[bad[0]] - logits[good[0]])
+
+    base_ids = list(prompt.render_tokens(tokenizer, VALUES).input_ids)
+    assert abs(scorer.gradients(seq).loss - stock_margin(base_ids + prefix)) < 1e-4
+    gates, offsets = seq.vertex("task", 1)
+    edited = list(prompt.replace_block("task", CANDIDATES["task"][1]).render_tokens(tokenizer, VALUES).input_ids)
+    assert abs(scorer.value_at(seq, gates, offsets) - stock_margin(edited + prefix)) < 1e-4

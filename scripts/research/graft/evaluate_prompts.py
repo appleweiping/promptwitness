@@ -18,6 +18,7 @@ from time import perf_counter
 from typing import Any
 
 from promptwitness import graft_tasks
+from promptwitness.graft_runtime import load_tokenizer
 
 from run_graft import Ledger, Runner
 
@@ -50,9 +51,9 @@ def main() -> None:
     args = parser.parse_args()
 
     import torch
-    from transformers import AutoModelForCausalLM, AutoTokenizer
+    from transformers import AutoModelForCausalLM
 
-    tokenizer = AutoTokenizer.from_pretrained(args.model_path)
+    tokenizer = load_tokenizer(args.model_path)
     model = AutoModelForCausalLM.from_pretrained(args.model_path, dtype=torch.bfloat16,
                                                  attn_implementation=args.attn).to("cuda").eval()
     published = json.loads(args.published.read_text(encoding="utf-8"))

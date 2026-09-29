@@ -24,6 +24,7 @@ from time import perf_counter
 from typing import Any
 
 from promptwitness import graft_tasks
+from promptwitness.graft_runtime import load_tokenizer
 from promptwitness.graft_runtime import answer_losses, generate_batch
 from promptwitness.superposed_gates import GateScorer, build_superposed, candidate_token_ids
 from promptwitness.superposed_patching import patch_estimates
@@ -80,10 +81,10 @@ def main() -> None:
     args = parser.parse_args()
 
     import torch
-    from transformers import AutoModelForCausalLM, AutoTokenizer
+    from transformers import AutoModelForCausalLM
 
     started = perf_counter()
-    tokenizer = AutoTokenizer.from_pretrained(args.model_path)
+    tokenizer = load_tokenizer(args.model_path)
     model = AutoModelForCausalLM.from_pretrained(args.model_path, dtype=torch.bfloat16,
                                                  attn_implementation=args.attn).to("cuda").eval()
     scorer = GateScorer(model)

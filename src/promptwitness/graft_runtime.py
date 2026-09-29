@@ -8,6 +8,27 @@ from time import perf_counter
 from typing import Any
 
 
+def load_tokenizer(path: str) -> Any:
+    """Tokenizer with model-specific chat-template defaults fixed for all experiments.
+
+    Qwen3 templates default to thinking mode; every experiment uses non-thinking mode
+    so that prompts, reasoning and extraction have the same shape across models.
+    """
+    import functools
+    import json
+    from pathlib import Path
+
+    from transformers import AutoTokenizer
+
+    tokenizer = AutoTokenizer.from_pretrained(path)
+    config = Path(path) / "config.json"
+    model_type = json.loads(config.read_text()).get("model_type", "") if config.exists() else ""
+    if model_type.startswith("qwen3"):
+        tokenizer.apply_chat_template = functools.partial(
+            tokenizer.apply_chat_template, enable_thinking=False)
+    return tokenizer
+
+
 @dataclass(frozen=True, slots=True)
 class Generation:
     token_ids: tuple[int, ...]  # without trailing EOS/padding

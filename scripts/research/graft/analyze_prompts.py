@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Any
 
 from promptwitness import graft_tasks
+from promptwitness.graft_runtime import load_tokenizer
 
 from run_graft import Ledger, Runner
 
@@ -76,11 +77,11 @@ def main() -> None:
     args = parser.parse_args()
 
     import torch
-    from transformers import AutoModelForCausalLM, AutoTokenizer
+    from transformers import AutoModelForCausalLM
 
     entries = json.loads(args.entries.read_text(encoding="utf-8"))
     results: dict[str, Any] = json.loads(args.output.read_text()) if args.output.exists() else {}
-    ref_tok = AutoTokenizer.from_pretrained(args.reference_model)
+    ref_tok = load_tokenizer(args.reference_model)
     ref = AutoModelForCausalLM.from_pretrained(args.reference_model, dtype=torch.bfloat16).to("cuda").eval()
     if args.mode == "ppl":
         for entry in entries:
@@ -97,7 +98,7 @@ def main() -> None:
             + [("paraphrase", paraphrase(ref, ref_tok, text))])
     del ref
     torch.cuda.empty_cache()
-    tok = AutoTokenizer.from_pretrained(args.task_model)
+    tok = load_tokenizer(args.task_model)
     model = AutoModelForCausalLM.from_pretrained(args.task_model, dtype=torch.bfloat16,
                                                  attn_implementation=args.attn).to("cuda").eval()
     for key, versions in variants.items():
