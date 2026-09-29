@@ -58,6 +58,8 @@ def _model(arch: str, vocab: int):
                                            attn_logit_softcapping=50.0,
                                            final_logit_softcapping=30.0)
         cls = transformers.Gemma2ForCausalLM
+    elif arch == "qwen3":
+        config, cls = transformers.Qwen3Config(**common, head_dim=16), transformers.Qwen3ForCausalLM
     else:
         config, cls = transformers.Olmo3Config(**common, sliding_window=4096), transformers.Olmo3ForCausalLM
     config._attn_implementation = "eager"
@@ -80,7 +82,7 @@ def tokenizer():
     return transformers.AutoTokenizer.from_pretrained(TOKENIZER)
 
 
-@pytest.mark.parametrize("arch", ["llama", "gemma2", "olmo3"])
+@pytest.mark.parametrize("arch", ["llama", "gemma2", "olmo3", "qwen3"])
 def test_exact_vertices_and_gradients(arch: str, tokenizer) -> None:
     model = _model(arch, len(tokenizer))
     prompt = _prompt()
@@ -159,7 +161,7 @@ def _prompt_with_slot() -> StructuredPrompt:
     return StructuredPrompt(document, tuple(blocks))
 
 
-@pytest.mark.parametrize("arch", ["llama", "gemma2"])
+@pytest.mark.parametrize("arch", ["llama", "gemma2", "qwen3"])
 def test_insertion_and_combined_vertices(arch: str, tokenizer) -> None:
     model = _model(arch, len(tokenizer))
     prompt = _prompt_with_slot()
