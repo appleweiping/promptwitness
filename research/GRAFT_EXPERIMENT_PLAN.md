@@ -102,3 +102,15 @@ C5 Stage C ablations (gate, random, exact) plus fidelity estimator ablations.
   exploratory and are reported as such. A failed replication means H-fork is not claimed;
   the paper then reports the exact calculus and estimator with the negative objective
   finding.
+* 2026-09-29, before any Stage C/D result: evaluation is separated from search. Search
+  runs stop after search (`run_graft.py --defer-eval`) and record their checkpoint
+  prompts as typed blocks; dev selection among checkpoints and the single test read are
+  done by `select_and_test.py` with a vLLM reader that renders the same token ids and
+  uses the same stop tokens, extractor and parser. Fixed-prompt baselines
+  (`evaluate_prompts.py --engine vllm`) use the same engine, so every method in a
+  comparison is read identically (greedy decoding in different kernels can differ on
+  near-ties, so engines are never mixed within a comparison). Reason: evaluation
+  dominated run time on shared GPUs. Qwen3-8B joins Llama-3-8B and Gemma-2-9B in
+  Stage C and D; GReaTer published prompts exist only for the latter two, so Qwen3
+  comparisons with GReaTer use an official GReaTer rerun if its code can be adapted,
+  otherwise only the other baselines.
