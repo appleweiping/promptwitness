@@ -35,8 +35,10 @@ from promptwitness.graft_runtime import (
     fork_targets,
     generate_batch,
     load_tokenizer,
+    remote_sample,
     sample_reasonings,
     sampling_stops,
+    use_remote_generation,
     verified_targets,
 )
 from promptwitness.structured_prompt import StructuredPrompt
@@ -144,6 +146,15 @@ def propose(runner: Runner, prompt: StructuredPrompt, slot: str, questions: list
         encoded.append(list(enc["input_ids"] if hasattr(enc, "keys") else enc))
     started = perf_counter()
     outputs: list[str] = []
+    remote = remote_sample(encoded, max_new_tokens=96, stop=sampling_stops(model, tokenizer),
+                           temperature=0.8, top_p=0.95, seed=seed)
+    if remote is not None:
+        for tokens in remote:
+            text = graft_tasks.clean_proposal(tokenizer.decode(tokens, skip_special_tokens=True))
+            if text:
+                outputs.append(text)
+        runner.ledger.add("proposal", perf_counter() - started, generated=sum(map(len, remote)))
+        return outputs
     device = next(model.parameters()).device
     width = max(map(len, encoded))
     pad = tokenizer.pad_token_id if tokenizer.pad_token_id is not None else tokenizer.eos_token_id
@@ -192,14 +203,20 @@ def textual_gradient_pools(runner: Runner, prompt: StructuredPrompt, batch: list
             "only the new block text.")
         enc = tokenizer.apply_chat_template([{"role": "user", "content": request}],
                                             tokenize=True, add_generation_prompt=True)
-        ids = torch.tensor([list(enc["input_ids"] if hasattr(enc, "keys") else enc)], device=model.device)
-        torch.manual_seed(seed + index)
-        with torch.no_grad():
-            gen = model.generate(ids, attention_mask=torch.ones_like(ids), max_new_tokens=320,
-                                 do_sample=True, temperature=0.7, top_p=0.95,
-                                 pad_token_id=tokenizer.eos_token_id,
-                                 eos_token_id=sampling_stops(model, tokenizer))
-        text = tokenizer.decode(gen[0, ids.shape[1]:], skip_special_tokens=True)
+        request_ids = list(enc["input_ids"] if hasattr(enc, "keys") else enc)
+        remote = remote_sample([request_ids], max_new_tokens=320, stop=sampling_stops(model, tokenizer),
+                               temperature=0.7, top_p=0.95, seed=seed + index)
+        if remote is not None:
+            text = tokenizer.decode(remote[0], skip_special_tokens=True)
+        else:
+            ids = torch.tensor([request_ids], device=model.device)
+            torch.manual_seed(seed + index)
+            with torch.no_grad():
+                gen = model.generate(ids, attention_mask=torch.ones_like(ids), max_new_tokens=320,
+                                     do_sample=True, temperature=0.7, top_p=0.95,
+                                     pad_token_id=tokenizer.eos_token_id,
+                                     eos_token_id=sampling_stops(model, tokenizer))
+            text = tokenizer.decode(gen[0, ids.shape[1]:], skip_special_tokens=True)
         new = graft_tasks.clean_proposal(text) if "NEW BLOCK:" in text else ""
         pools[block.block_id] = [new] if new else []
     runner.ledger.add("textgrad_feedback", perf_counter() - started)
@@ -378,6 +395,8 @@ def main() -> None:
     parser.add_argument("--max-new-tokens", type=int, default=384)
     parser.add_argument("--eval-max-new-tokens", type=int, default=512)
     parser.add_argument("--dev-checkpoints", type=int, default=3)
+    parser.add_argument("--gen-server", default=None,
+                        help="host:port of a graft_genserver (vLLM) for all generation; HF scores")
     parser.add_argument("--defer-eval", action="store_true",
                         help="stop after search; dev selection and test run in select_and_test.py")
     parser.add_argument("--candidates-per-pass", type=int, default=32)
@@ -393,6 +412,7 @@ def main() -> None:
     parser.add_argument("--attn", default="sdpa")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
+    use_remote_generation(args.gen_server)
 
     import torch
     from transformers import AutoModelForCausalLM

@@ -60,6 +60,30 @@ def stop_tokens(tokenizer: Any) -> set[int]:
     return stop
 
 
+_REMOTE: Any = None  # graft_genserver.GenClient when generation is served by vLLM
+
+
+def use_remote_generation(address: str | None) -> None:
+    """Route generate_batch, sample_reasonings and remote_sample to a graft_genserver process."""
+    global _REMOTE
+    if address:
+        from .graft_genserver import GenClient
+
+        _REMOTE = GenClient(address)
+    else:
+        _REMOTE = None
+
+
+def remote_sample(prompts: Sequence[Sequence[int]], *, max_new_tokens: int, stop: Sequence[int],
+                  temperature: float, top_p: float, seed: int) -> list[list[int]] | None:
+    """Sampled continuations from the generation server, or None when none is configured."""
+    if _REMOTE is None:
+        return None
+    outs = _REMOTE.generate(prompts, max_new_tokens=max_new_tokens, stop=stop, temperature=temperature,
+                            top_p=top_p, seeds=[seed * 1000 + i for i in range(len(prompts))])
+    return [tokens for tokens, _ in outs]
+
+
 def sampling_stops(model: Any, tokenizer: Any) -> list[int]:
     """Stop tokens for sampled generation: the model's generation-config EOS ids plus the
     chat end-of-turn tokens (Gemma-2's generation config lists only ``<eos>``, so without
@@ -82,6 +106,12 @@ def generate_batch(
     batch_size: int = 16,
 ) -> tuple[list[Generation], float, int]:
     """Greedy, left-padded batched generation. Returns generations, seconds, new tokens."""
+    if _REMOTE is not None:
+        started = perf_counter()
+        outs = _REMOTE.generate(prompts, max_new_tokens=max_new_tokens, stop=sorted(stop_tokens(tokenizer)))
+        gens = [Generation(tuple(tokens), tokenizer.decode(tokens, skip_special_tokens=True), ended)
+                for tokens, ended in outs]
+        return gens, perf_counter() - started, sum(len(g.token_ids) + int(g.ended) for g in gens)
     import torch
 
     eos = tokenizer.eos_token_id
@@ -226,6 +256,11 @@ def verified_targets(
 
 def sample_reasonings(model: Any, tokenizer: Any, prompts: list[list[int]], samples: int,
                       max_new_tokens: int, seed: int) -> list[list[list[int]]]:
+    flat = [p for p in prompts for _ in range(samples)]
+    remote = remote_sample(flat, max_new_tokens=max_new_tokens, stop=sampling_stops(model, tokenizer),
+                           temperature=0.7, top_p=0.95, seed=seed)
+    if remote is not None:
+        return [remote[i * samples:(i + 1) * samples] for i in range(len(prompts))]
     import torch
 
     eos = tokenizer.eos_token_id
