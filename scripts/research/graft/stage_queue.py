@@ -20,9 +20,8 @@ MODELS = {
                "snapshots/53346005fb0ef11d3b6a83b12c895cca40156b6c", "sdpa"),
     "gemma2": ("/media/lenovo/data2/graft-hf-cache/models--unsloth--gemma-2-9b-it/snapshots/"
                "fc7d4737cda11c3a19af2b722319e846670b4d89", "eager"),
-    "olmo3": ("/media/lenovo/data2/promptwitness-delta-20260926/hf-cache/hub/"
-              "models--allenai--Olmo-3-7B-Instruct/snapshots/6e5971d9eba42665f5bd5a0fcf047f299ce1dccc",
-              "sdpa"),
+    "qwen3": ("/media/lenovo/data2/graft-hf-cache/models--Qwen--Qwen3-8B/snapshots/"
+              "b968826d9c46dd6066d109eabc6255188de91218", "sdpa"),
 }
 
 
@@ -57,10 +56,12 @@ def main() -> None:
         model_path, attn = MODELS[run["model"]]
         commit = subprocess.run(["git", "-C", str(repo), "rev-parse", "HEAD"], capture_output=True,
                                 text=True).stdout.strip()
+        extra = run.get("extra", [])
+        method = [] if "--method" in extra else ["--method", run["method"]]  # variants carry their own
         command = [sys.executable, str(repo / "scripts/research/graft/run_graft.py"),
                    "--task", run["task"], "--model-path", model_path, "--data-dir", str(args.data_dir),
-                   "--method", run["method"], "--seed", str(run["seed"]), "--attn", attn,
-                   "--output", str(output), *run.get("extra", [])]
+                   *method, "--seed", str(run["seed"]), "--attn", attn,
+                   "--output", str(output), *extra]
         started = time.time()
         with (args.out / f"{name}.log").open("w") as log:
             code = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT, cwd=repo).returncode
