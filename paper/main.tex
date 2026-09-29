@@ -258,6 +258,26 @@ filtered by the answer as in STaR \citep{zelikman2022star}, so no annotated reas
 is needed. Because the reasoning tokens are downstream queries of every slot,
 Eq.~\ref{eq:patch} applies unchanged.
 
+\paragraph{Decision margins at reasoning forks.} Both objectives above score whole
+sequences, most of whose tokens do not decide the answer. Correct and incorrect
+reasoning of the same model on the same question typically share a prefix and part
+at a few tokens \citep{bigelow2025forking,lin2024critical,shen2026decision}. We
+sample $S$ reasonings per training example, read their answers with the shared
+reader, and pair the greedy reasoning with every sample of the opposite correctness.
+Their first divergence defines a \emph{fork}: a shared prefix $r_{<t}$, the token
+$a^+$ of the correct branch and the token $a^-$ of the incorrect one. The decision
+loss is the logit margin
+\begin{equation}
+\ell_{\text{fork}}(P)= z_\theta\big(a^-\mid P(x)\oplus r_{<t}\big)-z_\theta\big(a^+\mid P(x)\oplus r_{<t}\big),
+\label{eq:fork}
+\end{equation}
+averaged over at most three forks per example; the softmax normalizer cancels, so
+only the two competing continuations matter. Examples without a fork (all samples
+agree in correctness with the greedy reasoning) carry no decision signal and are
+skipped; if a minibatch has no fork, Eq.~\ref{eq:loss} is used. The prefix tokens are
+downstream queries of every slot, so the estimator is unchanged, and a single
+superposed pass scores all edits on all forks of an example.
+
 As in \greater{}, the model optimizes its own prompt, supervision enters only
 through the loss, and candidates come from the model itself: \greater{} uses the
 model's top-$k$ next tokens given task inputs; \graft{} asks the model for
@@ -307,6 +327,29 @@ section-local modular prompt optimization.
 \subsection{Fidelity of structural gradients}
 \label{sec:fidelity}
 \todo{Table: Spearman / normalized regret for patch vs gate variants across models and tasks; cost per example.}
+
+\subsection{Which structural signals predict held-out accuracy?}
+\label{sec:validity}
+A faithful estimator is useful only if the quantity it estimates predicts what we
+care about: the accuracy of the edited prompt on unseen questions. We test this
+directly, separately from search. For a task and an incumbent prompt we draw 24
+training rows and let the model propose label-free rewrites and insertions for every
+slot (20--26 edits). Each predictor is computed on the 24 rows: the change in
+\greater{}'s answer loss (Eq.~\ref{eq:loss}) exactly and by patching; the change in
+decision margin at reasoning forks (\S\ref{sec:graft}) exactly and by patching; and,
+as the evaluation-based reference, fresh greedy accuracy of every edited prompt on the
+first 8 and on all 24 rows. The target is the change in greedy accuracy on 200
+held-out questions. To keep target and search data disjoint we use four BBH tasks
+outside \greater{}'s 21 (logical deduction and tracking shuffled objects with three
+and seven objects), which are never used for benchmarking.
+
+\paragraph{The target is itself noisy.} Two random halves of the held-out questions
+rank the same edits with Spearman correlation $\rho_{1/2}$; the Spearman--Brown
+reliability $\kappa=2\rho_{1/2}/(1+\rho_{1/2})$ of the full target bounds the
+correlation any predictor can attain by $\sqrt{\kappa}$. We report this ceiling with
+every result, test differences between predictors with a paired hierarchical
+bootstrap over training rows and held-out questions, and measure every predictor's
+cost end to end. \todo{Table: rho per predictor, model, task; ceiling; cost.}
 
 \subsection{Main results}
 \todo{Table: per-task accuracy vs GReaTer and baselines.}
