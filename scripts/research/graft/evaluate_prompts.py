@@ -28,7 +28,7 @@ def candidates_for(name: str, task: str, model_key: str, published: dict[str, An
     if name == "greater_init":
         return [graft_tasks.initial_prompt(insertion_slot=False)]
     if name == "greater_published":
-        return [graft_tasks.flat_prompt(t) for t in published["prompts"][model_key].get(task, [])]
+        return [graft_tasks.flat_prompt(t) for t in published["prompts"].get(model_key, {}).get(task, [])]
     if name.startswith("file:"):
         texts = json.loads(Path(name[5:]).read_text(encoding="utf-8")).get(task, [])
         return [graft_tasks.flat_prompt(t) for t in texts]
