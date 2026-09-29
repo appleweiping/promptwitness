@@ -177,6 +177,15 @@ full; everything lives on `/media/lenovo/data2`.
     Qwen3 on GPU 1, then Gemma-2 shared). Stage F (official GReaTer on our train split,
     Llama-3, timed) is scripted (`greater_rerun.sh`) and waits for free GPU time.
 
+27. **v3 interim, 5 of 7 decision runs (LD7 L/Q, LD3 L, TS7 L/Q), 2026-09-29 14:30 UTC.**
+    Pooled Spearman with dev change: GReaTer answer loss -0.37 [-0.37, -0.13], fork margin
+    -0.12 (exact) / -0.11 (patch), fresh-8 +0.22, fresh-24 +0.39 [+0.12, +0.45]. Paired
+    differences: fork - answer +0.25 (P>0 0.95); fork - fresh-8 -0.34 (P>0 0.013); fork -
+    fresh-24 -0.50 (P>0 0.000); same on fork-eligible rows. Causal check on 4 runs: mean
+    |dP_fork| 0.16-0.22 vs |dP_ctrl| 0.14-0.23 (forks not more decisive than random
+    positions). H-fork is failing its preregistered criteria; the answer-loss result is
+    robust. Remaining: LD3 Qwen, state-variation runs, LD3 causal checks.
+
 ## Next
 
 * Fidelity v2 decides the scorer: renormalized patching must beat raw gates and
