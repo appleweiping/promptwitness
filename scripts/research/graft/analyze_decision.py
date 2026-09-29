@@ -5,6 +5,10 @@ dev questions for the target, jointly across predictors (paired), recomputes eac
 predictor per edit and its Spearman rho with the dev-accuracy change, and records the
 differences fork - answer, fork - fresh8 and fork - fresh_all. Runs are pooled by
 averaging rho over runs within a replicate (each run keeps its own proposal pool).
+
+Diagnostics per run: the split-half reliability of the dev target (Spearman-Brown
+corrected; its square root bounds any predictor's attainable rho), and GReaTer's answer
+loss split by whether the incumbent's greedy reasoning was right or wrong on the row.
 """
 
 from __future__ import annotations
@@ -36,6 +40,29 @@ def predictors_for(raw: dict, names: list[str], rows: list[int], questions: list
     base_dev = raw["base_dev"]
     target = [statistics.mean(raw["dev"][n][q] - base_dev[q] for q in questions) for n in names]
     return out, target
+
+
+def diagnostics(run: dict, rng: random.Random, splits: int = 500) -> dict[str, float]:
+    raw, names = run["raw"], run["edits"]
+    base_dev, n = raw["base_dev"], len(raw["base_dev"])
+    halves = []
+    for _ in range(splits):
+        order = list(range(n))
+        rng.shuffle(order)
+        a, b = order[: n // 2], order[n // 2:]
+        da = [statistics.mean(raw["dev"][e][q] - base_dev[q] for q in a) for e in names]
+        db = [statistics.mean(raw["dev"][e][q] - base_dev[q] for q in b) for e in names]
+        halves.append(spearman(da, db) or 0.0)
+    half = statistics.mean(halves)
+    full = 2 * half / (1 + half) if half > -1 else float("nan")
+    target = [statistics.mean(raw["dev"][e][q] - base_dev[q] for q in range(n)) for e in names]
+    out = {"dev_reliability": full, "rho_ceiling": max(full, 0.0) ** 0.5}
+    for label, value in (("right", 1), ("wrong", 0)):
+        rows = [r for r, b in enumerate(raw["base_fresh"]) if b == value]
+        if len(rows) >= 3:
+            pred = [-statistics.mean(raw["answer_exact"][e][r] for r in rows) for e in names]
+            out[f"answer_exact_{label}_rows"] = spearman(pred, target) or 0.0
+    return out
 
 
 def main() -> None:
@@ -84,6 +111,10 @@ def main() -> None:
         lo, hi = ordered[int(0.025 * len(ordered))], ordered[int(0.975 * len(ordered)) - 1]
         return f"[{lo:+.2f}, {hi:+.2f}]"
 
+    for run in runs:
+        info = diagnostics(run, random.Random(args.seed))
+        name = run["task"] + "/" + Path(run["model_path"]).parts[-3].split("--")[-1]
+        print(name, " ".join(f"{k}={v:+.2f}" for k, v in info.items()))
     print(f"runs: {len(runs)} ({', '.join(r['task'] + '/' + Path(r['model_path']).parts[-3].split('--')[-1] for r in runs)})")
     for k in keys:
         print(f"{k:14s} mean rho {point[k]:+.3f}  95% CI {interval(boot[k])}")

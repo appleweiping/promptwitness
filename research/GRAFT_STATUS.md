@@ -118,6 +118,20 @@ full; everything lives on `/media/lenovo/data2`.
     Disk on data2 is at 98% (shared); vLLM is being installed in its own venv for
     later evaluation phases.
 
+20. **v3 interim (logical_deduction_seven_objects, Llama-3 and Qwen3, 20 edits, 200 dev
+    questions).** Spearman with dev change: answer loss -0.55 / -0.25, fork margin exact
+    -0.14 / +0.18, patch +0.17 / +0.11, fresh-8 +0.49 / +0.18, fresh-24 +0.58 / +0.05.
+    Two diagnostics change how every rho must be read. (i) The dev target itself is
+    noisy: split-half reliability (Spearman-Brown) is 0.32 / 0.38, so no predictor can
+    exceed rho of about 0.56 / 0.61; true edit effects vary by about 1.5 points while
+    proposals cost 5.3 points on average for Llama. (ii) The answer loss is anti-predictive
+    only on rows whose greedy reasoning is wrong (-0.61 / -0.30 there, -0.04 / +0.08 on
+    right rows): lowering the gold answer's loss after wrong reasoning rewards prompts
+    that make the answer ignore the reasoning. Pooled bootstrap so far: fork - answer
+    +0.32 (P>0 0.95), fork - fresh-8 -0.12 (P>0 0.27). Search and evaluation are now
+    separated (`run_graft --defer-eval`, `select_and_test.py`, vLLM reader) so that every
+    method is read by one engine.
+
 ## Next
 
 * Fidelity v2 decides the scorer: renormalized patching must beat raw gates and
