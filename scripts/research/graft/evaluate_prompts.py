@@ -44,7 +44,7 @@ def main() -> None:
     parser.add_argument("--tasks", nargs="+", required=True)
     parser.add_argument("--sets", nargs="+", default=["zs_cot", "greater_init", "greater_published"])
     parser.add_argument("--max-candidates", type=int, default=12)
-    parser.add_argument("--max-new-tokens", type=int, default=512)
+    parser.add_argument("--max-new-tokens", type=int, default=1024)
     parser.add_argument("--attn", default="sdpa")
     parser.add_argument("--engine", choices=["hf", "vllm"], default="hf")
     parser.add_argument("--gpu-memory-utilization", type=float, default=0.5)

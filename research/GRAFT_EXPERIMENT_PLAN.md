@@ -131,3 +131,14 @@ C5 Stage C ablations (gate, random, exact) plus fidelity estimator ablations.
   negative; fork vs answer loss not established). H-fork is not claimed. Per the Stage C
   amendment, the fork variants remain exploratory and GRAFT's reported method uses the
   preregistered configuration.
+* 2026-09-29 ~22:50 UTC, before any Stage C result and before any baseline is reported:
+  reader fix and budgets. Qwen3 writes answers after the extractor in LaTeX
+  (`$$ \boxed{-4} $$`); the parser did not strip `\boxed{`, and 8 answer tokens cut long
+  numbers (observed on 18 Qwen3 GSM8K/arithmetic reads: reasoning correct, parse failed).
+  The parser now strips LaTeX/markdown wrappers and Unicode minus; answers are read with
+  16 tokens (`ANSWER_TOKENS`). Qwen3 also exceeded the 512-token evaluation budget on
+  causal judgement (60 of 69 test answers truncated), so reasoning budgets are 1024
+  tokens for search and evaluation (GReaTer's own selection uses up to 1024). All fixed
+  prompts and all Stage C runs use the fixed reader; the v3 and token-level studies (all
+  multiple-choice tasks, whose extractor ends in "(") are unaffected and keep their
+  preregistered settings.

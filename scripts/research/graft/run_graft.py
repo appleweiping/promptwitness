@@ -28,6 +28,7 @@ from typing import Any
 
 from promptwitness import graft_tasks
 from promptwitness.graft_runtime import (
+    ANSWER_TOKENS,
     Generation,
     Ledger,
     ScoredTarget,
@@ -100,7 +101,7 @@ class Runner:
         self.ledger.add(phase + "_reasoning", seconds, generated=tokens,
                         prompt_tokens=sum(map(len, prompts)))
         reads_in = [p + list(g.token_ids) + self.extractor for p, g in zip(prompts, gens)]
-        reads, seconds, tokens = generate_batch(self.model, self.tokenizer, reads_in, max_new_tokens=8)
+        reads, seconds, tokens = generate_batch(self.model, self.tokenizer, reads_in, max_new_tokens=ANSWER_TOKENS)
         self.ledger.add(phase + "_answer", seconds, generated=tokens)
         correct = [self.spec.correct(r.text, e.answer) for r, e in zip(reads, examples)]
         out: dict[str, Any] = {"accuracy": sum(correct) / len(correct), "correct": correct,
@@ -362,7 +363,7 @@ def build_targets(args: argparse.Namespace, runner: Runner, prompt: StructuredPr
                                    args.max_new_tokens, args.seed)
         reads, _, _ = generate_batch(runner.model, runner.tokenizer,
                                      [p + d + runner.extractor for p, ds in zip(prompts, drafts) for d in ds],
-                                     max_new_tokens=8)
+                                     max_new_tokens=ANSWER_TOKENS)
         judged = [[runner.spec.correct(reads[i * args.verify_samples + j].text, e.answer)
                    for j in range(args.verify_samples)] for i, e in enumerate(batch)]
         targets = fork_targets(reasoning, incumbent["correct"], drafts, judged, max_forks=3)
@@ -393,8 +394,8 @@ def main() -> None:
     parser.add_argument("--batch", type=int, default=8)
     parser.add_argument("--k", type=int, default=6)
     parser.add_argument("--mu", type=int, default=3)
-    parser.add_argument("--max-new-tokens", type=int, default=384)
-    parser.add_argument("--eval-max-new-tokens", type=int, default=512)
+    parser.add_argument("--max-new-tokens", type=int, default=1024)
+    parser.add_argument("--eval-max-new-tokens", type=int, default=1024)
     parser.add_argument("--dev-checkpoints", type=int, default=3)
     parser.add_argument("--gen-server", default=None,
                         help="host:port of a graft_genserver (vLLM) for all generation; HF scores")

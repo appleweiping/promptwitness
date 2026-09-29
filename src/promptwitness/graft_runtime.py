@@ -60,6 +60,9 @@ def stop_tokens(tokenizer: Any) -> set[int]:
     return stop
 
 
+# Tokens read after the extractor: long enough for LaTeX-wrapped answers such as
+# "$$ \boxed{70,000} $$" (8 tokens truncated them).
+ANSWER_TOKENS = 16
 _REMOTE: Any = None  # graft_genserver.GenClient when generation is served by vLLM
 
 

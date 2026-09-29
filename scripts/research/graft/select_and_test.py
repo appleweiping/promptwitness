@@ -27,7 +27,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("runs", nargs="+", type=Path)
     parser.add_argument("--data-dir", type=Path, required=True)
-    parser.add_argument("--max-new-tokens", type=int, default=512)
+    parser.add_argument("--max-new-tokens", type=int, default=1024)
     parser.add_argument("--gpu-memory-utilization", type=float, default=0.5)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()

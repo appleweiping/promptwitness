@@ -11,6 +11,29 @@ from promptwitness.graft_runtime import Ledger
 from promptwitness.graft_vllm import VllmReader
 
 
+def test_parser_handles_latex_and_markdown_answers() -> None:
+    integer, mc = graft_tasks.spec("gsm8k"), graft_tasks.spec("date_understanding")
+    binary, fallacy = graft_tasks.spec("causal_judgement"), graft_tasks.spec("formal_fallacies")
+    cases = [
+        (integer, "  \n**$\\boxed{18}$", "18"),  # Qwen3 reads observed on GSM8K
+        (integer, "  \n$$\n\\boxed{-4}\n", "-4"),
+        (integer, "  \n$$\n\\boxed{\\$70,000}", "70000"),
+        (integer, "\\(\\boxed{3}\\)", "3"),
+        (integer, " \\text{12 cups}", "12"),
+        (integer, " **540**.", "540"),
+        (integer, " $1,234.00", "1234"),
+        (integer, " −7", "-7"),
+        (integer, " none", None),
+        (mc, "C) The answer", "(C)"),
+        (mc, "\\boxed{B}", "(B)"),
+        (binary, "  \n**No**.", "No"),
+        (fallacy, " **invalid**", "invalid"),
+        (fallacy, " valid", "valid"),
+    ]
+    for spec, text, want in cases:
+        assert spec.parse(text) == want, (text, spec.parse(text), want)
+
+
 def test_prompt_blocks_round_trip_after_edits() -> None:
     prompt = graft_tasks.initial_prompt()
     edited = prompt.replace_block("procedure", "List every constraint first.\n")

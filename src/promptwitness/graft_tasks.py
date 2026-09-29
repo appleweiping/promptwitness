@@ -63,6 +63,10 @@ class Example:
         return self.example_id
 
 
+_LEADING_MARKUP = re.compile(
+    r"^(?:[\s\"'`*$]|\\\$|\\\(|\\\[|\\(?:boxed|text|textbf|mathbf|mathrm)\s*\{)+")
+
+
 @dataclass(frozen=True, slots=True)
 class TaskSpec:
     name: str
@@ -85,8 +89,9 @@ class TaskSpec:
 
     def parse(self, continuation: str) -> str | None:
         # Tolerate leading markup the reader may emit after the extractor: quotes,
-        # asterisks, backticks, dollar signs and spaces.
-        text = re.sub(r"^[\s\"'`*$]+", "", continuation)
+        # asterisks, backticks, dollar signs, spaces and LaTeX wrappers such as
+        # "$$\n\boxed{" or "\(\text{" (Qwen3 answers in LaTeX), and Unicode minus signs.
+        text = _LEADING_MARKUP.sub("", continuation.replace("−", "-"))
         if self.kind == "mc":
             match = re.match(r"\(?\s*([A-R])\b", text)
             return f"({match.group(1)})" if match else None

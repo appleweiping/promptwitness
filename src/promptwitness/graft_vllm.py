@@ -15,7 +15,7 @@ from time import perf_counter
 from typing import Any
 
 from . import graft_tasks
-from .graft_runtime import Generation, Ledger, stop_tokens
+from .graft_runtime import ANSWER_TOKENS, Generation, Ledger, stop_tokens
 from .structured_prompt import StructuredPrompt
 
 
@@ -64,7 +64,7 @@ class VllmReader:
         gens, seconds, tokens = self.generate(prompts, max_new_tokens or self.max_new_tokens)
         self.ledger.add(phase + "_reasoning", seconds, generated=tokens, prompt_tokens=sum(map(len, prompts)))
         reads, seconds, tokens = self.generate([p + list(g.token_ids) + self.extractor
-                                                for p, g in zip(prompts, gens)], 8)
+                                                for p, g in zip(prompts, gens)], ANSWER_TOKENS)
         self.ledger.add(phase + "_answer", seconds, generated=tokens)
         correct = [self.spec.correct(r.text, e.answer) for r, e in zip(reads, examples)]
         return {"accuracy": sum(correct) / len(correct), "correct": correct,
