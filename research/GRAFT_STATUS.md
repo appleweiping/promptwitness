@@ -186,6 +186,20 @@ full; everything lives on `/media/lenovo/data2`.
     positions). H-fork is failing its preregistered criteria; the answer-loss result is
     robust. Remaining: LD3 Qwen, state-variation runs, LD3 causal checks.
 
+28. **v3 replication complete (2026-09-29 19:04 UTC): H-fork is not supported.** Eight
+    decision runs (Llama-3 and Qwen3 on LD7, LD3, TS7, plus a non-initial prompt state on
+    LD7 for each model; 20-26 edits, 200 held-out questions) and six causal checks.
+    Pooled Spearman with held-out change: GReaTer answer loss -0.31 [-0.31, -0.10] (exact),
+    -0.20 [-0.28, -0.07] (patching); fork margin -0.13 / -0.14; fresh accuracy on 8 rows
+    +0.22 [+0.01, +0.26], on 24 rows +0.30 [+0.08, +0.33]. Preregistered criteria:
+    (a) fork - answer +0.17 [-0.06, +0.32], P>0 0.90 (not established); (b) fork - fresh-8
+    -0.36 [-0.41, -0.01], P>0 0.017 (fails; fresh accuracy is better); (c) causal:
+    signed dP_fork - |dP_ctrl| -0.16 [-0.20, -0.11], and even |dP_fork| - |dP_ctrl| is
+    -0.01 [-0.04, +0.03] (first divergences are not more decisive than random positions).
+    Robust finding: GReaTer's objective ranks block edits in the wrong direction, driven by
+    rows with wrong reasoning (answer loss on wrong rows -0.61, -0.48, -0.29, -0.52 for
+    Llama-3). Dev reliability varies from 0.01 (Qwen3 state run: no signal) to 0.90.
+
 ## Next
 
 * Fidelity v2 decides the scorer: renormalized patching must beat raw gates and

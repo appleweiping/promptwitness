@@ -126,3 +126,8 @@ C5 Stage C ablations (gate, random, exact) plus fidelity estimator ablations.
   GReaTer implementation shortlists by the gradient and then selects by fresh-reasoning
   errors plus a prompt-perplexity penalty, so `patch` vs `random` isolates the value of
   the gradient shortlist exactly as in GReaTer.
+* 2026-09-29 19:10 UTC, outcome (not an amendment): the H-fork replication failed its
+  preregistered criteria (fork vs fresh-8 accuracy P(diff>0) = 0.017; causal check
+  negative; fork vs answer loss not established). H-fork is not claimed. Per the Stage C
+  amendment, the fork variants remain exploratory and GRAFT's reported method uses the
+  preregistered configuration.
