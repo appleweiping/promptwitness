@@ -60,6 +60,19 @@ def stop_tokens(tokenizer: Any) -> set[int]:
     return stop
 
 
+def sampling_stops(model: Any, tokenizer: Any) -> list[int]:
+    """Stop tokens for sampled generation: the model's generation-config EOS ids plus the
+    chat end-of-turn tokens (Gemma-2's generation config lists only ``<eos>``, so without
+    ``<end_of_turn>`` samples would run past the end of the assistant turn)."""
+    stops = set(stop_tokens(tokenizer))
+    config_eos = getattr(getattr(model, "generation_config", None), "eos_token_id", None)
+    if isinstance(config_eos, int):
+        stops.add(config_eos)
+    elif config_eos:
+        stops.update(config_eos)
+    return sorted(stops)
+
+
 def generate_batch(
     model: Any,
     tokenizer: Any,
@@ -217,6 +230,8 @@ def sample_reasonings(model: Any, tokenizer: Any, prompts: list[list[int]], samp
 
     eos = tokenizer.eos_token_id
     pad = tokenizer.pad_token_id if tokenizer.pad_token_id is not None else eos
+    stops = sampling_stops(model, tokenizer)
+    cut = set(stops) | {eos, pad}
     device = next(model.parameters()).device
     batch = [p for p in prompts for _ in range(samples)]
     out_all: list[list[int]] = []
@@ -232,11 +247,11 @@ def sample_reasonings(model: Any, tokenizer: Any, prompts: list[list[int]], samp
         with torch.no_grad():
             gen = model.generate(input_ids=ids.to(device), attention_mask=mask.to(device),
                                  max_new_tokens=max_new_tokens, do_sample=True, temperature=0.7,
-                                 top_p=0.95, pad_token_id=pad)
+                                 top_p=0.95, pad_token_id=pad, eos_token_id=stops)
         for row in gen[:, width:].tolist():
             tokens = []
             for token in row:
-                if token in (eos, pad):
+                if token in cut:
                     break
                 tokens.append(token)
             out_all.append(tokens)

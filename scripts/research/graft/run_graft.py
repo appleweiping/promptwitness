@@ -36,6 +36,7 @@ from promptwitness.graft_runtime import (
     generate_batch,
     load_tokenizer,
     sample_reasonings,
+    sampling_stops,
     verified_targets,
 )
 from promptwitness.structured_prompt import StructuredPrompt
@@ -155,7 +156,7 @@ def propose(runner: Runner, prompt: StructuredPrompt, slot: str, questions: list
     with torch.no_grad():
         gen = model.generate(input_ids=ids.to(device), attention_mask=mask.to(device),
                              max_new_tokens=96, do_sample=True, temperature=0.8, top_p=0.95,
-                             pad_token_id=pad)
+                             pad_token_id=pad, eos_token_id=sampling_stops(model, tokenizer))
     for row in gen[:, width:]:
         text = graft_tasks.clean_proposal(tokenizer.decode(row, skip_special_tokens=True))
         if text:
@@ -196,7 +197,8 @@ def textual_gradient_pools(runner: Runner, prompt: StructuredPrompt, batch: list
         with torch.no_grad():
             gen = model.generate(ids, attention_mask=torch.ones_like(ids), max_new_tokens=320,
                                  do_sample=True, temperature=0.7, top_p=0.95,
-                                 pad_token_id=tokenizer.eos_token_id)
+                                 pad_token_id=tokenizer.eos_token_id,
+                                 eos_token_id=sampling_stops(model, tokenizer))
         text = tokenizer.decode(gen[0, ids.shape[1]:], skip_special_tokens=True)
         new = graft_tasks.clean_proposal(text) if "NEW BLOCK:" in text else ""
         pools[block.block_id] = [new] if new else []

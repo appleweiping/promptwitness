@@ -115,3 +115,27 @@ def test_token_pools_are_single_token_substitutions() -> None:
             ids, lo2, hi2 = _block_token_span(edited, tokenizer, {"input": rows[0].question}, slot)
             new = ids[lo2:hi2]
             assert len(new) == len(base) and sum(a != b for a, b in zip(new, base)) == 1
+
+
+def test_sampling_stops_add_end_of_turn_to_generation_config_eos() -> None:
+    from types import SimpleNamespace
+
+    from promptwitness.graft_runtime import sampling_stops
+
+    class Gemma(_Tokenizer):
+        eos_token_id = 1
+
+        def convert_tokens_to_ids(self, name: str) -> int:
+            return {"<end_of_turn>": 107}.get(name, self.unk_token_id)
+
+    gemma = SimpleNamespace(generation_config=SimpleNamespace(eos_token_id=1))
+    assert sampling_stops(gemma, Gemma()) == [1, 107]
+    llama = SimpleNamespace(generation_config=SimpleNamespace(eos_token_id=[128001, 128009]))
+
+    class Llama(_Tokenizer):
+        eos_token_id = 128009
+
+        def convert_tokens_to_ids(self, name: str) -> int:
+            return {"<|eot_id|>": 128009}.get(name, self.unk_token_id)
+
+    assert sampling_stops(llama, Llama()) == [128001, 128009]

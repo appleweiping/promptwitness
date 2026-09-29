@@ -147,6 +147,15 @@ full; everything lives on `/media/lenovo/data2`.
     validity control (GReaTer-style single-token edits, same seed/tasks/target as the block
     study) as soon as each GPU's v3 queue finishes.
 
+23. **Bug (Gemma-2 sampling) found and fixed.** `sample_reasonings`, label-free proposals
+    and textual-gradient feedback stopped at the generation config's EOS ids; Gemma-2's
+    config lists only `<eos>`, so sampled text could run past `<end_of_turn>` (and sampled
+    drafts kept it before the extractor, which can misjudge sample correctness). Fix:
+    `sampling_stops` = generation-config EOS + chat end-of-turn tokens. Llama-3 and Qwen3
+    are unaffected (identical stop sets and random draws), so v3 stands. Affected: the
+    exploratory Gemma-2 date decision run (fork rho 0.46-0.48) and Gemma-2 samples in
+    validity v1; they are marked exploratory and are not used as evidence.
+
 ## Next
 
 * Fidelity v2 decides the scorer: renormalized patching must beat raw gates and
