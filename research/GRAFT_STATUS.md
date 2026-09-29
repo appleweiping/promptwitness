@@ -200,6 +200,13 @@ full; everything lives on `/media/lenovo/data2`.
     rows with wrong reasoning (answer loss on wrong rows -0.61, -0.48, -0.29, -0.52 for
     Llama-3). Dev reliability varies from 0.01 (Qwen3 state run: no signal) to 0.90.
 
+29. **Mechanism probe (own-answer loss, 3 usable runs; suggestive only).** On wrong-reasoning
+    rows, the change in the gold answer's loss and in the model's own answer's loss are
+    anti-correlated across edits (Llama-3 LD7 state -0.91, Qwen3 LD7 state -0.33, Llama-3
+    LD3 -0.13): GReaTer's objective favors edits that move probability from the answer the
+    reasoning supports to the gold answer, and such decoupling predicts lower held-out
+    accuracy on the Llama-3 state run (-0.40). Too few wrong rows elsewhere for a claim.
+
 ## Next
 
 * Fidelity v2 decides the scorer: renormalized patching must beat raw gates and
