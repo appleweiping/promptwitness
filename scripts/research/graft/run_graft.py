@@ -26,14 +26,15 @@ from time import perf_counter
 from typing import Any
 
 from promptwitness import graft_tasks
-from promptwitness.graft_runtime import load_tokenizer
 from promptwitness.graft_runtime import (
     Generation,
+    Ledger,
     ScoredTarget,
     answer_losses,
     answer_target,
     fork_targets,
     generate_batch,
+    load_tokenizer,
     sample_reasonings,
     verified_targets,
 )
@@ -67,18 +68,6 @@ INSERT_OPERATORS = (
     "Write one instruction to double-check the final answer.",
 )
 Edit = tuple[str, int | None]  # (slot, candidate index) ; None = delete
-
-
-class Ledger:
-    def __init__(self) -> None:
-        self.phases: dict[str, dict[str, float]] = {}
-
-    def add(self, phase: str, seconds: float, **counts: float) -> None:
-        bucket = self.phases.setdefault(phase, {"seconds": 0.0, "calls": 0})
-        bucket["seconds"] += seconds
-        bucket["calls"] += 1
-        for name, value in counts.items():
-            bucket[name] = bucket.get(name, 0) + value
 
 
 class Runner:
@@ -387,6 +376,8 @@ def main() -> None:
     parser.add_argument("--max-new-tokens", type=int, default=384)
     parser.add_argument("--eval-max-new-tokens", type=int, default=512)
     parser.add_argument("--dev-checkpoints", type=int, default=3)
+    parser.add_argument("--defer-eval", action="store_true",
+                        help="stop after search; dev selection and test run in select_and_test.py")
     parser.add_argument("--candidates-per-pass", type=int, default=32)
     parser.add_argument("--no-checkpointing", action="store_true",
                         help="keep attention activations instead of recomputing (faster, more memory)")
@@ -492,6 +483,20 @@ def main() -> None:
         entry = max((a for a in accepted if a["round"] <= mark), key=lambda a: a["round"])
         if all(entry["text"] != c["text"] for c in checkpoints):
             checkpoints.append(entry)
+    for entry in checkpoints:
+        entry["blocks"] = graft_tasks.prompt_blocks(prompts[entry["text"]])
+    base = {"format": "promptwitness.graft-run/v1", "task": args.task, "method": args.method,
+            "seed": args.seed, "model_path": args.model_path, "config": vars(args) | {
+                "data_dir": str(args.data_dir), "output": str(args.output)},
+            "trajectory": trajectory, "accepted": accepted, "checkpoints": checkpoints,
+            "search_seconds": search_seconds}
+    if args.defer_eval:
+        result = base | {"cost": ledger.phases, "wall_seconds": perf_counter() - started,
+                         "peak_memory_gb": torch.cuda.max_memory_allocated() / 2**30}
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        print(json.dumps({"deferred": True, "checkpoints": len(checkpoints), "wall": result["wall_seconds"]}))
+        return
     dev_scores = []
     for entry in checkpoints:
         dev = runner.evaluate(prompts[entry["text"]], splits["dev"], "dev",
@@ -502,15 +507,11 @@ def main() -> None:
     chosen = accepted.index(checkpoints[best])
     test = runner.evaluate(prompts[accepted[chosen]["text"]], splits["test"], "test",
                            max_new_tokens=args.eval_max_new_tokens)
-    result = {"format": "promptwitness.graft-run/v1", "task": args.task, "method": args.method,
-              "seed": args.seed, "model_path": args.model_path, "config": vars(args) | {
-                  "data_dir": str(args.data_dir), "output": str(args.output)},
-              "trajectory": trajectory, "accepted": accepted, "selected": chosen,
-              "selected_text": accepted[chosen]["text"], "test_accuracy": test["accuracy"],
-              "test_correct": test["correct"], "test_truncated": test["truncated"],
-              "cost": ledger.phases, "search_seconds": search_seconds,
-              "wall_seconds": perf_counter() - started,
-              "peak_memory_gb": torch.cuda.max_memory_allocated() / 2**30}
+    result = base | {"selected": chosen,
+                     "selected_text": accepted[chosen]["text"], "test_accuracy": test["accuracy"],
+                     "test_correct": test["correct"], "test_truncated": test["truncated"],
+                     "cost": ledger.phases, "wall_seconds": perf_counter() - started,
+                     "peak_memory_gb": torch.cuda.max_memory_allocated() / 2**30}
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(json.dumps({"test_accuracy": test["accuracy"], "selected_round": accepted[chosen]["round"],

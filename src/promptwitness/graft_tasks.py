@@ -180,23 +180,35 @@ def initial_prompt(*, insertion_slot: bool = True) -> StructuredPrompt:
     strategy block and an output block, with an empty optional procedure slot
     between them that insertion edits may fill.
     """
-    pieces: list[tuple[str, BlockKind, str, bool]] = [
-        ("input", BlockKind.INPUT_DATA, "{{input}}\n\n", False),
-        ("strategy", BlockKind.REASONING_POLICY,
+    pieces: list[tuple[str, str, str, bool]] = [
+        ("input", BlockKind.INPUT_DATA.value, "{{input}}\n\n", False),
+        ("strategy", BlockKind.REASONING_POLICY.value,
          "Use proper logical reasoning and think step by step.\n", True),
     ]
     if insertion_slot:
-        pieces.append(("procedure", BlockKind.REASONING_POLICY, "", True))
-    pieces.append(("output", BlockKind.OUTPUT_INSTRUCTION,
+        pieces.append(("procedure", BlockKind.REASONING_POLICY.value, "", True))
+    pieces.append(("output", BlockKind.OUTPUT_INSTRUCTION.value,
                    "Finally give the actual correct answer.\n", True))
+    return prompt_from_blocks(pieces, "graft-greater-init")
+
+
+def prompt_from_blocks(pieces: list[tuple[str, str, str, bool]] | list[list[object]],
+                       document_id: str = "graft-prompt") -> StructuredPrompt:
+    """A single-user-message prompt from (block_id, kind, text, editable) pieces."""
     blocks: list[PromptBlock] = []
     content = ""
     for block_id, kind, text, editable in pieces:
         start = len(content)
-        content += text
-        blocks.append(PromptBlock(block_id, kind, text, editable, "user", start, len(content)))
-    document = PromptDocument("graft-greater-init", (Message("user", content, message_id="user"),))
+        content += str(text)
+        blocks.append(PromptBlock(str(block_id), BlockKind(kind), str(text), bool(editable), "user",
+                                  start, len(content)))
+    document = PromptDocument(document_id, (Message("user", content, message_id="user"),))
     return StructuredPrompt(document, tuple(blocks))
+
+
+def prompt_blocks(prompt: StructuredPrompt) -> list[list[object]]:
+    """JSON-serializable pieces; ``prompt_from_blocks(prompt_blocks(p))`` renders like ``p``."""
+    return [[b.block_id, b.kind.value, b.text, b.editable] for b in prompt.blocks]
 
 
 _PREAMBLE = re.compile(

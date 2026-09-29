@@ -29,11 +29,35 @@ def load_tokenizer(path: str) -> Any:
     return tokenizer
 
 
+class Ledger:
+    """Wall-clock seconds and token counts per phase (the cost ledger of every run)."""
+
+    def __init__(self) -> None:
+        self.phases: dict[str, dict[str, float]] = {}
+
+    def add(self, phase: str, seconds: float, **counts: float) -> None:
+        bucket = self.phases.setdefault(phase, {"seconds": 0.0, "calls": 0})
+        bucket["seconds"] += seconds
+        bucket["calls"] += 1
+        for name, value in counts.items():
+            bucket[name] = bucket.get(name, 0) + value
+
+
 @dataclass(frozen=True, slots=True)
 class Generation:
     token_ids: tuple[int, ...]  # without trailing EOS/padding
     text: str
     ended: bool
+
+
+def stop_tokens(tokenizer: Any) -> set[int]:
+    """EOS plus the end-of-turn tokens of the chat templates in use (shared by all engines)."""
+    stop = {tokenizer.eos_token_id}
+    for name in ("<|eot_id|>", "<end_of_turn>", "<|im_end|>", "<|endoftext|>"):
+        token = tokenizer.convert_tokens_to_ids(name)
+        if isinstance(token, int) and token >= 0 and token != tokenizer.unk_token_id:
+            stop.add(token)
+    return stop
 
 
 def generate_batch(
@@ -49,11 +73,7 @@ def generate_batch(
 
     eos = tokenizer.eos_token_id
     pad = tokenizer.pad_token_id if tokenizer.pad_token_id is not None else eos
-    stop = {eos}
-    for name in ("<|eot_id|>", "<end_of_turn>", "<|im_end|>", "<|endoftext|>"):
-        token = tokenizer.convert_tokens_to_ids(name)
-        if isinstance(token, int) and token >= 0 and token != tokenizer.unk_token_id:
-            stop.add(token)
+    stop = stop_tokens(tokenizer)
     device = next(model.parameters()).device
     results: list[Generation] = []
     generated = 0
