@@ -52,6 +52,9 @@ def main() -> None:
     parser.add_argument("--max-new-tokens", type=int, default=384)
     parser.add_argument("--max-forks", type=int, default=3)
     parser.add_argument("--attn", default="sdpa")
+    parser.add_argument("--dev-offset", type=int, default=0, help="first dev index (dev slices)")
+    parser.add_argument("--state-seed", type=int, default=None,
+                        help="start from a non-initial prompt: apply one proposal drawn with this seed")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
 
@@ -69,9 +72,18 @@ def main() -> None:
     train = list(splits["train"])
     rng.shuffle(train)
     proposal_rows, rows = train[:2], train[2:2 + args.rows]
-    dev = splits["dev"][: args.dev]
+    dev = splits["dev"][args.dev_offset: args.dev_offset + args.dev]
     runner = Runner(model, tokenizer, spec, Ledger(), args.max_new_tokens)
     prompt = graft_tasks.initial_prompt()
+    state_edit = None
+    if args.state_seed is not None:
+        # A different prompt state: apply the first cleanly tokenizing insertion proposal.
+        start_pool = propose(runner, prompt, "procedure", [r.question for r in proposal_rows],
+                             args.state_seed, 4)
+        for text in start_pool:
+            if candidate_token_ids(prompt, tokenizer, {"input": rows[0].question}, "procedure", text):
+                prompt, state_edit = prompt.replace_block("procedure", text), text
+                break
     slots = [b.block_id for b in prompt.blocks if b.editable]
     pools = {s: propose(runner, prompt, s, [r.question for r in proposal_rows], args.seed * 100 + j, args.k)
              for j, s in enumerate(slots)}
@@ -159,15 +171,20 @@ def main() -> None:
 
     # --- fresh accuracy on train rows (what the search loop's verification sees) ---
     t0 = perf_counter()
-    fresh = {e: runner.evaluate(apply(prompt, pools, e), rows, "fresh")["correct"] for e in edits}
-    cost["fresh_all"] = perf_counter() - t0
-    cost["fresh8"] = cost["fresh_all"] * 8 / len(rows)
+    fresh_head = {e: runner.evaluate(apply(prompt, pools, e), rows[:8], "fresh")["correct"] for e in edits}
+    cost["fresh8"] = perf_counter() - t0
+    t0 = perf_counter()
+    fresh_tail = {e: runner.evaluate(apply(prompt, pools, e), rows[8:], "fresh")["correct"] for e in edits}
+    cost["fresh_all"] = cost["fresh8"] + perf_counter() - t0
+    fresh = {e: fresh_head[e] + fresh_tail[e] for e in edits}
     base_correct = greedy["correct"]
 
     # --- held-out target ---
     t0 = perf_counter()
-    base_dev = runner.evaluate(prompt, dev, "dev")["accuracy"]
-    dev_delta = {e: runner.evaluate(apply(prompt, pools, e), dev, "dev")["accuracy"] - base_dev for e in edits}
+    base_dev_correct = runner.evaluate(prompt, dev, "dev")["correct"]
+    dev_correct = {e: runner.evaluate(apply(prompt, pools, e), dev, "dev")["correct"] for e in edits}
+    base_dev = statistics.mean(base_dev_correct)
+    dev_delta = {e: statistics.mean(dev_correct[e]) - base_dev for e in edits}
     cost["dev_target"] = perf_counter() - t0
 
     predictors = {
@@ -178,6 +195,13 @@ def main() -> None:
         "fresh8": {e: statistics.mean(fresh[e][:8]) - statistics.mean(base_correct[:8]) for e in edits},
         "fresh_all": {e: statistics.mean(fresh[e]) - statistics.mean(base_correct) for e in edits},
     }
+    eligible = [i for i, f in enumerate(forks) if f]
+    if eligible:  # same rows as the fork objective (conditional comparison)
+        predictors["answer_exact_eligible"] = {
+            e: -statistics.mean(answer_exact[e][i] for i in eligible) for e in edits}
+        predictors["fresh_eligible"] = {
+            e: statistics.mean(fresh[e][i] for i in eligible) - statistics.mean(base_correct[i] for i in eligible)
+            for e in edits}
     delta = [dev_delta[e] for e in edits]
     summary: dict[str, Any] = {"base_dev_accuracy": base_dev, "edits": len(edits),
                                "dev_delta_mean": statistics.mean(delta), "dev_delta_best": max(delta),
@@ -194,6 +218,16 @@ def main() -> None:
               "seed": args.seed, "rows": [r.example_id for r in rows], "pools": pools, "edits": names,
               "dev_delta": delta, "predictors": {k: [v[e] for e in edits] for k, v in predictors.items()},
               "forks_per_row": [len(f) for f in forks], "summary": summary,
+              "state_edit": state_edit, "dev_offset": args.dev_offset,
+              "raw": {"answer_exact": {n: answer_exact[e] for n, e in zip(names, edits)},
+                      "answer_patch": {n: answer_patch[e] for n, e in zip(names, edits)},
+                      "fork_rows": eligible,
+                      "fork_exact": {n: fork_exact[e] for n, e in zip(names, edits)},
+                      "fork_patch": {n: fork_patch[e] for n, e in zip(names, edits)},
+                      "fresh": {n: [int(x) for x in fresh[e]] for n, e in zip(names, edits)},
+                      "base_fresh": [int(x) for x in base_correct],
+                      "dev": {n: [int(x) for x in dev_correct[e]] for n, e in zip(names, edits)},
+                      "base_dev": [int(x) for x in base_dev_correct]},
               "wall_seconds": perf_counter() - started}
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")

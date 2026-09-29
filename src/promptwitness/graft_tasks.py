@@ -43,6 +43,12 @@ BBH_TASKS = (
     "temporal_sequences", "tracking_shuffled_objects_five_objects", "web_of_lies",
 )
 ALL_TASKS = BBH_TASKS + ("gsm8k", "folio")
+# BBH tasks outside GReaTer's 21: used only to validate objectives, never benchmarked.
+# Their 200 non-train examples form one large validity target; they have no test split.
+VALIDATION_TASKS = (
+    "logical_deduction_three_objects", "logical_deduction_seven_objects",
+    "tracking_shuffled_objects_three_objects", "tracking_shuffled_objects_seven_objects",
+)
 
 
 @dataclass(frozen=True, slots=True)
@@ -110,7 +116,7 @@ def spec(name: str) -> TaskSpec:
         return TaskSpec(name, "binary", BINARY[name])
     if name in INTEGER:
         return TaskSpec(name, "integer")
-    if name in BBH_TASKS or name == "folio":
+    if name in BBH_TASKS or name in VALIDATION_TASKS or name == "folio":
         return TaskSpec(name, "mc")
     raise KeyError(name)
 
@@ -153,6 +159,10 @@ def load_splits(data_dir: Path, task: str) -> dict[str, list[Example]]:
         _seeded(task).shuffle(train)
         return {"train": train[:50], "dev": _csv(data_dir / "FOLIO" / "dev.csv", task),
                 "test": _csv(data_dir / "FOLIO" / "test.csv", task)}
+    if task in VALIDATION_TASKS:
+        rows = _csv(data_dir / "BBH" / f"{task}.csv", task)
+        _seeded(task).shuffle(rows)
+        return {"train": rows[:50], "dev": rows[50:], "test": []}
     if task not in BBH_TASKS:
         raise KeyError(task)
     rows = _csv(data_dir / "BBH" / f"{task}.csv", task)
