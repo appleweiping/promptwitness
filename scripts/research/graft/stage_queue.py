@@ -41,12 +41,16 @@ def main() -> None:
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--data-dir", type=Path, required=True)
     parser.add_argument("--yield-to-pilot", action="store_true")
+    parser.add_argument("--model", help="only runs of this model key (one queue per GPU and model)")
+    parser.add_argument("--gen-server", help="host:port of a graft_genserver serving this model")
     args = parser.parse_args()
     repo = Path(__file__).resolve().parents[3]
     plan = json.loads(args.plan.read_text())
     journal = args.out / "journal.jsonl"
     args.out.mkdir(parents=True, exist_ok=True)
     for run in plan["runs"]:
+        if args.model and run["model"] != args.model:
+            continue
         name = f"{run['model']}-{run['task']}-{run['method']}-s{run['seed']}{run.get('suffix', '')}"
         output = args.out / f"{name}.json"
         if output.exists():
@@ -61,7 +65,8 @@ def main() -> None:
         command = [sys.executable, str(repo / "scripts/research/graft/run_graft.py"),
                    "--task", run["task"], "--model-path", model_path, "--data-dir", str(args.data_dir),
                    *method, "--seed", str(run["seed"]), "--attn", attn,
-                   "--output", str(output), *extra]
+                   "--output", str(output), *extra,
+                   *(["--gen-server", args.gen_server] if args.gen_server else [])]
         started = time.time()
         with (args.out / f"{name}.log").open("w") as log:
             code = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT, cwd=repo).returncode
