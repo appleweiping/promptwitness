@@ -22,9 +22,21 @@ def serve(model_path: str, host: str, port: int, gpu_memory_utilization: float, 
     from vllm import LLM, SamplingParams
     from vllm.inputs import TokensPrompt
 
-    llm = LLM(model=model_path, tokenizer=model_path, dtype="bfloat16", seed=0,
-              gpu_memory_utilization=gpu_memory_utilization, max_model_len=max_model_len,
-              enable_prefix_caching=True)
+    import time
+
+    for attempt in range(5):
+        try:
+            llm = LLM(model=model_path, tokenizer=model_path, dtype="bfloat16", seed=0,
+                      gpu_memory_utilization=gpu_memory_utilization, max_model_len=max_model_len,
+                      enable_prefix_caching=True)
+            break
+        except (AssertionError, RuntimeError) as error:
+            # vLLM's start-up memory profiling fails if a process sharing the GPU frees
+            # memory meanwhile (e.g. a search process between phases); retry.
+            if attempt == 4:
+                raise
+            print(f"engine start failed ({error!r}); retrying", flush=True)
+            time.sleep(20)
     print(f"READY {host}:{port}", flush=True)
     with Listener((host, port), authkey=AUTHKEY) as listener:
         while True:
