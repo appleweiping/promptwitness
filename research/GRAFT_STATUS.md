@@ -207,6 +207,13 @@ full; everything lives on `/media/lenovo/data2`.
     reasoning supports to the gold answer, and such decoupling predicts lower held-out
     accuracy on the Llama-3 state run (-0.40). Too few wrong rows elsewhere for a claim.
 
+30. **Exploratory, negative: gradient-guided evaluation rows.** Choosing the 8 (or 12)
+    training rows on which the answer-loss change varies most across edits, then ranking
+    edits by fresh accuracy on those rows, does not beat random rows on the v3 data
+    (mean rho +0.15/+0.21 for exact/patch top-8 vs +0.19 random-8; +0.19/+0.27 vs +0.24
+    for 12 rows). Not pursued. Literature review (`GRAFT_LITERATURE.md`) added: GEPA (ICLR
+    2026 oral), p1 (variance decomposition), HbBoPs, OPRO replication, CoT faithfulness.
+
 ## Next
 
 * Fidelity v2 decides the scorer: renormalized patching must beat raw gates and
