@@ -142,3 +142,26 @@ C5 Stage C ablations (gate, random, exact) plus fidelity estimator ablations.
   prompts and all Stage C runs use the fixed reader; the v3 and token-level studies (all
   multiple-choice tasks, whose extractor ends in "(") are unaffected and keep their
   preregistered settings.
+* 2026-09-29 ~23:00 UTC, after cross-family review round 3 (`.aris/traces/review-r3/final.md`),
+  before any Stage C result and before any TS3 data exist:
+  1. **Stage C is paused** until the phase-2 controls (done except one token run) and one
+     instrumented real-model smoke (2 rounds, `patch`, object_counting, generation server)
+     are recorded; it is then launched manually. The exploratory fork variants (84 runs)
+     are dropped (H-fork failed). Stage C analysis is prespecified as task-level paired
+     comparisons with seeds nested within tasks, plus accuracy versus measured total
+     search-and-selection compute; no speed claim is made from pass counts.
+  2. **Split provenance.** GReaTer optimized its published prompts on rows 0-49 of each
+     released file and monitored rows 50-99; 41% of our BBH test rows fall in those
+     ranges. Published-prompt comparisons are reported on the full test split and on the
+     clean subset (file rows >= 100), for all fixed prompts alike.
+  3. **H-cond, prospective (the only new objective allowed as confirmatory).** Score an
+     edit by the change in GReaTer's answer loss averaged only over training rows whose
+     incumbent greedy extracted answer is correct ("answer-conditioned"; exact and
+     patched); if no row qualifies, the ranking is random. Prior evidence, disclosed: on the
+     already-inspected v3 runs it beats the all-row answer loss (d_rho +0.18, P 0.985) but not
+     a random ranking (+0.03) and loses to fresh-8 (-0.24). Test: `decision_study.py` block
+     mode on the untouched task tracking_shuffled_objects_three_objects, seed 303, 24 rows,
+     200 held-out questions, Llama-3-8B, Qwen3-8B and Gemma-2-9B. Primary metric: best-3
+     regret (`analyze_decision.py --regret-k 3`); secondary: Spearman. H-cond is supported
+     only if answer_cond_patch beats both answer_patch and random on best-3 regret with
+     P(gain > 0) >= 0.95 in the pooled paired bootstrap; otherwise it is retired.

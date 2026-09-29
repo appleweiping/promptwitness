@@ -27,10 +27,13 @@ from pathlib import Path
 from fidelity_study import spearman
 
 KEYS = ("answer_exact", "answer_patch", "fork_exact", "fork_patch", "fresh8", "fresh_all",
-        "answer_exact_elig", "fresh_all_elig")
+        "answer_exact_elig", "fresh_all_elig", "answer_cond_exact", "answer_cond_patch", "random")
 PAIRS = (("fork_patch", "answer_exact"), ("fork_exact", "answer_exact"), ("fork_patch", "fresh8"),
          ("fork_patch", "fresh_all"), ("fork_patch", "answer_exact_elig"),
-         ("fork_patch", "fresh_all_elig"), ("fork_patch", "fork_exact"))
+         ("fork_patch", "fresh_all_elig"), ("fork_patch", "fork_exact"),
+         # H-cond (preregistered 2026-09-29 before any TS3 data): answer-conditioned shortlist
+         ("answer_cond_patch", "answer_patch"), ("answer_cond_patch", "random"),
+         ("answer_cond_patch", "fresh8"), ("answer_cond_exact", "answer_exact"))
 
 
 def predictors_for(raw: dict, names: list[str], rows: list[int], questions: list[int]) -> tuple[dict, list[float]]:
@@ -52,13 +55,24 @@ def predictors_for(raw: dict, names: list[str], rows: list[int], questions: list
         out[key] = [-mean_or_zero([raw[key][n][k] for k in sampled_fork]) for n in names]
     for key, subset in (("fresh8", first8), ("fresh_all", rows), ("fresh_all_elig", eligible)):
         out[key] = [mean_or_zero([raw["fresh"][n][r] - base_fresh[r] for r in subset]) for n in names]
+    # H-cond: GReaTer's answer loss only on rows whose incumbent greedy answer is correct;
+    # with no such row the ranking is random (a fixed arbitrary order, rho about 0).
+    right = [r for r in rows if base_fresh[r] == 1]
+    for key, source in (("answer_cond_exact", "answer_exact"), ("answer_cond_patch", "answer_patch")):
+        out[key] = ([-statistics.mean(raw[source][n][r] for r in right) for n in names] if right
+                    else [float((7919 * k) % len(names)) for k in range(len(names))])
+    out["random"] = [float((7919 * k) % len(names)) for k in range(len(names))]
     base_dev = raw["base_dev"]
     target = [statistics.mean(raw["dev"][n][q] - base_dev[q] for q in questions) for n in names]
     return out, target
 
 
+REGRET_K = 5
+
+
 def regret5(pred: list[float], target: list[float]) -> float:
-    k = min(5, len(target))
+    """Best-k regret (k = REGRET_K; H-cond preregisters k = 3 via --regret-k 3)."""
+    k = min(REGRET_K, len(target))
     best = statistics.mean(sorted(target, reverse=True)[:k])
     top = sorted(range(len(pred)), key=lambda i: pred[i], reverse=True)[:k]
     return best - statistics.mean(target[i] for i in top)
@@ -100,7 +114,10 @@ def main() -> None:
     parser.add_argument("--replicates", type=int, default=2000)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--json", type=Path, help="also write the summary as JSON")
+    parser.add_argument("--regret-k", type=int, default=5)
     args = parser.parse_args()
+    global REGRET_K
+    REGRET_K = args.regret_k
     runs = [json.loads(f.read_text(encoding="utf-8")) for f in args.files]
     runs = [r for r in runs if "raw" in r]
     if not runs:

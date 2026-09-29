@@ -214,6 +214,26 @@ full; everything lives on `/media/lenovo/data2`.
     for 12 rows). Not pursued. Literature review (`GRAFT_LITERATURE.md`) added: GEPA (ICLR
     2026 oral), p1 (variance decomposition), HbBoPs, OPRO replication, CoT faithfulness.
 
+31. **Token-level control (3 of 4 runs).** GReaTer-style single-token edits change
+    held-out accuracy by about +-2 points (SD 0.020-0.024) while flipping the greedy answer
+    on 16-22% of the 200 questions; the target's split-half reliability is 0.05-0.11, so no
+    predictor (gradient or evaluation) can be validated at this granularity. Block edits
+    flip 6-31% with SD 0.02-0.07. Greedy reasoning is non-local in the prompt: even one
+    token re-rolls a fifth of the answers, which is the regime where fixed-reasoning
+    first-order signals cannot work.
+32. **Reader bug (Qwen3) fixed before any baseline or Stage C result:** LaTeX-wrapped
+    answers (`oxed{}`) were unparsed and 8 answer tokens truncated numbers; Qwen3
+    reasoning exceeded 512 tokens on causal judgement (60/69). Parser fixed and tested,
+    16 answer tokens, 1024-token budgets (plan amendment). Old-reader baselines archived;
+    re-running. Killing a vLLM run must include its `VLLM::EngineCore` child (an orphan
+    held 30 GB on GPU 0 for 40 minutes).
+33. **Cross-family review round 3 (GPT-6):** C1 yes (conditional), C2 partial (fidelity; no
+    speed claim), C3 partial (association moderate, mechanism low), C4 no, C5 pending;
+    best framing: re-examination with an exact instrument (borderline to weak accept if
+    clean); novelty 6, significance 5. Adopted: Stage C paused behind a real-model smoke,
+    fork variants dropped, split-provenance audit (41% of BBH test rows were seen by
+    GReaTer's optimization), prospective H-cond test on untouched TS3 (plan amendment).
+
 ## Next
 
 * Fidelity v2 decides the scorer: renormalized patching must beat raw gates and
