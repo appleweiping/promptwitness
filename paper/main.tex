@@ -238,7 +238,7 @@ attention arithmetic is small next to the forward pass.
   \State verify the top-$\mu$ edits with fresh reasoning on $B$
   \State accept the best if it improves minibatch accuracy (ties: answer loss)
 \EndFor
-\State select among accepted prompts on dev; evaluate once on test
+\State select among the incumbents of rounds $0,R/3,2R/3,R$ on dev; evaluate once on test
 \end{algorithmic}
 \end{algorithm}
 
@@ -310,8 +310,10 @@ instruction (``Use proper logical reasoning and think step by step. Finally give
 actual correct answer.''), split into a strategy block and an output block, with an
 empty procedure slot between them. Each run has 12 rounds with minibatches of 8
 train examples, 6 label-free proposals per slot, and a shortlist of 3 edits verified
-with fresh reasoning. The development set selects among accepted prompts; the test
-set is read once.
+with fresh reasoning. The development set selects among the incumbents at rounds 0, 4,
+8 and 12 (so a run can fall back to the initial prompt); the test set is read once.
+Dev selection and the test read of every method, and all fixed prompts, are performed
+by one inference engine with identical rendering, stop tokens and answer parsing.
 
 \paragraph{Baselines and controls.} Fixed prompts: zero-shot chain of thought
 (ZS-CoT), \greater{}'s initial prompt, and \greater{}'s published optimized prompts
