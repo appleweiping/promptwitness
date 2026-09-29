@@ -101,6 +101,23 @@ full; everything lives on `/media/lenovo/data2`.
     of candidates. Consequence: the runner gains `--objective fork` and
     `--accept margin` (shortlist by one-pass estimate, exact re-score, no generation).
 
+17. **Exploratory decision study, Llama-3 date_understanding** (pre-freeze, seed 11):
+    fork margin rho -0.18 (exact) / -0.20 (patch), answer loss 0.05 / -0.21, fresh-8 0.14,
+    fresh-24 0.14; edits barely move accuracy on this task (mean -2.2, best +5 points on 60
+    questions), so the target is mostly noise. Exploratory formal_fallacies runs were
+    stopped by mistake after 5-16 minutes and are not rerun.
+18. **GPT-6 round 2** (`.aris/traces/review-r2/final.md`): PROCEED WITH CAUTION, novelty
+    7/10, potential 7/10 if replicated (about 4/10 now). Requirements adopted: frozen
+    hypothesis H-fork and replication protocol (plan amendment), measured costs, fork
+    coverage, eligible-row comparisons, hierarchical bootstrap, causal fork check, cite
+    ContraPrompt (textual contrast of traces with a strong LLM), Global Forking Tokens,
+    Forking Paths, Critical Tokens, Phi-4 pivotal tokens, decision-token restoration.
+19. **Replication v3 launched 2026-09-29 07:51 UTC** on validation-only BBH tasks
+    (logical deduction 3/7, tracking shuffled 7; 200-question targets; seed 101;
+    non-initial prompt state with seed 202): Llama-3 on GPU 0, Qwen3-8B on GPU 1.
+    Disk on data2 is at 98% (shared); vLLM is being installed in its own venv for
+    later evaluation phases.
+
 ## Next
 
 * Fidelity v2 decides the scorer: renormalized patching must beat raw gates and
