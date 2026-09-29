@@ -156,6 +156,15 @@ full; everything lives on `/media/lenovo/data2`.
     exploratory Gemma-2 date decision run (fork rho 0.46-0.48) and Gemma-2 samples in
     validity v1; they are marked exploratory and are not used as evidence.
 
+24. **Search-time generation service.** `graft_genserver.py` runs a vLLM engine beside the
+    HF scorer on the same GPU; `run_graft --gen-server` sends greedy reasoning, self-samples,
+    proposals and textual feedback there (HF only computes losses and gradients). All eight
+    Stage C variants and `select_and_test.py` run end to end on a small test model (with
+    head_dim 128: vLLM's FlexAttention fallback for head_dim 16 crashed, FlashAttention is
+    what real models use). Found and fixed on the way: `build_targets` used
+    `dataclasses.replace` without importing it, which would have crashed every Stage C run
+    with the answer or fork objective.
+
 ## Next
 
 * Fidelity v2 decides the scorer: renormalized patching must beat raw gates and
