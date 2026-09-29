@@ -114,3 +114,15 @@ C5 Stage C ablations (gate, random, exact) plus fidelity estimator ablations.
   Stage C and D; GReaTer published prompts exist only for the latter two, so Qwen3
   comparisons with GReaTer use an official GReaTer rerun if its code can be adapted,
   otherwise only the other baselines.
+* 2026-09-29, before any Stage C result, while the v3 replication is still running:
+  the Stage C variant set is fixed independently of the H-fork outcome. Preregistered:
+  `patch` (GRAFT, GReaTer's answer objective, patching shortlist, fresh verification),
+  `exact`, `random`, `textgrad` with seeds 1-3 and `gate` with seed 1. Exploratory
+  (labeled as such unless H-fork replicates): `fork-patch-fresh` (fork objective,
+  seeds 1-3) and `fork-patch-margin` (fork objective, generation-free acceptance,
+  seed 1). Models: Llama-3-8B, Qwen3-8B, Gemma-2-9B. Search-time generation runs on a
+  vLLM server beside the HF scorer (`--gen-server`), identically for every variant of a
+  model; dev selection and the test read use `select_and_test.py`. The official
+  GReaTer implementation shortlists by the gradient and then selects by fresh-reasoning
+  errors plus a prompt-perplexity penalty, so `patch` vs `random` isolates the value of
+  the gradient shortlist exactly as in GReaTer.
