@@ -82,3 +82,23 @@ C5 Stage C ablations (gate, random, exact) plus fidelity estimator ablations.
   dev accuracy of block edits. The third model is Qwen3-8B instead of OLMo-3 (advisor
   request); Llama-3-8B and Gemma-2-9B remain the main models for comparison with
   GReaTer.
+* 2026-09-29, frozen after the first decision-study result (Gemma-2 date) and the GPT-6
+  round-2 review, before inspecting any other decision-study result:
+  **Hypothesis H-fork.** For LLM-proposed whole-block edits, the change in decision margin
+  at self-generated reasoning forks (CE of the correct-branch token minus CE of the
+  incorrect-branch token, given the shared prefix) predicts held-out accuracy change better
+  than (a) GReaTer's answer loss on fixed greedy reasoning and (b) fresh greedy accuracy on
+  the same train rows, at lower measured end-to-end cost; the one-pass renormalized estimate
+  preserves this.
+  **Validation protocol (replication, v3).** Independent seeds (new train rows, proposal
+  pools, dev slices) on >= 2 models x >= 3 tasks, plus a non-initial prompt state. Report
+  fork coverage; results on all rows (operational policy) and conditional on fork-eligible
+  rows; a paired hierarchical bootstrap (rows, dev questions, pools) of the *difference*
+  in Spearman and in best-5 regret between predictors; costs measured end to end (no
+  extrapolation). **Causal check:** forcing the correct vs incorrect fork token and
+  sampling continuations must change success probability more than position-matched
+  random divergences on the shared prefix. The decision-study runs launched before this
+  entry (Llama-3, Gemma-2, Qwen3 on date/fallacies/navigate/counting, seed 11) are
+  exploratory and are reported as such. A failed replication means H-fork is not claimed;
+  the paper then reports the exact calculus and estimator with the negative objective
+  finding.
