@@ -76,6 +76,23 @@ full; everything lives on `/media/lenovo/data2`.
 12. **Compute so far (GRAFT, GPU 0):** about 4 GPU-hours (probes, fidelity v1-v2,
     smoke); well inside the 1000 GPU-hour cumulative cap.
 
+13. **Validity study v1 (8 train rows -> dev accuracy of 26 edits, 60 dev examples;
+    Llama-3 date/formal_fallacies, Gemma-2 date).** No fixed-reasoning objective reliably
+    predicts held-out accuracy of whole-block edits: GReaTer's answer loss rho -0.04/-0.03/0.03,
+    verified reasoning 0.25/-0.16/-0.02, contrastive margin 0.13/-0.22/-0.35, policy gradient
+    -0.30/-0.49 (patching tracks the exact values). Only the fork (decision) margin is
+    consistently positive on Llama-3 (0.26-0.30; best-5 above mean, worst-5 below) but it
+    rests on few forks. On formal_fallacies the average proposal adds +12 points: the
+    proposal pool, not the answer-loss ranking, drives gains. The objective, not the
+    estimator, is the bottleneck.
+14. **Decision study (v2)** running: forks between greedy and self-samples on 24 rows,
+    fork margin scored exactly and by one-pass patching (logit-margin loss), against fresh
+    accuracy on 8 and 24 train rows, with measured cost; Llama-3 (GPU 0), Gemma-2
+    (GPU 1), then Qwen3-8B. Both GPUs are shared with another project's training jobs.
+15. **Models:** the advisor asked for a stronger model than OLMo; Qwen3-8B (pure
+    softmax attention, non-thinking mode) replaces OLMo-3. Qwen3.5-9B is unsuitable: 24
+    of 32 layers are linear-attention recurrences where slots and gates are undefined.
+
 ## Next
 
 * Fidelity v2 decides the scorer: renormalized patching must beat raw gates and

@@ -76,3 +76,9 @@ C5 Stage C ablations (gate, random, exact) plus fidelity estimator ablations.
   incumbents at checkpoint rounds 0, 4, 8, 12 (deduplicated) instead of every
   accepted prompt, for all methods alike. Reason: dev re-evaluation of every accepted
   prompt dominated projected run time on one GPU.
+* 2026-09-29, after validity v1 and before any Stage C run: Stage C is deferred until
+  the decision study selects the search objective (answer loss vs fork margin vs fresh
+  minibatch accuracy). Reason: validity v1 shows the answer objective does not predict
+  dev accuracy of block edits. The third model is Qwen3-8B instead of OLMo-3 (advisor
+  request); Llama-3-8B and Gemma-2-9B remain the main models for comparison with
+  GReaTer.
