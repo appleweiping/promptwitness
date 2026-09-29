@@ -389,6 +389,8 @@ def main() -> None:
     parser.add_argument("--objective", choices=("answer", "verified", "fork"), default="answer",
                         help="GReaTer's answer loss, verified reasoning, or decision margin at forks")
     parser.add_argument("--verify-samples", type=int, default=4)
+    parser.add_argument("--accept", choices=("fresh", "margin"), default="fresh",
+                        help="accept by fresh minibatch accuracy, or by the exact objective on the shortlist")
     parser.add_argument("--no-reasoning-scores", action="store_true",
                         help="ablation: score edits without reasoning in the tail")
     parser.add_argument("--attn", default="sdpa")
@@ -447,14 +449,24 @@ def main() -> None:
         estimates = score_edits(scoring, runner, scorer, prompt, pools, edits, batch, targets, rng)
         shortlist = sorted(edits, key=lambda e: estimates[e])[: args.mu]
         checks = []
-        for edit in shortlist:
-            candidate = apply(prompt, pools, edit)
-            result = runner.evaluate(candidate, batch, "verify", with_loss=True)
-            checks.append({"edit": list(edit), "estimate": estimates[edit],
-                           "accuracy": result["accuracy"], "loss": result["loss"]})
-        best = max(checks, key=lambda c: (c["accuracy"], -c["loss"]))
-        take = (best["accuracy"] > incumbent["accuracy"] or
-                (best["accuracy"] == incumbent["accuracy"] and best["loss"] < incumbent["loss"] - 1e-3))
+        if args.accept == "margin" and targets:
+            # Re-score the shortlist exactly on the same targets (forwards only) and accept
+            # the best edit if it improves the objective; no generation is needed.
+            exact = score_edits("exact", runner, scorer, prompt, pools, shortlist, batch, targets, rng)
+            for edit in shortlist:
+                checks.append({"edit": list(edit), "estimate": estimates[edit], "exact": exact[edit],
+                               "accuracy": incumbent["accuracy"], "loss": exact[edit]})
+            best = min(checks, key=lambda c: c["exact"])
+            take = best["exact"] < -1e-3
+        else:
+            for edit in shortlist:
+                candidate = apply(prompt, pools, edit)
+                result = runner.evaluate(candidate, batch, "verify", with_loss=True)
+                checks.append({"edit": list(edit), "estimate": estimates[edit],
+                               "accuracy": result["accuracy"], "loss": result["loss"]})
+            best = max(checks, key=lambda c: (c["accuracy"], -c["loss"]))
+            take = (best["accuracy"] > incumbent["accuracy"] or
+                    (best["accuracy"] == incumbent["accuracy"] and best["loss"] < incumbent["loss"] - 1e-3))
         record.update({"estimates": {f"{s}:{'del' if i is None else i}": v for (s, i), v in estimates.items()},
                        "checks": checks, "accepted": best["edit"] if take else None})
         if take:
