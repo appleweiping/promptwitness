@@ -358,7 +358,11 @@ def build_targets(args: argparse.Namespace, runner: Runner, prompt: StructuredPr
                    for j in range(args.verify_samples)] for i, e in enumerate(batch)]
         targets = fork_targets(reasoning, incumbent["correct"], drafts, judged, max_forks=3)
         runner.ledger.add("fork_targets", perf_counter() - started)
-        return targets
+        if targets:
+            return targets
+        # No decision fork in this minibatch: fall back to GReaTer's answer objective.
+        return [replace(answer_target(r, runner.extractor, a), row=i, source="answer_fallback")
+                for i, (r, a) in enumerate(zip(reasoning, answers))]
     targets, _ = verified_targets(
         runner.model, runner.tokenizer, [runner.ids(prompt, e) for e in batch],
         [Generation(tuple(r), "", True) for r in reasoning], incumbent["correct"],
