@@ -265,6 +265,14 @@ full; everything lives on `/media/lenovo/data2`.
     0.36; the two failed Qwen3 patch runs are retried at the end. GPU 0 was taken by
     another user's job (35 GB) after we freed it; our GPU-0 schedule waits for it.
 
+39. **Stage C v2 running (140 runs; plan amendment).** Measured ~20-33 min per search run
+    (fresh verification dominated); the shortlist is now verified in one batched call.
+    GPU 1 runs Qwen3, then Llama-3 (shared through run claims), then Gemma-2 HF-only;
+    GPU 0 waits for another user's job to finish, then runs the official GReaTer
+    gradient-vs-random ablation and joins Llama-3. Memory: the vLLM server needs a 0.40
+    share (0.36 leaves 0.3 GB KV cache for Qwen3); the scorer uses 8 candidates per pass.
+    Always kill a server's `VLLM::EngineCore` child with it.
+
 ## Next
 
 * Fidelity v2 decides the scorer: renormalized patching must beat raw gates and
