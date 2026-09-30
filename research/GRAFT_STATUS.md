@@ -246,6 +246,13 @@ full; everything lives on `/media/lenovo/data2`.
     (273 runs) armed per GPU after the TS3 test; GPU 0 first runs the official GReaTer
     gradient-vs-random shortlist ablation (plan amendment).
 
+36. **Gemma-2 baselines (fixed reader, 21 BBH tasks so far):** ZS-CoT 71.4, initial 70.9,
+    published 73.9; published - initial +3.3 [+1.2, +5.2] full, +3.3 [+0.6, +6.1] clean,
+    13-14 wins of 20. GReaTer's published gains replicate on both of its models on data it
+    never saw. Paper restructured to the re-examination framing (validity, mechanism,
+    forks, token non-locality written with v3 numbers; end-to-end pending); SEPO (typed
+    structural editing with evaluation feedback, Aug 2026) cited.
+
 ## Next
 
 * Fidelity v2 decides the scorer: renormalized patching must beat raw gates and

@@ -402,8 +402,9 @@ split cannot distinguish good token edits from lucky ones. \todo{Qwen3 TS7 token
 prompts for Llama-3-8B improve on its initial prompt by $+4.7$ points averaged over 21
 BBH tasks ($+3.4$ [$+0.5,+6.4$] on test rows \greater{} never saw), concentrated in a few
 tasks (tracking shuffled objects $+32$, geometric shapes $+22$, object counting $+18$).
-\todo{Gemma-2 row.} The gains are real; the question is which part of \greater{}
-produces them.
+For Gemma-2-9B the gain is $+3.3$ points on both the full split ($[+1.2,+5.2]$) and
+the clean rows ($[+0.6,+6.1]$), winning 13 of 20 tasks. The gains are real; the question
+is which part of \greater{} produces them.
 
 \paragraph{Gradient or random shortlist?} \todo{Official \greater{} code with the
 gradient shortlist replaced by a uniformly random shortlist from the same candidates,
