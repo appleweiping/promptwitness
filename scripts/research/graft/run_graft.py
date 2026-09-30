@@ -451,7 +451,10 @@ def main() -> None:
     runner = Runner(model, tokenizer, spec, ledger, args.max_new_tokens)
     runner.use_reasoning = not args.no_reasoning_scores
     runner.candidates_per_pass = args.candidates_per_pass
+    # Separate streams: minibatches and proposal questions are identical across methods for a
+    # seed; the random shortlist draws from its own stream.
     rng = random.Random(args.seed)
+    score_rng = random.Random(args.seed * 7919 + 17)
     prompt = graft_tasks.initial_prompt()
     accepted: list[dict[str, Any]] = [{"round": 0, "text": prompt.document.messages[0].content}]
     prompts: dict[str, StructuredPrompt] = {accepted[0]["text"]: prompt}
@@ -485,13 +488,13 @@ def main() -> None:
         targets = (build_targets(args, runner, prompt, batch, incumbent)
                    if scoring != "random" else [])
         record["target_sources"] = [t.source for t in targets]
-        estimates = score_edits(scoring, runner, scorer, prompt, pools, edits, batch, targets, rng)
+        estimates = score_edits(scoring, runner, scorer, prompt, pools, edits, batch, targets, score_rng)
         shortlist = sorted(edits, key=lambda e: estimates[e])[: args.mu]
         checks = []
         if args.accept == "margin" and targets:
             # Re-score the shortlist exactly on the same targets (forwards only) and accept
             # the best edit if it improves the objective; no generation is needed.
-            exact = score_edits("exact", runner, scorer, prompt, pools, shortlist, batch, targets, rng)
+            exact = score_edits("exact", runner, scorer, prompt, pools, shortlist, batch, targets, score_rng)
             for edit in shortlist:
                 checks.append({"edit": list(edit), "estimate": estimates[edit], "exact": exact[edit],
                                "accuracy": incumbent["accuracy"], "loss": exact[edit]})
