@@ -33,7 +33,10 @@ PAIRS = (("fork_patch", "answer_exact"), ("fork_exact", "answer_exact"), ("fork_
          ("fork_patch", "fresh_all_elig"), ("fork_patch", "fork_exact"),
          # H-cond (preregistered 2026-09-29 before any TS3 data): answer-conditioned shortlist
          ("answer_cond_patch", "answer_patch"), ("answer_cond_patch", "random"),
-         ("answer_cond_patch", "fresh8"), ("answer_cond_exact", "answer_exact"))
+         ("answer_cond_patch", "fresh8"), ("answer_cond_exact", "answer_exact"),
+         # Same-incumbent, same-pool shortlist quality against a uniformly random shortlist
+         ("answer_exact", "random"), ("answer_patch", "random"), ("fork_patch", "random"),
+         ("fresh8", "random"), ("fresh_all", "random"))
 
 
 def predictors_for(raw: dict, names: list[str], rows: list[int], questions: list[int]) -> tuple[dict, list[float]]:
@@ -56,12 +59,12 @@ def predictors_for(raw: dict, names: list[str], rows: list[int], questions: list
     for key, subset in (("fresh8", first8), ("fresh_all", rows), ("fresh_all_elig", eligible)):
         out[key] = [mean_or_zero([raw["fresh"][n][r] - base_fresh[r] for r in subset]) for n in names]
     # H-cond: GReaTer's answer loss only on rows whose incumbent greedy answer is correct;
-    # with no such row the ranking is random (a fixed arbitrary order, rho about 0).
+    # with no such row the ranking is uniformly random. None marks a uniformly random
+    # ranking, scored by its exact expectation (rho 0; regret = best-k mean - mean).
     right = [r for r in rows if base_fresh[r] == 1]
     for key, source in (("answer_cond_exact", "answer_exact"), ("answer_cond_patch", "answer_patch")):
-        out[key] = ([-statistics.mean(raw[source][n][r] for r in right) for n in names] if right
-                    else [float((7919 * k) % len(names)) for k in range(len(names))])
-    out["random"] = [float((7919 * k) % len(names)) for k in range(len(names))]
+        out[key] = [-statistics.mean(raw[source][n][r] for r in right) for n in names] if right else None
+    out["random"] = None
     base_dev = raw["base_dev"]
     target = [statistics.mean(raw["dev"][n][q] - base_dev[q] for q in questions) for n in names]
     return out, target
@@ -76,6 +79,12 @@ def regret5(pred: list[float], target: list[float]) -> float:
     best = statistics.mean(sorted(target, reverse=True)[:k])
     top = sorted(range(len(pred)), key=lambda i: pred[i], reverse=True)[:k]
     return best - statistics.mean(target[i] for i in top)
+
+
+def random_regret(target: list[float]) -> float:
+    """Expected best-k regret of a uniformly random k-subset of edits."""
+    k = min(REGRET_K, len(target))
+    return statistics.mean(sorted(target, reverse=True)[:k]) - statistics.mean(target)
 
 
 def diagnostics(run: dict, rng: random.Random, splits: int = 500) -> dict[str, float]:
@@ -137,8 +146,12 @@ def main() -> None:
                 questions = [rng.randrange(n_q) for _ in range(n_q)]
             preds, target = predictors_for(raw, names, rows, questions)
             for k in KEYS:
-                per["rho"][k].append(spearman(preds[k], target) or 0.0)
-                per["regret5"][k].append(regret5(preds[k], target))
+                if preds[k] is None:  # uniformly random shortlist: exact expectation
+                    per["rho"][k].append(0.0)
+                    per["regret5"][k].append(random_regret(target))
+                else:
+                    per["rho"][k].append(spearman(preds[k], target) or 0.0)
+                    per["regret5"][k].append(regret5(preds[k], target))
         means = {m: {k: statistics.mean(v) for k, v in d.items()} for m, d in per.items()}
         if replicate == 0:
             point = means
