@@ -95,7 +95,16 @@ class Runner:
                  phase: str, *, with_loss: bool = False, max_new_tokens: int | None = None
                  ) -> dict[str, Any]:
         """Two-stage reader: greedy reasoning, extractor, short greedy answer."""
-        prompts = [self.ids(prompt, e) for e in examples]
+        return self.evaluate_many([prompt], examples, phase, with_loss=with_loss,
+                                  max_new_tokens=max_new_tokens)[0]
+
+    def evaluate_many(self, candidates: Sequence[StructuredPrompt], examples: Sequence[graft_tasks.Example],
+                      phase: str, *, with_loss: bool = False, max_new_tokens: int | None = None
+                      ) -> list[dict[str, Any]]:
+        """The reader for several prompts at once: one generation call for all (prompt, example)
+        pairs, so a server batches them instead of waiting for each prompt's longest answer."""
+        n = len(examples)
+        prompts = [self.ids(c, e) for c in candidates for e in examples]
         gens, seconds, tokens = generate_batch(self.model, self.tokenizer, prompts,
                                                max_new_tokens=max_new_tokens or self.max_new_tokens,
                                                batch_size=32)
@@ -104,16 +113,23 @@ class Runner:
         reads_in = [p + list(g.token_ids) + self.extractor for p, g in zip(prompts, gens)]
         reads, seconds, tokens = generate_batch(self.model, self.tokenizer, reads_in, max_new_tokens=ANSWER_TOKENS)
         self.ledger.add(phase + "_answer", seconds, generated=tokens)
-        correct = [self.spec.correct(r.text, e.answer) for r, e in zip(reads, examples)]
-        out: dict[str, Any] = {"accuracy": sum(correct) / len(correct), "correct": correct,
-                               "reads": [r.text for r in reads],
-                               "reasoning": [list(g.token_ids) for g in gens],
-                               "truncated": sum(not g.ended for g in gens)}
+        losses: list[float] = []
         if with_loss:
-            losses, seconds = answer_losses(self.model, [(r, self.target(e)) for r, e in zip(reads_in, examples)])
+            targets = [self.target(e) for e in examples]
+            losses, seconds = answer_losses(self.model, [(r, targets[i % n]) for i, r in enumerate(reads_in)])
             self.ledger.add(phase + "_loss", seconds)
-            out["loss"] = sum(losses) / len(losses)
-        return out
+        outs = []
+        for j in range(len(candidates)):
+            part = slice(j * n, (j + 1) * n)
+            correct = [self.spec.correct(r.text, e.answer) for r, e in zip(reads[part], examples)]
+            out: dict[str, Any] = {"accuracy": sum(correct) / len(correct), "correct": correct,
+                                   "reads": [r.text for r in reads[part]],
+                                   "reasoning": [list(g.token_ids) for g in gens[part]],
+                                   "truncated": sum(not g.ended for g in gens[part])}
+            if with_loss:
+                out["loss"] = sum(losses[part]) / n
+            outs.append(out)
+        return outs
 
 
 def propose(runner: Runner, prompt: StructuredPrompt, slot: str, questions: list[str],
@@ -482,9 +498,9 @@ def main() -> None:
             best = min(checks, key=lambda c: c["exact"])
             take = best["exact"] < -1e-3
         else:
-            for edit in shortlist:
-                candidate = apply(prompt, pools, edit)
-                result = runner.evaluate(candidate, batch, "verify", with_loss=True)
+            results = runner.evaluate_many([apply(prompt, pools, edit) for edit in shortlist], batch,
+                                           "verify", with_loss=True)
+            for edit, result in zip(shortlist, results):
                 checks.append({"edit": list(edit), "estimate": estimates[edit],
                                "accuracy": result["accuracy"], "loss": result["loss"]})
             best = max(checks, key=lambda c: (c["accuracy"], -c["loss"]))
