@@ -19,7 +19,8 @@ from time import perf_counter
 from typing import Any
 
 from promptwitness import graft_tasks
-from promptwitness.graft_runtime import Ledger, load_tokenizer
+from promptwitness.graft_reader import RemoteReader
+from promptwitness.graft_runtime import Ledger, load_tokenizer, use_remote_generation
 from promptwitness.graft_vllm import VllmReader
 
 
@@ -29,8 +30,11 @@ def main() -> None:
     parser.add_argument("--data-dir", type=Path, required=True)
     parser.add_argument("--max-new-tokens", type=int, default=1024)
     parser.add_argument("--gpu-memory-utilization", type=float, default=0.5)
+    parser.add_argument("--gen-server", help="read through a running graft_genserver instead of an offline engine")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
+    if args.gen_server:
+        use_remote_generation(args.gen_server)
 
     results: dict[str, Any] = (json.loads(args.output.read_text(encoding="utf-8"))
                                if args.output.exists() else {})
@@ -41,18 +45,21 @@ def main() -> None:
             continue
         by_model[run["model_path"]].append((path, run))
     for model_path, runs in by_model.items():
-        from vllm import LLM
+        llm = None
+        if not args.gen_server:
+            from vllm import LLM
 
-        llm = LLM(model=model_path, tokenizer=model_path, dtype="bfloat16", seed=0,
-                  gpu_memory_utilization=args.gpu_memory_utilization, max_model_len=4096,
-                  enable_prefix_caching=True)
+            llm = LLM(model=model_path, tokenizer=model_path, dtype="bfloat16", seed=0,
+                      gpu_memory_utilization=args.gpu_memory_utilization, max_model_len=4096,
+                      enable_prefix_caching=True)
         tokenizer = load_tokenizer(model_path)
         for path, run in runs:
             started = perf_counter()
             spec = graft_tasks.spec(run["task"])
             splits = graft_tasks.load_splits(args.data_dir, run["task"])
             ledger = Ledger()
-            reader = VllmReader(model_path, tokenizer, spec, ledger, args.max_new_tokens, llm=llm)
+            reader = (RemoteReader(tokenizer, spec, ledger, args.max_new_tokens) if args.gen_server
+                      else VllmReader(model_path, tokenizer, spec, ledger, args.max_new_tokens, llm=llm))
             prompts = [graft_tasks.prompt_from_blocks(c["blocks"]) for c in run["checkpoints"]]
             dev = [reader.evaluate(p, splits["dev"], "dev") for p in prompts]
             scores = [d["accuracy"] for d in dev]
@@ -61,7 +68,7 @@ def main() -> None:
             results[path.name] = {
                 "task": run["task"], "method": run["method"], "seed": run["seed"],
                 "objective": run["config"].get("objective"), "accept": run["config"].get("accept"),
-                "model_path": model_path, "engine": "vllm",
+                "model_path": model_path, "engine": "vllm-server" if args.gen_server else "vllm",
                 "checkpoint_rounds": [c["round"] for c in run["checkpoints"]],
                 "dev_accuracy": scores, "selected": chosen,
                 "selected_round": run["checkpoints"][chosen]["round"],

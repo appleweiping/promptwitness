@@ -46,13 +46,22 @@ def main() -> None:
     parser.add_argument("--max-candidates", type=int, default=12)
     parser.add_argument("--max-new-tokens", type=int, default=1024)
     parser.add_argument("--attn", default="sdpa")
-    parser.add_argument("--engine", choices=["hf", "vllm"], default="hf")
+    parser.add_argument("--engine", choices=["hf", "vllm", "server"], default="hf")
+    parser.add_argument("--gen-server", help="host:port of a graft_genserver (engine 'server')")
     parser.add_argument("--gpu-memory-utilization", type=float, default=0.5)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
 
     tokenizer = load_tokenizer(args.model_path)
-    if args.engine == "vllm":
+    if args.engine == "server":
+        from promptwitness.graft_reader import RemoteReader
+        from promptwitness.graft_runtime import use_remote_generation
+
+        use_remote_generation(args.gen_server)
+
+        def make_reader(spec: graft_tasks.TaskSpec, ledger: Ledger) -> Any:
+            return RemoteReader(tokenizer, spec, ledger, args.max_new_tokens)
+    elif args.engine == "vllm":
         from vllm import LLM
 
         from promptwitness.graft_vllm import VllmReader
