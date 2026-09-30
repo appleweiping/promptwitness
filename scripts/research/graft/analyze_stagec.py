@@ -1,13 +1,15 @@
-"""Stage C analysis, prespecified in the plan amendment of 2026-09-30 (before any outcome).
+"""Stage C analysis, prespecified in the plan amendments of 2026-09-30 (before any outcome).
 
 Inputs: the ``select_and_test.py`` output (dev selection and one test read per search run)
-and the fixed-prompt baselines (``evaluate_prompts.py``) for the same models. For each
-model and task, a method's accuracy is the mean over its seeds. Comparisons are paired at
-the task level: the difference of two methods is averaged over seeds within a task and
-then over tasks; its interval comes from a hierarchical bootstrap that resamples seeds
-within each task and test questions (paired across methods, which share the test set).
-Also reported: wins/ties/losses over tasks, accuracy on the clean subset (test rows that
-GReaTer's optimization never saw), and measured search-plus-selection seconds per run.
+and the fixed-prompt baselines (``evaluate_prompts.py``) for the same models. Seeds are
+paired across methods by seed index (for a seed, all methods see the same minibatches and
+proposal questions); a fixed prompt is paired with every seed. For each model and task a
+method difference is averaged over paired seeds, then over tasks. Two intervals:
+  conditional  bootstrap of test questions (paired across methods, which share the test
+               set) and of seed pairs within each task; tasks fixed
+  task-level   bootstrap over tasks of the task-level differences (the population claim)
+Also: wins/ties/losses over tasks, the clean subset (test rows GReaTer's optimization
+never saw), and measured search-plus-selection minutes per run.
 """
 
 from __future__ import annotations
@@ -23,12 +25,18 @@ from promptwitness import graft_tasks
 
 FIXED = ("zs_cot", "greater_init", "greater_published")
 PAIRS = (("patch", "random"), ("patch", "exact"), ("patch", "textgrad"), ("patch", "greater_init"),
-         ("patch", "greater_published"), ("random", "greater_init"), ("textgrad", "greater_init"))
+         ("patch", "greater_published"), ("random", "greater_init"), ("textgrad", "greater_init"),
+         ("patch", "zs_cot"))
 
 
 def model_key(path: str) -> str:
     name = path.lower()
     return "llama3" if "llama" in name else "gemma2" if "gemma" in name else "qwen3" if "qwen" in name else name
+
+
+def interval(values: list[float]) -> tuple[float, float]:
+    ordered = sorted(values)
+    return ordered[int(0.025 * len(ordered))], ordered[int(0.975 * len(ordered)) - 1]
 
 
 def main() -> None:
@@ -41,78 +49,89 @@ def main() -> None:
     parser.add_argument("--json", type=Path)
     args = parser.parse_args()
 
-    # vectors[model][task][method] = list over seeds of per-question correctness
-    vectors: dict = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
+    # runs[model][task][method][seed] = per-question correctness (seed 0 for fixed prompts)
+    runs: dict = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
     cost: dict = defaultdict(list)
     for entry in json.loads(args.selected.read_text(encoding="utf-8")).values():
         key = model_key(entry["model_path"])
-        vectors[key][entry["task"]][entry["method"]].append(entry["test_correct"])
-        cost[(key, entry["method"])].append((entry.get("search_seconds") or 0.0) +
-                                            (entry.get("eval_seconds") or 0.0))
+        runs[key][entry["task"]][entry["method"]][entry["seed"]] = entry["test_correct"]
+        cost[(key, entry["method"])].append((entry.get("search_seconds") or 0.0) + (entry.get("eval_seconds") or 0.0))
     for path in args.baselines:
-        results = json.loads(path.read_text(encoding="utf-8"))
         key = path.stem
-        for name, entry in results.items():
+        for name, entry in json.loads(path.read_text(encoding="utf-8")).items():
             task, method = name.split("/")
-            if method in FIXED and entry.get("test_correct") and task in vectors.get(key, {}):
-                vectors[key][task][method].append(entry["test_correct"])
+            if method in FIXED and entry.get("test_correct") and task in runs.get(key, {}):
+                runs[key][task][method][0] = entry["test_correct"]
 
     masks = {}
-    for key in vectors:
-        for task in vectors[key]:
+    for key in runs:
+        for task in runs[key]:
             test = graft_tasks.load_splits(args.data_dir, task)["test"]
             masks[task] = [(not args.clean) or task not in graft_tasks.BBH_TASKS
                            or int(e.example_id.rsplit(":", 1)[1]) >= 100 for e in test]
 
-    def acc(vec: list[int], mask: list[bool], pick: list[int] | None = None) -> float:
+    def acc(vec: list[int], task: str, pick: list[int] | None = None) -> float:
+        mask = masks[task]
         idx = pick if pick is not None else range(len(vec))
         kept = [vec[i] for i in idx if mask[i]]
         return statistics.mean(kept) if kept else float("nan")
 
+    def seed_pairs(task_runs: dict, a: str, b: str) -> list[tuple[list[int], list[int]]]:
+        sa, sb = task_runs[a], task_runs[b]
+        if 0 in sa and 0 in sb:
+            return [(sa[0], sb[0])]
+        if 0 in sb:
+            return [(sa[s], sb[0]) for s in sorted(sa)]
+        if 0 in sa:
+            return [(sa[0], sb[s]) for s in sorted(sb)]
+        return [(sa[s], sb[s]) for s in sorted(set(sa) & set(sb))]
+
     rng = random.Random(0)
-    summary: dict = {"models": {}}
-    for key in sorted(vectors):
-        tasks = sorted(vectors[key])
-        methods = sorted({m for t in tasks for m in vectors[key][t]})
-        table = {t: {m: statistics.mean(acc(v, masks[t]) for v in vectors[key][t][m])
-                     for m in vectors[key][t]} for t in tasks}
-        print(f"== {key} ({'clean' if args.clean else 'full'} test)")
+    summary: dict = {"subset": "clean" if args.clean else "full", "models": {}}
+    for key in sorted(runs):
+        tasks = sorted(runs[key])
+        methods = sorted({m for t in tasks for m in runs[key][t]})
+        table = {t: {m: statistics.mean(acc(v, t) for v in runs[key][t][m].values()) for m in runs[key][t]}
+                 for t in tasks}
+        print(f"== {key} ({summary['subset']} test)")
         print(f"{'task':40s} " + " ".join(f"{m[:10]:>10s}" for m in methods))
         for t in tasks:
             print(f"{t:40s} " + " ".join(f"{100 * table[t][m]:10.1f}" if m in table[t] else f"{'-':>10s}"
                                          for m in methods))
         means = {m: statistics.mean(table[t][m] for t in tasks if m in table[t]) for m in methods}
         print(f"{'mean':40s} " + " ".join(f"{100 * means[m]:10.1f}" for m in methods))
-        model_out = {"table": table, "means": means, "pairs": {}, "cost_seconds": {}}
+        model_out: dict = {"table": table, "means": means, "pairs": {}, "cost_minutes": {}}
         for a, b in PAIRS:
-            shared = [t for t in tasks if a in table[t] and b in table[t]]
+            shared = [t for t in tasks if a in runs[key][t] and b in runs[key][t] and seed_pairs(runs[key][t], a, b)]
             if not shared:
                 continue
-            point = statistics.mean(table[t][a] - table[t][b] for t in shared)
-            boots = []
+            pairs = {t: seed_pairs(runs[key][t], a, b) for t in shared}
+            task_diff = {t: statistics.mean(acc(x, t) - acc(y, t) for x, y in pairs[t]) for t in shared}
+            point = statistics.mean(task_diff.values())
+            conditional, task_level = [], []
             for _ in range(args.replicates):
                 diffs = []
                 for t in shared:
-                    n = len(vectors[key][t][a][0])
+                    n = len(pairs[t][0][0])
                     pick = [rng.randrange(n) for _ in range(n)]
-                    va = [rng.choice(vectors[key][t][a]) for _ in vectors[key][t][a]]
-                    vb = [rng.choice(vectors[key][t][b]) for _ in vectors[key][t][b]]
-                    diffs.append(statistics.mean(acc(v, masks[t], pick) for v in va) -
-                                 statistics.mean(acc(v, masks[t], pick) for v in vb))
-                boots.append(statistics.mean(diffs))
-            boots.sort()
-            lo, hi = boots[int(0.025 * len(boots))], boots[int(0.975 * len(boots)) - 1]
-            wins = sum(table[t][a] > table[t][b] for t in shared)
-            ties = sum(table[t][a] == table[t][b] for t in shared)
-            model_out["pairs"][f"{a}-{b}"] = {"diff": point, "ci": [lo, hi], "tasks": len(shared),
-                                             "wins": wins, "ties": ties, "p_gt0": sum(x > 0 for x in boots) / len(boots)}
-            print(f"  {a:>10s} - {b:<18s} {100 * point:+5.1f} [{100 * lo:+5.1f}, {100 * hi:+5.1f}] "
-                  f"W/T/L {wins}/{ties}/{len(shared) - wins - ties}  P>0 {model_out['pairs'][f'{a}-{b}']['p_gt0']:.3f}")
+                    chosen = [rng.choice(pairs[t]) for _ in pairs[t]]
+                    diffs.append(statistics.mean(acc(x, t, pick) - acc(y, t, pick) for x, y in chosen))
+                conditional.append(statistics.mean(diffs))
+                task_level.append(statistics.mean(task_diff[rng.choice(shared)] for _ in shared))
+            clo, chi = interval(conditional)
+            tlo, thi = interval(task_level)
+            wins = sum(d > 0 for d in task_diff.values())
+            ties = sum(d == 0 for d in task_diff.values())
+            model_out["pairs"][f"{a}-{b}"] = {"diff": point, "conditional_ci": [clo, chi], "task_ci": [tlo, thi],
+                                             "tasks": len(shared), "wins": wins, "ties": ties,
+                                             "seed_pairs": sum(len(p) for p in pairs.values())}
+            print(f"  {a:>10s} - {b:<18s} {100 * point:+5.1f}  cond [{100 * clo:+5.1f}, {100 * chi:+5.1f}]  "
+                  f"tasks [{100 * tlo:+5.1f}, {100 * thi:+5.1f}]  W/T/L {wins}/{ties}/{len(shared) - wins - ties}")
         for (k, m), secs in cost.items():
             if k == key:
-                model_out["cost_seconds"][m] = statistics.mean(secs)
+                model_out["cost_minutes"][m] = statistics.mean(secs) / 60
         print("  search+selection minutes per run: " +
-              ", ".join(f"{m} {s / 60:.0f}" for m, s in sorted(model_out["cost_seconds"].items())))
+              ", ".join(f"{m} {s:.0f}" for m, s in sorted(model_out["cost_minutes"].items())))
         summary["models"][key] = model_out
     if args.json:
         args.json.write_text(json.dumps(summary, indent=1), encoding="utf-8")
