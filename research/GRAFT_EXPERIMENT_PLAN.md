@@ -198,3 +198,10 @@ C5 Stage C ablations (gate, random, exact) plus fidelity estimator ablations.
   2-3, `textgrad` seed 3, other Gemma-2 runs. Completed runs of dropped variants are kept
   as supplementary data. Verification of the shortlist now uses one batched generation
   call (same algorithm, higher throughput).
+* 2026-09-30 ~08:00 UTC, after auto-review round 1, before any GReaTer ablation run: the
+  official GReaTer gradient-vs-random shortlist ablation uses two independent repetitions
+  per variant on its first two tasks (the official code does not seed its candidate
+  sampling); the component-level attribution in the paper is stated as a hypothesis until
+  this ablation is complete. The Stage C random-shortlist runs finished before the RNG
+  fix (qwen3 date_understanding and formal_fallacies, seed 1) are re-run so that all
+  methods share minibatch sequences per seed.
