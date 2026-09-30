@@ -1,0 +1,87 @@
+"""How much does one prompt edit change greedy reasoning? (direct measurement)
+
+For a validity-study record (token or block edits), regenerate greedy reasoning on the same
+held-out questions under the incumbent and under every edit, with the study's own budget,
+and measure per edit: the fraction of questions whose reasoning token sequence changes,
+whose parsed answer changes, and whose correctness changes, and the position of the
+first differing reasoning token. Generation goes through a vLLM generation server
+(``--gen-server``) or the HF model.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import statistics
+from pathlib import Path
+
+from promptwitness import graft_tasks
+from promptwitness.graft_runtime import ANSWER_TOKENS, first_divergence, generate_batch, load_tokenizer, \
+    use_remote_generation
+
+from run_graft import apply
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("record", type=Path, help="decision_study output (pools, edits, task, seed)")
+    parser.add_argument("--model-path", required=True)
+    parser.add_argument("--data-dir", type=Path, required=True)
+    parser.add_argument("--gen-server", required=True)
+    parser.add_argument("--max-new-tokens", type=int, default=384, help="the validity studies' budget")
+    parser.add_argument("--dev", type=int, default=200)
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+
+    use_remote_generation(args.gen_server)
+    record = json.loads(args.record.read_text(encoding="utf-8"))
+    tokenizer = load_tokenizer(args.model_path)
+    spec = graft_tasks.spec(record["task"])
+    offset = record.get("dev_offset", 0)
+    dev = graft_tasks.load_splits(args.data_dir, record["task"])["dev"][offset: offset + args.dev]
+    base_prompt = graft_tasks.initial_prompt()
+    if record.get("state_edit"):
+        base_prompt = base_prompt.replace_block("procedure", record["state_edit"])
+    extractor = tokenizer.encode(spec.extractor, add_special_tokens=False)
+    pools = record["pools"]
+
+    def run(prompt) -> tuple[list[tuple[int, ...]], list[str | None], list[bool]]:
+        ids = [list(prompt.render_tokens(tokenizer, {"input": q.question}).input_ids) for q in dev]
+        gens, _, _ = generate_batch(None, tokenizer, ids, max_new_tokens=args.max_new_tokens)
+        reads, _, _ = generate_batch(None, tokenizer, [p + list(g.token_ids) + extractor for p, g in zip(ids, gens)],
+                                     max_new_tokens=ANSWER_TOKENS)
+        parsed = [spec.parse(r.text) for r in reads]
+        return [g.token_ids for g in gens], parsed, [spec.correct(r.text, q.answer) for r, q in zip(reads, dev)]
+
+    base_reason, base_parsed, base_correct = run(base_prompt)
+    per_edit = {}
+    for name in record["edits"]:
+        slot, index = name.split(":")
+        edit = (slot, None if index == "del" else int(index))
+        reason, parsed, correct = run(apply(base_prompt, pools, edit))
+        changed = [a != b for a, b in zip(reason, base_reason)]
+        firsts = [first_divergence(list(a), list(b)) for a, b, c in zip(reason, base_reason, changed) if c]
+        firsts = [f if f is not None else min(len(a), len(b)) for f, a, b in
+                  zip(firsts, [r for r, c in zip(reason, changed) if c], [r for r, c in zip(base_reason, changed) if c])]
+        per_edit[name] = {
+            "reasoning_changed": statistics.mean(changed),
+            "answer_changed": statistics.mean(a != b for a, b in zip(parsed, base_parsed)),
+            "correctness_flipped": statistics.mean(a != b for a, b in zip(correct, base_correct)),
+            "accuracy_delta": statistics.mean(correct) - statistics.mean(base_correct),
+            "first_divergence_median": statistics.median(firsts) if firsts else None,
+        }
+        print(json.dumps({"edit": name, **per_edit[name]}), flush=True)
+    summary = {k: statistics.mean(v[k] for v in per_edit.values())
+               for k in ("reasoning_changed", "answer_changed", "correctness_flipped")}
+    summary["first_divergence_median"] = statistics.median(
+        v["first_divergence_median"] for v in per_edit.values() if v["first_divergence_median"] is not None)
+    summary["base_accuracy"] = statistics.mean(base_correct)
+    out = {"record": str(args.record), "task": record["task"], "edit_kind": record.get("edit_kind", "block"),
+           "model_path": args.model_path, "per_edit": per_edit, "summary": summary}
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(json.dumps(out, indent=1) + "\n", encoding="utf-8")
+    print(json.dumps(summary, indent=1))
+
+
+if __name__ == "__main__":
+    main()
