@@ -346,7 +346,8 @@ sampling for forks.}
 \paragraph{\greater{}'s objective anti-predicts block edits.} Table~\ref{tab:validity}
 and Figure~\ref{fig:validity}: the exact answer-loss change correlates \emph{negatively}
 with the held-out change (pooled over eleven runs $-0.26$ [$-0.27,-0.10$]); patching
-tracks the exact values (Spearman $0.81$ between them across pools) and inherits the
+tracks the exact values (mean Spearman $0.79$ between them, range $0.53$--$0.97$ over the
+eleven pools) and inherits the
 sign ($-0.20$). Fresh accuracy on the same 24 rows is positive ($+0.32$ [$+0.14,+0.35$]).
 The prospective test on an untouched task with three models (TS3 rows), whose targets
 are highly reliable ($\sqrt{\kappa}\ge0.90$), repeats the pattern: the patched
@@ -399,7 +400,7 @@ so the reasoning they are scored on might barely change. We repeat the validity 
 with \greater{}-style edits---single-token substitutions drawn from the model's own
 top-10 next tokens at a prompt position---on the same rows and held-out questions.
 Locality does not hold: a single-token edit changes the greedy answer on 16--22\% of the
-200 held-out questions, about as many as a block edit (6--31\%), while net accuracy moves
+200 held-out questions, about as many as a block edit (6--38\%), while net accuracy moves
 by only $\pm2$ points (standard deviation $0.020$--$0.025$ across edits, four runs on two
 models). Such changes are what random re-rolling of a fifth of the answers would produce,
 and the split-half reliability of the held-out target is $0.05$--$0.26$: at this
