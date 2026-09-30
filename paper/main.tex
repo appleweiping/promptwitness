@@ -39,21 +39,20 @@ which the one-hot relaxation behind token gradients is undefined. We introduce
 \graft{}, an exact structural edit calculus: candidate rewrites of every block share one
 sequence in parallel slots behind attention gates, and later tokens move by continuous
 slot offsets realized as rotary rotations, so that every vertex is exactly a real
-edited prompt. A renormalized one-pass estimator ranks all single-block edits close to
-exact evaluation. With exact scores in hand we can ask whether the signal is worth
-following. Across three models, four held-out tasks and preregistered replications
-with reliability-calibrated targets, \greater{}'s objective ranks structural edits in
-the \emph{wrong} direction (pooled Spearman $-0.26$ over eleven runs, including an
-untouched task and a third model); the anti-correlation comes from
-examples whose reasoning is wrong, where lowering the gold answer's loss rewards
-prompts that detach the answer from the reasoning. A preregistered alternative based
-on reasoning forks fails replication and a causal test. At the token level the
-question cannot be settled by any signal: a single-token edit re-rolls the greedy
-reasoning on about a fifth of the questions while moving accuracy by two points.
-End to end, \todo{GReaTer gradient vs.\ random shortlist; GRAFT vs.\ baselines}.
-Our results locate the gains of gradient-based self-optimization in model-proposed
-candidates and fresh-reasoning selection rather than in reasoning-conditioned
-gradients, and provide the calculus and protocol to test such signals.
+edited prompt, and a renormalized estimator reproduces exact scores (Spearman $0.79$).
+With exact scores in hand we can ask whether the signal is worth following. Across
+three models, four held-out tasks, a preregistered replication and a prospective test
+on an untouched task, \greater{}'s objective ranks LLM-proposed structural edits in the
+\emph{wrong} direction (pooled Spearman $-0.26$ over eleven runs); as a shortlist it is
+no better than, and when patched worse than, a random one, while fresh evaluation on
+the same examples is better. The anti-correlation concentrates on examples whose answer
+is wrong. Preregistered alternatives based on reasoning forks and on correctly answered
+examples fail. At the token level, a single-token edit flips the correctness of about a
+fifth of greedy answers while moving accuracy by two points, below what one benchmark
+split resolves. End to end, \todo{official GReaTer with gradient vs.\ random shortlist;
+GRAFT vs.\ controls}. The calculus and protocol make such signals testable, and our
+evidence points to fresh-reasoning evaluation, not reasoning-conditioned gradients, as
+the part of self-optimization that transfers to prompt structure.
 \end{abstract}
 
 \section{Introduction}
@@ -97,20 +96,21 @@ attention, with continuous per-slot offsets implemented as extra rotary rotation
 Every vertex---replacement, deletion, insertion and multi-block combinations---is
 exactly the corresponding real prompt, verified to fp32 precision on four
 architectures.
-\item \textbf{A faithful one-pass estimator} (\S\ref{sec:estimator}). First-order gate
-derivatives provably saturate and do not rank real edits; renormalized superposed
-patching keeps each layer's attention exact and tracks exact evaluation (Spearman
-$\approx0.8$).
+\item \textbf{A faithful estimator} (\S\ref{sec:estimator}). First-order gate derivatives
+provably saturate and do not rank real edits; renormalized superposed patching keeps each
+layer's attention exact and reproduces exact scores (mean Spearman $0.79$); at our pool
+sizes it is not faster than exact scoring.
 \item \textbf{A validity test of gradients over reasoning} (\S\ref{sec:validity}). For
-LLM-proposed block edits, \greater{}'s objective anti-predicts held-out accuracy; we
-trace this to answer--reasoning decoupling on failed examples, and show that a
-preregistered decision-token objective does not fix it. Held-out targets are noisy, so
-every correlation is reported against a split-half reliability ceiling.
-\item \textbf{Token-level non-locality and end-to-end tests} (\S\ref{sec:tokens},
-\S\ref{sec:endtoend}). A single-token edit re-rolls about a fifth of greedy answers,
-which puts token-level signals below the resolution of standard benchmarks;
-\todo{official GReaTer with random vs.\ gradient shortlists; GRAFT vs.\ baselines at
-matched cost}.
+LLM-proposed block edits, \greater{}'s objective does not predict held-out accuracy and
+its shortlist is no better than random; the anti-correlation concentrates on wrongly
+answered examples, and two preregistered alternatives (decision forks; correctly
+answered examples only) fail. Every correlation is reported with a reliability
+diagnostic of its noisy target.
+\item \textbf{Token-level resolution and end-to-end tests} (\S\ref{sec:tokens},
+\S\ref{sec:endtoend}). A single-token edit flips the correctness of about a fifth of
+greedy answers while moving accuracy by two points, below the resolution of one benchmark
+split; \todo{official GReaTer with random vs.\ gradient shortlists; GRAFT vs.\ controls at
+measured cost}.
 \end{itemize}
 
 \begin{figure*}[t]
@@ -326,9 +326,14 @@ three tasks, plus a non-initial prompt state, under a protocol frozen before its
 
 \paragraph{The target is noisy.} Two random halves of the held-out questions rank the
 same edits with Spearman correlation $\rho_{1/2}$; the Spearman--Brown reliability
-$\kappa=2\rho_{1/2}/(1+\rho_{1/2})$ gives a noise ceiling $\sqrt{\kappa}$ for what any
-predictor can reach. Differences between predictors are tested with a paired bootstrap
-over training rows and held-out questions (conditional on the pools).
+$\kappa=2\rho_{1/2}/(1+\rho_{1/2})$ and its square root serve as a diagnostic of how much
+of the target's variation across edits is signal (for a predictor with independent
+errors, $\sqrt{\kappa}$ approximates the attainable correlation). Differences between
+predictors are tested with a paired bootstrap over training rows and held-out questions;
+these intervals are conditional on the proposal pools and runs. Besides Spearman
+correlation we report the quantity a shortlist cares about, the best-3 regret: the mean
+held-out change of the three truly best edits minus that of the predictor's top three,
+compared with the exact expectation for a uniformly random shortlist.
 
 \begin{table}[t]
 \centering
@@ -336,78 +341,85 @@ over training rows and held-out questions (conditional on the pools).
 change of LLM-proposed block edits.} LD/TS rows: preregistered replication v3 (logical
 deduction 3/7, tracking shuffled objects 7); TS3 rows: prospective test on an untouched
 task. L: Llama-3-8B, Q: Qwen3-8B, G: Gemma-2-9B; $^\ast$ non-initial prompt state;
-$\sqrt{\kappa}$: noise ceiling of the held-out target. Pooled: mean over runs with a
-paired bootstrap interval; cost: seconds per pool on one A6000, including the shared
-sampling for forks.}
+$\sqrt{\kappa}$: reliability diagnostic of the held-out target. Pooled: mean over runs
+with a paired bootstrap interval conditional on the pools; cost: seconds per pool on one
+A6000, including the shared sampling for forks.}
 \label{tab:validity}
 \resizebox{0.92\textwidth}{!}{\input{tables/validity_block}}
 \end{table}
 
-\paragraph{\greater{}'s objective anti-predicts block edits.} Table~\ref{tab:validity}
+\paragraph{\greater{}'s objective does not predict block edits.} Table~\ref{tab:validity}
 and Figure~\ref{fig:validity}: the exact answer-loss change correlates \emph{negatively}
 with the held-out change (pooled over eleven runs $-0.26$ [$-0.27,-0.10$]); patching
 tracks the exact values (mean Spearman $0.79$ between them, range $0.53$--$0.97$ over the
-eleven pools) and inherits the
-sign ($-0.20$). Fresh accuracy on the same 24 rows is positive ($+0.32$ [$+0.14,+0.35$]).
-The prospective test on an untouched task with three models (TS3 rows), whose targets
-are highly reliable ($\sqrt{\kappa}\ge0.90$), repeats the pattern: the patched
-answer-loss shortlist picks top-3 edits worse than a random ranking (best-3 regret
-$0.114$ vs.\ $0.057$). The estimator is not the problem; the objective is.
+eleven pools) and gives $-0.20$. As a shortlist, the patched answer loss is worse than a
+uniformly random one (best-3 regret higher by $0.024$ [$0.006,0.033$]; exact scoring:
+$0.009$ [$-0.002,0.026$]), whereas fresh accuracy on the same 24 rows beats random (lower
+by $0.024$ [$0.003,0.030$]; Spearman $+0.32$ [$+0.14,+0.35$]). The prospective runs on an
+untouched task with three models (TS3 rows), whose targets are highly reliable
+($\sqrt{\kappa}\ge0.90$), repeat the pattern (best-3 regret $0.114$ for the patched
+answer-loss shortlist, $0.085$ expected for a random one, $0.043$ for fresh accuracy on 8
+rows). The estimator reproduces the objective faithfully; the objective does not
+predict what the edits do.
 
-\paragraph{Why: failed reasoning rewards decoupling.} Splitting the training rows by
-whether the incumbent's greedy answer was right isolates the effect. On Llama-3 the
-answer-loss score computed only on rows answered \emph{wrongly} correlates $-0.61$,
-$-0.48$, $-0.29$ and $-0.52$ with the held-out change; on rows answered correctly it is
-near zero. After a wrong rationale, the gold answer has low probability exactly when
-the answer follows the rationale; an edit lowers that loss by making the answer depend
-less on the reasoning. Consistent with this, on the run with the most wrong rows the
-edit-level change in the gold answer's loss is almost the mirror image of the change in
-the loss of the model's \emph{own} answer (Spearman $-0.91$), and edits that loosen the
-model's own answer lower held-out accuracy ($-0.40$). The effect is the optimization
-counterpart of unfaithful chain-of-thought \citep{turpin2023unfaithful,lanham2023faithfulness}.
-The obvious repair, scoring only rows the incumbent answers correctly, removes the
-harmful part but leaves no useful signal: preregistered before its data, it did not
-beat the all-row score on the untouched task and ranked top edits worse than chance
-(best-3 regret $-0.057$ relative to random, $P=0.001$).
+\paragraph{Where the anti-correlation comes from.} Splitting the training rows by
+whether the incumbent's greedy \emph{extracted answer} is correct locates most of it. The
+answer-loss score computed only on rows answered wrongly correlates with the held-out
+change at $-0.61$, $-0.48$, $-0.29$, $-0.52$ (Llama-3, v3) and $-0.30$, $-0.18$ (Llama-3,
+Gemma-2, TS3); on rows answered correctly it is mixed ($-0.39$ to $+0.36$). One hypothesis
+is that after a wrong rationale an edit can lower the gold answer's loss only by
+weakening the dependence of the answer on the rationale, a form of the answer--reasoning
+decoupling studied as chain-of-thought unfaithfulness
+\citep{turpin2023unfaithful,lanham2023faithfulness}. The evidence for this mechanism is
+limited: across the five runs where we also recorded the loss of the model's \emph{own}
+answer, its change mirrors the gold loss on one run (Spearman $-0.91$) but not on the
+others ($-0.33$, $-0.13$, $+0.04$, $+0.86$). The natural repair, scoring only rows the
+incumbent answers correctly, was preregistered before the untouched task's data existed
+and failed: no gain over the all-row score (best-3 regret $+0.000$ [$-0.025,+0.021$]) and
+worse than a random shortlist ($-0.029$ [$-0.048,-0.002$]).
 
 \paragraph{Decision forks do not rescue the signal.}
 \label{sec:forks}
 Our preregistered hypothesis H-fork stated that the fork margin predicts held-out change
 better than the answer loss and than fresh accuracy on 8 rows, and that forcing the
-correct fork token raises the success probability more than forcing a token at a random
-position of the shared prefix. It failed: the fork margin is $-0.13$ pooled, below fresh
-accuracy on 8 rows (difference $-0.36$, $P(\text{fork}>\text{fresh})=0.017$), and not
-reliably above the answer loss ($+0.17$, $P=0.90$). In the causal test (six runs, 190
-forks, six continuations per arm), first divergences change the success probability no
-more than random positions ($|\Delta P_{\text{fork}}|-|\Delta P_{\text{ctrl}}|=-0.01$
-[$-0.04,+0.03$]): the first place where a correct and an incorrect rationale differ is
-usually wording, not the decision.
+correct fork token raises the success probability more than a position-matched control.
+On the preregistered replication (v3, eight runs) it failed: fork margin $-0.13$, below
+fresh accuracy on 8 rows (difference $-0.36$, $P(\text{fork}>\text{fresh})=0.017$) and not
+reliably above the answer loss ($+0.17$, $P=0.90$); adding the three prospective runs
+does not change this ($-0.40$ against fresh accuracy, $P=0.001$). In the causal test (six
+runs, 190 forks, six continuations per arm) forcing the correct instead of the incorrect
+first-divergence token changes the success probability no more than forcing, at a random
+earlier position, the actual instead of the runner-up token
+($|\Delta P_{\text{fork}}|-|\Delta P_{\text{ctrl}}|=-0.01$ [$-0.04,+0.03$]). Since that
+control differs in both position and token choice, we read it as a failure of this
+operational fork definition, not as evidence about decision tokens in general.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{figures/validity.pdf}
 \caption{\textbf{How well each signal ranks block edits by held-out accuracy change.}
-Dots: single runs; bars: pooled mean with paired bootstrap interval; band: range of the
-noise ceilings. Gradient-over-reasoning objectives (red, blue) do not beat zero; fresh
-evaluation (green) does.}
+Dots: single runs; bars: pooled mean with paired bootstrap interval (conditional on
+pools); band: range of the reliability diagnostic $\sqrt{\kappa}$. Gradient-over-reasoning
+objectives (red, blue) are not positive; fresh evaluation (green) is.}
 \label{fig:validity}
 \end{figure}
 
-\section{Tokens: one edit re-rolls the reasoning}
+\section{Tokens: one edit flips a fifth of the answers}
 \label{sec:tokens}
 The block result invites a locality explanation: \greater{}'s edits are single tokens,
 so the reasoning they are scored on might barely change. We repeat the validity study
 with \greater{}-style edits---single-token substitutions drawn from the model's own
 top-10 next tokens at a prompt position---on the same rows and held-out questions.
-Locality does not hold: a single-token edit changes the greedy answer on 16--22\% of the
-200 held-out questions, about as many as a block edit (6--38\%), while net accuracy moves
-by only $\pm2$ points (standard deviation $0.020$--$0.025$ across edits, four runs on two
-models). Such changes are what random re-rolling of a fifth of the answers would produce,
-and the split-half reliability of the held-out target is $0.05$--$0.26$: at this
-granularity no signal, gradient or evaluation, is distinguishable from noise on a
-200-question set (pooled Spearman of the answer loss $-0.10$ [$-0.22,+0.11$], of fresh
-accuracy $+0.06$ [$-0.14,+0.20$]; Table~\ref{tab:validity-token}), and a single benchmark
-split cannot tell good token edits from lucky ones.
+A single-token edit flips the \emph{correctness} of the greedy answer on 16--22\% of the
+200 held-out questions (mean over edits per run), about as often as a block edit
+(6--38\%), while net accuracy moves by only $\pm2$ points (standard deviation
+$0.020$--$0.025$ across edits, four runs on two models). The reliability diagnostic of
+the held-out target is $0.05$--$0.26$, and no predictor, gradient or evaluation, is
+distinguishable from zero at this sample size (pooled Spearman of the answer loss
+$-0.10$ [$-0.22,+0.11$], of fresh accuracy $+0.06$ [$-0.14,+0.20$];
+Table~\ref{tab:validity-token}). \todo{Direct measurement of how often a single-token edit
+changes the greedy reasoning and answer text.} Token-level effects on accuracy are small
+relative to what one 200-question split can resolve.
 
 \section{End-to-end: where do the gains of self-optimization come from?}
 \label{sec:endtoend}
@@ -425,10 +437,16 @@ gradient shortlist replaced by a uniformly random shortlist from the same candid
 same fresh-reasoning selection: test accuracy and wall time on tracking shuffled
 objects, geometric shapes, object counting and movie recommendation.}
 
-\paragraph{Structural search.} \todo{Table: \graft{} (patching shortlist), exact,
-random and raw-gate shortlists, textual-gradient baseline, ZS-CoT, \greater{} initial and
-published prompts; three models, seven tasks, three seeds; task-level paired
-comparisons; accuracy versus measured search compute; prompt length and readability.}
+\paragraph{Structural search.} Algorithm~\ref{alg:graft} is run on seven tasks (date
+understanding, formal fallacies, object counting, navigate, tracking shuffled objects,
+movie recommendation, FOLIO) with Llama-3-8B and Qwen3-8B: the patching shortlist and a
+random shortlist with three seeds each, the textual-gradient baseline with two and the
+exact-scoring shortlist with one; Gemma-2-9B with one seed of the patching and random
+shortlists. For a given seed all methods see the same minibatches and proposal questions;
+they diverge once they accept different edits. The textual-gradient baseline proposes
+one feedback-driven rewrite per block from labeled failures, so it is a different class
+of method, not a matched-pool control. Inference is at the task level (seeds averaged
+within tasks) with measured search-plus-selection compute. \todo{Table and findings.}
 
 \section{Related work}
 \label{sec:related}
@@ -490,8 +508,8 @@ quantify but cannot remove, and all experiments ran on two shared 48\,GB GPUs, w
 bounds seeds and tasks. \todo{Update after end-to-end results.}
 
 \subsection*{AI use statement}
-\todo{Draft for the authors to verify and edit before submission.} Generative AI
-was used extensively in this work. An autonomous coding agent (Claude, Anthropic),
+% Authors: verify and adapt this statement before submission.
+Generative AI was used extensively in this work. An autonomous coding agent (Claude, Anthropic),
 directed by the authors, proposed and implemented the method, wrote the
 experiment and analysis code, ran the experiments and drafted the text; a model of a
 different family (GPT, OpenAI, via the Codex CLI) served as an adversarial reviewer
@@ -506,8 +524,10 @@ loop, all baselines and all analyses will be released with the camera-ready
 version and is provided as supplementary material. Exactness propositions are
 proved in Appendix~\ref{app:proofs} and verified numerically
 (Appendix~\ref{app:tests}); data splits are deterministic functions of the public
-\greater{} release (\S\ref{sec:setup}); the preregistered experiment plan and all
-run records are included.
+\greater{} release (\S\ref{sec:setup}), and the released records list the example
+identifiers of every split, including the rows used to form the clean subset; the
+preregistered experiment plan with its dated amendments and all run records are
+included.
 
 \bibliography{references}
 \bibliographystyle{iclr2027_conference}
