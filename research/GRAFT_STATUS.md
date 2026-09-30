@@ -273,6 +273,18 @@ full; everything lives on `/media/lenovo/data2`.
     share (0.36 leaves 0.3 GB KV cache for Qwen3); the scorer uses 8 candidates per pass.
     Always kill a server's `VLLM::EngineCore` child with it.
 
+40. **ARIS auto-review loop, round 1 (GPT-6 via Codex; `review-stage/`, not committed):
+    5/10, not ready.** Verified numbers match the files. Found and fixed: the "random
+    ranking" comparator was a fixed ordering (now the exact uniform-random expectation;
+    the patched answer-loss shortlist is still worse than random, by 0.024 [0.006, 0.033]
+    best-3 regret over eleven runs); the random scorer shared the minibatch RNG (separate
+    streams; two Qwen3 random runs re-run); overclaims on attribution, token "re-rolls"
+    and the decoupling mechanism (own-answer probe inconsistent: -0.91, -0.33, -0.13,
+    +0.04, +0.86) rewritten as measured facts and hypotheses; Stage C analysis now pairs
+    seeds and gives conditional and task-level intervals. Launched a direct re-roll
+    measurement (`reroll_study.py`) through the Qwen3 server; GReaTer ablation gets two
+    repetitions per variant.
+
 ## Next
 
 * Fidelity v2 decides the scorer: renormalized patching must beat raw gates and
