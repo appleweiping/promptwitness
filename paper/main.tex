@@ -416,7 +416,9 @@ Locality does not hold. Regenerating the greedy reasoning of Qwen3-8B on the 200
 held-out questions under each of 24 such edits, the reasoning text differs from the
 incumbent's on 92\% (logical deduction) and 78\% (tracking shuffled objects) of the
 questions---on at least 64\% for every edit---diverging after a median of 40--53
-tokens; the parsed answer changes on 27\% and 36\%. Over four runs on two models, a
+tokens; the parsed answer changes on 27\% and 36\%. Block edits on the same questions are
+only somewhat less local: they change the reasoning on 97--99\% of the questions after a
+median of 9--14 tokens and the answer on 33\% and 54\%. Over four runs on two models, a
 single-token edit flips the \emph{correctness} of the greedy answer on 16--22\% of the
 questions, about as often as a block edit (6--38\%), while net accuracy moves by only
 $\pm2$ points (standard deviation $0.020$--$0.025$ across edits). The reliability diagnostic of

@@ -285,6 +285,13 @@ full; everything lives on `/media/lenovo/data2`.
     measurement (`reroll_study.py`) through the Qwen3 server; GReaTer ablation gets two
     repetitions per variant.
 
+41. **Re-roll measured directly (Qwen3, 200 held-out questions, `reroll_study.py`).**
+    Single-token edits (24 per task) change the greedy reasoning on 92% (LD7) / 78% (TS7) of
+    questions (min 64% for any edit), first divergence after a median of 53 / 40 tokens;
+    answers change on 27% / 36%; correctness flips on 14.5%. Block edits: reasoning changed
+    on 99% / 97% after 9 / 14 tokens; answers 33% / 54%; correctness 17% / 23%. Token edits
+    are somewhat more local but not local. Llama-3 measurement pending (needs its server).
+
 ## Next
 
 * Fidelity v2 decides the scorer: renormalized patching must beat raw gates and
