@@ -21,7 +21,7 @@
 \newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
 \providecommand{\R}{\mathbb{R}}
 
-\title{Beyond Tokens: Exact Structural Gradients for\\ Self-Optimizing Prompts of Small Language Models}
+\title{Do Gradients over Reasoning Scale Beyond Tokens?\ An Exact Structural Test of Self-Optimizing Prompts}
 
 \author{Anonymous authors\Paper under double-blind review}
 
@@ -29,69 +29,86 @@
 \maketitle
 
 \begin{abstract}
-Gradient-based prompt optimization lets a small language model improve its own
-prompt without a larger critic model, but existing methods such as \greater{}
-edit one token at a time. Token coordinates cannot change a prompt's length or
-structure and often yield ungrammatical instructions. We move gradient feedback to
-the level at which prompts are actually engineered: typed instruction blocks.
-\graft{} places every candidate rewrite of every block in a parallel slot of a
-single sequence, connects it to downstream tokens through a differentiable
-attention gate, and moves later tokens by a continuous slot offset realized as an
-extra rotary rotation. Every vertex of this relaxation is exactly a real edited
-prompt---including edits that change length, delete a block or insert a new
-one---so structural edits have the same exact-vertex property that one-hot
-relaxations give tokens. We show that plain first-order gate derivatives are
-unusable because attention saturates, and derive a renormalized superposed
-patching estimator that keeps each layer's attention exact and linearizes only
-through later layers, scoring all single-block edits with one forward and one
-backward pass. \todo{headline results: fidelity, accuracy vs.\ GReaTer, cost, transfer.}
+\greater{} showed that a small language model can optimize its own prompt with the
+gradient of the answer loss computed over its own reasoning, editing one token at a
+time. Prompts, however, are written and reviewed as structured documents, so the
+natural next step is to move this feedback from brittle tokens to typed blocks. This
+requires scoring edits that change length, delete or insert whole instructions, for
+which the one-hot relaxation behind token gradients is undefined. We introduce
+\graft{}, an exact structural edit calculus: candidate rewrites of every block share one
+sequence in parallel slots behind attention gates, and later tokens move by continuous
+slot offsets realized as rotary rotations, so that every vertex is exactly a real
+edited prompt. A renormalized one-pass estimator ranks all single-block edits close to
+exact evaluation. With exact scores in hand we can ask whether the signal is worth
+following. Across three models, four held-out tasks and preregistered replications
+with reliability-calibrated targets, \greater{}'s objective ranks structural edits in
+the \emph{wrong} direction (pooled Spearman $-0.31$); the anti-correlation comes from
+examples whose reasoning is wrong, where lowering the gold answer's loss rewards
+prompts that detach the answer from the reasoning. A preregistered alternative based
+on reasoning forks fails replication and a causal test. At the token level the
+question cannot be settled by any signal: a single-token edit re-rolls the greedy
+reasoning on about a fifth of the questions while moving accuracy by two points.
+End to end, \todo{GReaTer gradient vs.\ random shortlist; GRAFT vs.\ baselines}.
+Our results locate the gains of gradient-based self-optimization in model-proposed
+candidates and fresh-reasoning selection rather than in reasoning-conditioned
+gradients, and provide the calculus and protocol to test such signals.
 \end{abstract}
 
 \section{Introduction}
 \label{sec:intro}
 
-Automatic prompt optimization is most attractive exactly where it is hardest: for
-small, locally deployed models that cannot rely on a stronger model to critique
-their prompts. \greater{} \citep{das2025greater} showed that such models can
-optimize their own prompts if the optimization signal is a true gradient of the
-task loss computed \emph{over the model's own reasoning}: the model reasons under
-the current prompt, an extractor elicits its answer, and the gradient of the
-answer loss with respect to one-hot prompt tokens ranks token substitutions.
+Automatic prompt optimization is most attractive where it is hardest: for small,
+locally deployed models that cannot rely on a stronger model to critique their
+prompts \citep{zhang2024revisiting}. \greater{} \citep{das2025greater} showed that such
+models can optimize their own prompts if the optimization signal is a true gradient of
+the task loss computed \emph{over the model's own reasoning}: the model reasons under
+the current prompt, an extractor elicits its answer, and the gradient of the answer
+loss with respect to one-hot prompt tokens shortlists token substitutions, which are
+then verified by regenerating the reasoning.
 
-Token coordinates are, however, a mismatch for how prompts are built and
-maintained. The optimized prompts that \greater{} released for Gemma-2-9B on
-date understanding include ``\emph{Use a for a or e or whatever I need help to. or
-understanding.}'', and for Llama-3-8B on navigate ``\emph{Use your reasoning here.
-I would like numbers assigned.. to.. To represent moving.}''\footnote{Final-beam
+Token coordinates are a mismatch for how prompts are built. Practitioners write
+prompts as structured documents---task, strategy, procedure, output contract,
+examples---and review them as structural diffs; a token swap cannot delete a harmful
+instruction, add a missing procedure or replace a sentence by one of a different
+length, and token-level optimization often yields text that is hard to read, such as
+the released \greater{} prompt for Llama-3-8B on navigate, ``\emph{Use your reasoning
+here. I would like numbers assigned.. to.. To represent moving.}''\footnote{Final-beam
 prompts from the official repository's processed logs (commit \texttt{42a22d9}).}
-Such prompts can score well, but they are hard to read, review or maintain. Practitioners write prompts as structured documents---role, task,
-strategy, output contract, examples, tool descriptions---and review them as
-structural diffs. A token swap cannot delete a harmful instruction, add a missing
-procedure or replace a sentence by one of a different length, and optimizing
-token by token tends to produce text that is hard to read and brittle
-(\S\ref{sec:brittle}). Recent systems edit larger units but either use gradients
-only to \emph{locate} a segment and then score rewrites by explicit evaluation
-\citep{zhao2026gmpo,chakma2026gradpo}, or replace gradients by textual
-feedback \citep{yuksekgonul2024textgrad,sharma2026mpo}.
+Structure-aware optimizers exist, but they use gradients only to \emph{locate} a
+segment \citep{zhao2026gmpo,chakma2026gradpo} or replace gradients by textual feedback
+from a strong model \citep{yuksekgonul2024textgrad,sharma2026mpo,agrawal2026gepa}. Can
+the gradient signal itself be lifted to blocks?
 
-We ask whether true gradient feedback can operate directly on typed prompt blocks.
-The obstacle is that alternative blocks have different token lengths, so the
-linearizations behind \greater{} and GCG \citep{zou2023gcg}---which relax a
-token into the simplex over the vocabulary---are undefined. Our contributions:
+Two things stand in the way. The first is technical: alternative blocks have different
+lengths, so the relaxation into the vocabulary simplex used by \greater{} and GCG
+\citep{zou2023gcg} is undefined. The second is conceptual and only becomes testable once
+the first is solved: a block edit changes the reasoning it is scored on far more than a
+token edit does, so it is unclear whether a gradient computed over \emph{fixed}
+reasoning still predicts what the edit does to accuracy. This paper solves the first
+problem exactly and then answers the second with preregistered, reliability-calibrated
+experiments.
 
 \begin{itemize}
-\item \textbf{An exact structural edit calculus} (\S\ref{sec:calculus}). All
-candidate rewrites of all blocks share one sequence in parallel slots, gated into
-downstream attention, with a continuous per-slot position offset implemented as an
-extra rotary rotation. Every vertex---replacement, deletion, insertion and
-multi-block combinations---is exactly the corresponding real prompt.
-\item \textbf{A faithful one-pass estimator} (\S\ref{sec:estimator}). We prove
-that first-order gate derivatives saturate and confirm that they do not rank real
-edits; renormalized superposed patching instead keeps attention exact per layer
-and ranks edits closely to exact evaluation at a fraction of its cost.
-\item \textbf{\graft{}}, a \greater{}-style self-optimization loop over typed
-blocks (\S\ref{sec:graft}), evaluated on \greater{}'s protocol with its models
-\todo{results summary}.
+\item \textbf{An exact structural edit calculus} (\S\ref{sec:calculus}). All candidate
+rewrites of all blocks share one sequence in parallel slots, gated into downstream
+attention, with continuous per-slot offsets implemented as extra rotary rotations.
+Every vertex---replacement, deletion, insertion and multi-block combinations---is
+exactly the corresponding real prompt, verified to fp32 precision on four
+architectures.
+\item \textbf{A faithful one-pass estimator} (\S\ref{sec:estimator}). First-order gate
+derivatives provably saturate and do not rank real edits; renormalized superposed
+patching keeps each layer's attention exact and tracks exact evaluation (Spearman
+$\approx0.8$).
+\item \textbf{A validity test of gradients over reasoning} (\S\ref{sec:validity}). For
+LLM-proposed block edits, \greater{}'s objective anti-predicts held-out accuracy; we
+trace this to answer--reasoning decoupling on failed examples, and show that a
+preregistered decision-token objective does not fix it. Held-out targets are noisy, so
+every correlation is reported against a split-half reliability ceiling.
+\item \textbf{Token-level non-locality and end-to-end tests} (\S\ref{sec:tokens},
+\S\ref{sec:endtoend}). A single-token edit re-rolls about a fifth of greedy answers,
+which puts token-level signals below the resolution of standard benchmarks;
+\todo{official GReaTer with random vs.\ gradient shortlists; GRAFT vs.\ baselines at
+matched cost}.
 \end{itemize}
 
 \begin{figure*}[t]
@@ -195,7 +212,7 @@ the candidate's mass, $\partial o_t/\partial g_c|_{0}=(S_c/Z_0)(\bar v_c-o_t)$ w
 actual insertion moves the output by $\frac{S_c}{Z_0+S_c}(\bar v_c-o_t)$. The linear
 extrapolation overshoots by the factor $(Z_0+S_c)/Z_0$, which is unbounded when a
 block attracts more mass than the rest of the context---typical for instruction
-blocks read by reasoning tokens. Empirically (\S\ref{sec:fidelity}) the estimates
+blocks read by reasoning tokens. Empirically (Appendix~\ref{app:tests}) the estimates
 reach hundreds of nats for edits whose true effect is below three, and they do not
 rank edits.
 
@@ -222,149 +239,181 @@ layout is what makes every candidate's exact keys and values available in a sing
 pass. The gradients $\nabla_{o^\ell}\ell$ come from one backward pass, and the extra
 attention arithmetic is small next to the forward pass.
 
-\section{\graft{}: gradient-guided structural self-optimization}
+\section{Objectives and the shortlist-then-verify loop}
 \label{sec:graft}
 
 \begin{algorithm}[t]
-\caption{\graft{}}
+\caption{Structural shortlist-then-verify search (\graft{} and its controls)}
 \label{alg:graft}
 \begin{algorithmic}[1]
-\Require model $f_\theta$, typed prompt $P$, train set $D$, rounds $R$
+\Require model $f_\theta$, typed prompt $P$, train set $D$, rounds $R$, shortlist size $\mu$
 \For{$\rho=1,\dots,R$}
-  \State sample minibatch $B\subset D$; reasoning $r_i\sim f_\theta(P(x_i))$
+  \State sample minibatch $B\subset D$; greedy reasoning $r_i$ under $P$
   \State propose $K$ label-free candidates per slot with $f_\theta$ (unlabeled inputs only)
-  \State filter by PromptWitness policies (required literals, variables, length)
-  \State score every edit by Eq.~\ref{eq:patch}, averaged over $B$ (one fwd/bwd per example)
-  \State verify the top-$\mu$ edits with fresh reasoning on $B$
+  \State filter by PromptWitness policies (required literals, variables, clean tokenization)
+  \State score every edit on $B$: \graft{} by Eq.~\ref{eq:patch}; controls: exact loss, random, raw gate
+  \State regenerate reasoning for the top-$\mu$ edits on $B$
   \State accept the best if it improves minibatch accuracy (ties: answer loss)
 \EndFor
 \State select among the incumbents of rounds $0,R/3,2R/3,R$ on dev; evaluate once on test
 \end{algorithmic}
 \end{algorithm}
 
-\paragraph{Which loss to differentiate.} \greater{}'s objective (Eq.~\ref{eq:loss})
-measures how the prompt affects \emph{reading off} the answer from fixed reasoning.
-Once the reasoning has committed to an answer, most of a prompt's effect on accuracy
-flows through the reasoning itself, which that objective cannot see. We therefore
-also consider a \emph{verified-reasoning} objective. For each training example let
-$r^\star$ be a self-generated reasoning that reaches the gold answer---the greedy
-reasoning if it is correct, otherwise the first correct one among $S$ samples---and
-score
-\begin{equation}
-\ell_{\text{ver}}(P)=-\tfrac{1}{2|r^\star|}\log p_\theta(r^\star\mid P(x))
--\tfrac{1}{2|y|}\log p_\theta(y\mid P(x)\oplus r^\star\oplus e),
-\label{eq:verified}
-\end{equation}
-falling back to Eq.~\ref{eq:loss} when no sample is correct. This is the likelihood
-of rationales used by PMPO \citep{zhao2025pmpo}, but with self-generated rationales
-filtered by the answer as in STaR \citep{zelikman2022star}, so no annotated reasoning
-is needed. Because the reasoning tokens are downstream queries of every slot,
-Eq.~\ref{eq:patch} applies unchanged.
+Algorithm~\ref{alg:graft} lifts \greater{}'s loop to blocks: the model proposes
+candidates, a gradient score shortlists them, and fresh reasoning decides. As in
+\greater{}, the model optimizes its own prompt and supervision enters only through the
+loss and the verification; \greater{} proposes the model's top-$k$ next tokens, we ask
+the model for type-conditioned rewrites or new blocks given unlabeled task inputs.
+Controls differ \emph{only} in the shortlist: exact fixed-reasoning loss of every edited
+prompt (one forward pass per edit and example), a random shortlist, and raw gate
+derivatives.
 
-\paragraph{Decision margins at reasoning forks.} Both objectives above score whole
-sequences, most of whose tokens do not decide the answer. Correct and incorrect
-reasoning of the same model on the same question typically share a prefix and part
-at a few tokens \citep{bigelow2025forking,lin2024critical,shen2026decision}. We
-sample $S$ reasonings per training example, read their answers with the shared
-reader, and pair the greedy reasoning with every sample of the opposite correctness.
-Their first divergence defines a \emph{fork}: a shared prefix $r_{<t}$, the token
-$a^+$ of the correct branch and the token $a^-$ of the incorrect one. The decision
-loss is the logit margin
+\paragraph{Objectives.} The main objective is \greater{}'s (Eq.~\ref{eq:loss}). We also
+test a \emph{decision margin at reasoning forks}. Correct and incorrect reasoning of
+the same model on the same question share a prefix and part at few tokens
+\citep{bigelow2025forking,lin2024critical,shen2026decision}. We sample $S$ reasonings per
+training example and pair the greedy reasoning with every sample of opposite
+correctness; their first divergence defines a fork with prefix $r_{<t}$, the token $a^+$
+of the correct branch and $a^-$ of the incorrect one, and
 \begin{equation}
 \ell_{\text{fork}}(P)= z_\theta\big(a^-\mid P(x)\oplus r_{<t}\big)-z_\theta\big(a^+\mid P(x)\oplus r_{<t}\big),
 \label{eq:fork}
 \end{equation}
-averaged over at most three forks per example; the softmax normalizer cancels, so
-only the two competing continuations matter. Examples without a fork (all samples
-agree in correctness with the greedy reasoning) carry no decision signal and are
-skipped; if a minibatch has no fork, Eq.~\ref{eq:loss} is used. The prefix tokens are
-downstream queries of every slot, so the estimator is unchanged, and a single
-superposed pass scores all edits on all forks of an example.
-
-As in \greater{}, the model optimizes its own prompt, supervision enters only
-through the loss, and candidates come from the model itself: \greater{} uses the
-model's top-$k$ next tokens given task inputs; \graft{} asks the model for
-type-conditioned rewrites or new blocks given unlabeled task inputs.
-Each accepted edit is recorded as a PromptWitness structural diff with its
-predicted and measured effect.
+averaged over at most three forks per example (the softmax normalizer cancels). Prefix
+tokens are downstream queries of every slot, so one superposed pass scores all edits on
+all forks. A rationale-likelihood objective in the style of PMPO
+\citep{zhao2025pmpo,zelikman2022star} was weaker in a pilot and is reported in the appendix.
 
 \section{Experimental setup}
 \label{sec:setup}
 
-\paragraph{Models and tasks.} We follow \greater{}'s protocol and models:
-Llama-3-8B-Instruct and Gemma-2-9B-it serve as both task and optimizer model; we add
-OLMo-3-7B-Instruct as a fully open model. Tasks are \greater{}'s 21 BIG-Bench Hard
-tasks \citep{suzgun2023bbh} with 50 train, 100 development and up to 100 test
-examples, GSM8K \citep{cobbe2021gsm8k} with 100/100 and the full 1{,}319-example test
-set, and FOLIO \citep{han2024folio} with 50 train, 100 development and 203 test
-examples, taken from the \greater{} release and split with a fixed seed.
+\paragraph{Models and data.} Task and optimizer model coincide, as in \greater{}:
+Llama-3-8B-Instruct and Gemma-2-9B-it (\greater{}'s models) and Qwen3-8B in non-thinking
+mode. Benchmarks are \greater{}'s 21 BIG-Bench Hard tasks \citep{suzgun2023bbh} (50
+train, 100 dev, up to 100 test), GSM8K \citep{cobbe2021gsm8k} (100/100/1{,}319) and FOLIO
+\citep{han2024folio} (50/100/203), from the \greater{} release with a fixed-seed split.
+41\% of our BBH test rows were among the rows \greater{} used to produce its published
+prompts, so comparisons with those prompts are also reported on the clean remainder.
+Validity experiments use four BBH tasks outside \greater{}'s 21 (logical deduction and
+tracking shuffled objects, three and seven objects) with 200 held-out questions each;
+they are never used for benchmarking.
 
-\paragraph{Shared reader.} Every prompt, including baselines, is evaluated in the same
-way: greedy reasoning under the prompt (512 tokens), then the task-typed extractor
-inside the assistant turn and eight greedy answer tokens parsed by answer type
-(option letter, binary label, or integer). This removes answer-format compliance as a
-confound between prompt styles.
+\paragraph{Shared reader.} Every prompt is evaluated identically: greedy reasoning (up to
+1{,}024 tokens, \greater{}'s own budget), the task-typed extractor inside the assistant
+turn, and 16 greedy answer tokens parsed by answer type, tolerant of Markdown and
+\LaTeX{} wrappers. All dev selections, test reads and fixed prompts use one inference
+engine with identical token-level rendering (verified to be token-identical to the
+training-time renderer).
 
-\paragraph{Search budget.} All search methods start from \greater{}'s initial
-instruction (``Use proper logical reasoning and think step by step. Finally give the
-actual correct answer.''), split into a strategy block and an output block, with an
-empty procedure slot between them. Each run has 12 rounds with minibatches of 8
-train examples, 6 label-free proposals per slot, and a shortlist of 3 edits verified
-with fresh reasoning. The development set selects among the incumbents at rounds 0, 4,
-8 and 12 (so a run can fall back to the initial prompt); the test set is read once.
-Dev selection and the test read of every method, and all fixed prompts, are performed
-by one inference engine with identical rendering, stop tokens and answer parsing.
+\paragraph{Preregistration.} Hypotheses, replication protocols and every amendment are
+dated in the experiment plan before the data they concern were inspected; reported
+negative outcomes (H-fork, \S\ref{sec:forks}) follow that plan.
 
-\paragraph{Baselines and controls.} Fixed prompts: zero-shot chain of thought
-(ZS-CoT), \greater{}'s initial prompt, and \greater{}'s published optimized prompts
-for the same model (all candidates of the final beam of every released run, at most
-12 selected on our development set, which favors \greater{}). Controls that share
-\graft{}'s proposals, verification and selection and differ only in how the shortlist
-is chosen: \emph{exact scoring} (the fixed-reasoning loss of every edited prompt,
-one forward pass per edit and example, as in PMPO), \emph{random} shortlist, and
-\emph{raw gate} derivatives. A \emph{textual-gradient} baseline uses the same model
-to critique each block from failed examples and rewrite it, as in TextGrad and
-section-local modular prompt optimization.
-
-\section{Results}
-\label{sec:results}
-
-\subsection{Fidelity of structural gradients}
-\label{sec:fidelity}
-\todo{Table: Spearman / normalized regret for patch vs gate variants across models and tasks; cost per example.}
-
-\subsection{Which structural signals predict held-out accuracy?}
+\section{Do gradients over reasoning predict what structural edits do?}
 \label{sec:validity}
-A faithful estimator is useful only if the quantity it estimates predicts what we
-care about: the accuracy of the edited prompt on unseen questions. We test this
-directly, separately from search. For a task and an incumbent prompt we draw 24
-training rows and let the model propose label-free rewrites and insertions for every
-slot (20--26 edits). Each predictor is computed on the 24 rows: the change in
-\greater{}'s answer loss (Eq.~\ref{eq:loss}) exactly and by patching; the change in
-decision margin at reasoning forks (\S\ref{sec:graft}) exactly and by patching; and,
-as the evaluation-based reference, fresh greedy accuracy of every edited prompt on the
-first 8 and on all 24 rows. The target is the change in greedy accuracy on 200
-held-out questions. To keep target and search data disjoint we use four BBH tasks
-outside \greater{}'s 21 (logical deduction and tracking shuffled objects with three
-and seven objects), which are never used for benchmarking.
 
-\paragraph{The target is itself noisy.} Two random halves of the held-out questions
-rank the same edits with Spearman correlation $\rho_{1/2}$; the Spearman--Brown
-reliability $\kappa=2\rho_{1/2}/(1+\rho_{1/2})$ of the full target bounds the
-correlation any predictor can attain by $\sqrt{\kappa}$. We report this ceiling with
-every result, test differences between predictors with a paired hierarchical
-bootstrap over training rows and held-out questions, and measure every predictor's
-cost end to end. \todo{Table: rho per predictor, model, task; ceiling; cost.}
+\paragraph{Design.} Search can succeed or fail for many reasons, so we test the signal
+directly. For a task and an incumbent prompt we draw 24 training rows and let the model
+propose label-free rewrites and insertions for every slot (20--26 edits per pool). Each
+predictor is computed on the 24 rows: the change in \greater{}'s answer loss, exactly and
+by patching; the change in fork margin (Eq.~\ref{eq:fork}), exactly and by patching; and,
+as the evaluation-based reference, fresh greedy accuracy of every edited prompt on 8 and
+on 24 rows. The target is the change in greedy accuracy on 200 held-out questions.
+Replication \emph{v3} uses independent seeds, pools and held-out sets on two models and
+three tasks, plus a non-initial prompt state, under a protocol frozen before its data.
 
-\subsection{Main results}
-\todo{Table: per-task accuracy vs GReaTer and baselines.}
+\paragraph{The target is noisy.} Two random halves of the held-out questions rank the
+same edits with Spearman correlation $\rho_{1/2}$; the Spearman--Brown reliability
+$\kappa=2\rho_{1/2}/(1+\rho_{1/2})$ gives a noise ceiling $\sqrt{\kappa}$ for what any
+predictor can reach. Differences between predictors are tested with a paired bootstrap
+over training rows and held-out questions (conditional on the pools).
 
-\subsection{Cost}
-\todo{GPU seconds and model calls to reach accuracy.}
+\begin{table}[t]
+\centering
+\caption{\textbf{Spearman correlation between each predictor and the held-out accuracy
+change of LLM-proposed block edits} (v3 replication; L: Llama-3-8B, Q: Qwen3-8B;
+$^\ast$ non-initial prompt state). Pooled: mean over runs with a paired bootstrap
+interval. Cost: seconds per pool on one A6000, including shared sampling for forks.
+The last row is the noise ceiling of each held-out target.}
+\label{tab:validity}
+\resizebox{\textwidth}{!}{\input{tables/validity_block}}
+\end{table}
 
-\subsection{Readability, robustness and transfer}
-\label{sec:brittle}
-\todo{Transfer across models; perplexity; perturbation sensitivity; examples.}
+\paragraph{\greater{}'s objective anti-predicts block edits.} Table~\ref{tab:validity}
+and Figure~\ref{fig:validity}: the exact answer-loss change correlates \emph{negatively}
+with the held-out change (pooled $-0.31$ [$-0.31,-0.10$]); patching tracks the exact
+values (Spearman $0.81$ between them across pools) and inherits the sign. Fresh accuracy
+on the same 24 rows is positive ($+0.30$ [$+0.08,+0.33$]) and reaches the ceiling on
+one run. The estimator is not the problem; the objective is.
+
+\paragraph{Why: failed reasoning rewards decoupling.} Splitting the training rows by
+whether the incumbent's greedy answer was right isolates the effect. On Llama-3 the
+answer-loss score computed only on rows answered \emph{wrongly} correlates $-0.61$,
+$-0.48$, $-0.29$ and $-0.52$ with the held-out change; on rows answered correctly it is
+near zero. After a wrong rationale, the gold answer has low probability exactly when
+the answer follows the rationale; an edit lowers that loss by making the answer depend
+less on the reasoning. Consistent with this, on the run with the most wrong rows the
+edit-level change in the gold answer's loss is almost the mirror image of the change in
+the loss of the model's \emph{own} answer (Spearman $-0.91$), and edits that loosen the
+model's own answer lower held-out accuracy ($-0.40$). The effect is the optimization
+counterpart of unfaithful chain-of-thought \citep{turpin2023unfaithful,lanham2023faithfulness}.
+
+\paragraph{Decision forks do not rescue the signal.}
+\label{sec:forks}
+Our preregistered hypothesis H-fork stated that the fork margin predicts held-out change
+better than the answer loss and than fresh accuracy on 8 rows, and that forcing the
+correct fork token raises the success probability more than forcing a token at a random
+position of the shared prefix. It failed: the fork margin is $-0.13$ pooled, below fresh
+accuracy on 8 rows (difference $-0.36$, $P(\text{fork}>\text{fresh})=0.017$), and not
+reliably above the answer loss ($+0.17$, $P=0.90$). In the causal test (six runs, 190
+forks, six continuations per arm), first divergences change the success probability no
+more than random positions ($|\Delta P_{\text{fork}}|-|\Delta P_{\text{ctrl}}|=-0.01$
+[$-0.04,+0.03$]): the first place where a correct and an incorrect rationale differ is
+usually wording, not the decision.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/validity.pdf}
+\caption{\textbf{How well each signal ranks block edits by held-out accuracy change.}
+Dots: single runs; bars: pooled mean with paired bootstrap interval; band: range of the
+noise ceilings. Gradient-over-reasoning objectives (red, blue) do not beat zero; fresh
+evaluation (green) does.}
+\label{fig:validity}
+\end{figure}
+
+\section{Tokens: one edit re-rolls the reasoning}
+\label{sec:tokens}
+The block result invites a locality explanation: \greater{}'s edits are single tokens,
+so the reasoning they are scored on might barely change. We repeat the validity study
+with \greater{}-style edits---single-token substitutions drawn from the model's own
+top-10 next tokens at a prompt position---on the same rows and held-out questions.
+Locality does not hold: a single-token edit changes the greedy answer on 16--22\% of the
+200 held-out questions, about as many as a block edit (6--31\%), while net accuracy moves
+by only $\pm2$ points (standard deviation $0.020$--$0.024$ across edits). Such changes are
+what random re-rolling of a fifth of the answers would produce, and the split-half
+reliability of the held-out target is $0.05$--$0.11$: at this granularity, no signal,
+gradient or evaluation, can be validated on a 200-question set, and a single benchmark
+split cannot distinguish good token edits from lucky ones. \todo{Qwen3 TS7 token run.}
+
+\section{End-to-end: where do the gains of self-optimization come from?}
+\label{sec:endtoend}
+
+\paragraph{Published \greater{} prompts.} With the shared reader, \greater{}'s released
+prompts for Llama-3-8B improve on its initial prompt by $+4.7$ points averaged over 21
+BBH tasks ($+3.4$ [$+0.5,+6.4$] on test rows \greater{} never saw), concentrated in a few
+tasks (tracking shuffled objects $+32$, geometric shapes $+22$, object counting $+18$).
+\todo{Gemma-2 row.} The gains are real; the question is which part of \greater{}
+produces them.
+
+\paragraph{Gradient or random shortlist?} \todo{Official \greater{} code with the
+gradient shortlist replaced by a uniformly random shortlist from the same candidates,
+same fresh-reasoning selection: test accuracy and wall time on tracking shuffled
+objects, geometric shapes, object counting and movie recommendation.}
+
+\paragraph{Structural search.} \todo{Table: \graft{} (patching shortlist), exact,
+random and raw-gate shortlists, textual-gradient baseline, ZS-CoT, \greater{} initial and
+published prompts; three models, seven tasks, three seeds; task-level paired
+comparisons; accuracy versus measured search compute; prompt length and readability.}
 
 \section{Related work}
 \label{sec:related}
