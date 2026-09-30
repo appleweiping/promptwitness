@@ -181,3 +181,9 @@ C5 Stage C ablations (gate, random, exact) plus fidelity estimator ablations.
   and movie_recommendation. One seed each (low power; reported as such). Outcome: test
   accuracy of the final prompt with the shared reader (full and clean subsets), plus wall
   time; compared with each other and with the initial prompt.
+* 2026-09-30 ~06:30 UTC, outcome (not an amendment): **H-cond is not supported and is
+  retired.** TS3 (untouched), seed 303, Llama-3, Qwen3, Gemma-2; best-3 regret gain of
+  answer_cond_patch over answer_patch +0.000 [-0.025, +0.021] (P 0.24) and over random
+  -0.057 [-0.082, -0.029] (worse than random). On the same untouched task the main result
+  replicates with reliable targets (ceilings 0.90-0.93): answer loss -0.13 (exact) /
+  -0.20 (patch), fork margin ~0, fresh accuracy +0.43 (8 rows) / +0.39 (24 rows).

@@ -253,6 +253,18 @@ full; everything lives on `/media/lenovo/data2`.
     forks, token non-locality written with v3 numbers; end-to-end pending); SEPO (typed
     structural editing with evaluation feedback, Aug 2026) cited.
 
+37. **TS3 prospective test (untouched task, 3 models incl. Gemma-2 with the sampling fix).**
+    H-cond fails (no gain over all-row answer loss; worse than random, P 0.001) and is
+    retired. The main result replicates out of sample with reliable targets (ceilings
+    0.90-0.93): answer loss -0.13 / -0.20, fork ~0, fresh-8 +0.43, fresh-24 +0.39; best-3
+    regret of the patched answer-loss shortlist 0.114 vs 0.057 for a random ranking.
+38. **Compute incidents.** Official GReaTer crashed at import (`np.infty`, NumPy 2); fixed
+    in our copy (semantically identical `np.inf`). Stage C `patch` runs OOM beside the vLLM
+    server on long-reasoning tasks (fp32 gated attention is quadratic in length):
+    candidates per superposed pass 32 -> 8 (exact per candidate) and server share 0.40 ->
+    0.36; the two failed Qwen3 patch runs are retried at the end. GPU 0 was taken by
+    another user's job (35 GB) after we freed it; our GPU-0 schedule waits for it.
+
 ## Next
 
 * Fidelity v2 decides the scorer: renormalized patching must beat raw gates and
