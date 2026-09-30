@@ -187,3 +187,14 @@ C5 Stage C ablations (gate, random, exact) plus fidelity estimator ablations.
   -0.057 [-0.082, -0.029] (worse than random). On the same untouched task the main result
   replicates with reliable targets (ceilings 0.90-0.93): answer loss -0.13 (exact) /
   -0.20 (patch), fork margin ~0, fresh accuracy +0.43 (8 rows) / +0.39 (24 rows).
+* 2026-09-30 ~06:45 UTC, before any Stage C outcome (no search run has been read on dev or
+  test): **Stage C re-scoped.** Measured search time is ~28 min per run with the
+  1024-token budget (3-4x the smoke estimate), and GPU 0 is occupied by another user's
+  job, so 273 runs (~170 GPU-hours) are infeasible. New plan (140 runs, seed-major):
+  Llama-3 and Qwen3 x 7 tasks with `patch` and `random` (seeds 1-3; the core comparison
+  of gradient vs random shortlist under identical fresh verification), `textgrad`
+  (seeds 1-2) and `exact` (seed 1); Gemma-2 `patch` and `random` seed 1 last. Dropped:
+  the raw-gate search ablation (estimator fidelity is measured directly), `exact` seeds
+  2-3, `textgrad` seed 3, other Gemma-2 runs. Completed runs of dropped variants are kept
+  as supplementary data. Verification of the shortlist now uses one batched generation
+  call (same algorithm, higher throughput).
