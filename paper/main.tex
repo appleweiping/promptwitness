@@ -9,6 +9,7 @@
 \usepackage{amsmath,amssymb,amsthm}
 \usepackage{booktabs}
 \usepackage{multirow}
+\usepackage{makecell}
 \usepackage{xcolor}
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
@@ -42,7 +43,8 @@ edited prompt. A renormalized one-pass estimator ranks all single-block edits cl
 exact evaluation. With exact scores in hand we can ask whether the signal is worth
 following. Across three models, four held-out tasks and preregistered replications
 with reliability-calibrated targets, \greater{}'s objective ranks structural edits in
-the \emph{wrong} direction (pooled Spearman $-0.31$); the anti-correlation comes from
+the \emph{wrong} direction (pooled Spearman $-0.26$ over eleven runs, including an
+untouched task and a third model); the anti-correlation comes from
 examples whose reasoning is wrong, where lowering the gold answer's loss rewards
 prompts that detach the answer from the reasoning. A preregistered alternative based
 on reasoning forks fails replication and a causal test. At the token level the
@@ -331,20 +333,25 @@ over training rows and held-out questions (conditional on the pools).
 \begin{table}[t]
 \centering
 \caption{\textbf{Spearman correlation between each predictor and the held-out accuracy
-change of LLM-proposed block edits} (v3 replication; L: Llama-3-8B, Q: Qwen3-8B;
-$^\ast$ non-initial prompt state). Pooled: mean over runs with a paired bootstrap
-interval. Cost: seconds per pool on one A6000, including shared sampling for forks.
-The last row is the noise ceiling of each held-out target.}
+change of LLM-proposed block edits.} LD/TS rows: preregistered replication v3 (logical
+deduction 3/7, tracking shuffled objects 7); TS3 rows: prospective test on an untouched
+task. L: Llama-3-8B, Q: Qwen3-8B, G: Gemma-2-9B; $^\ast$ non-initial prompt state;
+$\sqrt{\kappa}$: noise ceiling of the held-out target. Pooled: mean over runs with a
+paired bootstrap interval; cost: seconds per pool on one A6000, including the shared
+sampling for forks.}
 \label{tab:validity}
-\resizebox{\textwidth}{!}{\input{tables/validity_block}}
+\resizebox{0.92\textwidth}{!}{\input{tables/validity_block}}
 \end{table}
 
 \paragraph{\greater{}'s objective anti-predicts block edits.} Table~\ref{tab:validity}
 and Figure~\ref{fig:validity}: the exact answer-loss change correlates \emph{negatively}
-with the held-out change (pooled $-0.31$ [$-0.31,-0.10$]); patching tracks the exact
-values (Spearman $0.81$ between them across pools) and inherits the sign. Fresh accuracy
-on the same 24 rows is positive ($+0.30$ [$+0.08,+0.33$]) and reaches the ceiling on
-one run. The estimator is not the problem; the objective is.
+with the held-out change (pooled over eleven runs $-0.26$ [$-0.27,-0.10$]); patching
+tracks the exact values (Spearman $0.81$ between them across pools) and inherits the
+sign ($-0.20$). Fresh accuracy on the same 24 rows is positive ($+0.32$ [$+0.14,+0.35$]).
+The prospective test on an untouched task with three models (TS3 rows), whose targets
+are highly reliable ($\sqrt{\kappa}\ge0.90$), repeats the pattern: the patched
+answer-loss shortlist picks top-3 edits worse than a random ranking (best-3 regret
+$0.114$ vs.\ $0.057$). The estimator is not the problem; the objective is.
 
 \paragraph{Why: failed reasoning rewards decoupling.} Splitting the training rows by
 whether the incumbent's greedy answer was right isolates the effect. On Llama-3 the
@@ -357,6 +364,10 @@ edit-level change in the gold answer's loss is almost the mirror image of the ch
 the loss of the model's \emph{own} answer (Spearman $-0.91$), and edits that loosen the
 model's own answer lower held-out accuracy ($-0.40$). The effect is the optimization
 counterpart of unfaithful chain-of-thought \citep{turpin2023unfaithful,lanham2023faithfulness}.
+The obvious repair, scoring only rows the incumbent answers correctly, removes the
+harmful part but leaves no useful signal: preregistered before its data, it did not
+beat the all-row score on the untouched task and ranked top edits worse than chance
+(best-3 regret $-0.057$ relative to random, $P=0.001$).
 
 \paragraph{Decision forks do not rescue the signal.}
 \label{sec:forks}
