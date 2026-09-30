@@ -402,7 +402,7 @@ def main() -> None:
                         help="host:port of a graft_genserver (vLLM) for all generation; HF scores")
     parser.add_argument("--defer-eval", action="store_true",
                         help="stop after search; dev selection and test run in select_and_test.py")
-    parser.add_argument("--candidates-per-pass", type=int, default=16)
+    parser.add_argument("--candidates-per-pass", type=int, default=8)
     parser.add_argument("--no-checkpointing", action="store_true",
                         help="keep attention activations instead of recomputing (faster, more memory)")
     parser.add_argument("--objective", choices=("answer", "verified", "fork"), default="answer",
