@@ -420,51 +420,59 @@ comparisons; accuracy versus measured search compute; prompt length and readabil
 
 \paragraph{Gradient-based discrete prompt search.} AutoPrompt \citep{shin2020autoprompt},
 GCG \citep{zou2023gcg}, PEZ \citep{wen2023hard} and \greater{} \citep{das2025greater}
-relax tokens into the vocabulary simplex or embedding space. \graft{} relaxes
-blocks, and its vertices remain exact for length-changing edits.
+relax tokens into the vocabulary simplex or embedding space; \greater{} takes the
+gradient over the model's own reasoning so that small models can optimize themselves,
+where LLM-driven optimizers struggle \citep{zhang2024revisiting}. \graft{} relaxes blocks
+with exact vertices for length-changing edits, and we test the reasoning-conditioned
+signal itself rather than a search pipeline built on it.
 
-\paragraph{Segment- and structure-level optimization.} GMPO \citep{zhao2026gmpo},
-PMPO \citep{zhao2025pmpo} and GradPO \citep{chakma2026gradpo} use masking or
-gradients to locate influential segments and score generated rewrites by explicit
-evaluation; SAMMO \citep{schnabel2024sammo}, SPRIG \citep{zhang2024sprig},
-MIPRO \citep{opsahl2024mipro} and modular prompt optimization with section-local
-textual gradients \citep{sharma2026mpo} search over prompt structure without model
-gradients. \graft{} scores the candidate rewrites themselves with one gradient pass.
+\paragraph{Evaluation- and feedback-driven optimization.} APE \citep{zhou2023ape}, OPRO
+\citep{yang2024opro}, ProTeGi \citep{pryzant2023protegi}, EvoPrompt \citep{guo2024evoprompt},
+TextGrad \citep{yuksekgonul2024textgrad}, MIPRO \citep{opsahl2024mipro} and GEPA
+\citep{agrawal2026gepa} propose candidates with an LLM and decide by measured scores or
+natural-language critiques. Structure-aware variants edit sections or typed units:
+SAMMO \citep{schnabel2024sammo}, SPRIG \citep{zhang2024sprig}, section-local textual
+gradients \citep{sharma2026mpo} and SEPO \citep{ma2026sepo}; GMPO, GradPO and PMPO use
+gradients or masking to \emph{locate} segments and score rewrites by evaluation or
+rationale likelihood \citep{zhao2026gmpo,chakma2026gradpo,zhao2025pmpo}. Our results
+explain why evaluation remains necessary for structural edits: the gradient signal over
+fixed reasoning is misaligned with what such edits do.
 
-\paragraph{Decision points in reasoning.} Sampled reasoning of one model often
-branches at a few tokens that decide the outcome: forking tokens
-\citep{bigelow2025forking,jia2026forking}, critical tokens \citep{lin2024critical},
-pivotal tokens used for preference data \citep{abdin2024phi4}, and decision tokens
-whose correction restores reasoning \citep{shen2026decision}. These works analyze or
-train the model; we use such forks as a differentiable objective for a frozen model's
-prompt. ContraPrompt \citep{rishav2026contraprompt} and contrastive reflection
-\citep{koh2026contrastive} contrast successful and failed traces too, but in text,
-through a reflecting LLM that writes the prompt edit.
+\paragraph{Reliability of the optimization signal.} p1 \citep{gao2026p1} decomposes reward
+variance into response noise and prompt-quality variance and selects training prompts
+where the latter dominates; HbBoPs \citep{schneider2025hbbops} allocates evaluations
+adaptively; \citet{sadjoli2025optimization} show that prompt optimization changes model
+rankings. We add a split-half ceiling for \emph{ranking edits} and show that at token
+granularity the edit-quality variance is below the resolution of standard splits.
+
+\paragraph{Reasoning faithfulness and decision points.} Chain-of-thought answers can
+depart from the stated reasoning \citep{turpin2023unfaithful,lanham2023faithfulness}; we
+find that \greater{}'s objective rewards exactly this departure on failed examples.
+Sampled reasoning branches at few decisive tokens
+\citep{bigelow2025forking,jia2026forking,lin2024critical,abdin2024phi4,shen2026decision};
+our causal test shows that the \emph{first} divergence between a correct and an incorrect
+rationale is usually not such a token. ContraPrompt \citep{rishav2026contraprompt} and
+contrastive reflection \citep{koh2026contrastive} contrast traces in text through a
+reflecting LLM.
 
 \paragraph{Attribution and parallel contexts.} Attribution patching and AtP*
 \citep{syed2024atp,kramar2024atp} estimate interventions to first order; ContextCite
-\citep{cohenwang2024contextcite} attributes generations to context sources.
-Parallel context windows \citep{ratner2023pcw} and superposition prompting
-\citep{merth2024superposition} process prompt segments in parallel paths for
-efficiency. We combine parallel paths, exact positional offsets and exact attention
-to estimate the effect of structural edits for optimization.
+\citep{cohenwang2024contextcite} attributes generations to context sources; parallel
+context windows \citep{ratner2023pcw} and superposition prompting
+\citep{merth2024superposition} process segments in parallel paths. We combine parallel
+paths, exact positional offsets and exact attention to evaluate structural edits.
 
 \section{Limitations}
-
-\graft{} inherits \greater{}'s fixed-reasoning approximation: the loss is
-differentiated with the model's reasoning held fixed, so an edit's effect on the
-reasoning itself is seen only through verification with fresh reasoning. The
-vertices of our relaxation are exact, but the estimator is first order through the
-layers after each attention step and scores single-slot edits; interactions between
-simultaneous edits are handled by sequential acceptance, not by the estimate. The
-method needs white-box access to a model with rotary position embeddings and
-softmax attention; models with other position schemes or recurrent layers would
-need a different offset construction. Edits must tokenize cleanly at block
-boundaries, which excludes a small fraction of proposals. Our tasks have
-extractable answers, as in \greater{}; open-ended generation would need a
-different loss. All experiments ran on a single 48\,GB GPU, which bounds the number
-of seeds and tasks; we report per-task results and seed variation rather than a
-single aggregate.
+Our validity experiments use LLM-proposed edits from one proposal procedure and
+multiple-choice reasoning tasks; the anti-correlation may be weaker for other proposal
+distributions or answer types, and intervals are conditional on the proposal pools.
+Correctness of a rationale is judged by its extracted answer, and the decoupling
+mechanism rests on correlational evidence from few runs. The exact calculus needs
+white-box access to models with rotary embeddings and softmax attention and edits that
+tokenize cleanly at block boundaries; the one-pass estimator is not faster than exact
+scoring at the pool sizes we use. Held-out targets of 200 questions are noisy, which we
+quantify but cannot remove, and all experiments ran on two shared 48\,GB GPUs, which
+bounds seeds and tasks. \todo{Update after end-to-end results.}
 
 \subsection*{AI use statement}
 \todo{Draft for the authors to verify and edit before submission.} Generative AI
