@@ -47,9 +47,10 @@ on an untouched task, \greater{}'s objective ranks LLM-proposed structural edits
 no better than, and when patched worse than, a random one, while fresh evaluation on
 the same examples is better. The anti-correlation concentrates on examples whose answer
 is wrong. Preregistered alternatives based on reasoning forks and on correctly answered
-examples fail. At the token level, a single-token edit flips the correctness of about a
-fifth of greedy answers while moving accuracy by two points, below what one benchmark
-split resolves. End to end, \todo{official GReaTer with gradient vs.\ random shortlist;
+examples fail. Nor are token edits local: a single-token edit rewrites the greedy
+reasoning on 78--92\% of held-out questions and flips the correctness of about a fifth
+of the answers while moving accuracy by two points, below what one benchmark split
+resolves. End to end, \todo{official GReaTer with gradient vs.\ random shortlist;
 GRAFT vs.\ controls}. The calculus and protocol make such signals testable, and our
 evidence points to fresh-reasoning evaluation, not reasoning-conditioned gradients, as
 the part of self-optimization that transfers to prompt structure.
@@ -404,22 +405,27 @@ objectives (red, blue) are not positive; fresh evaluation (green) is.}
 \label{fig:validity}
 \end{figure}
 
-\section{Tokens: one edit flips a fifth of the answers}
+\section{Tokens: one edit re-rolls the reasoning}
 \label{sec:tokens}
 The block result invites a locality explanation: \greater{}'s edits are single tokens,
 so the reasoning they are scored on might barely change. We repeat the validity study
 with \greater{}-style edits---single-token substitutions drawn from the model's own
 top-10 next tokens at a prompt position---on the same rows and held-out questions.
-A single-token edit flips the \emph{correctness} of the greedy answer on 16--22\% of the
-200 held-out questions (mean over edits per run), about as often as a block edit
-(6--38\%), while net accuracy moves by only $\pm2$ points (standard deviation
-$0.020$--$0.025$ across edits, four runs on two models). The reliability diagnostic of
+Locality does not hold. Regenerating the greedy reasoning of Qwen3-8B on the 200
+held-out questions under each of 24 such edits, the reasoning text differs from the
+incumbent's on 92\% (logical deduction) and 78\% (tracking shuffled objects) of the
+questions---on at least 64\% for every edit---diverging after a median of 40--53
+tokens; the parsed answer changes on 27\% and 36\%. Over four runs on two models, a
+single-token edit flips the \emph{correctness} of the greedy answer on 16--22\% of the
+questions, about as often as a block edit (6--38\%), while net accuracy moves by only
+$\pm2$ points (standard deviation $0.020$--$0.025$ across edits). The reliability diagnostic of
 the held-out target is $0.05$--$0.26$, and no predictor, gradient or evaluation, is
 distinguishable from zero at this sample size (pooled Spearman of the answer loss
 $-0.10$ [$-0.22,+0.11$], of fresh accuracy $+0.06$ [$-0.14,+0.20$];
-Table~\ref{tab:validity-token}). \todo{Direct measurement of how often a single-token edit
-changes the greedy reasoning and answer text.} Token-level effects on accuracy are small
-relative to what one 200-question split can resolve.
+Table~\ref{tab:validity-token}). A token edit is therefore not a local perturbation of
+the reasoning that \greater{}'s gradient is computed over: it re-rolls most of the
+reasoning, and its effect on accuracy is small relative to what one 200-question split
+can resolve.
 
 \section{End-to-end: where do the gains of self-optimization come from?}
 \label{sec:endtoend}
