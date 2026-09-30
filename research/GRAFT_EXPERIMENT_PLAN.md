@@ -165,3 +165,19 @@ C5 Stage C ablations (gate, random, exact) plus fidelity estimator ablations.
      regret (`analyze_decision.py --regret-k 3`); secondary: Spearman. H-cond is supported
      only if answer_cond_patch beats both answer_patch and random on best-3 regret with
      P(gain > 0) >= 0.95 in the pooled paired bootstrap; otherwise it is retired.
+* 2026-09-30 ~01:15 UTC, before any ablation run: **token-level shortlist ablation of the
+  official GReaTer code.** The fixed-reader baselines show real gains of GReaTer's published
+  prompts over its initial prompt on Llama-3 (+4.7 points full test, +3.4 [+0.5, +6.4] on
+  the clean subset), while the token-level control shows single-token edits cannot be
+  ranked by any signal at n = 200. The framing rules (`GRAFT_FRAMING.md`, case "not
+  predictive / real gains") call for testing whether GReaTer's gains come from its
+  gradient shortlist or from its fresh-reasoning selection. Test: official GReaTer
+  (`greater_rerun.sh`, Llama-3-8B, our 50 train rows, the official hyperparameters) with
+  the gradient shortlist vs. the same loop with the shortlist drawn uniformly from the
+  same model-proposed candidates (`GREATER_SHORTLIST=random`,
+  `scripts/research/graft/greater_random_shortlist.patch`). Tasks, chosen because the
+  published prompts gain most there (so a null for the gradient is informative):
+  tracking_shuffled_objects_five_objects and geometric_shapes first, then object_counting
+  and movie_recommendation. One seed each (low power; reported as such). Outcome: test
+  accuracy of the final prompt with the shared reader (full and clean subsets), plus wall
+  time; compared with each other and with the initial prompt.

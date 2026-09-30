@@ -1,0 +1,18 @@
+0a1
+> import os
+345c346,351
+<             grad = self.get_grads(main_device, pos, top_indices)
+---
+>             # GRAFT ablation (opt-in): GREATER_SHORTLIST=random draws the shortlist uniformly from
+>             # the same model-proposed candidates instead of ranking them by the gradient.
+>             random_shortlist = os.environ.get("GREATER_SHORTLIST") == "random"
+>             grad = None
+>             if not random_shortlist:
+>                 grad = self.get_grads(main_device, pos, top_indices)
+355c361,364
+<             topk_indices = top_indices[(-grad).topk(selections, dim=-1).indices[0]]
+---
+>             if random_shortlist:
+>                 topk_indices = top_indices[torch.randperm(len(top_indices), device=top_indices.device)[:selections]]
+>             else:
+>                 topk_indices = top_indices[(-grad).topk(selections, dim=-1).indices[0]]

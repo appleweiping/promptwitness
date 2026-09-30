@@ -234,6 +234,18 @@ full; everything lives on `/media/lenovo/data2`.
     fork variants dropped, split-provenance audit (41% of BBH test rows were seen by
     GReaTer's optimization), prospective H-cond test on untouched TS3 (plan amendment).
 
+34. **Fixed-reader baselines (vLLM, 23 tasks; dev selects among <= 12 published prompts).**
+    Llama-3: ZS-CoT 60.2, GReaTer initial 61.7, GReaTer published 65.6 (21 tasks);
+    published - initial +4.7 [+2.5, +7.0] on the full test split, +3.4 [+0.5, +6.4] on the
+    clean subset GReaTer never saw; largest gains tracking-5 (+32), geometric shapes (+22),
+    object counting (+18). Qwen3 (no published prompts): ZS-CoT 82.3, initial 81.6, near
+    ceiling on many tasks. Gemma-2 running. Split audit: 41% of BBH test rows fall in
+    GReaTer's train/monitor rows.
+35. **Real-model smoke (Qwen3, object_counting, 2 rounds, generation server):** ~60 s per
+    round, HF peak 18.6 GB + server 18.9 GB; accepted readable procedural edits. Stage C
+    (273 runs) armed per GPU after the TS3 test; GPU 0 first runs the official GReaTer
+    gradient-vs-random shortlist ablation (plan amendment).
+
 ## Next
 
 * Fidelity v2 decides the scorer: renormalized patching must beat raw gates and
