@@ -27,6 +27,11 @@ FIXED = ("zs_cot", "greater_init", "greater_published")
 PAIRS = (("patch", "random"), ("patch", "exact"), ("patch", "textgrad"), ("patch", "greater_init"),
          ("patch", "greater_published"), ("random", "greater_init"), ("textgrad", "greater_init"),
          ("patch", "zs_cot"))
+# Stage C v2 (verification on all 50 training questions; 2026-10-01 amendment).
+PAIRS_V2 = (("patch-v50", "random-v50"), ("dist-v50", "patch-v50"), ("dist-v50", "random-v50"),
+            ("random-v50", "random-v8"), ("textgrad-v50", "random-v50"), ("patch-v50", "greater_init"),
+            ("random-v50", "greater_init"), ("patch-v50", "greater_published"),
+            ("random-v50", "greater_published"), ("textgrad-v50", "greater_init"), ("patch-v50", "zs_cot"))
 
 
 def model_key(path: str) -> str:
@@ -46,16 +51,28 @@ def main() -> None:
     parser.add_argument("--data-dir", type=Path, required=True)
     parser.add_argument("--replicates", type=int, default=2000)
     parser.add_argument("--clean", action="store_true", help="restrict to clean test rows (BBH)")
+    parser.add_argument("--v2", action="store_true", help="Stage C v2 comparison pairs")
+    parser.add_argument("--max-truncation", type=float, default=None,
+                        help="drop tasks where any selected prompt truncates on more than this fraction")
     parser.add_argument("--json", type=Path)
     args = parser.parse_args()
+    pairs_to_test = PAIRS_V2 if args.v2 else PAIRS
 
     # runs[model][task][method][seed] = per-question correctness (seed 0 for fixed prompts)
     runs: dict = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
     cost: dict = defaultdict(list)
+    truncation: dict = defaultdict(lambda: defaultdict(list))  # model -> task -> fractions
     for entry in json.loads(args.selected.read_text(encoding="utf-8")).values():
         key = model_key(entry["model_path"])
         runs[key][entry["task"]][entry["method"]][entry["seed"]] = entry["test_correct"]
         cost[(key, entry["method"])].append((entry.get("search_seconds") or 0.0) + (entry.get("eval_seconds") or 0.0))
+        truncation[key][entry["task"]].append(entry.get("test_truncated", 0) / max(1, len(entry["test_correct"])))
+    if args.max_truncation is not None:
+        for key in list(runs):
+            for task in list(runs[key]):
+                if max(truncation[key][task], default=0.0) > args.max_truncation:
+                    print(f"dropping {key}/{task}: max truncation {max(truncation[key][task]):.2f}")
+                    del runs[key][task]
     for path in args.baselines:
         key = path.stem
         for name, entry in json.loads(path.read_text(encoding="utf-8")).items():
@@ -101,7 +118,8 @@ def main() -> None:
         means = {m: statistics.mean(table[t][m] for t in tasks if m in table[t]) for m in methods}
         print(f"{'mean':40s} " + " ".join(f"{100 * means[m]:10.1f}" for m in methods))
         model_out: dict = {"table": table, "means": means, "pairs": {}, "cost_minutes": {}}
-        for a, b in PAIRS:
+        model_out["truncation"] = {t: max(truncation[key][t], default=0.0) for t in tasks}
+        for a, b in pairs_to_test:
             shared = [t for t in tasks if a in runs[key][t] and b in runs[key][t] and seed_pairs(runs[key][t], a, b)]
             if not shared:
                 continue
