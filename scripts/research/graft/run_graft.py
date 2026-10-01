@@ -396,7 +396,9 @@ class DistScorer:
         for row, row_traces in zip(self.rows, traces):
             p = self.runner.ids(prompt, row)
             items += [(p + t, len(p), len(p) + len(t), e) for t, e in row_traces]
-        values = graft_dist.trace_logprobs(self.runner.model, items, tau=self.tau, stops=self.stops)
+        # Batches of 4: search traces run to 1,024 tokens and the HF scorer shares the GPU
+        # with the generation server.
+        values = graft_dist.trace_logprobs(self.runner.model, items, tau=self.tau, stops=self.stops, batch=4)
         return [values[i * self.samples:(i + 1) * self.samples] for i in range(len(self.rows))]
 
     def scores(self, prompt: StructuredPrompt, pools: dict[str, list[str]], edits: list[Edit]) -> dict[Edit, float]:
