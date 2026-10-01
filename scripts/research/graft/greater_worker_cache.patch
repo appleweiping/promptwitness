@@ -1,0 +1,10 @@
+--- /media/lenovo/data2/promptwitness-graft-runtime/cc/attack_manager.py.orig	2026-10-02 02:36:07.453995845 +0800
++++ llm_opt/base/attack_manager.py	2026-10-02 02:36:07.501996258 +0800
+@@ -1875,6 +1875,7 @@
+                         results.put(ob.test_loss(*args, **kwargs))
+                     else:
+                         results.put(fn(*args, **kwargs))
++            torch.cuda.empty_cache()  # GRAFT: release cached blocks for the reasoning worker
+             tasks.task_done()
+ 
+     def start(self):
