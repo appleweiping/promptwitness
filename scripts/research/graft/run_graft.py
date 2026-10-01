@@ -7,6 +7,8 @@ acceptance rule, dev-set checkpoint selection and a single test evaluation:
   gate    ablation: raw first-order gate derivative (saturates)
   exact   control: fixed-reasoning loss of every edited prompt (one forward per edit)
   random  control: random shortlist, no scoring
+  dist    distributional score: exact likelihood ratios of the incumbent's own sampled
+          reasoning (tempered self-normalized importance sampling; graft_dist)
   textgrad baseline: section-local textual feedback from the same model on failed
           minibatch examples (labels visible to the critic, as in TextGrad/MPO), one
           feedback-driven rewrite per block, then the same verification
@@ -21,13 +23,14 @@ import argparse
 import os
 import json
 import random
+import statistics
 from collections.abc import Sequence
 from dataclasses import replace
 from pathlib import Path
 from time import perf_counter
 from typing import Any
 
-from promptwitness import graft_tasks
+from promptwitness import graft_dist, graft_tasks
 from promptwitness.graft_runtime import (
     ANSWER_TOKENS,
     Generation,
@@ -350,6 +353,71 @@ def score_edits(method: str, runner: Runner, scorer: GateScorer, prompt: Structu
     return _row_mean(per_row, edits)
 
 
+class DistScorer:
+    """Distributional edit scores (``--method dist``; see promptwitness.graft_dist).
+
+    S reasonings per scoring row are sampled once per incumbent (cached while the incumbent
+    is unchanged) and read under the incumbent; every candidate is scored by the tempered
+    self-normalized importance estimate of its accuracy change on those samples, with exact
+    teacher-forced likelihood ratios and beta chosen without targets (ESS rule).
+    """
+
+    def __init__(self, runner: Runner, rows: list[graft_tasks.Example], samples: int, tau: float,
+                 seed: int, max_new_tokens: int) -> None:
+        self.runner, self.rows, self.samples, self.tau, self.seed = runner, rows, samples, tau, seed
+        self.max_new_tokens = max_new_tokens
+        self.stops = sampling_stops(runner.model, runner.tokenizer)
+        self.cache: dict[str, tuple[list[list[tuple[list[int], bool]]], list[list[int]], list[list[float]]]] = {}
+        self.last_beta: float | None = None
+
+    def _material(self, prompt: StructuredPrompt) -> tuple[list, list[list[int]], list[list[float]]]:
+        key = prompt.document.messages[0].content
+        if key in self.cache:
+            return self.cache[key]
+        runner, s = self.runner, self.samples
+        started = perf_counter()
+        ids = [runner.ids(prompt, r) for r in self.rows]
+        flat = [p for p in ids for _ in range(s)]
+        drawn = graft_dist.sample_traces(runner.model, runner.tokenizer, flat, max_new_tokens=self.max_new_tokens,
+                                         tau=self.tau, stops=self.stops, seed=self.seed + len(self.cache))
+        traces = [drawn[i * s:(i + 1) * s] for i in range(len(self.rows))]
+        reads, _, _ = generate_batch(runner.model, runner.tokenizer,
+                                     [p + t + runner.extractor for p, (t, _) in zip(flat, drawn)],
+                                     max_new_tokens=ANSWER_TOKENS)
+        correct = [[int(runner.spec.correct(reads[i * s + j].text, row.answer)) for j in range(s)]
+                   for i, row in enumerate(self.rows)]
+        base = self._logprobs(prompt, traces)
+        runner.ledger.add("dist_samples", perf_counter() - started, generated=sum(len(t) for t, _ in drawn))
+        self.cache = {key: (traces, correct, base)}  # only the current incumbent is kept
+        return self.cache[key]
+
+    def _logprobs(self, prompt: StructuredPrompt, traces: list) -> list[list[float]]:
+        items = []
+        for row, row_traces in zip(self.rows, traces):
+            p = self.runner.ids(prompt, row)
+            items += [(p + t, len(p), len(p) + len(t), e) for t, e in row_traces]
+        values = graft_dist.trace_logprobs(self.runner.model, items, tau=self.tau, stops=self.stops)
+        return [values[i * self.samples:(i + 1) * self.samples] for i in range(len(self.rows))]
+
+    def scores(self, prompt: StructuredPrompt, pools: dict[str, list[str]], edits: list[Edit]) -> dict[Edit, float]:
+        traces, correct, base = self._material(prompt)
+        started = perf_counter()
+        logw = {}
+        for e in edits:
+            lp = self._logprobs(apply(prompt, pools, e), traces)
+            logw[e] = [[a - b for a, b in zip(lp[x], base[x])] for x in range(len(self.rows))]
+        beta = graft_dist.choose_beta([logw[e] for e in edits], self.samples) if edits else 1.0
+        self.last_beta = beta
+        out = {}
+        for e in edits:
+            gain = statistics.mean(graft_dist.snis(logw[e][x], correct[x], beta) - statistics.mean(correct[x])
+                                   for x in range(len(self.rows)))
+            out[e] = -gain  # lower is better, like a loss change
+        n = len(edits) * len(self.rows) * self.samples
+        self.runner.ledger.add("score_dist", perf_counter() - started, forwards=n)
+        return out
+
+
 def _row_mean(per_row: dict[int, list[dict[Edit, float]]], edits: list[Edit]) -> dict[Edit, float]:
     """Average targets within a row, then rows; edits missing in a target are skipped."""
     totals = {e: 0.0 for e in edits}
@@ -399,8 +467,11 @@ def main() -> None:
     parser.add_argument("--task", required=True)
     parser.add_argument("--model-path", required=True)
     parser.add_argument("--data-dir", type=Path, required=True)
-    parser.add_argument("--method", choices=("patch", "gate", "exact", "random", "textgrad"),
+    parser.add_argument("--method", choices=("patch", "gate", "exact", "random", "textgrad", "dist"),
                         required=True)
+    parser.add_argument("--dist-rows", type=int, default=16, help="dist: training rows scored (fixed per run)")
+    parser.add_argument("--dist-samples", type=int, default=8, help="dist: incumbent samples per row")
+    parser.add_argument("--dist-tau", type=float, default=0.7, help="dist: sampling temperature")
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--rounds", type=int, default=12)
     parser.add_argument("--batch", type=int, default=8)
@@ -453,6 +524,12 @@ def main() -> None:
     # seed; the random shortlist draws from its own stream.
     rng = random.Random(args.seed)
     score_rng = random.Random(args.seed * 7919 + 17)
+    dist_scorer = None
+    if args.method == "dist":
+        # Fixed scoring rows from their own stream (minibatches/proposals stay shared across methods).
+        dist_rows = random.Random(args.seed * 104729 + 3).sample(splits["train"], args.dist_rows)
+        dist_scorer = DistScorer(runner, dist_rows, args.dist_samples, args.dist_tau, args.seed * 7 + 1,
+                                 args.max_new_tokens)
     prompt = graft_tasks.initial_prompt()
     accepted: list[dict[str, Any]] = [{"round": 0, "text": prompt.document.messages[0].content}]
     prompts: dict[str, StructuredPrompt] = {accepted[0]["text"]: prompt}
@@ -484,9 +561,13 @@ def main() -> None:
             trajectory.append({**record, "accepted": None})
             continue
         targets = (build_targets(args, runner, prompt, batch, incumbent)
-                   if scoring != "random" else [])
+                   if scoring not in ("random", "dist") else [])
         record["target_sources"] = [t.source for t in targets]
-        estimates = score_edits(scoring, runner, scorer, prompt, pools, edits, batch, targets, score_rng)
+        if dist_scorer is not None:
+            estimates = dist_scorer.scores(prompt, pools, edits)
+            record["dist_beta"] = dist_scorer.last_beta
+        else:
+            estimates = score_edits(scoring, runner, scorer, prompt, pools, edits, batch, targets, score_rng)
         shortlist = sorted(edits, key=lambda e: estimates[e])[: args.mu]
         checks = []
         if args.accept == "margin" and targets:
