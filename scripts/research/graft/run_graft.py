@@ -82,6 +82,8 @@ class Runner:
         self.model, self.tokenizer, self.spec, self.ledger = model, tokenizer, spec, ledger
         self.max_new_tokens = max_new_tokens
         self.use_reasoning = True  # False: GReaTer's no-reasoning ablation for scoring
+        # Keep proposals cut at their token cap (behaviour of runs before 2026-10-01).
+        self.keep_truncated = False
         self.candidates_per_pass = 32
         self.extractor = tokenizer.encode(spec.extractor, add_special_tokens=False)
 
@@ -173,7 +175,7 @@ def propose(runner: Runner, prompt: StructuredPrompt, slot: str, questions: list
     if remote is not None:
         for tokens, ended in remote:
             text = graft_tasks.clean_proposal(tokenizer.decode(tokens, skip_special_tokens=True))
-            if text and ended:
+            if text and (ended or runner.keep_truncated):
                 outputs.append(text)
         runner.ledger.add("proposal", perf_counter() - started, generated=sum(len(t) for t, _ in remote))
         return outputs
@@ -192,7 +194,7 @@ def propose(runner: Runner, prompt: StructuredPrompt, slot: str, questions: list
                              pad_token_id=pad, eos_token_id=stops)
     for row in gen[:, width:]:
         text = graft_tasks.clean_proposal(tokenizer.decode(row, skip_special_tokens=True))
-        if text and any(int(t) in stops for t in row.tolist()):
+        if text and (runner.keep_truncated or any(int(t) in stops for t in row.tolist())):
             outputs.append(text)
     runner.ledger.add("proposal", perf_counter() - started, generated=int(gen[:, width:].numel()))
     return outputs
@@ -241,7 +243,7 @@ def textual_gradient_pools(runner: Runner, prompt: StructuredPrompt, batch: list
             text = tokenizer.decode(gen[0, ids.shape[1]:], skip_special_tokens=True)
             ended = any(int(t) in stops for t in gen[0, ids.shape[1]:].tolist())
         # A rewrite cut at the token cap is discarded, as for label-free proposals.
-        new = graft_tasks.clean_proposal(text) if "NEW BLOCK:" in text and ended else ""
+        new = graft_tasks.clean_proposal(text) if "NEW BLOCK:" in text and (ended or runner.keep_truncated) else ""
         pools[block.block_id] = [new] if new else []
     runner.ledger.add("textgrad_feedback", perf_counter() - started)
     return pools
@@ -422,6 +424,8 @@ def main() -> None:
     parser.add_argument("--no-reasoning-scores", action="store_true",
                         help="ablation: score edits without reasoning in the tail")
     parser.add_argument("--attn", default="sdpa")
+    parser.add_argument("--keep-truncated-proposals", action="store_true",
+                        help="keep proposals cut at their token cap (configuration of runs before 2026-10-01)")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     # Long reasoning tails beside a vLLM server fragment memory; chunked candidate passes
@@ -443,6 +447,7 @@ def main() -> None:
     ledger = Ledger()
     runner = Runner(model, tokenizer, spec, ledger, args.max_new_tokens)
     runner.use_reasoning = not args.no_reasoning_scores
+    runner.keep_truncated = args.keep_truncated_proposals
     runner.candidates_per_pass = args.candidates_per_pass
     # Separate streams: minibatches and proposal questions are identical across methods for a
     # seed; the random shortlist draws from its own stream.
