@@ -55,11 +55,16 @@ mislead, not that it must.
 
 ## Why fixed traces are fragile under edits (re-roll)
 
-sd(log w) across samples ~ 20 nats on pool 1 (Llama-3 LD7): an edit reweights the model's own
-reasoning paths by factors of e^20; the greedy trace under P is typically not a high-probability
-trace under P' (single-token edits change greedy reasoning on 78-92% of questions; the
-deterministic-reader null is 0%). A first-order signal on one fixed trace cannot represent
-this change; the shared-sample estimator sees it directly through the weights.
+KL(pi_P || pi_P') = -E_{pi_P} log w has a median of 4.5-14.6 nats per trace across the Llama-3
+pools (within-question sd of log w 4.6-9.2 nats; the pooled sd across rows and edits, ~20 nats,
+mixes between-question variation and is not the relevant quantity). The greedy trace under P is
+typically not a likely trace under P'. A first-order signal on one fixed trace cannot represent
+this change -- and neither can self-normalized importance sampling with S = 16 samples, which needs
+about exp(KL) samples (Chatterjee & Diaconis 2018): on the first five pools its split-half
+reliability is ~0 and it does not agree with the on-policy estimate of the same quantity.
+(Corrected 2026-10-01: an earlier version compared |A| with an SNIS estimate of D, which is at
+its permutation null; A is now compared with on-policy totals: |A| 0.1-1.2 points vs held-out
+effects of 3.4-10.9 points, rho(A, held-out) -0.31 to +0.28.)
 
 ## Verification noise (pipeline)
 

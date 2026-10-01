@@ -393,6 +393,22 @@ full; everything lives on `/media/lenovo/data2`.
     runs may stay nondeterministic (noise shared by all arms); every dev/test read must be
     reproducible. The H-dist samples and reads used the uncapped server: numerical noise only
     (it can only inflate the measured read-off flips, which is conservative for |A| << |D|).
+54. **Independent second opinion on H-dist (Opus 5.5, 5 pools):** the importance score is noise
+    (split-half reliability -0.31..+0.26; agreement with the on-policy estimate of the same
+    quantity +0.03/-0.32/+0.10/-0.52/-0.22; per-pool percentile CIs all include 0, so the
+    deduction-vs-tracking split is not an effect), explained by coverage: KL 4.5-14.6 nats per
+    trace vs ~exp(KL) samples needed (Chatterjee & Diaconis 2018); optimistic bias growing with
+    distance on the tracking pools. Corrections adopted: |A| re-based on on-policy totals (the
+    SNIS D was at its permutation null); the "e^20" statement replaced by KL. Amendment added
+    before the remaining pools (reliability, on-policy A, KL gate at 0.5 log S, bf16 null).
+    Framing: analysis paper with a prescriptive conclusion -- edits act on the reasoning
+    distribution (KL ~10 nats), neither fixed-trace gradients nor off-policy reweighting can see
+    it, the bottleneck is on-policy verification noise; headline experiments are Stage C v2 and
+    the official GReaTer gradient-vs-random ablation.
+55. **GReaTer smoke 2 (18:16 UTC):** single-GPU fixes work through step 1 (regeneration chunks
+    11-15 s; ~10-13 min per step, so ~20 h per 106-step run); OOM in step 2 because the spawned
+    gradient worker keeps ~20 GB of cached blocks. Fix: the worker empties its CUDA cache after
+    each task (`greater_worker_cache.patch`); smoke re-queued.
 53. **Queue (operational):** Stage C v2 Llama-3 seed 1 (28 runs) now precedes the remaining H-dist
     pools; the importance-score arm is not in it (H-dist/H-inc unresolved, Llama-3 pools mixed).
 
