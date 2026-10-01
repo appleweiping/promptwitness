@@ -342,6 +342,30 @@ full; everything lives on `/media/lenovo/data2`.
     ratios of self-generated reasoning under each edit; GReaTer as the fixed-reasoning
     special case), gated by a preregistered kill test before any further investment.
 
+47. **Opus 5.5 auto-review round 1 (nightmare, 3/10, `review-stage/`).** Validity numbers verified
+    exactly and robust at pool level (answer-exact rho negative in 8/11 pools); found: vLLM reader
+    nondeterminism (prefix caching; same-prompt re-reads flip 2-14% of answers), a truncation
+    artifact (selected movie_recommendation prompts exhaust 1,024 tokens on 90-100% of test
+    questions), stale H-cond number (-0.057 should be -0.029 [-0.048, -0.002]), the TS3 *exact*
+    objective is null (rho -0.126; regret 0.080 vs 0.085 random), Qwen3 wrong-row values omitted,
+    biased percentile intervals, truncated proposals accepted, testability overclaim. Fixes and
+    the H-dist kill test were preregistered (plan amendment 2026-10-01) before any new data.
+48. **Pipeline regret (zero GPU, `pipeline_regret.py`, 11 block pools, one round, shortlist 3,
+    verification by fresh greedy accuracy on training rows 0-7, accept if better than the
+    incumbent).** Mean realized held-out change of the accepted edit: answer-loss shortlist -3.27
+    points (exact) / -3.23 (patched), random shortlist -1.34, fresh-24 shortlist -0.18,
+    verify-all -2.27; the best edit per pool would give +5.50. Verifying all candidates on 8 rows
+    is worse than a random shortlist (winner's curse); verify-all on 16 rows -0.77, on 24 rows
+    +1.14 (margins of 1-3 net rows do not fix 8-row verification: -1.18 to -0.27). The
+    bottleneck of shortlist-then-verify self-optimization is verification noise, not the
+    shortlist signal. Rank-normalizing each row's loss changes leaves the Llama-3 wrong-row
+    anti-correlation (-0.25 to -0.61) but not Qwen3's (+0.25, -0.04, +0.07): the wrong-row
+    concentration is a Llama-3 finding, not a general one.
+49. **Queue v3 on GPU 1 (user-approved restart, 12:46 UTC):** the hung GReaTer smoke and our old
+    master queue were stopped; queue: fixed GReaTer smoke -> Llama-3 (reader null, H-dist pools,
+    re-roll with null) -> Qwen3 (same) -> Qwen3 null with prefix caching on -> Gemma-2 H-dist
+    (HF only) -> Llama-3 Stage C seeds 1-2. Queue file `cc/gpu1.queue` (editable while running).
+
 ## Next
 
 * Fidelity v2 decides the scorer: renormalized patching must beat raw gates and
