@@ -62,7 +62,7 @@ def per_row_values(dist: dict, name: str, beta_star: float) -> dict[str, list[fl
     out: dict[str, list[float]] = {f"snis_hard_{b}": [] for b in BETAS}
     out |= {f"snis_soft_{b}": [] for b in BETAS}
     out |= {f"snis_incread_{b}": [] for b in BETAS[1:]}
-    out |= {"primary": [], "score_fn": [], "fresh_dist": []}
+    out |= {"primary": [], "inc_primary": [], "score_fn": [], "fresh_dist": []}
     for x in range(len(dist["logp"]["base"])):
         logw = [a - b for a, b in zip(dist["logp"][name][x], dist["logp"]["base"][x])]
         hard_c, hard_b = dist["hard"][name][x], dist["hard"]["base"][x]
@@ -74,6 +74,7 @@ def per_row_values(dist: dict, name: str, beta_star: float) -> dict[str, list[fl
             if b > 0:  # reasoning-distribution term only: the incumbent's own reads, reweighted
                 out[f"snis_incread_{b}"].append(snis(logw, hard_b, b) - base_hard)
         out["primary"].append(snis(logw, hard_c, beta_star) - base_hard)
+        out["inc_primary"].append(snis(logw, hard_b, beta_star) - base_hard)
         mean_w, mean_c = statistics.mean(logw), statistics.mean(hard_c)
         cov = statistics.mean((c - mean_c) * (w - mean_w) for c, w in zip(hard_c, logw))
         out["score_fn"].append(cov + statistics.mean(c - b for c, b in zip(hard_c, hard_b)))
@@ -211,6 +212,8 @@ def main() -> None:
                                     "regret": reg, "regret_ci_bc": bc_interval(boot["regret"][k], reg)}
         print(f"{k:16s} rho {rho:+.3f} {summary['predictors'][k]['rho_ci_bc']}  regret3 {reg:.3f}")
     for a, b in (("primary", "random"), ("primary", "fresh8"), ("primary", "answer_exact"),
+                 ("inc_primary", "random"), ("inc_primary", "fresh8"), ("inc_primary", "answer_exact"),
+                 ("inc_primary", "fresh_all"),
                  ("primary", "fresh_all"), ("fresh_dist", "fresh8"), ("score_fn", "random"),
                  ("snis_soft_0.0", "answer_exact"), ("fresh_dist", "random"), ("fresh8", "random")):
         gain = [y - x for x, y in zip(boot["regret"][a], boot["regret"][b])]
@@ -227,8 +230,8 @@ def main() -> None:
               f"pools {pools_better}/{len(pools)} | d_rho {r0:+.3f} P>0 {c['p_drho_gt0']:.3f}")
     # Verify-all pipeline: accept the edit with the highest predicted change if it is > 0;
     # realized gain = its held-out change (0 if nothing is accepted). Same pools, all rows.
-    verifiers = ("fresh8", "fresh_all", "primary", "snis_hard_1.0", "snis_soft_1.0", "fresh_dist", "score_fn",
-                 "answer_exact")
+    verifiers = ("fresh8", "fresh_all", "primary", "inc_primary", "snis_hard_1.0", "snis_soft_1.0", "fresh_dist",
+                 "score_fn", "answer_exact")
     summary["verify_all"] = {}
     print("verify-all pipeline: mean realized held-out change (points), pools improved/worsened")
     for v in verifiers:
@@ -246,6 +249,12 @@ def main() -> None:
                  and vs_fresh8["d_rho"] >= -0.05)
     summary["h_dist_supported"] = supported
     print("H-dist (preregistered kill criterion):", "SUPPORTED" if supported else "NOT SUPPORTED")
+    inc_random, inc_fresh8 = summary["comparisons"]["inc_primary-random"], summary["comparisons"]["inc_primary-fresh8"]
+    summary["h_inc_supported"] = (inc_random["p_gain_gt0"] >= 0.9
+                                  and inc_random["pools_with_lower_regret"] >= math.ceil(7 * len(pools) / 11)
+                                  and inc_fresh8["d_rho"] >= -0.05)
+    print("H-inc criterion on these pools (confirmatory only on the 10 pools after pool 1):",
+          "SUPPORTED" if summary["h_inc_supported"] else "NOT SUPPORTED")
     if args.json:
         args.json.write_text(json.dumps(summary, indent=1) + "\n", encoding="utf-8")
 
