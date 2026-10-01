@@ -173,6 +173,7 @@ def main() -> None:
                    seed=args.seed)
     traces = [drawn[i * args.samples:(i + 1) * args.samples] for i in range(len(rows))]
     cost["incumbent_samples"] = perf_counter() - t0
+    print(json.dumps({"phase": "incumbent_samples", "seconds": cost["incumbent_samples"]}), flush=True)
     tokens["incumbent_samples_generated"] = sum(len(t) for t, _ in drawn)
 
     # 2. Teacher-forced likelihoods and soft reads under the incumbent and every candidate.
@@ -193,6 +194,7 @@ def main() -> None:
         soft[name] = [[math.exp(scores[i * args.samples + s][1]) for s in range(args.samples)]
                       for i in range(len(rows))]
     cost["teacher_forcing"] = perf_counter() - t0
+    print(json.dumps({"phase": "teacher_forcing", "seconds": cost["teacher_forcing"]}), flush=True)
     tokens["teacher_forced"] = forced
 
     # 3. Hard reads (greedy answer after reasoning + extractor) under every prompt.
@@ -205,6 +207,7 @@ def main() -> None:
         flags = [int(spec.correct(r.text, rows[k // args.samples].answer)) for k, r in enumerate(reads)]
         hard[name] = [flags[i * args.samples:(i + 1) * args.samples] for i in range(len(rows))]
     cost["hard_reads"] = perf_counter() - t0
+    print(json.dumps({"phase": "hard_reads", "seconds": cost["hard_reads"]}), flush=True)
 
     # 4. Distributional fresh evaluation with coupled seeds (same seed per (row, sample)).
     t0 = perf_counter()
