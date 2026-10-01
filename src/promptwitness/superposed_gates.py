@@ -94,6 +94,7 @@ class SuperposedSequence:
     owner: list[str | None] = field(default_factory=list)  # candidate slot per token
     answer_weights: list[float] | None = None  # per-token CE weights over answer_ids
     contrast_ids: list[int] | None = None  # if set: loss = mean(logit[contrast] - logit[answer])
+    answer_temperature: float = 1.0  # CE of logits / T (trace likelihoods under temperature sampling)
 
     def base_values(self) -> list[float]:
         return [1.0] + [gate.base_value for gate in self.gates]
@@ -228,6 +229,7 @@ def build_superposed(
     gate_incumbents: Sequence[str] | None = None,
     answer_weights: Sequence[float] | None = None,
     contrast_ids: Sequence[int] | None = None,
+    answer_temperature: float = 1.0,
 ) -> SuperposedSequence:
     """Lay out incumbent prompt, parallel candidate slots, then reasoning+extractor+answer.
 
@@ -370,6 +372,7 @@ def build_superposed(
         cand_block,
         None if answer_weights is None else [float(w) for w in answer_weights],
         None if contrast_ids is None else [int(t) for t in contrast_ids],
+        float(answer_temperature),
     )
 
 
@@ -495,6 +498,8 @@ class GateScorer:
             input_ids=ids, position_ids=positions, use_cache=False, logits_to_keep=keep
         )
         logits = output.logits[0, :-1].float()
+        if seq.answer_temperature != 1.0:
+            logits = logits / seq.answer_temperature
         target = torch.tensor(seq.answer_ids, device=device)
         if seq.contrast_ids is not None:
             # Decision margin: CE(answer) - CE(contrast) at the same positions equals the

@@ -273,3 +273,26 @@ def test_decision_margin_matches_stock(tokenizer) -> None:
     gates, offsets = seq.vertex("task", 1)
     edited = list(prompt.replace_block("task", CANDIDATES["task"][1]).render_tokens(tokenizer, VALUES).input_ids)
     assert abs(scorer.value_at(seq, gates, offsets) - stock_margin(edited + prefix)) < 1e-4
+
+
+def test_tempered_trace_likelihood_matches_stock(tokenizer) -> None:
+    """Trace likelihood under temperature T (H-dist weights): CE of logits / T, base and vertex."""
+    import torch.nn.functional as F
+
+    model = _model("qwen3", len(tokenizer))
+    prompt = _prompt()
+    trace = tokenizer.encode("Five is larger than three, so the answer is B.", add_special_tokens=False)
+    seq = build_superposed(prompt, tokenizer, VALUES, CANDIDATES, [], trace, mode="exact", answer_temperature=0.7)
+    scorer = GateScorer(model, checkpointing=False)
+
+    def stock(ids):
+        tensor = torch.tensor([ids + trace])
+        with torch.no_grad():
+            logits = model(input_ids=tensor, attention_mask=torch.ones_like(tensor)).logits[0]
+        return float(F.cross_entropy(logits[len(ids) - 1 : -1].float() / 0.7, torch.tensor(trace)))
+
+    base_ids = list(prompt.render_tokens(tokenizer, VALUES).input_ids)
+    assert abs(scorer.gradients(seq).loss - stock(base_ids)) < 1e-4
+    gates, offsets = seq.vertex("reasoning", 1)
+    edited = list(prompt.replace_block("reasoning", CANDIDATES["reasoning"][1]).render_tokens(tokenizer, VALUES).input_ids)
+    assert abs(scorer.value_at(seq, gates, offsets) - stock(edited)) < 1e-4
