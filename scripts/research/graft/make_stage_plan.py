@@ -21,6 +21,13 @@ VARIANTS = {
     "fork-patch-fresh": ["--method", "patch", "--objective", "fork", "--accept", "fresh"],
     "fork-exact-margin": ["--method", "exact", "--objective", "fork", "--accept", "margin"],
     "answer-patch-fresh": ["--method", "patch", "--objective", "answer", "--accept", "fresh"],
+    # Stage C v2 (2026-10-01): verification on all 50 training rows, as official GReaTer
+    # selects shortlisted candidates by fresh-reasoning mistakes on all its training rows.
+    "patch-v50": ["--method", "patch", "--batch", "50"],
+    "random-v50": ["--method", "random", "--batch", "50"],
+    "exact-v50": ["--method", "exact", "--batch", "50"],
+    "textgrad-v50": ["--method", "textgrad", "--batch", "50"],
+    "random-v8": ["--method", "random", "--batch", "8"],
 }
 
 
