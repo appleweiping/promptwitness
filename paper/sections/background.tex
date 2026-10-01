@@ -1,0 +1,35 @@
+\section{Setting: self-optimization with gradients over reasoning}
+\label{sec:background}
+
+Let $f_\theta$ be a frozen causal language model, $P$ a prompt with an input slot and
+$(x,y)$ a question with its gold answer. Under $P$ the model writes a reasoning
+$r\sim\pi_P(\cdot\mid x)$ (greedy decoding is the $\tau\!\to\!0$ limit of temperature-$\tau$
+sampling); an extractor $e$ (``Therefore, the final answer is'') is appended and the answer is
+read greedily. We write $c_P(x,r)\in\{0,1\}$ for the correctness of that read and
+$q_P(y\mid x,r)=p_\theta(y\mid P(x)\oplus r\oplus e)$ for the probability of the gold answer.
+The quantity a prompt should improve is its accuracy,
+\begin{equation}
+J(P)=\mathbb{E}_{x}\,\mathbb{E}_{r\sim\pi_P(\cdot\mid x)}\,c_P(x,r).
+\label{eq:J}
+\end{equation}
+
+\paragraph{\greater{}.} \citet{das2025greater} let a small model optimize its own prompt. For a
+training question it generates the greedy reasoning $\hat r$ under the incumbent prompt and
+scores a candidate $P'$ by the answer loss on that \emph{fixed} reasoning,
+\begin{equation}
+\ell(P';x,y,\hat r)=-\log q_{P'}(y\mid x,\hat r).
+\label{eq:greater}
+\end{equation}
+The gradient of $\ell$ with respect to one-hot prompt tokens ranks the model's own top-$k$
+token substitutions; the shortlisted candidates are then verified by regenerating the reasoning
+on all training questions and the one with the fewest errors (plus a small perplexity penalty)
+is kept. The gradient thus decides which candidates are tried, and fresh reasoning decides which
+is accepted. Throughout, task model and optimizer model coincide, as in \greater{}.
+
+\paragraph{From tokens to structure.} Practitioners write prompts as typed documents---task,
+strategy, procedure, output contract, examples---and edit them as structural diffs: rewrite a
+block, delete an instruction, insert a missing procedure. Such edits change length and cannot be
+expressed as token substitutions, so the one-hot relaxation behind Eq.~\ref{eq:greater}'s
+gradient is undefined for them. \S\ref{sec:calculus} makes the fixed-reasoning objective exactly
+computable for structural edits---in one pass for all candidates---so that we can ask whether it
+is worth following.

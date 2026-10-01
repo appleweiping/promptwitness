@@ -1,0 +1,77 @@
+\section{Do gradients over reasoning predict what structural edits do?}
+\label{sec:diagnosis}
+
+\paragraph{Design.} Search succeeds or fails for many reasons, so we test the signal directly.
+For a task, a model and an incumbent prompt we draw $24$ training questions and let the model
+propose label-free rewrites and insertions for every slot ($20$--$21$ edits per pool). Each
+predictor is computed on the $24$ questions; the target is the change in greedy accuracy on $200$
+held-out questions. Predictors: \greater{}'s objective (Eq.~\ref{eq:greater}), exactly (one pass
+per edited prompt) and by one-pass patching; and, as the evaluation-based reference, fresh greedy
+accuracy of every edited prompt on $8$ and on all $24$ questions. Eleven pools: a replication on
+Llama-3-8B and Qwen3-8B, three tasks and a non-initial prompt state, with protocol and hypotheses
+fixed before its data (v3, eight pools), and a prospective test on an untouched task with three
+models (TS3). The validity tasks (logical deduction, tracking shuffled objects) are outside the
+benchmark tasks of \S\ref{sec:experiments}. Pools are the units of inference: we report how many
+pools agree in sign and an exact sign-flip permutation test over pools; question- and
+row-resampling bootstrap intervals are bias-corrected and conditional on the pools. The
+split-half reliability $\kappa$ of each held-out target bounds the attainable correlation
+(roughly by $\sqrt\kappa$); a best-3 regret---the held-out change of the three truly best edits
+minus that of a predictor's top three---measures what a shortlist cares about, against the exact
+expectation for a uniformly random shortlist.
+
+\begin{table}[t]
+\centering
+\caption{\textbf{Spearman correlation between each predictor and the held-out accuracy change of
+LLM-proposed block edits} (per pool, pooled mean, and pools agreeing in sign with the sign-flip
+test). LD/TS: logical deduction (3/7 objects) and tracking shuffled objects (7); TS3: untouched
+task (3 objects). L: Llama-3-8B, Q: Qwen3-8B, G: Gemma-2-9B; $^\ast$ non-initial prompt state;
+$\sqrt\kappa$: reliability diagnostic of the held-out target.}
+\label{tab:validity}
+\resizebox{0.95\textwidth}{!}{\input{tables/validity_block}}
+\end{table}
+
+\paragraph{The fixed-reasoning objective ranks block edits in the wrong direction.}
+\greater{}'s objective correlates negatively with the held-out change in $8$ of $11$ pools
+(pooled Spearman $-0.26$; sign-flip $p=0.017$); its one-pass estimate tracks the exact values
+(mean Spearman $0.79$ between them) and is negative in $9$ of $11$ pools ($-0.20$; $p=0.037$).
+Fresh accuracy on the same questions is positive in $9$ ($8$ questions; $+0.28$, $p=0.010$) and
+$10$ ($24$ questions; $+0.33$, $p=0.004$) of the $11$ pools. As a shortlist the patched objective
+is worse than a random one in $8$ of $11$ pools (best-3 regret $0.091$ vs.\ $0.067$; $p=0.022$);
+the exact objective is not distinguishable from random ($0.075$; worse in $7$ of $11$, $p=0.14$),
+and on the untouched task its correlation is null ($-0.13$) rather than negative. The direction
+is consistent across models and tasks; its size is not. Splitting training questions by whether
+the incumbent answers them correctly, and ranking each question's loss changes across edits
+before averaging (which removes scale differences between questions), the negative correlation
+on wrongly answered questions persists for Llama-3 ($-0.25$ to $-0.61$ in all five pools) but not
+for Qwen3 ($+0.25$, $-0.04$, $+0.07$): the unfaithful-read mechanism of
+Proposition~\ref{prop:faithful} explains a model-dependent part of the failure, the absence of the
+distribution term explains the rest. Two preregistered repairs---a decision margin at reasoning
+forks and the objective restricted to correctly answered questions---failed their criteria
+(Appendix~\ref{app:prereg}).
+
+\paragraph{Edits rewrite the reasoning, even token edits.} The fixed reasoning is the weak point.
+Under a reader that we verified to be deterministic (three re-reads of the same prompt give
+token-identical reasoning on $200$ questions; the answer read differs on $0$--$0.5\%$), a single
+\greater{}-style token substitution \todo{deterministic re-roll numbers: reasoning changed on X\%,
+first divergence after Y tokens, correctness flipped on Z\%}, while net accuracy moves by about
+$\pm2$ points; at this granularity no predictor, gradient or evaluation, is distinguishable from
+zero on $200$ questions (Appendix~\ref{app:results}).
+
+\begin{table}[t]
+\centering
+\caption{\textbf{Where an edit's effect lives} (Eq.~\ref{eq:decomp}, estimated on the incumbent's
+$16$ samples per training question). Read-off flips: fraction of (candidate, question, sample)
+whose hard read of the same reasoning changes; $|A|$, $|D|$: mean absolute read-off and
+reasoning-distribution terms per edit (accuracy points$/100$); sd of the log-likelihood ratios.}
+\label{tab:readoff}
+\small
+\input{tables/readoff}
+\end{table}
+
+\paragraph{Verification noise.} Self-optimization loops shortlist candidates and verify them by
+fresh accuracy on training questions. Simulating one round on each pool with the recorded
+per-question correctness, accepting the best of all candidates by fresh accuracy on $8$ questions
+\emph{lowers} held-out accuracy by $2.3$ points on average (on $16$ questions $-0.8$, on $24$
+$+1.1$), while the best edit of each pool would add $5.5$: on small minibatches verification picks
+noise. \greater{} verifies on all its training questions; the structural search of
+\S\ref{sec:experiments} does the same.

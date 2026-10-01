@@ -1,0 +1,52 @@
+\section{Introduction}
+\label{sec:intro}
+
+Automatic prompt optimization is most attractive where it is hardest: for small, locally deployed
+models that cannot rely on a stronger model to critique their prompts \citep{zhang2024revisiting}.
+\greater{} \citep{das2025greater} showed that such models can optimize their own prompts if the
+signal is a true gradient of the task loss computed \emph{over the model's own reasoning}: the
+model reasons under the current prompt, an extractor elicits its answer, and the gradient of the
+answer loss with respect to one-hot prompt tokens shortlists token substitutions, which are then
+verified by regenerating the reasoning.
+
+Token coordinates are a poor match for how prompts are written and reviewed---as structured
+documents with a task, a strategy, a procedure and an output contract, edited by rewriting,
+deleting or inserting whole instructions. Lifting \greater{}'s signal to such edits poses a
+technical problem, since edits of different lengths have no one-hot relaxation, and a conceptual
+one: a structural edit changes the very reasoning the gradient is computed over. We solve the
+technical problem exactly and then show that the conceptual one is decisive---and that it has a
+principled fix.
+
+\textbf{Contributions.}
+\begin{itemize}
+\item \emph{An exact calculus for structural edits} (\S\ref{sec:calculus}). All candidate rewrites
+of all blocks share one sequence in parallel slots behind attention gates, with continuous slot
+offsets realized as rotary rotations; every vertex---replacement, deletion, insertion and their
+combinations---is exactly a real edited prompt, and one forward/backward pass estimates the effect
+of every edit.
+\item \emph{A preregistered diagnosis} (\S\ref{sec:diagnosis}). Across three models and eleven
+proposal pools, \greater{}'s fixed-reasoning objective ranks LLM-proposed block edits in the wrong
+direction ($8$ of $11$ pools; as a one-pass shortlist worse than random in $8$ of $11$), while
+fresh evaluation is positive in $9$--$10$ of $11$. Under a deterministic reader, edits rewrite the
+reasoning they are scored on, and verifying candidates on small minibatches picks noise.
+\item \emph{A decomposition and a fix} (\S\ref{sec:theory}). An edit's effect on accuracy splits
+exactly into a reasoning-distribution term and an answer read-off term; the fixed-reasoning
+objective sees only the read-off term, which on the models' own samples is three to twenty times
+smaller and, on wrongly answered questions, rewards reading against one's own reasoning. Exact
+likelihood ratios of the model's own sampled reasoning recover the missing term without
+generating under any candidate: \todo{H-dist / H-inc pooled results}.
+\item \emph{End-to-end and at scale} (\S\ref{sec:experiments}). \todo{Stage C v2: dist vs
+\greater{}-lifted vs random vs textual gradients at matched verification; official \greater{} with
+gradient vs random shortlist; breadth over 21 BBH tasks, GSM8K and FOLIO.}
+\end{itemize}
+
+\begin{figure*}[t]
+\centering
+\resizebox{\textwidth}{!}{\input{figures/overview}}
+\caption{\textbf{From token coordinates to typed blocks.} (a) \greater{} relaxes one prompt token
+into the vocabulary simplex; its vertices are real tokens but every edit keeps the prompt's length
+and structure. (b) Candidate rewrites of every typed block sit in parallel slots behind attention
+gates, with continuous slot offsets realized as rotary rotations; every vertex is exactly a real
+edited prompt.}
+\label{fig:overview}
+\end{figure*}

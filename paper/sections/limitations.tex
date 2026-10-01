@@ -1,0 +1,13 @@
+\section{Limitations}
+\label{sec:limitations}
+The validity pools use multiple-choice deduction and tracking tasks and one proposal procedure;
+effects may differ for other answer types and proposal distributions, and the bootstrap intervals
+are conditional on the pools (pool-level tests are the primary inference). Correctness of a
+reasoning is judged by its extracted answer. The distributional score estimates accuracy under
+temperature sampling, while benchmarks report greedy accuracy; the two agree in direction here but
+need not in general. Importance weights over long reasoning are heavy-tailed; tempering trades
+bias for variance and the effective-sample-size rule is a heuristic. The exact calculus and the
+likelihood ratios require white-box access; the calculus assumes rotary position embeddings,
+softmax attention and edits that tokenize cleanly at block boundaries. All experiments ran on
+one or two shared 48\,GB GPUs with 8--9B models, which bounds seeds, tasks and model scale. Review
+during the research process was done by a model of the same family as the one that ran it.

@@ -1,0 +1,65 @@
+\section{What a fixed-reasoning gradient can and cannot see}
+\label{sec:theory}
+
+An edit $P\to P'$ changes accuracy (Eq.~\ref{eq:J}) through two channels: the reasoning the model
+writes, and how an answer is read off a given reasoning. With the likelihood ratio of a reasoning
+under the two prompts, $w(r)=\pi_{P'}(r\mid x)/\pi_P(r\mid x)$, and $\mathbb{E}_{\pi_P}[w\,g]=\mathbb{E}_{\pi_{P'}}[g]$,
+\begin{equation}
+J(P')-J(P)=\underbrace{\mathbb{E}_{x}\mathbb{E}_{r\sim\pi_P}\big[(w(r)-1)\,c_{P'}(x,r)\big]}_{D\text{: reasoning distribution}}
++\underbrace{\mathbb{E}_{x}\mathbb{E}_{r\sim\pi_P}\big[c_{P'}(x,r)-c_P(x,r)\big]}_{A\text{: answer read-off}} .
+\label{eq:decomp}
+\end{equation}
+This identity is exact (for $\tau>0$, where every reasoning has positive probability under both
+prompts). \greater{}'s objective (Eq.~\ref{eq:greater}) is a soft version of the read-off term $A$
+evaluated on a single reasoning, the incumbent's greedy trace, and its gradient is the first-order
+change of that quantity; it carries no information about $D$. To first order in a small edit,
+$D\approx\operatorname{Cov}_{\pi_P}(\log w,\,c)$: an edit helps if it makes the model's own
+\emph{correct} reasoning more likely relative to its incorrect reasoning---the score-function
+term that a gradient taken over a fixed reasoning drops.
+
+\begin{proposition}[Faithful reading]
+\label{prop:faithful}
+If, for every candidate $P'$ and every reasoning $r$, the answer read under $P'$ is the answer
+read under $P$ except on a set of $\pi_P$-probability at most $\varepsilon$, then $|A|\le\varepsilon$
+and $J(P')-J(P)=D\pm\varepsilon$. On a question whose reasoning $r$ supports a wrong answer $a$, a
+candidate lowers \greater{}'s loss only by moving probability from $a$---the answer the reasoning
+supports---to $y$, i.e.\ by reading against its own reasoning.
+\end{proposition}
+
+The proof is immediate from Eq.~\ref{eq:decomp} and $q_{P'}(a\mid x,r)+q_{P'}(y\mid x,r)\le1$.
+The regime is not hypothetical: on the incumbents' own samples the hard read of a fixed
+reasoning changes under a candidate in only $0.2$--$3.2\%$ of (candidate, question, sample)
+triples, and the read-off term is three to twenty times smaller than the distribution term
+(Table~\ref{tab:readoff}). Two consequences follow. First, a signal computed on a fixed reasoning
+measures the small and, on wrongly answered questions, unfaithful part of an edit's effect
+(\S\ref{sec:diagnosis} finds exactly this signature). Second, the effect lives in the weights
+$w$, which are large: log-likelihood ratios of the incumbent's own samples spread by $19$--$44$
+nats across samples for typical block edits, so the reasoning that a fixed-trace gradient is
+taken over is rarely a likely reasoning under the edited prompt.
+
+\paragraph{Estimating the distribution term without generating under candidates.} Sample
+$r_1,\dots,r_S\sim\pi_P^\tau(\cdot\mid x)$ once per training question under the incumbent, read
+them under the incumbent, and compute for every candidate the exact log-ratios $\log w_s$ of the
+\emph{same} samples (teacher forcing, or one superposed pass, \S\ref{sec:calculus}). The tempered
+self-normalized importance estimate
+\begin{equation}
+\widehat{J}_\beta(P'\mid x)=\frac{\sum_s w_s^{\beta}\,c_P(x,r_s)}{\sum_s w_s^{\beta}},\qquad
+\widehat{\Delta}_\beta(P')=\mathbb{E}_x\big[\widehat{J}_\beta(P'\mid x)-\tfrac1S\textstyle\sum_s c_P(x,r_s)\big]
+\label{eq:snis}
+\end{equation}
+estimates $D$ (with candidate reads $c_{P'}$ instead of $c_P$ it estimates the full change).
+$\beta=0$ recovers the fixed-reasoning family (no reweighting); $\beta=1$ is consistent as
+$S\to\infty$; intermediate $\beta$ trades bias for variance, and for small $\beta$,
+$\widehat\Delta_\beta\approx\beta\,\widehat{\operatorname{Cov}}(\log w,c)$. Because importance
+weights over hundreds of tokens are heavy-tailed, we choose $\beta$ \emph{without labels} as the
+largest value in $\{1,\tfrac12,\tfrac14\}$ whose median effective sample size
+$(\sum_s w_s^\beta)^2/\sum_s w_s^{2\beta}$ is at least $S/4$. No reasoning is generated and no
+answer is read under any candidate; the cost per candidate is one teacher-forced pass over the
+shared samples.
+
+\paragraph{Why verification is noisy.} Greedy correctness is a $\{0,1\}$ quantization of a
+per-question success probability. Comparing two prompts on $n$ questions by greedy accuracy has
+variance $\approx f/n$, where $f$ is the fraction of questions whose correctness flips between
+them; single edits flip $16$--$22\%$ of questions while moving accuracy by about two points
+(\S\ref{sec:diagnosis}), so on an $8$-question minibatch the comparison has a standard deviation of
+about $15$ points. Selecting the best of many candidates on such a comparison is a winner's curse.

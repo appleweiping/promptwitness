@@ -1,0 +1,176 @@
+﻿\section{Proofs}
+\label{app:proofs}
+
+\paragraph{Setting.} We consider decoder-only transformers whose token mixing is
+causal softmax attention with rotary position embeddings, possibly with logit
+soft-capping and grouped-query attention; all other sublayers act on tokens
+independently. We require that edits \emph{tokenize cleanly}: the edited prompt's
+token sequence is the incumbent's prefix tokens, the candidate's tokens and the
+incumbent's suffix tokens (edits violating this are excluded, which happens rarely
+because blocks end at line breaks). Sliding windows are assumed to exceed the
+sequence length, which our implementation asserts.
+
+\paragraph{Proof of Proposition 1.} By induction over layers we show that every
+non-candidate token $t$ has the hidden state of the reference computation on
+$P(x)\oplus r\oplus e\oplus y$. At the input, token identities and positions agree
+($\Omega=0$). At a layer, the keys visible to $t$ are the non-candidate tokens that
+precede it in the reference order, with gate $1$, and candidate tokens with gate
+$0$. The latter contribute $0\cdot\exp(s_{tu}-m_t)=0$ to both the numerator and the
+denominator of Eq.~\ref{eq:gate}; the max-shift $m_t$ may include them but softmax
+is shift-invariant. Keys and values of the former equal the reference ones by the
+induction hypothesis, and all other sublayers are tokenwise. \hfill$\square$
+
+\paragraph{Proof of Proposition 2.} Fix a choice $e_j\in\{\text{keep},\text{delete},c_j\}$
+per slot and let $P'$ be the edited prompt. Map every retained non-candidate token
+$t$ and every chosen candidate token to its counterpart in $P'$. Its position in
+$P'$ is its base position plus the cumulative length change of the edits before
+it, $\sum_{k\prec t}(|e_k|-|b_k|)$, which is exactly $\pi_t+\Omega_t$ at
+$\omega_k=|e_k|-|b_k|$ (candidates start at their slot's first position and move
+only with earlier slots). The keys with non-zero gate visible to a mapped query are
+exactly the tokens preceding it in $P'$: removed incumbents and unchosen
+candidates have gate $0$; a chosen candidate of slot $j$ sees the prefix before
+slot $j$ and the chosen candidates of earlier slots; a later token sees retained
+incumbents and chosen candidates. Rotary scores depend only on position
+differences, which agree with $P'$. The induction of Proposition~1 then applies
+verbatim to the mapped tokens, so the loss equals $\ell(P';x,y,r)$. \hfill$\square$
+
+\paragraph{Saturation of gate derivatives.} For one attention row, write the
+current output as $o_0=N_0/Z_0$ with $N_0=\sum_{u\notin c}G_{tu}e^{s_{tu}-m}v_u$,
+$Z_0=\sum_{u\notin c}G_{tu}e^{s_{tu}-m}$, and let $S_c=\sum_{u\in c}e^{s_{tu}-m}$,
+$\bar v_c=S_c^{-1}\sum_{u\in c}e^{s_{tu}-m}v_u$. Then
+$o(g)=\frac{N_0+gS_c\bar v_c}{Z_0+gS_c}$, so
+\begin{equation*}
+\frac{\partial o}{\partial g}\Big|_{0}=\frac{S_c}{Z_0}\,(\bar v_c-o_0),\qquad
+o(1)-o(0)=\frac{S_c}{Z_0+S_c}\,(\bar v_c-o_0).
+\end{equation*}
+The first-order extrapolation exceeds the actual change by the factor
+$1+S_c/Z_0$ in every head and layer, before any downstream nonlinearity. A
+candidate block that competes with an instruction block already holding most of a
+reading token's attention has $S_c/Z_0\gg1$, so raw gate derivatives are dominated
+by attention mass rather than by the effect of the edit. The renormalized estimator
+of Eq.~\ref{eq:patch} uses $o(1)-o(0)$ exactly.
+
+\section{Numerical verification}
+\label{app:tests}
+All exactness claims are checked in fp32 on small randomly initialized models with a real
+tokenizer and chat template. The base point and every replacement and deletion vertex are checked
+on four architectures (Llama, Gemma-2 with attention and final logit soft-capping, OLMo-3 and
+Qwen3); insertion into an empty slot and a combined vertex with three simultaneous edits of
+different lengths on Llama, Gemma-2 and Qwen3. In all cases the superposed loss equals the loss of
+the stock model on the real edited prompt to within $10^{-4}$ nats. Gate and offset gradients
+agree with central finite differences to within $2\cdot10^{-3}+2\%$. The weighted rationale
+objective, the decision margin and the tempered likelihood of a whole reasoning
+($\tau=0.7$; base point and a vertex) match stock computations to $10^{-4}$, and renormalized
+patching reconstructs the base computation to $10^{-4}$. A control confirms that approximate
+right- and left-padded layouts are \emph{not} exact, so the tests detect the offset construction.
+The exact teacher-forced trace likelihoods used for the distributional scores are checked against a
+direct per-token computation. The tests are part of the released code.
+
+\section{Experimental details}
+\label{app:details}
+
+\paragraph{Prompts and proposals.} The initial prompt splits \greater{}'s instruction into
+a strategy block (``Use proper logical reasoning and think step by step.''), an empty
+procedure slot and an output block (``Finally give the actual correct answer.''). The
+task model proposes candidates from two unlabeled training questions with a fixed
+meta-prompt per operator (rewrite: rephrase, specialize, add a step, shorten, warn about a
+pitfall, number the procedure, clarify the final answer; insert: procedure, verification,
+organization of facts, common mistake, comparison of options, restating facts, strategy
+hint, double-checking), sampled at temperature 0.8. Proposals are cleaned of preambles and
+type labels and must tokenize cleanly at block boundaries.
+
+\paragraph{Reader.} Greedy reasoning up to 1{,}024 tokens (384 in the validity studies,
+whose tasks need fewer), stopped at the chat template's end-of-turn tokens; the extractor
+is appended inside the assistant turn (``Therefore, the final answer is ('' for
+multiple choice; ``(Yes or No) is:'' style for binary tasks; ``(a single integer) is:''
+for counting and arithmetic); 16 greedy answer tokens are parsed by answer type, tolerant
+of Markdown emphasis and \LaTeX{} wrappers such as \verb|\boxed{}|. Qwen3 runs in
+non-thinking mode. Rendered token ids are identical across the training-time and
+evaluation engines for all three models.
+
+\paragraph{Validity studies.} Per run: 2 training questions for proposals, 24 training
+rows for predictors, 6 sampled rationales per row (temperature 0.7) for forks, at most 3
+forks per row, and 200 held-out questions for the target; seeds 101 (v3), 202 with a
+non-initial state (v3), 303 (TS3). The paired bootstrap resamples training rows and
+held-out questions jointly for all predictors (2{,}000 replicates) and keeps the proposal
+pools fixed, so intervals are conditional on the pools.
+
+\paragraph{Causal fork test.} For 32 training rows per run, forks are computed as in the
+validity study. For each fork we force the correct-branch and the incorrect-branch token
+after the shared prefix and sample six continuations each; the control forces, at a
+uniformly random position of the shared prefix, the actual token versus the model's most
+likely different token.
+
+\section{Additional results}
+\label{app:results}
+
+\begin{table}[h]
+\centering
+\caption{\textbf{Token-level validity control:} single-token substitutions drawn from the
+model's top-10 next tokens ($^t$), same rows and held-out questions as the block runs
+LD7/TS7 with seed 101. Columns as in Table~\ref{tab:validity}.}
+\label{tab:validity-token}
+\resizebox{0.92\textwidth}{!}{\input{tables/validity_token}}
+\end{table}
+
+\begin{table}[h]
+\centering
+\caption{\textbf{Causal fork test.} Mean change in success probability when forcing the
+correct instead of the incorrect fork token ($\Delta P_{\text{fork}}$), its absolute value,
+and the absolute change at a random position of the shared prefix
+($|\Delta P_{\text{ctrl}}|$).}
+\label{tab:causal}
+\small
+\begin{tabular}{lrrrr}
+\toprule
+Run & Forks & $\Delta P_{\text{fork}}$ & $|\Delta P_{\text{fork}}|$ & $|\Delta P_{\text{ctrl}}|$ \\
+\midrule
+LD7, Llama-3 & 41 & $+0.085$ & 0.199 & 0.191 \\
+LD3, Llama-3 & 41 & $+0.049$ & 0.203 & 0.246 \\
+TS7, Llama-3 & 47 & $+0.092$ & 0.220 & 0.234 \\
+LD7, Qwen3 & 17 & $-0.069$ & 0.186 & 0.144 \\
+LD3, Qwen3 & 11 & $+0.136$ & 0.258 & 0.146 \\
+TS7, Qwen3 & 33 & $-0.025$ & 0.157 & 0.181 \\
+\midrule
+Pooled difference $|\Delta P_{\text{fork}}|-|\Delta P_{\text{ctrl}}|$ & \multicolumn{4}{r}{$-0.008$ [$-0.041,+0.026$]} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Rationale-likelihood objective (pilot).} In an earlier pilot (validity v1; 8
+training rows, 60 held-out questions; Llama-3 on date understanding and formal fallacies,
+Gemma-2 on date understanding), the likelihood of a self-generated gold-consistent
+rationale (PMPO-style) correlated $0.25$, $-0.16$ and $-0.02$ with the held-out change,
+a correct-versus-incorrect rationale contrast $0.13$, $-0.22$, $-0.35$, and a policy-gradient
+estimate $-0.30$ and $-0.49$; none was pursued. (The Gemma-2 pilot preceded a fix of its
+end-of-turn token in sampling and is reported for completeness only.)
+
+\paragraph{Answer-conditioned shortlist (H-cond).} Preregistered on the untouched task
+TS3 before its data existed: scoring edits by the answer-loss change only on rows the
+incumbent answers correctly does not improve best-3 regret over the all-row score ($+0.000$
+[$-0.025,+0.021$]) and is worse than the exact expectation of a uniformly random ranking
+($-0.029$ [$-0.048,-0.002$]). H-cond is retired.
+
+\section{Preregistration and amendments}
+\label{app:prereg}
+The experiment plan was fixed before any optimizer result and amended with dates and
+reasons: dev selection restricted to checkpoint incumbents; Stage C deferred until the
+validity study; H-fork and its replication protocol frozen after one exploratory result;
+evaluation separated from search with one shared engine; a reader fix (\LaTeX{}-wrapped
+answers, answer length and reasoning budget) before any baseline or Stage C result; the
+Stage C variant set and its later re-scoping to 140 runs before any Stage C outcome;
+H-cond before its data; and the official \greater{} shortlist ablation before its runs.
+After an internal review found the generation engine nondeterministic (prefix caching) and a
+truncation artifact, every read was redone with a deterministic engine and a $4{,}096$-token budget,
+proposals cut at their token cap were discarded, pool-level tests became primary, and the
+distributional hypothesis H-dist with its kill criterion was fixed before any of its data; its
+incumbent-read variant H-inc was defined after the first of eleven pools and is tested on the other
+ten. The Stage C protocol was then revised to verify on all $50$ training questions (as \greater{}
+does) before any of its runs. The failed hypotheses (H-fork, H-cond) are reported as registered.
+Deviations: the v3 replication runs on a non-initial prompt state share their $200$ held-out
+questions with the initial-state run of the same task and model (the protocol asked for
+independent slices), and the bootstrap does not resample pools; under the stricter preregistered
+causal statistic (signed $\Delta P_{\text{fork}}-|\Delta P_{\text{ctrl}}|=-0.156$
+[$-0.203,-0.112$]) H-fork fails as under the lenient one.
+
+

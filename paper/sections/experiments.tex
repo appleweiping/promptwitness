@@ -1,0 +1,49 @@
+﻿\section{Experiments}
+\label{sec:experiments}
+
+\paragraph{Models and data.} Task and optimizer model coincide: Llama-3-8B-Instruct and
+Gemma-2-9B-it (\greater{}'s models) and Qwen3-8B in non-thinking mode. Benchmarks are
+\greater{}'s 21 BIG-Bench Hard tasks \citep{suzgun2023bbh} (50 train, 100 dev, up to 100 test),
+GSM8K \citep{cobbe2021gsm8k} and FOLIO \citep{han2024folio}, from the \greater{} release with a
+fixed-seed split; $41\%$ of our BBH test questions were among those \greater{} used to produce its
+published prompts, so comparisons with those prompts are also reported on the clean remainder.
+Hypotheses, protocols and every amendment were dated before the data they concern
+(Appendix~\ref{app:prereg}); failed hypotheses are reported as registered.
+
+\subsection{Distributional scores rank structural edits}
+\label{sec:exp-validity}
+On the eleven pools of \S\ref{sec:diagnosis} (same questions, edits and held-out targets) we drew
+$S=16$ reasonings per training question under the incumbent ($\tau=0.7$, no truncation of the
+distribution) and computed exact tempered likelihood ratios under every candidate. The kill
+criterion was fixed before any of this data existed: the distributional score must beat a random
+shortlist in pooled best-3 regret (bootstrap $P\ge0.9$, and in at least $7$ of $11$ pools) and not
+fall more than $0.05$ below fresh accuracy on $8$ questions in pooled Spearman. \todo{H-dist
+verdict and numbers; H-inc on the ten pools defined after the first; Figure~\ref{fig:beta}:
+validity vs.\ $\beta$; verify-all pipeline with each verifier; cost.}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{figures/beta.png}
+\caption{\textbf{Validity as a function of the importance tempering $\beta$.} $\beta=0$ is the
+fixed-reasoning family; reweighting the model's own samples by exact likelihood ratios turns a
+negative signal positive. Left: pooled Spearman with the held-out change (bias-corrected bootstrap
+ranges); right: best-3 regret against a random shortlist.}
+\label{fig:beta}
+\end{figure}
+
+\subsection{End-to-end structural search}
+\label{sec:exp-search}
+\todo{Stage C v2 (Llama-3 primary): dist vs patched \greater{} objective vs random vs textual
+gradients, verification on all 50 training questions, three seeds; random with 8-question
+verification as noise control; accuracy against measured GPU time; truncation; clean subset.}
+
+\subsection{Does \greater{} need its gradient?}
+\label{sec:exp-greater}
+\todo{Official \greater{} code with gradient vs uniformly random shortlist from the same
+candidates, same fresh-reasoning selection; tasks fixed in advance; repetitions; wall time.}
+
+\subsection{Breadth}
+\label{sec:exp-breadth}
+\todo{Best configuration on 21 BBH tasks, GSM8K and FOLIO with Llama-3 and Gemma-2 against ZS-CoT,
+\greater{}'s initial and published prompts (full and clean test), deterministic reader.}
+

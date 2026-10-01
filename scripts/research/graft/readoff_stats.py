@@ -23,7 +23,9 @@ def lse(values: list[float]) -> float:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("dist", nargs="+", type=Path)
+    parser.add_argument("--latex", type=Path, help="write a LaTeX tabular")
     args = parser.parse_args()
+    rows_tex = []
     print(f"{'pool':55s} {'flip':>6s} {'A':>7s} {'|A|':>6s} {'D':>7s} {'|D|':>6s} {'sd logw':>8s}")
     for path in args.dist:
         d = json.loads(path.read_text(encoding="utf-8"))
@@ -44,6 +46,23 @@ def main() -> None:
         print(f"{path.stem:55s} {statistics.mean(flips):6.3f} {statistics.mean(a_terms):+7.3f} "
               f"{statistics.mean(abs(v) for v in a_terms):6.3f} {statistics.mean(d_terms):+7.3f} "
               f"{statistics.mean(abs(v) for v in d_terms):6.3f} {statistics.pstdev(logws):8.2f}")
+        rows_tex.append((label(path.stem), statistics.mean(flips), statistics.mean(abs(v) for v in a_terms),
+                         statistics.mean(abs(v) for v in d_terms), statistics.pstdev(logws)))
+    if args.latex:
+        lines = [r"\begin{tabular}{lrrrr}", r"\toprule",
+                 r"Pool & Read-off flips & $|A|$ & $|D|$ & sd$(\log w)$ \\", r"\midrule"]
+        lines += [f"{name} & {100 * f:.1f}\\% & {a:.3f} & {d:.3f} & {s:.1f} \\\\" for name, f, a, d, s in rows_tex]
+        lines += [r"\bottomrule", r"\end{tabular}"]
+        args.latex.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def label(stem: str) -> str:
+    """Short pool label, e.g. 'LD7, L*' for llama3-logical_deduction_seven_objects-dec-state."""
+    model = {"llama3": "L", "qwen3": "Q", "gemma2": "G"}[stem.split("-")[0]]
+    task = stem.split("-")[1]
+    short = {"logical_deduction_seven_objects": "LD7", "logical_deduction_three_objects": "LD3",
+             "tracking_shuffled_objects_seven_objects": "TS7", "tracking_shuffled_objects_three_objects": "TS3"}
+    return f"{short.get(task, task)}, {model}{'$^\\ast$' if stem.endswith('state') else ''}"
 
 
 if __name__ == "__main__":

@@ -1,0 +1,53 @@
+\section{Related work}
+\label{sec:related}
+
+\paragraph{Gradient-based discrete prompt search.} AutoPrompt \citep{shin2020autoprompt}, GCG
+\citep{zou2023gcg}, PEZ \citep{wen2023hard} and \greater{} \citep{das2025greater} relax tokens into
+the vocabulary simplex or embedding space; \greater{} takes the gradient over the model's own
+reasoning so that small models can optimize themselves. In the attack setting, one-hot gradients
+are known to predict the actual loss change of a token swap poorly \citep{li2024fastergcg} and the
+cost is dominated by candidate evaluation \citep{zhao2024probe}. We show why the reasoning-based
+variant fails for structural edits---it differentiates the read-off of a fixed reasoning, not the
+distribution of reasoning---and how to score that distribution. Policy-gradient prompt learning
+\citep{deng2022rlprompt,diao2023bdpl} places a distribution over prompts and is black-box; chain of
+thought as a latent variable \citep{phan2023trice} is used to train models, not to score prompts.
+
+\paragraph{Evaluation- and feedback-driven optimization.} APE \citep{zhou2023ape}, OPRO
+\citep{yang2024opro}, ProTeGi \citep{pryzant2023protegi}, EvoPrompt \citep{guo2024evoprompt},
+TextGrad \citep{yuksekgonul2024textgrad}, MIPRO \citep{opsahl2024mipro}, PromptWizard
+\citep{agarwal2025promptwizard} and GEPA \citep{agrawal2026gepa} propose candidates with an LLM and
+decide by measured scores or natural-language critiques; textual gradients improve prompts without
+behaving like gradients \citep{melcer2025textual}, and random search is a strong baseline
+\citep{lu2024strings}. Structure-aware variants edit sections or typed units: SAMMO
+\citep{schnabel2024sammo}, SPRIG \citep{zhang2024sprig}, section-local textual gradients
+\citep{sharma2026mpo}, SEPO \citep{ma2026sepo}, SAPO \citep{kulin2026sapo} and prompt codebooks
+\citep{nath2026codebooks}; GMPO, GradPO and PMPO use gradients or masking to \emph{locate} segments
+\citep{zhao2026gmpo,chakma2026gradpo,zhao2025pmpo}. Our setting is self-optimization of a small
+model with likelihood-based signals; SEPO, for instance, uses a much larger architect model.
+
+\paragraph{Noise in evaluating prompts.} Prompt formatting alone can move accuracy by tens of
+points \citep{sclar2024formatspread,su2025single}; greedy decoding is not reproducible across batch
+sizes and hardware \citep{yuan2025nondeterminism,atil2025nondeterminism,he2025nondeterminism}; prompt
+optimization gains shrink with scale \citep{zhou2025scale} and change model rankings
+\citep{sadjoli2025optimization}. Efficient prompt evaluation allocates evaluations adaptively
+\citep{shi2024triple,polo2024prompteval,schneider2025hbbops,nian2026sess}, p1 separates response noise
+from prompt quality \citep{gao2026p1}, and an edit-level analysis studies which edits help
+\citep{gong2026why}. We quantify verification noise in self-optimization loops and evaluate
+candidates through the model's own reasoning distribution instead of a single greedy trace.
+
+\paragraph{Counterfactual and off-policy evaluation of language-model outputs.} Gumbel-max
+structural causal models generate counterfactual strings
+\citep{ravfogel2025gumbel,chatzi2025counterfactual}, and sharing randomness across compared models
+reduces evaluation cost \citep{corvelobenz2025coupled}. Off-policy prompt optimization has used
+learned reward models from logged data \citep{sun2024promptoirl,kiyohara2025logged}. We use exact,
+white-box likelihood ratios of the model's own reasoning under candidate prompts.
+
+\paragraph{Attribution, parallel and block-wise contexts.} Attribution patching and AtP*
+\citep{syed2024atp,kramar2024atp}, ContextCite \citep{cohenwang2024contextcite}, AttriBoT
+\citep{liu2025attribot} and AT2 \citep{cohenwang2025at2} estimate the effect of context parts;
+parallel context windows \citep{ratner2023pcw}, superposition prompting \citep{merth2024superposition},
+Prompt Cache \citep{gim2024promptcache}, Block-Attention \citep{ma2025blockattention}, adaptive
+parallel encoding \citep{yang2025parallel} and EPIC \citep{hu2025epic} encode or cache blocks
+independently with approximate positional handling. Our superposed sequence differs in purpose and
+guarantee: candidate blocks compete for the same slot behind gates, and continuous slot offsets
+make every vertex \emph{exactly} the edited prompt, including length-changing and combined edits.
