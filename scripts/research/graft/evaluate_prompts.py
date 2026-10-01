@@ -68,7 +68,7 @@ def main() -> None:
 
         llm = LLM(model=args.model_path, tokenizer=args.model_path, dtype="bfloat16", seed=0,
                   gpu_memory_utilization=args.gpu_memory_utilization, max_model_len=4096,
-                  enable_prefix_caching=True)
+                  enable_prefix_caching=False)  # cached prefixes change numerics; reads must repeat exactly
 
         def make_reader(spec: graft_tasks.TaskSpec, ledger: Ledger) -> Any:
             return VllmReader(args.model_path, tokenizer, spec, ledger, args.max_new_tokens, llm=llm)

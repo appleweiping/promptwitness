@@ -165,14 +165,17 @@ def propose(runner: Runner, prompt: StructuredPrompt, slot: str, questions: list
         encoded.append(list(enc["input_ids"] if hasattr(enc, "keys") else enc))
     started = perf_counter()
     outputs: list[str] = []
-    remote = remote_sample(encoded, max_new_tokens=96, stop=sampling_stops(model, tokenizer),
-                           temperature=0.8, top_p=0.95, seed=seed)
+    stops = sampling_stops(model, tokenizer)
+    # Proposals that hit the token cap are cut mid-sentence and are discarded
+    # (plan amendment 2026-10-01; runs before it kept them).
+    remote = remote_sample(encoded, max_new_tokens=96, stop=stops, temperature=0.8, top_p=0.95, seed=seed,
+                           with_ended=True)
     if remote is not None:
-        for tokens in remote:
+        for tokens, ended in remote:
             text = graft_tasks.clean_proposal(tokenizer.decode(tokens, skip_special_tokens=True))
-            if text:
+            if text and ended:
                 outputs.append(text)
-        runner.ledger.add("proposal", perf_counter() - started, generated=sum(map(len, remote)))
+        runner.ledger.add("proposal", perf_counter() - started, generated=sum(len(t) for t, _ in remote))
         return outputs
     device = next(model.parameters()).device
     width = max(map(len, encoded))
@@ -186,10 +189,10 @@ def propose(runner: Runner, prompt: StructuredPrompt, slot: str, questions: list
     with torch.no_grad():
         gen = model.generate(input_ids=ids.to(device), attention_mask=mask.to(device),
                              max_new_tokens=96, do_sample=True, temperature=0.8, top_p=0.95,
-                             pad_token_id=pad, eos_token_id=sampling_stops(model, tokenizer))
+                             pad_token_id=pad, eos_token_id=stops)
     for row in gen[:, width:]:
         text = graft_tasks.clean_proposal(tokenizer.decode(row, skip_special_tokens=True))
-        if text:
+        if text and any(int(t) in stops for t in row.tolist()):
             outputs.append(text)
     runner.ledger.add("proposal", perf_counter() - started, generated=int(gen[:, width:].numel()))
     return outputs
@@ -223,20 +226,22 @@ def textual_gradient_pools(runner: Runner, prompt: StructuredPrompt, batch: list
         enc = tokenizer.apply_chat_template([{"role": "user", "content": request}],
                                             tokenize=True, add_generation_prompt=True)
         request_ids = list(enc["input_ids"] if hasattr(enc, "keys") else enc)
-        remote = remote_sample([request_ids], max_new_tokens=320, stop=sampling_stops(model, tokenizer),
-                               temperature=0.7, top_p=0.95, seed=seed + index)
+        stops = sampling_stops(model, tokenizer)
+        remote = remote_sample([request_ids], max_new_tokens=320, stop=stops,
+                               temperature=0.7, top_p=0.95, seed=seed + index, with_ended=True)
         if remote is not None:
-            text = tokenizer.decode(remote[0], skip_special_tokens=True)
+            text, ended = tokenizer.decode(remote[0][0], skip_special_tokens=True), remote[0][1]
         else:
             ids = torch.tensor([request_ids], device=model.device)
             torch.manual_seed(seed + index)
             with torch.no_grad():
                 gen = model.generate(ids, attention_mask=torch.ones_like(ids), max_new_tokens=320,
                                      do_sample=True, temperature=0.7, top_p=0.95,
-                                     pad_token_id=tokenizer.eos_token_id,
-                                     eos_token_id=sampling_stops(model, tokenizer))
+                                     pad_token_id=tokenizer.eos_token_id, eos_token_id=stops)
             text = tokenizer.decode(gen[0, ids.shape[1]:], skip_special_tokens=True)
-        new = graft_tasks.clean_proposal(text) if "NEW BLOCK:" in text else ""
+            ended = any(int(t) in stops for t in gen[0, ids.shape[1]:].tolist())
+        # A rewrite cut at the token cap is discarded, as for label-free proposals.
+        new = graft_tasks.clean_proposal(text) if "NEW BLOCK:" in text and ended else ""
         pools[block.block_id] = [new] if new else []
     runner.ledger.add("textgrad_feedback", perf_counter() - started)
     return pools

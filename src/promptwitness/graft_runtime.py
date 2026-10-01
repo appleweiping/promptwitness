@@ -78,13 +78,17 @@ def use_remote_generation(address: str | None) -> None:
 
 
 def remote_sample(prompts: Sequence[Sequence[int]], *, max_new_tokens: int, stop: Sequence[int],
-                  temperature: float, top_p: float, seed: int) -> list[list[int]] | None:
-    """Sampled continuations from the generation server, or None when none is configured."""
+                  temperature: float, top_p: float, seed: int, with_ended: bool = False) -> list[Any] | None:
+    """Sampled continuations from the generation server, or None when none is configured.
+
+    With ``with_ended`` each item is ``(tokens, ended)``; ``ended`` is False when the
+    continuation hit ``max_new_tokens`` instead of a stop token.
+    """
     if _REMOTE is None:
         return None
     outs = _REMOTE.generate(prompts, max_new_tokens=max_new_tokens, stop=stop, temperature=temperature,
                             top_p=top_p, seeds=[seed * 1000 + i for i in range(len(prompts))])
-    return [tokens for tokens, _ in outs]
+    return [(tokens, ended) for tokens, ended in outs] if with_ended else [tokens for tokens, _ in outs]
 
 
 def sampling_stops(model: Any, tokenizer: Any) -> list[int]:

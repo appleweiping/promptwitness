@@ -205,3 +205,45 @@ C5 Stage C ablations (gate, random, exact) plus fidelity estimator ablations.
   this ablation is complete. The Stage C random-shortlist runs finished before the RNG
   fix (qwen3 date_understanding and formal_fallacies, seed 1) are re-run so that all
   methods share minibatch sequences per seed.
+* 2026-10-01 ~12:00 UTC, after the Opus 5.5 review round 1 (3/10) and research-review, before
+  any data of the items below exist. **Integrity fixes (apply to every read from now on):**
+  1. *Deterministic reading.* vLLM engines run without prefix caching (cached and recomputed
+     prefixes differ numerically, so same-prompt re-reads flipped 2-14% of answers); every
+     evaluation request contains exactly one prompt's questions in a fixed order. Before any
+     re-read is used, three re-reads of one prompt must be token-identical; the same-prompt
+     flip rate of the old configuration and of the HF reader is reported as a measured floor.
+  2. *Budgets and truncation.* Re-reads use a 4,096-token reasoning budget; truncation rates are
+     reported per method and task, and every end-to-end table is also given without tasks whose
+     selected prompts truncate on more than half of the test questions.
+  3. *Proposals.* Proposals that hit their token cap (`finish_reason = length`) are discarded
+     (the same rule for label-free and textual-gradient proposals). This changes the search, so
+     it applies to runs started after this entry; the completed Qwen3 Stage C runs are reported
+     as a separate, earlier configuration.
+  4. *Statistics.* Pool-level (run-level) tests are primary for the validity study (sign /
+     Wilcoxon over pools, t over pools); question/row bootstraps are reported with
+     bias-corrected (BC) intervals and labeled conditional.
+  5. *Re-roll null.* The re-roll study re-reads the incumbent under the same engine; edit-induced
+     change is reported net of the same-prompt floor.
+  **Hypothesis H-dist (kill test for a distributional signal; confirmatory).** GReaTer's objective
+  scores an edit P -> P' on one fixed greedy reasoning r under P. The expected accuracy of P' is
+  J(P') = E_x E_{r ~ pi_P'(.|x)} c(P', x, r), with c the correctness of the answer read under P'
+  after r. With S reasonings r_s ~ pi_P^tau(.|x) sampled once under the incumbent (temperature
+  tau, no top-p/top-k truncation) and exact teacher-forced log-likelihoods under every candidate,
+  the self-normalized importance estimate with tempered weights
+  J_beta(P') = sum_s w_s^beta c(P', x, r_s) / sum_s w_s^beta,  w_s = pi_P'^tau(r_s|x) / pi_P^tau(r_s|x),
+  scores all candidates from shared samples (beta = 0 with a soft read is a fixed-reasoning
+  objective averaged over samples, i.e. GReaTer's family). Protocol: the 11 block pools of the
+  validity study (v3: 8 runs, TS3: 3 runs), the same 24 training rows, edits and 200-question
+  greedy held-out targets; S = 16, tau = 0.7, 384-token budget (as in those runs). Primary
+  predictor: beta chosen per pool *without targets* as the largest of {1, 1/2, 1/4} whose median
+  per-row effective sample size over candidates is >= S/4 (else 1/4); hard correctness read
+  under P'. Also reported (secondary): the beta curve {0, 1/4, 1/2, 1}, the soft read, the
+  first-order score-function estimate Cov_s(c, log w), ESS and length diagnostics, and a
+  distributional fresh evaluation (4 samples per row under each candidate, seeds shared across
+  candidates). **Kill criterion:** H-dist is supported only if, pooled over the 11 pools, the
+  primary predictor's best-3 regret is below the uniform-random expectation with
+  P(gain > 0) >= 0.9 in the paired bootstrap *and* positive in at least 7 of 11 pools, and its
+  pooled Spearman is not below fresh accuracy on 8 rows by more than 0.05. Otherwise the
+  distributional importance signal is not pursued as a search method and is reported as a
+  negative result. Cost (GPU-seconds, generated and teacher-forced tokens) is reported for every
+  predictor.

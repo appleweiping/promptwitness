@@ -28,7 +28,7 @@ class VllmReader:
 
             llm = LLM(model=model_path, tokenizer=model_path, dtype="bfloat16", seed=0,
                       gpu_memory_utilization=gpu_memory_utilization, max_model_len=max_model_len,
-                      enable_prefix_caching=True)
+                      enable_prefix_caching=False)  # cached prefixes change numerics; reads must repeat exactly
         self.llm, self.tokenizer, self.spec, self.ledger = llm, tokenizer, spec, ledger
         self.max_new_tokens = max_new_tokens
         self.stop = sorted(stop_tokens(tokenizer))

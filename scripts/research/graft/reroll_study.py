@@ -6,6 +6,10 @@ and measure per edit: the fraction of questions whose reasoning token sequence c
 whose parsed answer changes, and whose correctness changes, and the position of the
 first differing reasoning token. Generation goes through a vLLM generation server
 (``--gen-server``) or the HF model.
+
+Null control (2026-10-01): the incumbent is read ``--null-reads`` extra times under the same
+engine; the same rates between its first read and each re-read measure how much of the
+edit-induced change the engine produces on an unchanged prompt (numerical nondeterminism).
 """
 
 from __future__ import annotations
@@ -27,13 +31,21 @@ def main() -> None:
     parser.add_argument("record", type=Path, help="decision_study output (pools, edits, task, seed)")
     parser.add_argument("--model-path", required=True)
     parser.add_argument("--data-dir", type=Path, required=True)
-    parser.add_argument("--gen-server", required=True)
+    parser.add_argument("--gen-server", help="vLLM generation server; without it the HF model generates")
+    parser.add_argument("--null-reads", type=int, default=2, help="extra reads of the incumbent (null control)")
     parser.add_argument("--max-new-tokens", type=int, default=384, help="the validity studies' budget")
     parser.add_argument("--dev", type=int, default=200)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
 
-    use_remote_generation(args.gen_server)
+    model = None
+    if args.gen_server:
+        use_remote_generation(args.gen_server)
+    else:
+        import torch
+        from transformers import AutoModelForCausalLM
+
+        model = AutoModelForCausalLM.from_pretrained(args.model_path, dtype=torch.bfloat16).to("cuda").eval()
     record = json.loads(args.record.read_text(encoding="utf-8"))
     tokenizer = load_tokenizer(args.model_path)
     spec = graft_tasks.spec(record["task"])
@@ -47,13 +59,21 @@ def main() -> None:
 
     def run(prompt) -> tuple[list[tuple[int, ...]], list[str | None], list[bool]]:
         ids = [list(prompt.render_tokens(tokenizer, {"input": q.question}).input_ids) for q in dev]
-        gens, _, _ = generate_batch(None, tokenizer, ids, max_new_tokens=args.max_new_tokens)
-        reads, _, _ = generate_batch(None, tokenizer, [p + list(g.token_ids) + extractor for p, g in zip(ids, gens)],
+        gens, _, _ = generate_batch(model, tokenizer, ids, max_new_tokens=args.max_new_tokens)
+        reads, _, _ = generate_batch(model, tokenizer, [p + list(g.token_ids) + extractor for p, g in zip(ids, gens)],
                                      max_new_tokens=ANSWER_TOKENS)
         parsed = [spec.parse(r.text) for r in reads]
         return [g.token_ids for g in gens], parsed, [spec.correct(r.text, q.answer) for r, q in zip(reads, dev)]
 
     base_reason, base_parsed, base_correct = run(base_prompt)
+    null = []
+    for _ in range(args.null_reads):
+        reason, parsed, correct = run(base_prompt)
+        null.append({"reasoning_changed": statistics.mean(a != b for a, b in zip(reason, base_reason)),
+                     "answer_changed": statistics.mean(a != b for a, b in zip(parsed, base_parsed)),
+                     "correctness_flipped": statistics.mean(a != b for a, b in zip(correct, base_correct)),
+                     "accuracy_delta": statistics.mean(correct) - statistics.mean(base_correct)})
+        print(json.dumps({"null_read": null[-1]}), flush=True)
     per_edit = {}
     for name in record["edits"]:
         slot, index = name.split(":")
@@ -76,8 +96,12 @@ def main() -> None:
     summary["first_divergence_median"] = statistics.median(
         v["first_divergence_median"] for v in per_edit.values() if v["first_divergence_median"] is not None)
     summary["base_accuracy"] = statistics.mean(base_correct)
+    if null:
+        summary["null"] = {k: statistics.mean(n[k] for n in null)
+                           for k in ("reasoning_changed", "answer_changed", "correctness_flipped")}
     out = {"record": str(args.record), "task": record["task"], "edit_kind": record.get("edit_kind", "block"),
-           "model_path": args.model_path, "per_edit": per_edit, "summary": summary}
+           "model_path": args.model_path, "engine": "vllm-server" if args.gen_server else "hf",
+           "per_edit": per_edit, "null_reads": null, "summary": summary}
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(out, indent=1) + "\n", encoding="utf-8")
     print(json.dumps(summary, indent=1))

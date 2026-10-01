@@ -28,7 +28,7 @@ def serve(model_path: str, host: str, port: int, gpu_memory_utilization: float, 
         try:
             llm = LLM(model=model_path, tokenizer=model_path, dtype="bfloat16", seed=0,
                       gpu_memory_utilization=gpu_memory_utilization, max_model_len=max_model_len,
-                      enable_prefix_caching=True)
+                      enable_prefix_caching=False)  # cached prefixes change numerics; reads must repeat exactly
             break
         except (AssertionError, RuntimeError) as error:
             # vLLM's start-up memory profiling fails if a process sharing the GPU frees

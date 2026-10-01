@@ -51,7 +51,7 @@ def main() -> None:
 
             llm = LLM(model=model_path, tokenizer=model_path, dtype="bfloat16", seed=0,
                       gpu_memory_utilization=args.gpu_memory_utilization, max_model_len=4096,
-                      enable_prefix_caching=True)
+                      enable_prefix_caching=False)  # cached prefixes change numerics; reads must repeat exactly
         tokenizer = load_tokenizer(model_path)
         for path, run in runs:
             started = perf_counter()
