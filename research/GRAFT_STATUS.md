@@ -382,6 +382,19 @@ full; everything lives on `/media/lenovo/data2`.
     three logical-deduction pools and negative on both tracking pools; H-inc (pools 2-5 so far:
     +0.47, +0.19, -0.67, -0.49) is unlikely to pass. The registered test is completed on all
     pools regardless; read-off flips 0.3%, |A| 0.001 vs |D| 0.069 on this pool.
+52. **Reader nondeterminism, second source (2026-10-01 16:45 UTC).** Without prefix caching the
+    first null check (3 reads, 200 questions) was token-identical, but the null inside the
+    Llama-3 token re-roll run changed the greedy reasoning on 54.5% of questions in one re-read
+    and 0% in the other. Cause (most likely): with a 0.40 memory share the KV cache holds far
+    fewer tokens than 200 concurrent sequences need, so vLLM preempts and recomputes sequences,
+    which changes numerics. Fix: `--max-num-seqs` cap so that no preemption can occur
+    (`MAXSEQS` in `ops/with_server.sh`), verified by same-prompt probes before any evaluation
+    job uses a configuration; re-roll studies are re-run under a verified configuration. Search
+    runs may stay nondeterministic (noise shared by all arms); every dev/test read must be
+    reproducible. The H-dist samples and reads used the uncapped server: numerical noise only
+    (it can only inflate the measured read-off flips, which is conservative for |A| << |D|).
+53. **Queue (operational):** Stage C v2 Llama-3 seed 1 (28 runs) now precedes the remaining H-dist
+    pools; the importance-score arm is not in it (H-dist/H-inc unresolved, Llama-3 pools mixed).
 
 ## Next
 
