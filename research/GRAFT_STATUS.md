@@ -377,6 +377,11 @@ full; everything lives on `/media/lenovo/data2`.
     sum_s w_s < 0, to fresh-8) helps on TS7/LD3 and hurts on LD7/LD7-state; not preregistered,
     reported as exploratory only. Read-off flips 0.2-3.2%, |A| << |D| on all four pools.
     Wrong-direction finding for the fixed-trace objective holds on all four.
+51. **H-dist interim, pool 5 (Llama-3 TS3, untouched task):** primary -0.39, incumbent-read -0.49,
+    fresh-8 +0.36, GReaTer objective +0.08. On Llama-3 the importance score is positive on the
+    three logical-deduction pools and negative on both tracking pools; H-inc (pools 2-5 so far:
+    +0.47, +0.19, -0.67, -0.49) is unlikely to pass. The registered test is completed on all
+    pools regardless; read-off flips 0.3%, |A| 0.001 vs |D| 0.069 on this pool.
 
 ## Next
 
