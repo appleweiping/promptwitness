@@ -292,6 +292,14 @@ full; everything lives on `/media/lenovo/data2`.
     on 99% / 97% after 9 / 14 tokens; answers 33% / 54%; correctness 17% / 23%. Token edits
     are somewhat more local but not local. Llama-3 measurement pending (needs its server).
 
+42. **Stage C interim, Qwen3 (seeds 1-2 complete; seed 3 and two re-run random runs
+    pending; evaluated through the Qwen3 vLLM server, same path for all methods and
+    fixed prompts).** Mean test accuracy over 7 tasks: patch 88.6, textgrad 88.3, exact
+    87.6, random 86.0, GReaTer initial 83.5, ZS-CoT 83.5. patch - random +2.5
+    (conditional [+0.4, +4.5], task-level [-0.7, +6.6], W/T/L 4/0/3); patch - initial +5.1
+    (movie recommendation 38 -> 66). Search+selection minutes per run: patch 32, exact 30,
+    textgrad 27, random 20. Interim only; no decision is taken on it.
+
 ## Next
 
 * Fidelity v2 decides the scorer: renormalized patching must beat raw gates and
