@@ -19,7 +19,7 @@ AUTHKEY = b"graft-generation"
 
 
 def serve(model_path: str, host: str, port: int, gpu_memory_utilization: float, max_model_len: int,
-          prefix_caching: bool = False) -> None:
+          prefix_caching: bool = False, max_num_seqs: int | None = None) -> None:
     from vllm import LLM, SamplingParams
     from vllm.inputs import TokensPrompt
 
@@ -27,11 +27,14 @@ def serve(model_path: str, host: str, port: int, gpu_memory_utilization: float, 
 
     for attempt in range(5):
         try:
+            # Cached prefixes and preempted-then-recomputed sequences change numerics, so
+            # repeated reads differ; for exact repeats keep prefix caching off and cap the
+            # number of concurrent sequences so that the KV cache never forces preemption.
+            # The cached configuration exists only to measure its same-prompt flip rate.
+            extra = {"max_num_seqs": max_num_seqs} if max_num_seqs else {}
             llm = LLM(model=model_path, tokenizer=model_path, dtype="bfloat16", seed=0,
                       gpu_memory_utilization=gpu_memory_utilization, max_model_len=max_model_len,
-                      # Cached prefixes change numerics; reads must repeat exactly. The cached
-                      # configuration exists only to measure its same-prompt flip rate.
-                      enable_prefix_caching=prefix_caching)
+                      enable_prefix_caching=prefix_caching, **extra)
             break
         except (AssertionError, RuntimeError) as error:
             # vLLM's start-up memory profiling fails if a process sharing the GPU frees
@@ -97,9 +100,11 @@ def main() -> None:
     parser.add_argument("--max-model-len", type=int, default=4096)
     parser.add_argument("--prefix-caching", action="store_true",
                         help="enable vLLM prefix caching (nondeterministic re-reads; for the null measurement only)")
+    parser.add_argument("--max-num-seqs", type=int, default=None,
+                        help="cap on concurrent sequences (no preemption: deterministic repeated reads)")
     args = parser.parse_args()
     serve(args.model_path, args.host, args.port, args.gpu_memory_utilization, args.max_model_len,
-          args.prefix_caching)
+          args.prefix_caching, args.max_num_seqs)
 
 
 if __name__ == "__main__":
