@@ -220,6 +220,21 @@ def main() -> None:
         c = summary["comparisons"][f"{a}-{b}"]
         print(f"{a + ' - ' + b:30s} regret gain {g0:+.3f} {c['regret_gain_ci_bc']} P>0 {c['p_gain_gt0']:.3f} "
               f"pools {pools_better}/{len(pools)} | d_rho {r0:+.3f} P>0 {c['p_drho_gt0']:.3f}")
+    # Verify-all pipeline: accept the edit with the highest predicted change if it is > 0;
+    # realized gain = its held-out change (0 if nothing is accepted). Same pools, all rows.
+    verifiers = ("fresh8", "fresh_all", "primary", "snis_hard_1.0", "snis_soft_1.0", "fresh_dist", "score_fn",
+                 "answer_exact")
+    summary["verify_all"] = {}
+    print("verify-all pipeline: mean realized held-out change (points), pools improved/worsened")
+    for v in verifiers:
+        gains = []
+        for pool in pools:
+            preds, target = pool.predictors(list(range(pool.n_rows)), list(range(pool.n_q)))
+            best = max(range(len(target)), key=lambda i: preds[v][i])
+            gains.append(target[best] if preds[v][best] > 1e-9 else 0.0)
+        summary["verify_all"][v] = {"mean": statistics.mean(gains), "improved": sum(g > 0 for g in gains),
+                                    "worsened": sum(g < 0 for g in gains), "per_pool": gains}
+        print(f"  {v:16s} {100 * statistics.mean(gains):+6.2f}  +{sum(g > 0 for g in gains)}/-{sum(g < 0 for g in gains)}")
     vs_random = summary["comparisons"]["primary-random"]
     vs_fresh8 = summary["comparisons"]["primary-fresh8"]
     supported = (vs_random["p_gain_gt0"] >= 0.9 and vs_random["pools_with_lower_regret"] >= math.ceil(7 * len(pools) / 11)

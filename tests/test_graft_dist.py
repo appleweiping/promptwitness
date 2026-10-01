@@ -40,6 +40,42 @@ def test_per_row_values_and_beta_choice() -> None:
     assert values["score_fn"][0] == pytest.approx(0.25)  # log w = 0: only the read-off term
 
 
+def test_analyze_dist_runs_on_synthetic_pools(tmp_path, monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    import json
+    import random
+
+    import analyze_dist
+
+    rng = random.Random(0)
+    pairs = []
+    for p in range(3):
+        names = [f"strategy:{i}" for i in range(6)]
+        rows, samples, fresh_samples, questions = 5, 4, 2, 20
+        record = {"edits": names, "task": "toy", "seed": p, "model_path": "/m/models--org--toy/snapshots/x",
+                  "raw": {"base_fresh": [rng.randint(0, 1) for _ in range(rows)],
+                          "base_dev": [rng.randint(0, 1) for _ in range(questions)],
+                          "fresh": {n: [rng.randint(0, 1) for _ in range(rows)] for n in names},
+                          "dev": {n: [rng.randint(0, 1) for _ in range(questions)] for n in names},
+                          "answer_exact": {n: [rng.gauss(0, 1) for _ in range(rows)] for n in names}}}
+        prompts = ["base", *names]
+        dist = {"edits": names, "samples": samples,
+                "logp": {n: [[rng.gauss(-50, 3) for _ in range(samples)] for _ in range(rows)] for n in prompts},
+                "hard": {n: [[rng.randint(0, 1) for _ in range(samples)] for _ in range(rows)] for n in prompts},
+                "soft": {n: [[rng.random() for _ in range(samples)] for _ in range(rows)] for n in prompts},
+                "fresh": {n: [[rng.randint(0, 1) for _ in range(fresh_samples)] for _ in range(rows)]
+                          for n in prompts}}
+        rec_path, dist_path = tmp_path / f"r{p}.json", tmp_path / f"d{p}.json"
+        rec_path.write_text(json.dumps(record), encoding="utf-8")
+        dist_path.write_text(json.dumps(dist), encoding="utf-8")
+        pairs.append(f"{rec_path}={dist_path}")
+    out = tmp_path / "summary.json"
+    monkeypatch.setattr(sys, "argv", ["analyze_dist.py", *pairs, "--replicates", "20", "--json", str(out)])
+    analyze_dist.main()
+    summary = json.loads(out.read_text(encoding="utf-8"))
+    assert len(summary["pools"]) == 3 and "primary-random" in summary["comparisons"]
+    assert isinstance(summary["h_dist_supported"], bool) and "primary" in summary["verify_all"]
+
+
 def test_trace_scores_match_direct_computation() -> None:
     torch = pytest.importorskip("torch")
     transformers = pytest.importorskip("transformers")
