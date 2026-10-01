@@ -188,8 +188,9 @@ def main() -> None:
         return {"mean": statistics.mean(values), "positive": sum(v > 0 for v in values),
                 "negative": sum(v < 0 for v in values), "n": n, "p_signflip": flips / 2 ** n}
 
-    summary: dict = {"runs": [run_name(r) for r in runs], "diagnostics": {}, "predictors": {}, "differences": {},
-                     "pool_level": {}}
+    # JSON keys keep the historical name "regret5"; the k actually used is recorded here.
+    summary: dict = {"runs": [run_name(r) for r in runs], "regret_k": REGRET_K, "diagnostics": {},
+                     "predictors": {}, "differences": {}, "pool_level": {}}
     for run in runs:
         info = diagnostics(run, random.Random(args.seed))
         summary["diagnostics"][run_name(run)] = info
@@ -202,7 +203,7 @@ def main() -> None:
         summary["predictors"][k] = {"rho": point["rho"][k], "rho_ci": [lo, hi],
                                     "regret5": point["regret5"][k], "regret5_ci": [rlo, rhi]}
         print(f"{k:18s} rho {point['rho'][k]:+.3f} [{lo:+.2f}, {hi:+.2f}]   "
-              f"regret5 {point['regret5'][k]:.3f} [{rlo:.3f}, {rhi:.3f}]   pools rho "
+              f"regret@{REGRET_K} {point['regret5'][k]:.3f} [{rlo:.3f}, {rhi:.3f}]   pools rho "
               f"+{summary['pool_level'][k]['rho']['positive']}/-{summary['pool_level'][k]['rho']['negative']} "
               f"p={summary['pool_level'][k]['rho']['p_signflip']:.3f}")
     for a, b in PAIRS:
