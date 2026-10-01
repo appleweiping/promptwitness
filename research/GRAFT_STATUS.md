@@ -300,6 +300,14 @@ full; everything lives on `/media/lenovo/data2`.
     (movie recommendation 38 -> 66). Search+selection minutes per run: patch 32, exact 30,
     textgrad 27, random 20. Interim only; no decision is taken on it.
 
+43. **Scheduling with one GPU (operational, no change to any analysis).** GPU 0 has been
+    held by another user's job for ~22 h. GPU 1 order: Qwen3 Stage C -> its re-runs ->
+    official GReaTer 2-step smoke -> GReaTer gradient vs random on tracking-5 -> Llama-3
+    seeds 1-2 -> GReaTer on geometric shapes -> Llama-3 seed 3 -> Gemma-2 (HF only) ->
+    GReaTer repetition 2 and two more tasks. GPU 0, if freed, draws from the same pools
+    (run claims for Stage C and GReaTer). Server-backed evaluation blocks the search
+    queue while it runs (6 h for 42 Qwen3 runs).
+
 ## Next
 
 * Fidelity v2 decides the scorer: renormalized patching must beat raw gates and
