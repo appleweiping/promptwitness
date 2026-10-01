@@ -7,6 +7,8 @@ fresh samples per prompt. Predictors (per edit; mean over rows of the per-row va
 
   snis_hard_b   sum_s w^b hard'_s / sum_s w^b - mean_s hard_s(incumbent)      b in {0,1/4,1/2,1}
   snis_soft_b   the same with soft reads (b = 0: fixed-reasoning answer objective over samples)
+  snis_incread_b  the incumbent's own hard reads reweighted (no candidate reads; isolates the
+                change of the reasoning distribution; exploratory, added after pool 1)
   primary       snis_hard at b* = largest of {1, 1/2, 1/4} whose median (over edits) of the
                 median (over rows) effective sample size is >= S/4 (else 1/4); no targets used
   score_fn      Cov_s(hard'_s, log w_s) + mean_s(hard'_s - hard_s)   (first-order version)
@@ -59,6 +61,7 @@ def per_row_values(dist: dict, name: str, beta_star: float) -> dict[str, list[fl
     """Per training row, every distributional predictor for one edit."""
     out: dict[str, list[float]] = {f"snis_hard_{b}": [] for b in BETAS}
     out |= {f"snis_soft_{b}": [] for b in BETAS}
+    out |= {f"snis_incread_{b}": [] for b in BETAS[1:]}
     out |= {"primary": [], "score_fn": [], "fresh_dist": []}
     for x in range(len(dist["logp"]["base"])):
         logw = [a - b for a, b in zip(dist["logp"][name][x], dist["logp"]["base"][x])]
@@ -68,6 +71,8 @@ def per_row_values(dist: dict, name: str, beta_star: float) -> dict[str, list[fl
         for b in BETAS:
             out[f"snis_hard_{b}"].append(snis(logw, hard_c, b) - base_hard)
             out[f"snis_soft_{b}"].append(snis(logw, soft_c, b) - base_soft)
+            if b > 0:  # reasoning-distribution term only: the incumbent's own reads, reweighted
+                out[f"snis_incread_{b}"].append(snis(logw, hard_b, b) - base_hard)
         out["primary"].append(snis(logw, hard_c, beta_star) - base_hard)
         mean_w, mean_c = statistics.mean(logw), statistics.mean(hard_c)
         cov = statistics.mean((c - mean_c) * (w - mean_w) for c, w in zip(hard_c, logw))

@@ -247,3 +247,14 @@ C5 Stage C ablations (gate, random, exact) plus fidelity estimator ablations.
   distributional importance signal is not pursued as a search method and is reported as a
   negative result. Cost (GPU-seconds, generated and teacher-forced tokens) is reported for every
   predictor.
+* 2026-10-01 ~13:55 UTC, after inspecting only pool 1 of H-dist (Llama-3 LD7 s101), before any
+  other H-dist pool output exists: **secondary hypothesis H-inc (reasoning-distribution term
+  only).** On pool 1, reweighting the incumbent's *own* hard reads of its samples by the exact
+  likelihood ratios, sum_s w_s^beta c_P(x, r_s) / sum_s w_s^beta - mean_s c_P(x, r_s), ranked edits
+  at least as well as the preregistered primary (rho +0.54 at beta 1/4, best-3 regret ~0) while
+  needing no generation or reads under the candidates. Because it was defined after seeing pool
+  1, H-inc is tested only on the remaining 10 pools: predictor `inc_primary` = this estimate at
+  the same target-free beta* as the primary; criterion identical to the H-dist kill criterion
+  (pooled best-3 regret below random with P >= 0.9, lower than random in >= 7 of the 10 pools,
+  pooled Spearman not below fresh-8 by more than 0.05). The beta curve {1/4, 1/2, 1} is reported.
+  Pool 1 is reported as exploratory for H-inc. H-dist itself is unchanged (all 11 pools).
