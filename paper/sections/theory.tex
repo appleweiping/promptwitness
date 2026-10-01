@@ -19,11 +19,12 @@ term that a gradient taken over a fixed reasoning drops.
 
 \begin{proposition}[Faithful reading]
 \label{prop:faithful}
-If, for every candidate $P'$ and every reasoning $r$, the answer read under $P'$ is the answer
-read under $P$ except on a set of $\pi_P$-probability at most $\varepsilon$, then $|A|\le\varepsilon$
-and $J(P')-J(P)=D\pm\varepsilon$. On a question whose reasoning $r$ supports a wrong answer $a$, a
-candidate lowers \greater{}'s loss only by moving probability from $a$---the answer the reasoning
-supports---to $y$, i.e.\ by reading against its own reasoning.
+If, for every candidate $P'$, the answer read under $P'$ equals the answer read under $P$ except
+on a set of reasonings of $\pi_P$-probability at most $\varepsilon$, then $|A|\le\varepsilon$ and
+$J(P')-J(P)=D\pm\varepsilon$. Moreover, on a question whose reasoning $r$ supports a wrong answer
+$a\neq y$, every decrease of \greater{}'s loss on $r$ raises the probability of reading an answer
+that the reasoning does not support, and a decrease by $\delta>0$ nats implies
+$q_{P'}(a\mid x,r)\le1-e^{\delta}q_P(y\mid x,r)$.
 \end{proposition}
 
 The proof is immediate from Eq.~\ref{eq:decomp} and $q_{P'}(a\mid x,r)+q_{P'}(y\mid x,r)\le1$.
