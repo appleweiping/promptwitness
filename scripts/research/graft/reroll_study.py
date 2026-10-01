@@ -33,6 +33,7 @@ def main() -> None:
     parser.add_argument("--data-dir", type=Path, required=True)
     parser.add_argument("--gen-server", help="vLLM generation server; without it the HF model generates")
     parser.add_argument("--null-reads", type=int, default=2, help="extra reads of the incumbent (null control)")
+    parser.add_argument("--null-only", action="store_true", help="measure only the same-prompt null")
     parser.add_argument("--max-new-tokens", type=int, default=384, help="the validity studies' budget")
     parser.add_argument("--dev", type=int, default=200)
     parser.add_argument("--output", type=Path, required=True)
@@ -75,7 +76,7 @@ def main() -> None:
                      "accuracy_delta": statistics.mean(correct) - statistics.mean(base_correct)})
         print(json.dumps({"null_read": null[-1]}), flush=True)
     per_edit = {}
-    for name in record["edits"]:
+    for name in ([] if args.null_only else record["edits"]):
         slot, index = name.split(":")
         edit = (slot, None if index == "del" else int(index))
         reason, parsed, correct = run(apply(base_prompt, pools, edit))
@@ -91,10 +92,12 @@ def main() -> None:
             "first_divergence_median": statistics.median(firsts) if firsts else None,
         }
         print(json.dumps({"edit": name, **per_edit[name]}), flush=True)
-    summary = {k: statistics.mean(v[k] for v in per_edit.values())
-               for k in ("reasoning_changed", "answer_changed", "correctness_flipped")}
-    summary["first_divergence_median"] = statistics.median(
-        v["first_divergence_median"] for v in per_edit.values() if v["first_divergence_median"] is not None)
+    summary: dict = {}
+    if per_edit:
+        summary = {k: statistics.mean(v[k] for v in per_edit.values())
+                   for k in ("reasoning_changed", "answer_changed", "correctness_flipped")}
+        medians = [v["first_divergence_median"] for v in per_edit.values() if v["first_divergence_median"] is not None]
+        summary["first_divergence_median"] = statistics.median(medians) if medians else None
     summary["base_accuracy"] = statistics.mean(base_correct)
     if null:
         summary["null"] = {k: statistics.mean(n[k] for n in null)
