@@ -1,0 +1,60 @@
+--- a/experiments/main.py
++++ b/experiments/main.py
+@@ -34,6 +34,10 @@
+     train_goals, train_targets, test_goals, test_targets, train_final_target, test_final_target = get_goals_and_targets(params)
+ 
+     workers, test_workers = get_workers(params)
++    # GRAFT single-GPU adaptation: the official transfer configs load the same model twice
++    # (gradient worker and reasoning worker); with one local copy it serves both roles.
++    if not test_workers:
++        test_workers = workers
+ 
+     managers = {
+         "AP": attack_lib.Prompter,
+@@ -63,25 +67,27 @@
+             test_final_target =  test_final_target
+         )
+ 
+-    prompt_optimizer.run(
+-        n_steps=params.n_steps,
+-        batch_size=params.batch_size, 
+-        topk=params.topk,
+-        temp=params.temp,
+-        topq=params.topq,
+-        target_weight=params.target_weight,
+-        control_weight=params.control_weight,
+-        test_steps=getattr(params, 'test_steps', 1),
+-        anneal=params.anneal,
+-        incr_control=params.incr_control,
+-        stop_on_success=params.stop_on_success,
+-        verbose=params.verbose,
+-        filter_cand=params.filter_cand,
+-        allow_non_ascii=params.allow_non_ascii,
+-    )
++    try:
++        prompt_optimizer.run(
++            n_steps=params.n_steps,
++            batch_size=params.batch_size, 
++            topk=params.topk,
++            temp=params.temp,
++            topq=params.topq,
++            target_weight=params.target_weight,
++            control_weight=params.control_weight,
++            test_steps=getattr(params, 'test_steps', 1),
++            anneal=params.anneal,
++            incr_control=params.incr_control,
++            stop_on_success=params.stop_on_success,
++            verbose=params.verbose,
++            filter_cand=params.filter_cand,
++            allow_non_ascii=params.allow_non_ascii,
++        )
+ 
+-    for worker in workers + test_workers:
+-        worker.stop()
++    finally:
++        for worker in {id(w): w for w in workers + test_workers}.values():
++            worker.stop()
+ 
+ if __name__ == '__main__':
+     app.run(main)
+\ ????????

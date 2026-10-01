@@ -269,19 +269,7 @@ def apply(prompt: StructuredPrompt, pools: dict[str, list[str]], edit: Edit) -> 
 
 def delete_block(prompt: StructuredPrompt, slot: str) -> StructuredPrompt:
     """Empty a block (it stays as an insertion slot)."""
-    from dataclasses import replace
-
-    old = next(b for b in prompt.blocks if b.block_id == slot)
-    size = len(old.text)
-    blocks = tuple(
-        replace(b, text="", source_end=b.source_start) if b.block_id == slot else
-        replace(b, source_start=b.source_start - size, source_end=b.source_end - size)
-        if b.message_id == old.message_id and b.source_start >= old.source_end else b
-        for b in prompt.blocks)
-    messages = tuple(
-        replace(m, content=m.content[: old.source_start] + m.content[old.source_end:])
-        if m.message_id == old.message_id else m for m in prompt.document.messages)
-    return StructuredPrompt(replace(prompt.document, messages=messages), blocks)
+    return graft_tasks.delete_block(prompt, slot)
 
 
 def score_edits(method: str, runner: Runner, scorer: GateScorer, prompt: StructuredPrompt,  # noqa: PLR0913

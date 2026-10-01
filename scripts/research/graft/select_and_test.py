@@ -60,7 +60,7 @@ def main() -> None:
             ledger = Ledger()
             reader = (RemoteReader(tokenizer, spec, ledger, args.max_new_tokens) if args.gen_server
                       else VllmReader(model_path, tokenizer, spec, ledger, args.max_new_tokens, llm=llm))
-            prompts = [graft_tasks.prompt_from_blocks(c["blocks"]) for c in run["checkpoints"]]
+            prompts = [graft_tasks.prompt_from_record(c["blocks"], c["text"]) for c in run["checkpoints"]]
             dev = [reader.evaluate(p, splits["dev"], "dev") for p in prompts]
             scores = [d["accuracy"] for d in dev]
             chosen = max(range(len(prompts)), key=lambda i: (scores[i], i))

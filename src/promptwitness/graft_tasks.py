@@ -211,9 +211,51 @@ def prompt_from_blocks(pieces: list[tuple[str, str, str, bool]] | list[list[obje
     return StructuredPrompt(document, tuple(blocks))
 
 
+def delete_block(prompt: StructuredPrompt, slot: str) -> StructuredPrompt:
+    """Empty a block; it stays in place as an insertion slot."""
+    from dataclasses import replace
+
+    old = next(b for b in prompt.blocks if b.block_id == slot)
+    size = len(old.text)
+    blocks = tuple(
+        replace(b, text="", source_end=b.source_start) if b.block_id == slot else
+        replace(b, source_start=b.source_start - size, source_end=b.source_end - size)
+        if b.message_id == old.message_id and b.source_start >= old.source_end else b
+        for b in prompt.blocks)
+    messages = tuple(
+        replace(m, content=m.content[: old.source_start] + m.content[old.source_end:])
+        if m.message_id == old.message_id else m for m in prompt.document.messages)
+    return StructuredPrompt(replace(prompt.document, messages=messages), blocks)
+
+
 def prompt_blocks(prompt: StructuredPrompt) -> list[list[object]]:
-    """JSON-serializable pieces; ``prompt_from_blocks(prompt_blocks(p))`` renders like ``p``."""
-    return [[b.block_id, b.kind.value, b.text, b.editable] for b in prompt.blocks]
+    """JSON-serializable pieces in message order; ``prompt_from_blocks`` of them renders like ``p``.
+
+    Filling an empty slot moves an empty block that shares its offset behind it, so tuple
+    order can differ from message order; serializing in tuple order (as before 2026-10-01)
+    could swap two blocks that later both hold text.
+    """
+    ordered = sorted(prompt.blocks, key=lambda b: (b.source_start, b.source_end))
+    return [[b.block_id, b.kind.value, b.text, b.editable] for b in ordered]
+
+
+def prompt_from_record(blocks: list[list[object]], text: str) -> StructuredPrompt:
+    """Rebuild a recorded prompt whose block list may be in tuple order (older run records).
+
+    Uses the recorded order if it reproduces the recorded message text, otherwise the
+    unique order of the same blocks that does (the first block, the input, stays first).
+    """
+    prompt = prompt_from_blocks(blocks)
+    if prompt.document.messages[0].content == text:
+        return prompt
+    from itertools import permutations
+
+    head, rest = blocks[0], blocks[1:]
+    matches = [order for order in permutations(rest)
+               if "".join(str(b[2]) for b in (head, *order)) == text]
+    if not matches:
+        raise ValueError("no order of the recorded blocks reproduces the recorded prompt")
+    return prompt_from_blocks([head, *matches[0]])
 
 
 _PREAMBLE = re.compile(

@@ -1,8 +1,13 @@
 # GRAFT research status (living document)
 
 Branch `research/graft`. ARIS stage: Workflow 1 done (idea + cross-model review),
-Workflow 1.5 (experiment bridge) in progress. Target: ACL Rolling Review (Oct 12 or
-Dec 20, 2026 cycle), GReaTer-level protocol and writing quality.
+Workflow 1.5 (experiment bridge) in progress. Target (user instruction of 2026-10-01): an
+ICLR main-track submission in the ICLR template, GReaTer-level protocol, scale and writing
+quality, high novelty. The ICLR 2027 deadline (Sep 25, 2026) has passed and nothing was
+submitted, so the goal is a submission-ready paper for the next ICLR-class deadline.
+From 2026-10-01 the ARIS executor and reviewer are both Claude Opus 5.5 (user instruction);
+reviews run in fresh-context subagents that read the repository and raw results directly,
+recorded as same-family reviews.
 
 ## Locations
 
@@ -307,6 +312,35 @@ full; everything lives on `/media/lenovo/data2`.
     GReaTer repetition 2 and two more tasks. GPU 0, if freed, draws from the same pools
     (run claims for Stage C and GReaTer). Server-backed evaluation blocks the search
     queue while it runs (6 h for 42 Qwen3 runs).
+
+44. **2026-10-01: two bugs found and fixed; no completed number changes except as stated.**
+    (i) `delete_block` could produce an unordered block partition (zero-width block tied in
+    offset with a non-empty block earlier in tuple order) after a sequence "empty a block,
+    fill the neighbouring empty slot (which moves the emptied block behind it), refill, empty
+    again"; the validator then raised, which crashed `qwen3-movie_recommendation-patch-s3`.
+    Blocks are now ordered by (start, end), which only changes previously failing cases.
+    (ii) Run records serialized checkpoint blocks in tuple order, and `select_and_test.py`
+    rebuilt prompts by concatenating them, so a reordered prompt was rebuilt with two blocks
+    swapped. Audit over all 63 Stage C run records (`audit_checkpoint_order.py`): 4 of 244
+    checkpoints affected (qwen3 navigate patch s2 r12, navigate patch s3 r8, tracking-5
+    random s1 r4/r12). Records are now written in message order and the evaluator rebuilds
+    from the recorded text (`prompt_from_record`); the affected runs are re-evaluated and the
+    movie patch s3 run is re-run before any Stage C number is final.
+45. **Official GReaTer smoke (2 steps) crashed on one GPU:** the official transfer configs load
+    the same model twice (gradient worker and a reasoning "test worker" on a second GPU); our
+    one-copy config had no test worker (`IndexError` in `morph_control`), and the spawned
+    worker kept the process alive holding 37 GB on GPU 1. Fix
+    (`scripts/research/graft/greater_single_gpu.patch`): the single model serves both roles
+    (identical weights, so the algorithm is unchanged), and workers are stopped in a
+    `finally` block. The runtime script's claim name now includes the steps suffix, so a smoke
+    run no longer claims the full run.
+46. **Opus 5.5 strategic review (ARIS research-review, 2026-10-01):** as is, 4-5/10 at ICLR
+    (negative headline, no positive method; strawman risk; instrument without a customer;
+    missing citations incl. "Textual Gradients are a Flawed Metaphor", Library of Babel,
+    Faster-GCG gradient/loss concordance, AttriBoT, Block-Attention/EPIC, coupled generation).
+    Recommended direction: gradients over the *distribution* of reasoning (exact likelihood
+    ratios of self-generated reasoning under each edit; GReaTer as the fixed-reasoning
+    special case), gated by a preregistered kill test before any further investment.
 
 ## Next
 

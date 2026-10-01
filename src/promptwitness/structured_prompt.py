@@ -45,6 +45,15 @@ class PromptBlock:
             raise ValueError("required literals must occur in the source block")
 
 
+def _span_order(block: PromptBlock) -> tuple[int, int]:
+    """Message order of blocks: an empty block at offset p precedes text starting at p.
+
+    Sorting by start alone let tuple order decide such ties, so emptying a block whose
+    neighbour had moved to the same offset produced an unordered partition.
+    """
+    return block.source_start, block.source_end
+
+
 @dataclass(frozen=True, slots=True)
 class TokenizedPrompt:
     text: str
@@ -79,7 +88,7 @@ class StructuredPrompt:
             message_id = message.message_id
             if message_id is None:
                 raise ValueError("structured prompts require message IDs")
-            parts = sorted(by_message[message_id], key=lambda block: block.source_start)
+            parts = sorted(by_message[message_id], key=_span_order)
             cursor = 0
             for block in parts:
                 if block.source_start != cursor:
@@ -140,7 +149,7 @@ class StructuredPrompt:
         for message in self.document.messages:
             parts = sorted(
                 (block for block in self.blocks if block.message_id == message.message_id),
-                key=lambda block: block.source_start,
+                key=_span_order,
             )
             # Several chat templates (Llama-3, Gemma-2) trim message content. Trim at
             # block level for every model so all templates see identical content and

@@ -45,6 +45,27 @@ def test_prompt_blocks_round_trip_after_edits() -> None:
                [(b.block_id, b.kind, b.text, b.editable, b.source_start, b.source_end) for b in p.blocks]
 
 
+def test_slot_reordering_survives_delete_and_round_trip() -> None:
+    # The edit sequence behind the failed Qwen3 movie_recommendation patch s3 run: an emptied
+    # strategy block is moved behind the procedure slot when that slot is filled; refilling
+    # strategy and then emptying procedure left a zero-width block tied in offset with text.
+    prompt = graft_tasks.initial_prompt()
+    prompt = graft_tasks.delete_block(prompt, "strategy")
+    prompt = prompt.replace_block("procedure", "List the facts.\n")
+    prompt = prompt.replace_block("strategy", "Think step by step.\n")
+    content = prompt.document.messages[0].content
+    assert content.index("List the facts.") < content.index("Think step by step.")
+    emptied = graft_tasks.delete_block(prompt, "procedure")  # raised ValueError before the fix
+    assert "List the facts." not in emptied.document.messages[0].content
+    for p in (prompt, emptied):
+        back = graft_tasks.prompt_from_blocks(graft_tasks.prompt_blocks(p))
+        assert back.document.messages[0].content == p.document.messages[0].content
+    # Records written before the fix list blocks in tuple order; rebuild them from the text.
+    old_record = [[b.block_id, b.kind.value, b.text, b.editable] for b in prompt.blocks]
+    assert graft_tasks.prompt_from_blocks(old_record).document.messages[0].content != content
+    assert graft_tasks.prompt_from_record(old_record, content).document.messages[0].content == content
+
+
 class _Tokenizer:
     eos_token_id = 2
     unk_token_id = 0
