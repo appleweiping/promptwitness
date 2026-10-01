@@ -59,10 +59,14 @@ zero on $200$ questions (Appendix~\ref{app:results}).
 
 \begin{table}[t]
 \centering
-\caption{\textbf{Where an edit's effect lives} (Eq.~\ref{eq:decomp}, estimated on the incumbent's
-$16$ samples per training question). Read-off flips: fraction of (candidate, question, sample)
-whose hard read of the same reasoning changes; $|A|$, $|D|$: mean absolute read-off and
-reasoning-distribution terms per edit (accuracy points$/100$); sd of the log-likelihood ratios.}
+\caption{\textbf{The answer read-off term is small and unpredictive} (Eq.~\ref{eq:decomp}; the
+incumbent's $16$ samples per training question, read under the incumbent and under each
+candidate). Read-off flips: fraction of (candidate, question, sample) whose hard read of the same
+reasoning changes; $|A|$: mean absolute read-off term per edit; $|\Delta_{\text{held-out}}|$,
+$|\Delta_{\text{fresh}}|$: mean absolute change of held-out greedy accuracy and of fresh sampled
+accuracy on the training questions (accuracy points); $\rho$: Spearman between $A$ and the
+held-out change; KL: median over edits of $-\mathbb{E}_{\pi_P}\log w$ per reasoning (nats);
+sd$_x$: mean within-question standard deviation of $\log w$.}
 \label{tab:readoff}
 \small
 \input{tables/readoff}

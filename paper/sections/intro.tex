@@ -31,10 +31,12 @@ fresh evaluation is positive in $9$--$10$ of $11$. Under a deterministic reader,
 reasoning they are scored on, and verifying candidates on small minibatches picks noise.
 \item \emph{A decomposition and a fix} (\S\ref{sec:theory}). An edit's effect on accuracy splits
 exactly into a reasoning-distribution term and an answer read-off term; the fixed-reasoning
-objective sees only the read-off term, which on the models' own samples is three to twenty times
-smaller and, on wrongly answered questions, rewards reading against one's own reasoning. Exact
-likelihood ratios of the model's own sampled reasoning recover the missing term without
-generating under any candidate: \todo{H-dist / H-inc pooled results}.
+objective sees only the read-off term, which on the models' own samples is a small fraction of
+the edits' effects, does not predict them, and on wrongly answered questions rewards reading
+against one's own reasoning. Edits shift the reasoning distribution by about ten nats per
+reasoning, so the natural repair---reweighting the model's own samples by exact likelihood
+ratios---fails a preregistered test \todo{final 11-pool numbers}: what an edit does must be
+observed on fresh reasoning.
 \item \emph{End-to-end and at scale} (\S\ref{sec:experiments}). \todo{Stage C v2: dist vs
 \greater{}-lifted vs random vs textual gradients at matched verification; official \greater{} with
 gradient vs random shortlist; breadth over 21 BBH tasks, GSM8K and FOLIO.}

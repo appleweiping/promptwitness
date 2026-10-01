@@ -40,11 +40,14 @@ LLM-proposed block edits in the \emph{wrong} direction (8 of 11 proposal pools; 
 shortlist worse than random in 8 of 11), while fresh evaluation is positive. We trace the failure
 to what the gradient is taken over: an edit's effect on accuracy decomposes exactly into a change
 of the reasoning distribution and a change of how answers are read off a fixed reasoning, and the
-fixed-reasoning objective sees only the second, which on the models' own samples is three to twenty
-times smaller and on wrongly answered questions rewards reading against the reasoning. Scoring
-edits instead by exact likelihood ratios of the model's own sampled reasoning---a tempered
-self-normalized importance estimate that needs no generation under any candidate---\todo{validity
-and end-to-end results}. Verifying candidates on small minibatches, finally, chases noise.
+fixed-reasoning objective sees only the second, which on the models' own samples is a small
+fraction of the edits' effects, does not predict them, and on wrongly answered questions rewards
+reading against the reasoning. Edits move the reasoning distribution by about ten nats per
+reasoning, beyond what reweighting the model's own samples by exact likelihood ratios can cover:
+this principled repair fails a preregistered test \todo{final numbers}. What edits do must be
+observed on fresh reasoning, and verifying candidates on small minibatches chases noise;
+\todo{end-to-end: structural search with full verification vs \greater{}; gradient vs random
+shortlist inside official \greater{}}.
 \end{abstract}
 
 \input{sections/intro}

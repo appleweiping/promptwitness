@@ -10,7 +10,7 @@ published prompts, so comparisons with those prompts are also reported on the cl
 Hypotheses, protocols and every amendment were dated before the data they concern
 (Appendix~\ref{app:prereg}); failed hypotheses are reported as registered.
 
-\subsection{Distributional scores rank structural edits}
+\subsection{Reweighting the model's own samples does not rescue the signal}
 \label{sec:exp-validity}
 On the eleven pools of \S\ref{sec:diagnosis} (same questions, edits and held-out targets) we drew
 $S=16$ reasonings per training question under the incumbent ($\tau=0.7$, no truncation of the
@@ -24,10 +24,9 @@ validity vs.\ $\beta$; verify-all pipeline with each verifier; cost.}
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{figures/beta.png}
-\caption{\textbf{Validity as a function of the importance tempering $\beta$.} $\beta=0$ is the
-fixed-reasoning family; reweighting the model's own samples by exact likelihood ratios turns a
-negative signal positive. Left: pooled Spearman with the held-out change (bias-corrected bootstrap
-ranges); right: best-3 regret against a random shortlist.}
+\caption{\textbf{Validity as a function of the importance tempering $\beta$} ($\beta=0$: the
+fixed-reasoning family). Left: pooled Spearman with the held-out change (bootstrap ranges); right:
+best-3 regret against a random shortlist. \todo{final 11-pool figure.}}
 \label{fig:beta}
 \end{figure}
 

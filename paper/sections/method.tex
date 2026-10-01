@@ -1,39 +1,36 @@
-\section{Distributional self-optimization of structured prompts}
+\section{Structural self-optimization}
 \label{sec:method}
 
 \begin{algorithm}[t]
-\caption{Structural shortlist-then-verify search (one round); arms differ only in line 4}
+\caption{Structural shortlist-then-verify search (one round); arms differ only in line 3}
 \label{alg:search}
 \begin{algorithmic}[1]
-\Require model $f_\theta$, typed incumbent $P$, training questions $D$ ($|D|=50$), scoring
-questions $D_s\subset D$, shortlist size $\mu$
-\State propose $K$ label-free candidates per slot with $f_\theta$ from unlabeled questions
-\State keep edits that tokenize cleanly at block boundaries and preserve required literals
-\State \textbf{if} no samples for $P$: draw $S$ reasonings per $x\in D_s$ under $P$ at temperature $\tau$; read them under $P$
-\State score every edit: \textsc{dist}: $\widehat\Delta_{\beta^\ast}$ (Eq.~\ref{eq:snis}) from exact $\log w$ on the shared samples;
-\Statex \hspace{1.2em} controls: \greater{}'s objective (one pass, \S\ref{sec:calculus}); exact fixed-reasoning loss; random
-\State regenerate greedy reasoning on all of $D$ for the top-$\mu$ edits
+\Require model $f_\theta$, typed incumbent $P$, training questions $D$ ($|D|=50$), shortlist size $\mu$
+\State propose $K$ label-free candidates per slot with $f_\theta$ from unlabeled questions; keep edits
+that tokenize cleanly at block boundaries and preserve required literals
+\State compute the incumbent's greedy reasoning on $D$
+\State shortlist $\mu$ edits: \greater{}'s objective lifted to blocks (one pass, \S\ref{sec:calculus});
+exact fixed-reasoning loss; or uniformly at random
+\State regenerate greedy reasoning on all of $D$ for the shortlisted edits
 \State accept the best if it makes fewer errors on $D$ than $P$ (ties: answer loss)
 \end{algorithmic}
 \end{algorithm}
 
 Algorithm~\ref{alg:search} lifts \greater{}'s loop to blocks. As in \greater{}, the model proposes
 candidates, a signal shortlists them, and fresh reasoning on all training questions decides; the
-model optimizes its own prompt and supervision enters only through correctness. \textsc{dist}
-replaces the shortlist signal by the distributional score: $S$ reasonings per scoring question are
-sampled once per incumbent and reused while it stays the incumbent, so the per-round cost is one
-teacher-forced pass per candidate and sample; nothing is generated under candidates before
-verification. $\beta^\ast$ is chosen per round from the effective sample size (\S\ref{sec:theory}).
-The controls isolate the shortlist signal: \greater{}'s objective lifted to blocks (patched, the
-one-pass estimate; exact, one pass per edit), a uniformly random shortlist drawn from its own
-random stream (minibatches and proposals are identical across arms for a seed), and a
-textual-gradient arm in which the same model critiques failed training questions and rewrites
-each block (a different method class, not a matched-pool control). Dev questions select among the
-incumbents at four evenly spaced rounds; the selected prompt is read once on test.
+model optimizes its own prompt and supervision enters only through correctness. The arms isolate
+the shortlist signal: \greater{}'s objective (patched, the one-pass estimate; exact, one pass per
+edit) and a uniformly random shortlist drawn from its own random stream (minibatches and proposals
+are identical across arms for a seed). A textual-gradient arm, in which the same model critiques
+failed training questions and rewrites each block, is a different method class, not a matched-pool
+control. A verification-noise control verifies on random $8$-question minibatches instead of all
+$50$ questions. Dev questions select among the incumbents at four evenly spaced rounds; the
+selected prompt is read once on test.
 
 \paragraph{Reading.} Every prompt in a comparison is read by one engine with identical
 token-level rendering: greedy reasoning, the task-typed extractor inside the assistant turn and
-$16$ greedy answer tokens parsed by answer type. The engine is configured to be deterministic
-(no prefix caching; one prompt's questions per request), which we verified by repeated reads;
-reasoning budgets are $1{,}024$ tokens during search and $4{,}096$ for dev selection and test, and
-truncation rates are reported.
+$16$ greedy answer tokens parsed by answer type. The engine is configured so that repeated reads
+are identical (no prefix caching; a cap on concurrent sequences so that no sequence is preempted
+and recomputed), which we verify by repeated reads (Appendix~\ref{app:reader}); reasoning budgets
+are $1{,}024$ tokens during search and $4{,}096$ for dev selection and test, and truncation rates
+are reported.
