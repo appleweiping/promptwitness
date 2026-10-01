@@ -36,7 +36,8 @@ echo "extractor: $EXTRACTOR"
 cd $G/experiments
 START=$(date +%s)
 echo "START greater-$NAME gpu$GPU $(date -u +%FT%TZ)"
-GREATER_GEN_FRACTION=0.125 GREATER_SHORTLIST=$SHORT CUDA_VISIBLE_DEVICES=$GPU /media/lenovo/data2/greater-official/venv/bin/python main.py \
+nvidia-smi --query-gpu=index,memory.used --format=csv,noheader; nvidia-smi --query-compute-apps=pid,used_memory --format=csv,noheader
+PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True GREATER_GEN_FRACTION=0.125 GREATER_SHORTLIST=$SHORT CUDA_VISIBLE_DEVICES=$GPU /media/lenovo/data2/greater-official/venv/bin/python main.py \
   --config="./configs/local_llama3_1gpu.py" \
   --config.train_data="../data/BBH_graft/${TASK}.json" --config.test_data="../data/BBH_graft/${TASK}.json" \
   --config.result_prefix="$R/greater_rerun/$NAME" \

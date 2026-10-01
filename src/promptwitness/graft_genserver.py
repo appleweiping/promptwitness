@@ -101,8 +101,15 @@ def main() -> None:
     parser.add_argument("--prefix-caching", action="store_true",
                         help="enable vLLM prefix caching (nondeterministic re-reads; for the null measurement only)")
     parser.add_argument("--max-num-seqs", type=int, default=None,
-                        help="cap on concurrent sequences (no preemption: deterministic repeated reads)")
+                        help="cap on concurrent sequences (no preemption)")
+    parser.add_argument("--inproc", action="store_true",
+                        help="run the vLLM engine core in this process, so every request of a call is "
+                             "enqueued before the first step (batch composition independent of timing)")
     args = parser.parse_args()
+    if args.inproc:
+        import os
+
+        os.environ["VLLM_ENABLE_V1_MULTIPROCESSING"] = "0"
     serve(args.model_path, args.host, args.port, args.gpu_memory_utilization, args.max_model_len,
           args.prefix_caching, args.max_num_seqs)
 

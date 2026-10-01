@@ -21,7 +21,7 @@ export CUDA_VISIBLE_DEVICES=$GPU PYTHONPATH=$PWD/src:$PWD/scripts/research/graft
 mkdir -p $R/cc/logs
 SLOG=$R/cc/logs/genserver-$KEY-gpu$GPU-$PORT.log
 setsid $VV -m promptwitness.graft_genserver --model-path $M --port $PORT --gpu-memory-utilization $MEM \
-  --max-model-len ${MAXLEN:-4096} ${MAXSEQS:+--max-num-seqs $MAXSEQS} $EXTRA > $SLOG 2>&1 &
+  --max-model-len ${MAXLEN:-4096} ${MAXSEQS:+--max-num-seqs $MAXSEQS} ${INPROC:+--inproc} $EXTRA > $SLOG 2>&1 &
 SERVER=$!
 for i in $(seq 200); do grep -q READY $SLOG && break; kill -0 $SERVER 2>/dev/null || break; sleep 3; done
 if ! grep -q READY $SLOG; then
