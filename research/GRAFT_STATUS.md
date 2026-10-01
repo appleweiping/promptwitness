@@ -366,6 +366,18 @@ full; everything lives on `/media/lenovo/data2`.
     re-roll with null) -> Qwen3 (same) -> Qwen3 null with prefix caching on -> Gemma-2 H-dist
     (HF only) -> Llama-3 Stage C seeds 1-2. Queue file `cc/gpu1.queue` (editable while running).
 
+50. **H-dist interim, 4 of 11 pools (Llama-3; exploratory reading, no decision):** primary
+    (tempered SNIS, candidate reads) rho +0.54, +0.47, +0.19, **-0.67** (LD7, LD7 state, LD3,
+    TS7); incumbent-read variant similar; GReaTer objective -0.55, -0.48, -0.41, -0.66; fresh-8
+    +0.48, -0.07, +0.27, +0.48. On TS7 the score favours edits that impose elaborate procedures,
+    which shift the reasoning distribution by 35-50 nats (mean log w) and are the worst edits on
+    held-out (-10 to -17 points): off-policy evaluation fails where a candidate's reasoning lies
+    outside the incumbent's samples, and self-normalization hides it. A label-free coverage gate
+    (route edits whose samples carry less than one unit of the candidate's mass, median log
+    sum_s w_s < 0, to fresh-8) helps on TS7/LD3 and hurts on LD7/LD7-state; not preregistered,
+    reported as exploratory only. Read-off flips 0.2-3.2%, |A| << |D| on all four pools.
+    Wrong-direction finding for the fixed-trace objective holds on all four.
+
 ## Next
 
 * Fidelity v2 decides the scorer: renormalized patching must beat raw gates and
