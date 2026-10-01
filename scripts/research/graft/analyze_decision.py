@@ -133,6 +133,7 @@ def main() -> None:
         raise SystemExit("no records with raw per-row data (decision_study v3)")
     rng = random.Random(args.seed)
     point: dict[str, dict[str, float]] = {}
+    point_runs: dict[str, dict[str, list[float]]] = {}
     boot: dict[str, dict[str, list[float]]] = {m: {k: [] for k in KEYS} for m in ("rho", "regret5")}
     for replicate in range(args.replicates + 1):
         per: dict[str, dict[str, list[float]]] = {m: {k: [] for k in KEYS} for m in ("rho", "regret5")}
@@ -154,43 +155,73 @@ def main() -> None:
                     per["regret5"][k].append(regret5(preds[k], target))
         means = {m: {k: statistics.mean(v) for k, v in d.items()} for m, d in per.items()}
         if replicate == 0:
-            point = means
+            point, point_runs = means, per
             continue
         for m in boot:
             for k in KEYS:
                 boot[m][k].append(means[m][k])
 
-    def interval(values: list[float]) -> tuple[float, float]:
-        ordered = sorted(values)
-        return ordered[int(0.025 * len(ordered))], ordered[int(0.975 * len(ordered)) - 1]
+    normal = statistics.NormalDist()
 
-    summary: dict = {"runs": [run_name(r) for r in runs], "diagnostics": {}, "predictors": {}, "differences": {}}
+    def interval(values: list[float], point_value: float) -> tuple[float, float]:
+        """Bias-corrected (BC) percentile interval. Plain percentiles sat at or outside their own
+        point estimates here: resampling held-out questions attenuates Spearman and inflates
+        the best-k winner, so the bootstrap distribution is shifted."""
+        ordered = sorted(values)
+        below = sum(v < point_value for v in values) + 0.5 * sum(v == point_value for v in values)
+        z0 = normal.inv_cdf(min(max(below / len(values), 1e-4), 1 - 1e-4))
+
+        def pick(q: float) -> float:
+            return ordered[min(len(ordered) - 1, max(0, int(q * len(ordered))))]
+
+        return pick(normal.cdf(2 * z0 - 1.96)), pick(normal.cdf(2 * z0 + 1.96))
+
+    def pool_test(values: list[float]) -> dict[str, float]:
+        """Pool-level inference over runs: sign counts and an exact sign-flip permutation p-value
+        (two-sided) for the mean; runs are the units, so no question/row resampling enters."""
+        n = len(values)
+        observed = abs(statistics.mean(values))
+        flips = 0
+        for mask in range(2 ** n):
+            total = sum(-v if (mask >> i) & 1 else v for i, v in enumerate(values))
+            flips += abs(total / n) >= observed - 1e-12
+        return {"mean": statistics.mean(values), "positive": sum(v > 0 for v in values),
+                "negative": sum(v < 0 for v in values), "n": n, "p_signflip": flips / 2 ** n}
+
+    summary: dict = {"runs": [run_name(r) for r in runs], "diagnostics": {}, "predictors": {}, "differences": {},
+                     "pool_level": {}}
     for run in runs:
         info = diagnostics(run, random.Random(args.seed))
         summary["diagnostics"][run_name(run)] = info
         print(run_name(run), " ".join(f"{k}={v:+.2f}" for k, v in info.items()))
     print(f"runs: {len(runs)}")
     for k in KEYS:
-        lo, hi = interval(boot["rho"][k])
-        rlo, rhi = interval(boot["regret5"][k])
+        lo, hi = interval(boot["rho"][k], point["rho"][k])
+        rlo, rhi = interval(boot["regret5"][k], point["regret5"][k])
+        summary["pool_level"][k] = {"rho": pool_test(point_runs["rho"][k])}
         summary["predictors"][k] = {"rho": point["rho"][k], "rho_ci": [lo, hi],
                                     "regret5": point["regret5"][k], "regret5_ci": [rlo, rhi]}
         print(f"{k:18s} rho {point['rho'][k]:+.3f} [{lo:+.2f}, {hi:+.2f}]   "
-              f"regret5 {point['regret5'][k]:.3f} [{rlo:.3f}, {rhi:.3f}]")
+              f"regret5 {point['regret5'][k]:.3f} [{rlo:.3f}, {rhi:.3f}]   pools rho "
+              f"+{summary['pool_level'][k]['rho']['positive']}/-{summary['pool_level'][k]['rho']['negative']} "
+              f"p={summary['pool_level'][k]['rho']['p_signflip']:.3f}")
     for a, b in PAIRS:
         d_rho = [x - y for x, y in zip(boot["rho"][a], boot["rho"][b])]
         d_reg = [y - x for x, y in zip(boot["regret5"][a], boot["regret5"][b])]  # >0: a has lower regret
-        lo, hi = interval(d_rho)
-        rlo, rhi = interval(d_reg)
+        lo, hi = interval(d_rho, point["rho"][a] - point["rho"][b])
+        rlo, rhi = interval(d_reg, point["regret5"][b] - point["regret5"][a])
+        pool_rho = pool_test([x - y for x, y in zip(point_runs["rho"][a], point_runs["rho"][b])])
+        pool_reg = pool_test([y - x for x, y in zip(point_runs["regret5"][a], point_runs["regret5"][b])])
         p_rho = sum(x > 0 for x in d_rho) / len(d_rho)
         p_reg = sum(x > 0 for x in d_reg) / len(d_reg)
         summary["differences"][f"{a}-{b}"] = {
             "rho": point["rho"][a] - point["rho"][b], "rho_ci": [lo, hi], "p_rho_gt0": p_rho,
             "regret5_gain": point["regret5"][b] - point["regret5"][a], "regret5_gain_ci": [rlo, rhi],
-            "p_regret5_gain_gt0": p_reg}
+            "p_regret5_gain_gt0": p_reg, "pool_rho": pool_rho, "pool_regret_gain": pool_reg}
         print(f"{a + ' - ' + b:34s} d_rho {point['rho'][a] - point['rho'][b]:+.3f} [{lo:+.2f}, {hi:+.2f}] "
               f"P>0 {p_rho:.3f} | regret gain {point['regret5'][b] - point['regret5'][a]:+.3f} "
-              f"[{rlo:+.3f}, {rhi:+.3f}] P>0 {p_reg:.3f}")
+              f"[{rlo:+.3f}, {rhi:+.3f}] P>0 {p_reg:.3f} | pools: rho +{pool_rho['positive']}/-{pool_rho['negative']} "
+              f"p={pool_rho['p_signflip']:.3f}, regret +{pool_reg['positive']}/-{pool_reg['negative']} p={pool_reg['p_signflip']:.3f}")
     if args.json:
         args.json.write_text(json.dumps(summary, indent=1) + "\n", encoding="utf-8")
 

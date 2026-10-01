@@ -233,6 +233,7 @@ def main() -> None:
         "engine": "vllm-server" if args.gen_server else "hf", "edits": names,
         "trace_lengths": [[len(t) for t, _ in row] for row in traces],
         "trace_ended": [[int(e) for _, e in row] for row in traces],
+        "traces": [[list(t) for t, _ in row] for row in traces],  # token ids (for estimator fidelity checks)
         "logp": logp, "soft": soft, "hard": hard, "fresh": fresh,
         "cost_seconds": cost, "tokens": tokens, "wall_seconds": perf_counter() - started,
     }
