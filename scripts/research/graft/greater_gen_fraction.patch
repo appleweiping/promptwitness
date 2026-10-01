@@ -1,0 +1,16 @@
+--- /media/lenovo/data2/promptwitness-graft-runtime/cc/greater_opt.py.orig	2026-10-01 21:00:52.473856908 +0800
++++ /media/lenovo/data2/greater-official/GreaTer/llm_opt/gcg/greater_opt.py	2026-10-01 21:01:55.906401399 +0800
+@@ -389,11 +389,11 @@
+ 
+                 else:
+                     record1, record2, record3 = None, None, None
+-                    percentage = 0.5
++                    percentage = float(os.environ.get("GREATER_GEN_FRACTION", "0.5"))  # GRAFT: memory only
+ 
+                     for iter_idx in range(0, round(1//percentage + 0.001)):
+                         logits, target_slice_starts, targets_ids_list, _prompts_obj_list, padding_cnts = self.prompts[0].logits_batched_gen(
+-                            self.test_workers[0].model, control_toks, percentage=0.5, iter_index=iter_idx)
++                            self.test_workers[0].model, control_toks, percentage=percentage, iter_index=iter_idx)
+ 
+                         logits, target_slice_starts, targets_ids_list = [logits], [target_slice_starts], [targets_ids_list]
+ 
