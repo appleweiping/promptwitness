@@ -1,9 +1,11 @@
-\begin{tabular}{lrrrr}
+\begin{tabular}{lrrrrrrr}
 \toprule
-Pool & Read-off flips & $|A|$ & $|D|$ & sd$(\log w)$ \\
+Pool & Read-off flips & $|A|$ & $|\Delta_{\text{held-out}}|$ & $|\Delta_{\text{fresh}}|$ & $\rho(A,\Delta_{\text{held-out}})$ & KL & sd$_x(\log w)$ \\
 \midrule
-LD7, L$^\ast$ & 3.2\% & 0.012 & 0.034 & 43.5 \\
-LD7, L & 1.4\% & 0.005 & 0.039 & 19.6 \\
-LD3, L & 0.2\% & 0.002 & 0.041 & 19.0 \\
+LD7, L & 1.4\% & 0.5 & 5.3 & 3.5 & -0.31 & 10.2 & 4.6 \\
+LD7, L$^\ast$ & 3.2\% & 1.2 & 3.4 & 3.8 & +0.25 & 4.5 & 9.2 \\
+LD3, L & 0.2\% & 0.2 & 4.4 & 5.7 & +0.28 & 10.6 & 5.4 \\
+TS7, L & 0.4\% & 0.2 & 7.7 & 6.4 & -0.07 & 14.6 & 5.4 \\
+TS3, L & 0.3\% & 0.1 & 10.9 & 6.8 & +0.02 & 8.9 & 5.4 \\
 \bottomrule
 \end{tabular}

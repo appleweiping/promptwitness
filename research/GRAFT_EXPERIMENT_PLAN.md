@@ -277,3 +277,19 @@ C5 Stage C ablations (gate, random, exact) plus fidelity estimator ablations.
   random-v50 vs random-v8. Measured GPU-seconds and tokens per run are reported. The completed
   Stage C v1 Qwen3 runs are re-read with the deterministic reader and the 4,096-token budget and
   reported as an earlier configuration (8-row verification, truncated proposals kept).
+* 2026-10-01 ~18:50 UTC, after 5 of 11 H-dist pools (all Llama-3) and an independent review of
+  them, before any Qwen3/Gemma-2 H-dist output exists. Unchanged: H-dist and H-inc criteria.
+  Added (secondary / descriptive, reported for all 11 pools): (i) split-half reliability of the
+  importance score across samples (1-8 vs 9-16) and per-pool percentile and BC intervals for
+  every predictor's Spearman; (ii) agreement of the score with the on-policy estimate of the
+  same quantity (coupled fresh samples); (iii) the read-off term A measured on-policy (hard reads
+  of the same incumbent samples) and compared with the edits' held-out and fresh changes, not
+  with a self-normalized estimate of D (that estimate is at its permutation null on the five
+  pools); (iv) KL(pi_P || pi_P') = -mean log w per trace for every edit, and a KL gate fixed from
+  theory, not data: score an edit off-policy only if KL <= 0.5 log S (= 1.39 nats for S = 16),
+  otherwise by fresh accuracy on 8 rows (`kl_gate`); (v) a numerical null: the incumbent
+  re-scored with a different batch size (`logp_base_recheck`), whose log-ratio spread bounds
+  bf16/padding noise. Interim observation (5 pools, informational): the score's split-half
+  reliability is about zero and its agreement with the on-policy estimate is about zero; the
+  edits shift the reasoning distribution by a median KL of 4.5-14.6 nats per trace, far beyond
+  what self-normalized importance sampling with S = 16 can cover (needs ~exp(KL) samples).

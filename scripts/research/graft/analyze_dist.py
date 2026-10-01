@@ -109,6 +109,22 @@ def random_regret(target: list[float]) -> float:
     return statistics.mean(sorted(target, reverse=True)[:k]) - statistics.mean(target)
 
 
+def half_reliability(dist: dict, beta: float, key: str = "primary") -> float | None:
+    """Spearman between the score computed on samples 1..S/2 and on S/2+1..S (same rows, edits)."""
+    s = dist["samples"]
+    halves = []
+    for part in (slice(0, s // 2), slice(s // 2, s)):
+        sub = dict(dist)
+        for field in ("logp", "hard", "soft"):
+            sub[field] = {n: [row[part] for row in rows] for n, rows in dist[field].items()}
+        vals = []
+        for n in dist["edits"]:
+            v = per_row_values(sub, n, beta)
+            vals.append(statistics.mean(v[key]))
+        halves.append(vals)
+    return spearman(halves[0], halves[1])
+
+
 class Pool:
     def __init__(self, record: dict, dist: dict) -> None:
         if record["edits"] != dist["edits"]:
@@ -123,6 +139,19 @@ class Pool:
         logw = [a - b for n in self.names for x in range(self.n_rows)
                 for a, b in zip(dist["logp"][n][x], dist["logp"]["base"][x])]
         self.logw_sd = statistics.pstdev(logw)
+        # Secondary (amendment 2026-10-01 18:45 UTC): KL gate fixed from theory, not from data.
+        # KL(pi_P || pi_P') = -E log w per trace; self-normalized IS needs ~exp(KL) samples, so
+        # an edit is scored off-policy only if KL <= 0.5 log S, else by fresh accuracy on 8 rows.
+        self.kl = {n: -statistics.mean(a - b for x in range(self.n_rows)
+                                       for a, b in zip(dist["logp"][n][x], dist["logp"]["base"][x]))
+                   for n in self.names}
+        self.kl_threshold = 0.5 * math.log(dist["samples"])
+        self.half_rel = half_reliability(dist, self.beta_star)
+        self.numeric_sd = None
+        if "logp_base_recheck" in dist:
+            diffs = [a - b for x in range(self.n_rows)
+                     for a, b in zip(dist["logp_base_recheck"][x], dist["logp"]["base"][x])]
+            self.numeric_sd = statistics.pstdev(diffs)
 
     def name(self) -> str:
         state = "/state" if self.record.get("state_edit") else ""
@@ -139,6 +168,8 @@ class Pool:
         first8 = [x for x in rows if x < 8] or rows[:1]
         out["fresh8"] = [statistics.mean(raw["fresh"][n][x] - raw["base_fresh"][x] for x in first8) for n in names]
         out["fresh_all"] = [statistics.mean(raw["fresh"][n][x] - raw["base_fresh"][x] for x in rows) for n in names]
+        out["kl_gate"] = [p if self.kl[n] <= self.kl_threshold else f
+                          for n, p, f in zip(names, out["primary"], out["fresh8"])]
         out["random"] = None
         target = [statistics.mean(raw["dev"][n][q] - raw["base_dev"][q] for q in questions) for n in names]
         return out, target
@@ -195,12 +226,30 @@ def main() -> None:
         for m in per:
             for k, v in per[m].items():
                 boot.setdefault(m, {}).setdefault(k, []).append(statistics.mean(v))
+                boot.setdefault("pool_" + m, {}).setdefault(k, []).append(list(v))
     assert keys is not None
     summary: dict = {"pools": [], "predictors": {}, "comparisons": {}}
     for i, pool in enumerate(pools):
+        preds0, _ = pool.predictors(list(range(pool.n_rows)), list(range(pool.n_q)))
         info = {"pool": pool.name(), "beta_star": pool.beta_star, "ess_medians": pool.ess_medians,
-                "logw_sd": pool.logw_sd,
+                "logw_sd": pool.logw_sd, "half_reliability_primary": pool.half_rel,
+                "numeric_null_sd_logp": pool.numeric_sd,
+                "kl_median": statistics.median(pool.kl.values()),
+                "kl_gated_fraction": sum(v <= pool.kl_threshold for v in pool.kl.values()) / len(pool.kl),
+                "rho_primary_vs_fresh_dist": spearman(preds0["primary"], preds0["fresh_dist"]),
+                "rho_ci_bc": {k: bc_interval([b[i] for b in boot["pool_rho"][k]], point["rho"][k][i])
+                              for k in ("primary", "inc_primary", "fresh8", "fresh_all", "fresh_dist", "answer_exact",
+                                        "kl_gate")},
+                # Plain percentile intervals: wider; the bootstrap attenuates Spearman toward 0, so
+                # they are conservative for the sign.
+                "rho_ci_pct": {k: (sorted(b[i] for b in boot["pool_rho"][k])[int(0.025 * len(boot["pool_rho"][k]))],
+                                   sorted(b[i] for b in boot["pool_rho"][k])[int(0.975 * len(boot["pool_rho"][k])) - 1])
+                               for k in ("primary", "inc_primary", "fresh8", "fresh_all", "fresh_dist", "answer_exact",
+                                         "kl_gate")},
                 "rho": {k: point["rho"][k][i] for k in keys}, "regret": {k: point["regret"][k][i] for k in keys}}
+        print(f"   {pool.name()}: split-half rel. of primary {pool.half_rel}, KL median {info['kl_median']:.1f}, "
+              f"gated {info['kl_gated_fraction']:.2f}, rho(primary, fresh_dist) {info['rho_primary_vs_fresh_dist']}, "
+              f"numeric sd {pool.numeric_sd}, primary CI pct {info['rho_ci_pct']['primary']}")
         summary["pools"].append(info)
         print(f"{pool.name():50s} b*={pool.beta_star:<4} ESS(b=1,.5,.25)="
               + "/".join(f"{pool.ess_medians[b]:.1f}" for b in ("1.0", "0.5", "0.25"))

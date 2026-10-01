@@ -195,6 +195,16 @@ def main() -> None:
                       for i in range(len(rows))]
     cost["teacher_forcing"] = perf_counter() - t0
     print(json.dumps({"phase": "teacher_forcing", "seconds": cost["teacher_forcing"]}), flush=True)
+    # Numerical null (amendment 2026-10-01 18:45 UTC): the incumbent re-scored in batches of a
+    # different size; its log-ratios against the first pass bound bf16/padding noise.
+    items = []
+    for i, row in enumerate(rows):
+        p = runner.ids(base, row)
+        for reasoning, ended in traces[i]:
+            seq = p + reasoning + ext + golds[i]
+            items.append((seq, len(p), len(p) + len(reasoning), ended, len(p) + len(reasoning) + len(ext)))
+    rescored = trace_scores(model, items, tau=args.tau, stops=stops, batch=max(1, args.batch // 2 - 1))
+    logp_base_recheck = [[rescored[i * args.samples + s][0] for s in range(args.samples)] for i in range(len(rows))]
     tokens["teacher_forced"] = forced
 
     # 3. Hard reads (greedy answer after reasoning + extractor) under every prompt.
@@ -234,7 +244,7 @@ def main() -> None:
         "trace_lengths": [[len(t) for t, _ in row] for row in traces],
         "trace_ended": [[int(e) for _, e in row] for row in traces],
         "traces": [[list(t) for t, _ in row] for row in traces],  # token ids (for estimator fidelity checks)
-        "logp": logp, "soft": soft, "hard": hard, "fresh": fresh,
+        "logp": logp, "soft": soft, "hard": hard, "fresh": fresh, "logp_base_recheck": logp_base_recheck,
         "cost_seconds": cost, "tokens": tokens, "wall_seconds": perf_counter() - started,
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
