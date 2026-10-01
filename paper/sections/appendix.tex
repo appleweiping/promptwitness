@@ -151,6 +151,42 @@ incumbent answers correctly does not improve best-3 regret over the all-row scor
 [$-0.025,+0.021$]) and is worse than the exact expectation of a uniformly random ranking
 ($-0.029$ [$-0.048,-0.002$]). H-cond is retired.
 
+\section{Reading, determinism and budgets}
+\label{app:reader}
+Greedy decoding is not reproducible across batch compositions and cached computation paths
+\citep{yuan2025nondeterminism,he2025nondeterminism}. An earlier configuration of our generation
+engine (vLLM with prefix caching) re-read the same prompt with $2$--$14\%$ of answers changed, as
+large as the end-to-end effects under study; all reads reported here use the engine without prefix
+caching and with one prompt's questions per request. On $200$ held-out questions, three reads of
+the same prompt gave token-identical reasoning; one of $400$ answer reads differed. Rendered token
+ids are identical between the training-time (Hugging Face) and evaluation engines for all three
+models. Reasoning budgets are $1{,}024$ tokens during search, $384$ in the validity studies (whose
+tasks need fewer) and $4{,}096$ for dev selection and test; truncation rates are reported.
+
+\section{Distributional scores: protocol}
+\label{app:dist}
+Per pool (the records of \S\ref{sec:diagnosis}): $S=16$ reasonings per training question under the
+incumbent, sampled at $\tau=0.7$ with no top-$k$/top-$p$ truncation (so that the proposal is the
+full tempered softmax), the validity studies' $384$-token budget, a fixed seed per (question,
+sample). For every candidate and sample, the tempered log-likelihood of the reasoning is computed by
+teacher forcing in bfloat16 with float32 softmax, adding $\log P(\text{stop})$ at the end of samples
+that stopped. Hard reads (greedy, $16$ tokens after the extractor) and soft reads (gold-answer
+probability) are recorded under the incumbent and under every candidate; four further samples per
+question under every prompt with the same seed per (question, sample) give a coupled fresh
+distributional evaluation. All estimators of Eq.~\ref{eq:snis} and the label-free $\beta$ rule are
+computed afterwards from the stored values; the predictors, targets and kill criterion were fixed
+before the data (Appendix~\ref{app:prereg}).
+
+\section{Pipeline simulation}
+\label{app:pipeline}
+For each pool and a verification size $n\in\{8,16,24\}$, one round of the shortlist-then-verify
+loop is replayed from recorded per-question correctness: the edits are scored by a predictor on
+the $24$ training questions, the top three (or all edits) are verified by fresh greedy accuracy on
+the first $n$ training questions, and the best is accepted if it beats the incumbent on those
+questions (optionally by a margin of $1$--$3$ questions); the realized gain is the accepted edit's
+change on the $200$ held-out questions (zero if none is accepted). The random shortlist is scored
+by its exact expectation over all three-subsets.
+
 \section{Preregistration and amendments}
 \label{app:prereg}
 The experiment plan was fixed before any optimizer result and amended with dates and
