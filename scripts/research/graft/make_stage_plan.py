@@ -28,6 +28,7 @@ VARIANTS = {
     "exact-v50": ["--method", "exact", "--batch", "50"],
     "textgrad-v50": ["--method", "textgrad", "--batch", "50"],
     "random-v8": ["--method", "random", "--batch", "8"],
+    "dist-v50": ["--method", "dist", "--batch", "50"],
 }
 
 

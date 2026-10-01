@@ -258,3 +258,22 @@ C5 Stage C ablations (gate, random, exact) plus fidelity estimator ablations.
   (pooled best-3 regret below random with P >= 0.9, lower than random in >= 7 of the 10 pools,
   pooled Spearman not below fresh-8 by more than 0.05). The beta curve {1/4, 1/2, 1} is reported.
   Pool 1 is reported as exploratory for H-inc. H-dist itself is unchanged (all 11 pools).
+* 2026-10-01 ~15:00 UTC, before any Stage C v2 run and before H-dist/H-inc are decided (2 of 11
+  pools seen): **Stage C v2 (end-to-end, replaces the remaining Stage C v1 plan).** Reasons:
+  official GReaTer verifies every shortlisted candidate on all of its training rows (50), while
+  Stage C v1 verified on 8-row minibatches, which the pipeline-regret analysis shows to be
+  noise-dominated (verify-all realizes -2.27 points on 8 rows, +1.14 on 24); and the v1 reads
+  were nondeterministic and truncated at 1,024 tokens. Protocol: Llama-3-8B primary (Qwen3-8B
+  and Gemma-2-9B secondary), the 7 Stage C tasks, 12 rounds, K = 6 proposals per slot,
+  shortlist 3, **verification by fresh greedy accuracy on all 50 training rows** (`--batch 50`),
+  proposals cut at their cap discarded, deterministic generation server, dev selection among
+  checkpoint incumbents and one test read with a 4,096-token budget (`select_and_test.py`),
+  truncation reported, full and clean test subsets. Arms (identical except the shortlist):
+  `patch-v50` (GReaTer's objective lifted to blocks), `random-v50`, `dist-v50` (distributional
+  score, 16 fixed scoring rows x 8 samples, tau 0.7, ESS beta) -- included only if H-dist or
+  H-inc is supported --, `textgrad-v50` (seeds 1-2), and the verification-noise control
+  `random-v8` (8-row minibatches). Seeds 1-3. Primary comparisons, task-level paired with seeds
+  nested in tasks: dist-v50 vs patch-v50 and vs random-v50; patch-v50 vs random-v50;
+  random-v50 vs random-v8. Measured GPU-seconds and tokens per run are reported. The completed
+  Stage C v1 Qwen3 runs are re-read with the deterministic reader and the 4,096-token budget and
+  reported as an earlier configuration (8-row verification, truncated proposals kept).
