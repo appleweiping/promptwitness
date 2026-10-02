@@ -27,7 +27,8 @@ def label(stem: str) -> str:
     task = stem.split("-")[1]
     short = {"logical_deduction_seven_objects": "LD7", "logical_deduction_three_objects": "LD3",
              "tracking_shuffled_objects_seven_objects": "TS7", "tracking_shuffled_objects_three_objects": "TS3"}
-    return f"{short.get(task, task)}, {model}{'$^\\ast$' if stem.endswith('state') else ''}"
+    star = "$^\\ast$" if stem.endswith("state") else ""  # outside the f-string (Python < 3.12)
+    return f"{short.get(task, task)}, {model}{star}"
 
 
 def main() -> None:

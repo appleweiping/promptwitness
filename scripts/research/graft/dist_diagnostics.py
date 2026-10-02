@@ -32,7 +32,8 @@ def main() -> None:
         fin = [c for c, e in zip(correct, ended) if e]
         print(f"== {Path(dist_path).stem}")
         print(f"   incumbent sample accuracy {statistics.mean(correct):.3f}; truncated {1 - statistics.mean(ended):.3f} "
-              f"(acc {statistics.mean(trunc) if trunc else float('nan'):.3f}) vs ended acc {statistics.mean(fin):.3f}")
+              f"(acc {statistics.mean(trunc) if trunc else float('nan'):.3f}) vs ended acc "
+              f"{statistics.mean(fin) if fin else float('nan'):.3f}")
         cl = [l for l, c in zip(lengths, correct) if c]
         il = [l for l, c in zip(lengths, correct) if not c]
         print(f"   mean length correct {statistics.mean(cl) if cl else float('nan'):.0f} vs incorrect "
