@@ -10,6 +10,11 @@ first differing reasoning token. Generation goes through a vLLM generation serve
 Null control (2026-10-01): the incumbent is read ``--null-reads`` extra times under the same
 engine; the same rates between its first read and each re-read measure how much of the
 edit-induced change the engine produces on an unchanged prompt (numerical nondeterminism).
+
+Numerical re-rolls (2026-10-02, ``--reroll-chunks``): with a deterministic engine, the incumbent
+is also read in separate requests of c questions for each listed c. Different batch shapes change
+the floating-point reduction order but not the prompt, so each is a reproducible "re-roll" of greedy
+decoding; edits whose effects match these re-rolls are indistinguishable from numerical noise.
 """
 
 from __future__ import annotations
@@ -36,6 +41,9 @@ def main() -> None:
     parser.add_argument("--null-only", action="store_true", help="measure only the same-prompt null")
     parser.add_argument("--max-new-tokens", type=int, default=384, help="the validity studies' budget")
     parser.add_argument("--dev", type=int, default=200)
+    parser.add_argument("--reroll-chunks", default="",
+                        help="comma-separated sizes: re-read the incumbent in separate requests of this many "
+                             "questions (numerical re-rolls: the same prompt under different batch shapes)")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
 
@@ -58,11 +66,17 @@ def main() -> None:
     extractor = tokenizer.encode(spec.extractor, add_special_tokens=False)
     pools = record["pools"]
 
-    def run(prompt) -> tuple[list[tuple[int, ...]], list[str | None], list[bool]]:
+    def run(prompt, chunk: int | None = None) -> tuple[list[tuple[int, ...]], list[str | None], list[bool]]:
         ids = [list(prompt.render_tokens(tokenizer, {"input": q.question}).input_ids) for q in dev]
-        gens, _, _ = generate_batch(model, tokenizer, ids, max_new_tokens=args.max_new_tokens)
-        reads, _, _ = generate_batch(model, tokenizer, [p + list(g.token_ids) + extractor for p, g in zip(ids, gens)],
+        gens, reads = [], []
+        step = chunk or len(ids)  # one request per call unless re-rolling by batch shape
+        for begin in range(0, len(ids), step):
+            part = ids[begin:begin + step]
+            g, _, _ = generate_batch(model, tokenizer, part, max_new_tokens=args.max_new_tokens)
+            r, _, _ = generate_batch(model, tokenizer, [p + list(x.token_ids) + extractor for p, x in zip(part, g)],
                                      max_new_tokens=ANSWER_TOKENS)
+            gens += g
+            reads += r
         parsed = [spec.parse(r.text) for r in reads]
         return [g.token_ids for g in gens], parsed, [spec.correct(r.text, q.answer) for r, q in zip(reads, dev)]
 
@@ -75,6 +89,19 @@ def main() -> None:
                      "correctness_flipped": statistics.mean(a != b for a, b in zip(correct, base_correct)),
                      "accuracy_delta": statistics.mean(correct) - statistics.mean(base_correct)})
         print(json.dumps({"null_read": null[-1]}), flush=True)
+    rerolls = []
+    for chunk in [int(c) for c in args.reroll_chunks.split(",") if c.strip()]:
+        reason, parsed, correct = run(base_prompt, chunk)
+        changed = [a != b for a, b in zip(reason, base_reason)]
+        firsts = [first_divergence(list(a), list(b)) for a, b, c in zip(reason, base_reason, changed) if c]
+        rerolls.append({"chunk": chunk, "reasoning_changed": statistics.mean(changed),
+                        "answer_changed": statistics.mean(a != b for a, b in zip(parsed, base_parsed)),
+                        "correctness_flipped": statistics.mean(a != b for a, b in zip(correct, base_correct)),
+                        "accuracy_delta": statistics.mean(correct) - statistics.mean(base_correct),
+                        "first_divergence_median": statistics.median(f for f in firsts if f is not None)
+                        if any(f is not None for f in firsts) else None,
+                        "correct": [int(c) for c in correct]})
+        print(json.dumps({k: v for k, v in rerolls[-1].items() if k != "correct"}), flush=True)
     per_edit = {}
     for name in ([] if args.null_only else record["edits"]):
         slot, index = name.split(":")
@@ -105,7 +132,7 @@ def main() -> None:
                            for k in ("reasoning_changed", "answer_changed", "correctness_flipped")}
     out = {"record": str(args.record), "task": record["task"], "edit_kind": record.get("edit_kind", "block"),
            "model_path": args.model_path, "engine": "vllm-server" if args.gen_server else "hf",
-           "per_edit": per_edit, "null_reads": null, "summary": summary,
+           "per_edit": per_edit, "null_reads": null, "reroll_reads": rerolls, "summary": summary,
            "base_correct": [int(c) for c in base_correct]}
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(out, indent=1) + "\n", encoding="utf-8")
