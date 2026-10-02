@@ -1,5 +1,5 @@
 #!/bin/bash
-# usage: job_greater_eval.sh   (inside with_server.sh for llama3; MAXLEN=6144 and MAXSEQS set)
+# usage: job_greater_eval.sh   (inside with_server.sh for llama3 with INPROC=1 MAXLEN=6144: deterministic in-process engine)
 # Read the final prompt of every completed official-GReaTer rerun (gradient or random shortlist)
 # with the shared deterministic reader and a 4,096-token budget. Skips runs already evaluated.
 R=/media/lenovo/data2/promptwitness-graft-runtime

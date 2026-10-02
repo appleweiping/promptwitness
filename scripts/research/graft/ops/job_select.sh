@@ -1,5 +1,5 @@
 #!/bin/bash
-# usage: job_select.sh <model_key> <runs-dir> <output.json>   (inside with_server.sh; MAXLEN=6144, MAXSEQS set)
+# usage: job_select.sh <model_key> <runs-dir> <output.json>   (inside with_server.sh with INPROC=1 MAXLEN=6144: deterministic in-process engine)
 # Dev selection among checkpoint incumbents and one test read per search run, deterministic server,
 # 4,096-token budget. Resumable: runs already in the output are skipped.
 R=/media/lenovo/data2/promptwitness-graft-runtime
