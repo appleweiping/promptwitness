@@ -293,3 +293,17 @@ C5 Stage C ablations (gate, random, exact) plus fidelity estimator ablations.
   reliability is about zero and its agreement with the on-policy estimate is about zero; the
   edits shift the reasoning distribution by a median KL of 4.5-14.6 nats per trace, far beyond
   what self-normalized importance sampling with S = 16 can cover (needs ~exp(KL) samples).
+* 2026-10-02 ~04:30 UTC, after all 11 H-dist pools. **Registered outcomes:** H-dist NOT
+  SUPPORTED (11 pools: primary pooled Spearman +0.034, best-3 regret 0.075 vs 0.067 random,
+  6/11 pools, P(gain > 0) 0.21; vs fresh-8 d_rho -0.243); H-inc NOT SUPPORTED (pools 2-11:
+  regret 0.083 vs 0.069, 6/10 pools; d_rho vs fresh-8 -0.280). Consequently `dist-v50` is not
+  run in Stage C v2 (as registered above). **Changes to the reading protocol (no outcome
+  used):** all evaluation, re-read and re-roll jobs and Stage C v2 search use the vLLM engine
+  core in the server process (`--inproc`), verified token-identical by same-prompt re-reads
+  (4/4, evaluation and search configurations); the one Stage C v2 run made with the
+  multiprocess engine is archived and re-run. **Exploratory analyses added after the registered
+  outcome (reported as exploratory):** (i) verification at matched generation budgets
+  (`verify_cost.py`: greedy vs coupled vs independent sampled verification); (ii) numerical
+  re-rolls in the re-roll study (`--reroll-chunks`: the incumbent read in separate requests of
+  16/25/40/64/100 questions) as the null for edit effects; (iii) truncation of every held-out
+  read in the block re-reads, and per-pool truncation of the H-dist samples.

@@ -450,6 +450,39 @@ full; everything lives on `/media/lenovo/data2`.
     pools before the Stage C v2 resume, the eleven block pools after the re-reads; they also re-read
     every validity edit's held-out target under the deterministic reader (per-question correctness
     stored) to check Table 1.
+58. **2026-10-02 ~04:30 UTC: registered H-dist and H-inc fail on all pools; verification budget is
+    what matters; single-token edits are indistinguishable from numerical re-rolls.**
+    (i) H-dist (11 pools, `dist/analysis_11pools.*`, commit in `.commit`): primary (tempered SNIS,
+    candidate reads) pooled Spearman +0.034 [-0.065, +0.190]; best-3 regret 0.075 vs 0.067 for a
+    random shortlist (gain -0.009, P>0 0.21, 6/11 pools); vs fresh greedy on 8 rows d_rho -0.243
+    (P>0 0.019). **NOT SUPPORTED.** H-inc confirmatory on pools 2-11 (`analysis_hinc10.*`):
+    incumbent-read score -0.024, regret 0.083 vs random 0.069 (6/10 pools), vs fresh-8 d_rho -0.280.
+    **NOT SUPPORTED.** Split-half reliability of the primary score -0.31..+0.26 per pool; KL median
+    per trace: Llama-3 4.5-14.6, Qwen3 1.1-8.4, Gemma-2 10.4 nats. GReaTer's objective pooled -0.258
+    [-0.310, -0.243] (11 pools). Coupled sampled evaluation (`fresh_dist`, 24 rows x 4 samples)
+    +0.413, regret 0.035, the best predictor. Read-off on 11 pools (`readoff_11pools.tex`): flips
+    0.0-3.2%, |A| 0.000-0.012 vs mean |held-out change| 0.021-0.109.
+    (ii) Verification at matched cost (exploratory, `verify_cost.py`, 400 row/sample subsets per
+    cell): at equal generations greedy verification is as good as or better than sampled (24 gen.:
+    greedy rho 0.325 vs coupled 24x1 0.295, independent 0.294); common-random-number coupling gives
+    nothing over independent seeds; quality rises monotonically with generations: verify-all
+    realized held-out change -1.71 (4 gen.), -1.45 (8), +0.41 (24 greedy), +0.88 (48), +1.44 (96)
+    points. `fresh_dist`'s lead is its 4x budget, not sampling or coupling.
+    (iii) Token re-roll under the deterministic reader (`reroll3/`, Llama-3): one GReaTer-style token
+    substitution changes the greedy reasoning on 87.5% (LD7) / 83.7% (TS7) of held-out questions
+    (same-prompt null 0%), correctness on 20.3% / 19.0%, first divergence after a median 110 / 164
+    tokens. Numerical re-rolls of the *unchanged* prompt (`--reroll-chunks`, separate requests of
+    16/25/40/64/100 questions, each deterministic) change the reasoning on 67-71% / 56-61% and
+    correctness on 13-16% / 8-13%; accuracy over re-rolls 0.467 +- 0.018 (LD7) and 0.301 +- 0.022
+    (TS7) vs over 24 token edits 0.462 +- 0.022 and 0.319 +- 0.020. The accuracy effect of a single
+    token edit is indistinguishable from re-rolling greedy decoding; the deterministic base read is
+    one draw (on LD7 the highest of the re-rolls, which is why every edit looked harmful there).
+    Greedy accuracy on 200 questions has a numerical noise floor of ~2 points (sd) even with a
+    deterministic engine. Block edits move held-out accuracy by 2-11 points on average (above it).
+    (iv) Truncation caveat found: at the validity studies' 384-token budget the incumbent's sampled
+    reasoning hits the budget on 97% (Llama-3 LD7-state) and 100% (Qwen3 LD7) of samples; the
+    fixed-reasoning objective is negative also on low-truncation pools (Llama-3 LD3 0.3%: -0.41;
+    TS7 14%: -0.66). Greedy held-out truncation is now recorded by `reroll_study` (block re-reads).
 
 ## Next
 
