@@ -8,6 +8,9 @@
 # 3 and freed before the next candidate; no expandable_segments (GReaTer shares CUDA tensors with
 # its worker process, which expandable segments forbid); per-process GPU memory logged every 15 s;
 # a failed run is archived under failed/ and its claim released, so re-queueing retries it.
+# Smoke 5 (2026-10-02): the gradient worker froze no weights, so every backward pass computed and
+# kept ~16 GB of unused weight gradients (worker at 27-32 GB next to the 16 GB main process);
+# greater_freeze_weights.patch freezes them (one_hot.grad unchanged), memory only.
 G=/media/lenovo/data2/greater-official/GreaTer
 R=/media/lenovo/data2/promptwitness-graft-runtime
 GPU=$1; TASK=$2; SHORT=${3:-gradient}; STEPS=${4:-106}; REP=${5:-1}

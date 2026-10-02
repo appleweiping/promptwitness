@@ -435,6 +435,21 @@ full; everything lives on `/media/lenovo/data2`.
     (marker locks, `ops/defer_stage.py`) behind the short jobs: GReaTer smoke 5 -> Qwen3 H-dist (5
     pools, running) -> Qwen3 prefix-cache null -> Gemma-2 H-dist (HF) -> Stage C v2 seed 1
     (`ops/resume_stagec2.sh`, in-process engine) -> deterministic re-reads -> Qwen3 token pools.
+57. **2026-10-02 ~02:00 UTC: H-dist data complete; GReaTer smoke 5 ran out of our bug, not memory.**
+    All 11 H-dist pools are sampled (Llama-3 5, Qwen3 5, Gemma-2 1); the registered 11-pool
+    analysis is running. Smoke 5 got through step 1's candidate evaluation (three candidates, 8
+    regeneration chunks each, 20-48 s per chunk) and crashed on `del logits` from our own memory
+    patch (GReaTer later deletes the name again); now `logits = None`. The per-process memory log
+    shows where memory went: the gradient worker held 27-32 GB through the whole selection phase
+    next to the main process's 16-19 GB (peak 47.7 of 48 GB). Cause: GReaTer's worker runs
+    `model.train()` + `loss.backward()` with trainable weights, so each backward computes and keeps
+    weight gradients (~16 GB for Llama-3-8B) that are never read; only `one_hot.grad` is used.
+    `greater_freeze_weights.patch` freezes the weights in the worker (`one_hot.grad` is unchanged;
+    memory and roughly a third of the backward compute removed). Smoke 6 queued first.
+    Deterministic re-roll studies queued (`ops/job_reroll.sh`, outputs `reroll3/`): the four token
+    pools before the Stage C v2 resume, the eleven block pools after the re-reads; they also re-read
+    every validity edit's held-out target under the deterministic reader (per-question correctness
+    stored) to check Table 1.
 
 ## Next
 

@@ -1,0 +1,10 @@
+--- llm_opt/base/attack_manager.py.pre-freeze	2026-10-02 02:36:07.501996258 +0800
++++ llm_opt/base/attack_manager.py	2026-10-02 09:55:46.222689869 +0800
+@@ -1844,6 +1844,7 @@
+         # tasks = (tasks)
+         # results = (results)
+ 
++        model.requires_grad_(False)  # GRAFT (memory only): only one_hot.grad is used
+         while True:
+             task = tasks.get()
+             if task is None:
