@@ -46,7 +46,8 @@ def main() -> None:
             rho = spearman(lw, lengths)
             if rho is not None:
                 len_corr.append(rho)
-        print(f"   per-sample Spearman(log w, length): median over edits {statistics.median(len_corr):+.2f}")
+        print("   per-sample Spearman(log w, length): median over edits "
+              + (f"{statistics.median(len_corr):+.2f}" if len_corr else "n/a (all samples hit the budget)"))
         print(f"   Spearman(edit mean log w, held-out change) {spearman(mean_logw, target):+.2f}")
         # Which edits does the score favour? mean change in expected length under the SNIS weights
         print(f"   held-out changes: mean {100 * statistics.mean(target):+.1f}, best {100 * max(target):+.1f}, "

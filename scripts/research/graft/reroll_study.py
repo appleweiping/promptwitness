@@ -66,6 +66,8 @@ def main() -> None:
     extractor = tokenizer.encode(spec.extractor, add_special_tokens=False)
     pools = record["pools"]
 
+    last_ended: list[list[bool]] = [[]]  # whether each question's reasoning of the latest run() ended
+
     def run(prompt, chunk: int | None = None) -> tuple[list[tuple[int, ...]], list[str | None], list[bool]]:
         ids = [list(prompt.render_tokens(tokenizer, {"input": q.question}).input_ids) for q in dev]
         gens, reads = [], []
@@ -78,9 +80,11 @@ def main() -> None:
             gens += g
             reads += r
         parsed = [spec.parse(r.text) for r in reads]
+        last_ended[0] = [g.ended for g in gens]
         return [g.token_ids for g in gens], parsed, [spec.correct(r.text, q.answer) for r, q in zip(reads, dev)]
 
     base_reason, base_parsed, base_correct = run(base_prompt)
+    base_ended = last_ended[0]
     null = []
     for _ in range(args.null_reads):
         reason, parsed, correct = run(base_prompt)
@@ -100,6 +104,7 @@ def main() -> None:
                         "accuracy_delta": statistics.mean(correct) - statistics.mean(base_correct),
                         "first_divergence_median": statistics.median(f for f in firsts if f is not None)
                         if any(f is not None for f in firsts) else None,
+                        "truncated": 1 - statistics.mean(last_ended[0]),
                         "correct": [int(c) for c in correct]})
         print(json.dumps({k: v for k, v in rerolls[-1].items() if k != "correct"}), flush=True)
     per_edit = {}
@@ -118,6 +123,7 @@ def main() -> None:
             "accuracy_delta": statistics.mean(correct) - statistics.mean(base_correct),
             "first_divergence_median": statistics.median(firsts) if firsts else None,
             "correct": [int(c) for c in correct],  # per held-out question (re-read validity targets)
+            "ended": [int(e) for e in last_ended[0]],  # reasoning stopped before the budget
         }
         print(json.dumps({"edit": name, **per_edit[name]}), flush=True)
     summary: dict = {}
@@ -127,13 +133,16 @@ def main() -> None:
         medians = [v["first_divergence_median"] for v in per_edit.values() if v["first_divergence_median"] is not None]
         summary["first_divergence_median"] = statistics.median(medians) if medians else None
     summary["base_accuracy"] = statistics.mean(base_correct)
+    summary["base_truncated"] = 1 - statistics.mean(base_ended)
+    if per_edit:
+        summary["edit_truncated"] = statistics.mean(1 - statistics.mean(v["ended"]) for v in per_edit.values())
     if null:
         summary["null"] = {k: statistics.mean(n[k] for n in null)
                            for k in ("reasoning_changed", "answer_changed", "correctness_flipped")}
     out = {"record": str(args.record), "task": record["task"], "edit_kind": record.get("edit_kind", "block"),
            "model_path": args.model_path, "engine": "vllm-server" if args.gen_server else "hf",
            "per_edit": per_edit, "null_reads": null, "reroll_reads": rerolls, "summary": summary,
-           "base_correct": [int(c) for c in base_correct]}
+           "base_correct": [int(c) for c in base_correct], "base_ended": [int(e) for e in base_ended]}
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(out, indent=1) + "\n", encoding="utf-8")
     print(json.dumps(summary, indent=1))
