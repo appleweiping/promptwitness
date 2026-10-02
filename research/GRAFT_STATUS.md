@@ -411,6 +411,30 @@ full; everything lives on `/media/lenovo/data2`.
     each task (`greater_worker_cache.patch`); smoke re-queued.
 53. **Queue (operational):** Stage C v2 Llama-3 seed 1 (28 runs) now precedes the remaining H-dist
     pools; the importance-score arm is not in it (H-dist/H-inc unresolved, Llama-3 pools mixed).
+56. **2026-10-01 ~20:30 UTC: deterministic reader found; GReaTer smoke 4 failed; queue reordered.**
+    (i) Same-prompt re-reads with the vLLM engine core *in the server process*
+    (`graft_genserver --inproc`, `VLLM_ENABLE_V1_MULTIPROCESSING=0`) are token-identical: 4 of 4
+    re-reads x 200 questions (Llama-3, LD7 incumbent) at the evaluation configuration (4,096
+    tokens, 0.85 memory) and at the search configuration (384 tokens, 0.40 memory, KV cache for
+    5.4 concurrent 4k sequences, so preemption is certain). The earlier capped runs
+    (`--max-num-seqs` 16/24, multiprocess engine) changed the reasoning on 55-66% of questions in
+    the first re-read and 0% in the second. Preemption is therefore not the cause; with the
+    engine core in another process, the batch composition of the first steps depends on request
+    arrival timing. All evaluation, re-read and re-roll jobs and Stage C v2 search now use the
+    in-process engine; the one Stage C v2 run made with the multiprocess engine
+    (date_understanding patch-v50 s1) is archived (`stageC2/runs/archive-multiproc`) and re-run so
+    every arm uses one engine. Item 52's preemption explanation is withdrawn.
+    (ii) GReaTer smoke 4 crashed at start: `expandable_segments` (added against the smoke-3 OOM)
+    forbids the CUDA IPC tensor sharing GReaTer uses with its worker. Smoke 3's OOM was in the
+    candidate-evaluation forward (`logits_batched_gen`, full-vocabulary float32 logits for every
+    position, 2.46 GiB requested). Memory-only fix (`greater_logits_batch.patch`): candidate
+    logits in batches of 3 (GReaTer's default is 9) and freed before the next candidate;
+    `max_split_size_mb:512`; per-process GPU memory logged every 15 s; failed runs are archived and
+    their claims released. Smoke 5 queued.
+    (iii) To surface failures early, the 27 not-yet-started Stage C v2 seed-1 runs were deferred
+    (marker locks, `ops/defer_stage.py`) behind the short jobs: GReaTer smoke 5 -> Qwen3 H-dist (5
+    pools, running) -> Qwen3 prefix-cache null -> Gemma-2 H-dist (HF) -> Stage C v2 seed 1
+    (`ops/resume_stagec2.sh`, in-process engine) -> deterministic re-reads -> Qwen3 token pools.
 
 ## Next
 

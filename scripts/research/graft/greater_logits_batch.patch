@@ -1,0 +1,20 @@
+--- llm_opt/gcg/greater_opt.py.pre-logits	2026-10-01 21:01:55.906401399 +0800
++++ llm_opt/gcg/greater_opt.py	2026-10-02 05:11:11.827737251 +0800
+@@ -393,7 +393,8 @@
+ 
+                     for iter_idx in range(0, round(1//percentage + 0.001)):
+                         logits, target_slice_starts, targets_ids_list, _prompts_obj_list, padding_cnts = self.prompts[0].logits_batched_gen(
+-                            self.test_workers[0].model, control_toks, percentage=percentage, iter_index=iter_idx)
++                            self.test_workers[0].model, control_toks, percentage=percentage, iter_index=iter_idx,
++                            logits_batch_size=int(os.environ.get("GREATER_LOGITS_BATCH", "9")))
+ 
+                         logits, target_slice_starts, targets_ids_list = [logits], [target_slice_starts], [targets_ids_list]
+ 
+@@ -408,6 +409,7 @@
+                         else:
+                             record1, record2, record3 = torch.cat((record1, loss_new), dim=0), torch.cat((record2, mist_perc), dim=0), torch.cat((record3, control_loss), dim=0)
+ 
++                        del logits; gc.collect()  # GRAFT: free this candidate's logits (memory only)
+                         torch.cuda.empty_cache()
+ 
+                     loss_new, mist_perc, control_loss = record1.mean(), record2.mean(), record3.mean()

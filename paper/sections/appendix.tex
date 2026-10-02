@@ -154,11 +154,20 @@ incumbent answers correctly does not improve best-3 regret over the all-row scor
 \section{Reading, determinism and budgets}
 \label{app:reader}
 Greedy decoding is not reproducible across batch compositions and cached computation paths
-\citep{yuan2025nondeterminism,he2025nondeterminism}. An earlier configuration of our generation
-engine (vLLM with prefix caching) re-read the same prompt with $2$--$14\%$ of answers changed, as
-large as the end-to-end effects under study; all reads reported here use the engine without prefix
-caching and with one prompt's questions per request. On $200$ held-out questions, three reads of
-the same prompt gave token-identical reasoning; one of $400$ answer reads differed. Rendered token
+\citep{yuan2025nondeterminism,he2025nondeterminism}. We found two sources in our generation
+engine (vLLM). With prefix caching, same-prompt re-reads changed $2$--$14\%$ of answers, as large
+as the end-to-end effects under study. Without prefix caching but with the engine core in a
+separate process, the batch composition of the first decoding steps depends on when requests
+arrive: a first check (three reads, $200$ questions) was token-identical, but with capped
+concurrency one of two re-reads changed the greedy reasoning on $55$--$66\%$ of questions. With the
+engine core in the calling process, so that all of a call's requests are enqueued before the first
+step, four re-reads of $200$ questions were token-identical both at the evaluation configuration
+($4{,}096$ tokens) and at the search configuration ($384$ tokens, a KV cache for about five
+$4{,}096$-token sequences, so that sequences are preempted and recomputed). All end-to-end
+evaluations, re-reads and re-roll measurements use this configuration; the validity studies
+(\S\ref{sec:diagnosis}) were read without prefix caching with the multiprocess engine
+\todo{re-read the held-out targets of the eleven pools with the in-process engine and report
+the change of Table~\ref{tab:validity}}. Rendered token
 ids are identical between the training-time (Hugging Face) and evaluation engines for all three
 models. Reasoning budgets are $1{,}024$ tokens during search, $384$ in the validity studies (whose
 tasks need fewer) and $4{,}096$ for dev selection and test; truncation rates are reported.

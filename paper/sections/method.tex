@@ -30,7 +30,9 @@ selected prompt is read once on test.
 \paragraph{Reading.} Every prompt in a comparison is read by one engine with identical
 token-level rendering: greedy reasoning, the task-typed extractor inside the assistant turn and
 $16$ greedy answer tokens parsed by answer type. The engine is configured so that repeated reads
-are identical (no prefix caching; a cap on concurrent sequences so that no sequence is preempted
-and recomputed), which we verify by repeated reads (Appendix~\ref{app:reader}); reasoning budgets
+are identical: no prefix caching, and the engine core runs in the calling process, so that every
+request of a call is enqueued before the first decoding step and batch composition does not depend
+on request timing. Four re-reads of the same prompt on $200$ questions are token-identical, at the
+evaluation and at the search configuration (Appendix~\ref{app:reader}); reasoning budgets
 are $1{,}024$ tokens during search and $4{,}096$ for dev selection and test, and truncation rates
 are reported.

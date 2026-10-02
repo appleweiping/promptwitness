@@ -1,64 +1,79 @@
-# Paper plan (ICLR format), 2026-10-01 — conditional on H-dist / H-inc
+# Paper plan (ICLR format), v2 2026-10-01 — analysis framing
 
-Working title: **"Score Prompt Edits by How They Reshape Reasoning: Distributional
-Self-Optimization of Structured Prompts"** (alt.: "What Gradients over Reasoning Miss").
+Supersedes the v1 plan (distributional scoring as the method), which was conditional on H-dist;
+the interim H-dist evidence (5 Llama-3 pools: split-half reliability -0.31..+0.26, KL 4.5-14.6
+nats per trace) makes a positive importance-sampling method untenable. H-dist is still completed
+on all 11 pools and reported as registered.
 
-## One-paragraph story
+Working title: **"What Gradients over Reasoning Miss: Prompt Edits Act on the Reasoning, Not on
+the Read-Off"** (alt.: "Prompt Edits Rewrite the Reasoning: Limits of Gradient-over-Reasoning
+Prompt Optimization").
 
-GReaTer lets a small model optimize its own prompt with the gradient of the answer loss
-computed over its own, *fixed*, reasoning. We lift this signal from tokens to the structural
-edits practitioners make (typed blocks; an exact calculus makes every structural vertex a
-real prompt) and find, in preregistered experiments on three models, that it ranks block
-edits in the wrong direction (pool level). The cause: an edit reshapes the *distribution* of
-the model's reasoning (log-likelihood ratios of the model's own samples spread by tens of
-nats; even a single-token edit rewrites the greedy reasoning on most questions, against a 0%
-deterministic-reader null), and the fixed-trace objective only sees the answer read-off. We
-decompose an edit's effect on expected accuracy into a reasoning-distribution term and a
-read-off term; GReaTer's objective is the read-off term on one trace. Scoring edits by exact
-likelihood ratios of the model's own sampled reasoning (tempered self-normalized importance
-sampling, beta chosen without labels) recovers the missing term without generating under any
-candidate; it [ranks edits as well as or better than fresh evaluation; pending all pools] and
-[end-to-end results pending]. Verification noise explains why gains of self-optimization are
-fragile: greedy minibatch verification on 8 rows chases noise (winner's curse).
+## One-sentence contribution
 
-## Sections -> evidence
+Gradient-over-reasoning prompt optimization scores an edit by how it changes the answer read off
+a *fixed* reasoning; with an exact calculus for structural edits and preregistered tests on three
+models we show that edits act almost entirely by changing the reasoning itself, so the
+fixed-reasoning signal ranks structural edits in the wrong direction, reweighting the model's
+own samples cannot recover the missing term, and what self-optimization achieves is decided by
+how candidates are verified on fresh reasoning.
 
-1. Introduction (contributions: diagnosis, decomposition, distributional scoring, end-to-end).
-2. Background: GReaTer's objective and its shortlist-then-verify loop.
-3. Structural edits: typed blocks; exact superposed calculus (short; details/proofs in appendix);
-   its role: exact vertices + one-pass estimates of likelihood ratios (trace_fidelity.py).
-4. Diagnosis (validity study, 11 pools, 3 models; pool-level sign-flip tests; BC intervals):
-   GReaTer objective negative 8/11 (p=.017); fresh positive 9-10/11; token level; re-roll with
-   deterministic null; wrong-row analysis (Llama-3 only after rank normalization).
-5. Theory: decomposition (D + A), GReaTer = A on one trace, first-order = score function,
-   wrong-row proposition, verification-noise model.
-6. Method: distributional scores (SNIS family, ESS rule, incumbent reads), cost, one-pass weights.
-7. Experiments:
-   7.1 Validity of distributional scores (H-dist primary; H-inc on 10 unseen pools); beta figure.
-   7.2 Pipeline: verification noise (8/16/24 rows), verifiers compared (pipeline_regret, analyze_dist).
-   7.3 End-to-end Stage C v2 (Llama-3 primary; patch/random/dist/textgrad at 50-row verification;
-       random-v8 control); accuracy vs measured compute; truncation reported.
-   7.4 Official GReaTer: gradient vs random shortlist (token level), 2+ tasks x 2 reps.
-   7.5 Breadth (GReaTer-scale table): best configuration on 21 BBH + GSM8K + FOLIO, Llama-3 and
-       Gemma-2, vs ZS-CoT, GReaTer initial/published (clean subset), TextGrad-style.
-   7.6 Transfer/readability (if time).
-8. Related work (GReaTer & token-gradient methods incl. Faster-GCG mismatch; structural APO incl.
-   SEPO, SAPO, PCO, GEPA; evaluation noise & prompt sensitivity incl. FormatSpread, nondeterminism;
-   off-policy / coupled evaluation; block-wise KV/positional encoding as prior art for the calculus).
-9. Limitations (MC-heavy validity tasks; 8-9B models; one GPU; same-family reviewer).
-Appendix: proofs; preregistration log with dates; per-pool tables; reader determinism; costs.
+## Causal spine
+
+gap (GReaTer's signal is a gradient over a fixed reasoning; prompts are edited as structures) ->
+question (does the signal predict what structural edits do?) -> finding (no: wrong direction) ->
+insight (exact decomposition D + A; GReaTer sees only A; A is small, D dominant; KL ~10 nats) ->
+consequence 1 (off-policy reweighting cannot cover the shift: preregistered failure) ->
+consequence 2 (the only reliable signal is fresh reasoning; verification noise then dominates:
+winner's curse) -> end-to-end test (shortlist signal vs verification size, structural and
+official GReaTer) -> implication (spend compute on verification, not on the shortlist signal).
+
+## Claims-evidence matrix
+
+| Claim | Evidence | Status |
+|---|---|---|
+| C1 The fixed-reasoning objective ranks LLM-proposed block edits in the wrong direction | 11 pools x 3 models, pool sign-flip test (8/11 negative, p=.017; patched 9/11, p=.037); fresh positive 9-10/11; best-3 regret vs exact random expectation | done (Table 1) |
+| C2 Edits act on the reasoning distribution; read-off term is small and unpredictive | readoff_stats on-policy A vs held-out; KL per trace; flips 0.2-3.2% | 5 Llama-3 pools done; Qwen3 5 + Gemma 1 queued |
+| C3 Reweighting own samples (tempered SNIS, beta without labels) does not rescue the signal | H-dist preregistered kill test, H-inc; reliability, KL gate, numeric null; beta figure | 5/11 pools; queued |
+| C4 Verification on small minibatches chases noise | pipeline_regret (8/16/24 rows, margins) + Stage C v2 random-v8 vs random-v50 | simulation done; Stage C v2 running |
+| C5 With full verification, the shortlist signal does not matter (structural) | Stage C v2: patch-v50 vs random-v50 (paired by seed), textgrad-v50 as different class | seed 1 queued (resumes after H-dist pools) |
+| C6 Same question inside official GReaTer (token level) | gradient vs uniformly random shortlist from the same candidates, official code | smoke 4 queued |
+| C7 Even single-token edits rewrite the reasoning | re-roll study under a verified deterministic reader | needs determinism probe (in-process engine) |
+| C8 Structural self-optimization with full verification is competitive at GReaTer's scale and cost | breadth: 21 BBH + GSM8K + FOLIO, Llama-3 + Gemma-2, vs ZS-CoT, GReaTer initial/published (clean subset) | after Stage C v2 |
+
+Outcome branches: if C5/C6 show the gradient shortlist *beats* random, the implication becomes
+"the gradient helps only as a cheap pre-filter before full verification" (still consistent with
+C1-C4 since the shortlist is verified on fresh reasoning). If C8 is below GReaTer published
+numbers on the clean subset, the breadth table is reported as a cost/accuracy tradeoff, not a win.
+
+## Sections
+
+1. Introduction (1.5 p): hook = self-optimization for small models; gap; question; findings
+   C1-C3 with numbers; prescription C4-C6; contributions list; Figure 1.
+2. Background (0.5 p): GReaTer objective and loop; notation.
+3. Structural edits and an exact calculus (1 p): typed blocks; superposed gated slots; exactness
+   (proofs in appendix); role = makes the lifted objective computable for every block edit in one
+   pass (patched vs exact rho 0.79).
+4. Diagnosis (1.5 p): C1 table; token-level C7; wrong-row analysis (Llama-3 only).
+5. Why: decomposition (1.5 p): Eq. D + A; Proposition (faithful reading); C2 table; C3 with the
+   coverage argument (Chatterjee-Diaconis) and the registered result; beta figure.
+6. Verification is the bottleneck (2 p): C4 simulation; Stage C v2 (C5); official GReaTer
+   ablation (C6); breadth (C8).
+7. Related work (1 p). 8. Limitations + conclusion (0.5 p).
+Appendix: proofs, preregistration log with dates, per-pool tables, reader determinism, costs,
+prompts, GReaTer patches.
 
 ## Figures/tables
 
-F1 overview (token vs block; fixed trace vs distribution). F2 validity per signal (pool dots).
-F3 beta curve (dist_figure.py). F4 verification noise (pipeline grid). T1 validity table
-(per pool). T2 end-to-end Stage C v2. T3 breadth table. T4 GReaTer ablation. T5 costs.
+F1 hero: (a) fixed trace vs distribution (an edit moves pi_P to pi_P', KL ~10 nats; GReaTer's
+gradient lives on one trace of pi_P); (b) the decomposition bars per pool (|A| vs |D|).
+F2 validity per signal (pool dots, Table 1 companion). F3 beta curve. F4 verification noise grid.
+T1 validity; T2 read-off; T3 Stage C v2; T4 GReaTer ablation; T5 breadth; T6 costs (appendix).
 
-## Open experiments (queue order)
+## GPU order (one A6000; GPU 0 belongs to another user)
 
-1. H-dist/H-inc pools (running); re-roll with null; Qwen3 prefix-cache null.
-2. Re-reads: baselines (23 tasks x 3 models) and Stage C v1 Qwen3 (4,096 tokens, deterministic).
-3. Stage C v2 Llama-3 (dist arm only if supported).
-4. Official GReaTer gradient vs random (needs the 1/8-fraction fix verified by the smoke).
-5. trace_fidelity (one-pass weights) on pools with stored traces.
-6. Breadth with the best configuration.
+1. Determinism probes (in-process engine) -> GReaTer smoke 4 -> Qwen3 H-dist 5 pools ->
+   Qwen3 prefix-cache null -> Gemma-2 H-dist (HF) -> Stage C v2 seed 1 (resume, ~19 h) ->
+   re-reads (deterministic config) -> Qwen3 token pools.
+2. Then: GReaTer ablation (~20 h per run; 2 tasks x 2 arms first), Stage C v2 seeds 2-3
+   (49 runs, ~30 h), breadth (~46 runs + evaluation), re-roll studies.

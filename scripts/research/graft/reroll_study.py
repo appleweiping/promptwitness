@@ -90,6 +90,7 @@ def main() -> None:
             "correctness_flipped": statistics.mean(a != b for a, b in zip(correct, base_correct)),
             "accuracy_delta": statistics.mean(correct) - statistics.mean(base_correct),
             "first_divergence_median": statistics.median(firsts) if firsts else None,
+            "correct": [int(c) for c in correct],  # per held-out question (re-read validity targets)
         }
         print(json.dumps({"edit": name, **per_edit[name]}), flush=True)
     summary: dict = {}
@@ -104,7 +105,8 @@ def main() -> None:
                            for k in ("reasoning_changed", "answer_changed", "correctness_flipped")}
     out = {"record": str(args.record), "task": record["task"], "edit_kind": record.get("edit_kind", "block"),
            "model_path": args.model_path, "engine": "vllm-server" if args.gen_server else "hf",
-           "per_edit": per_edit, "null_reads": null, "summary": summary}
+           "per_edit": per_edit, "null_reads": null, "summary": summary,
+           "base_correct": [int(c) for c in base_correct]}
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(out, indent=1) + "\n", encoding="utf-8")
     print(json.dumps(summary, indent=1))

@@ -4,6 +4,10 @@
 # 2026-10-01: the claim/skip name includes the steps suffix (a smoke run no longer claims the
 # full run's name); main.py reuses the single local model as GReaTer's reasoning worker, and the
 # reasoning worker regenerates 1/8 of the rows per call instead of 1/2 (memory only).
+# Later the same day (memory only, see greater_logits_batch.patch): candidate logits in batches of
+# 3 and freed before the next candidate; no expandable_segments (GReaTer shares CUDA tensors with
+# its worker process, which expandable segments forbid); per-process GPU memory logged every 15 s;
+# a failed run is archived under failed/ and its claim released, so re-queueing retries it.
 G=/media/lenovo/data2/greater-official/GreaTer
 R=/media/lenovo/data2/promptwitness-graft-runtime
 GPU=$1; TASK=$2; SHORT=${3:-gradient}; STEPS=${4:-106}; REP=${5:-1}
@@ -37,7 +41,9 @@ cd $G/experiments
 START=$(date +%s)
 echo "START greater-$NAME gpu$GPU $(date -u +%FT%TZ)"
 nvidia-smi --query-gpu=index,memory.used --format=csv,noheader; nvidia-smi --query-compute-apps=pid,used_memory --format=csv,noheader
-PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True GREATER_GEN_FRACTION=0.125 GREATER_SHORTLIST=$SHORT CUDA_VISIBLE_DEVICES=$GPU /media/lenovo/data2/greater-official/venv/bin/python main.py \
+(while true; do echo "$(date -u +%T) $(nvidia-smi --query-compute-apps=pid,used_memory --format=csv,noheader | tr '\n' ' ')"; sleep 15; done) > $R/greater_rerun/$NAME.mem.log 2>&1 &
+MEMLOG=$!
+PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512 GREATER_LOGITS_BATCH=3 GREATER_GEN_FRACTION=0.125 GREATER_SHORTLIST=$SHORT CUDA_VISIBLE_DEVICES=$GPU /media/lenovo/data2/greater-official/venv/bin/python main.py \
   --config="./configs/local_llama3_1gpu.py" \
   --config.train_data="../data/BBH_graft/${TASK}.json" --config.test_data="../data/BBH_graft/${TASK}.json" \
   --config.result_prefix="$R/greater_rerun/$NAME" \
@@ -48,7 +54,14 @@ PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True GREATER_GEN_FRACTION=0.125 GREA
   --config.extractor_text="$EXTRACTOR" --config.control_weight=0.20 --config.target_weight=1.0 \
   > $R/greater_rerun/$NAME.log 2>&1
 CODE=$?
+kill $MEMLOG 2>/dev/null
 echo "{\"task\": \"$TASK\", \"shortlist\": \"$SHORT\", \"steps\": $STEPS, \"rep\": $REP, \"exit\": $CODE, \"seconds\": $(( $(date +%s) - START ))}" > $R/greater_rerun/$NAME.time.json
+if [ $CODE -ne 0 ]; then
+  F=$R/greater_rerun/failed/$NAME-$(date -u +%Y%m%dT%H%M%S)
+  mkdir -p $F && mv $R/greater_rerun/$NAME.log $R/greater_rerun/$NAME.time.json $R/greater_rerun/$NAME.mem.log $F/
+  rmdir $R/greater_rerun/$NAME.claim
+  echo "FAILED greater-$NAME exit $CODE (archived $F) $(date -u +%FT%TZ)"; exit $CODE
+fi
 # Final prompt = "Use" + last reported best control (as in GReaTer's published prompts).
 python3 - << PY
 import json, re
