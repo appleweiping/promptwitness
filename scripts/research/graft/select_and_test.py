@@ -32,6 +32,9 @@ def main() -> None:
     parser.add_argument("--gpu-memory-utilization", type=float, default=0.5)
     parser.add_argument("--gen-server", help="read through a running graft_genserver instead of an offline engine")
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--reroll-chunks", default="",
+                        help="comma-separated sizes: re-read the selected prompt's test questions in separate requests "
+                             "of this many (numerical re-rolls by batch shape; deterministic engine)")
     args = parser.parse_args()
     if args.gen_server:
         use_remote_generation(args.gen_server)
@@ -65,7 +68,14 @@ def main() -> None:
             scores = [d["accuracy"] for d in dev]
             chosen = max(range(len(prompts)), key=lambda i: (scores[i], i))
             test = reader.evaluate(prompts[chosen], splits["test"], "test")
+            rerolls = []
+            for chunk in [int(c) for c in args.reroll_chunks.split(",") if c.strip()]:
+                rows = splits["test"]
+                correct = [c for b in range(0, len(rows), chunk)
+                           for c in reader.evaluate(prompts[chosen], rows[b:b + chunk], "test_reroll")["correct"]]
+                rerolls.append({"chunk": chunk, "accuracy": sum(correct) / len(correct), "correct": correct})
             results[path.name] = {
+                "test_rerolls": rerolls,
                 "task": run["task"], "method": run["method"], "seed": run["seed"],
                 "objective": run["config"].get("objective"), "accept": run["config"].get("accept"),
                 "model_path": model_path, "engine": "vllm-server" if args.gen_server else "vllm",

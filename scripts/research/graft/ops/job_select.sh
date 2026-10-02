@@ -7,5 +7,5 @@ V=/media/lenovo/data2/promptwitness-delta-20260926/venv-torch271/bin/python
 RUNS=$(ls $2/$1-*.json 2>/dev/null)
 [ -z "$RUNS" ] && { echo "SELECT $1 no runs"; exit 0; }
 $V scripts/research/graft/select_and_test.py $RUNS --data-dir $R/data/greater-42a22d9 --gen-server $GEN \
-  --max-new-tokens 4096 --output $3 >> ${3%.json}.log 2>&1
+  --max-new-tokens 4096 --reroll-chunks ${RECHUNKS:-20,34,50} --output $3 >> ${3%.json}.log 2>&1
 echo "SELECT $1 $(basename $2) exit $? $(date -u +%FT%TZ)"
