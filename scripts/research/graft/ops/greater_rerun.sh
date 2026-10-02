@@ -10,7 +10,8 @@
 # a failed run is archived under failed/ and its claim released, so re-queueing retries it.
 # Smoke 5 (2026-10-02): the gradient worker froze no weights, so every backward pass computed and
 # kept ~16 GB of unused weight gradients (worker at 27-32 GB next to the 16 GB main process);
-# greater_freeze_weights.patch freezes them (one_hot.grad unchanged), memory only.
+# greater_freeze_weights.patch freezes them (one_hot.grad unchanged), memory only. Smoke 6 then
+# peaked at 33 GB in total (worker 17 GB), so candidate logits are back to GReaTer's batch of 9.
 G=/media/lenovo/data2/greater-official/GreaTer
 R=/media/lenovo/data2/promptwitness-graft-runtime
 GPU=$1; TASK=$2; SHORT=${3:-gradient}; STEPS=${4:-106}; REP=${5:-1}
@@ -46,7 +47,7 @@ echo "START greater-$NAME gpu$GPU $(date -u +%FT%TZ)"
 nvidia-smi --query-gpu=index,memory.used --format=csv,noheader; nvidia-smi --query-compute-apps=pid,used_memory --format=csv,noheader
 (while true; do echo "$(date -u +%T) $(nvidia-smi --query-compute-apps=pid,used_memory --format=csv,noheader | tr '\n' ' ')"; sleep 15; done) > $R/greater_rerun/$NAME.mem.log 2>&1 &
 MEMLOG=$!
-PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512 GREATER_LOGITS_BATCH=3 GREATER_GEN_FRACTION=0.125 GREATER_SHORTLIST=$SHORT CUDA_VISIBLE_DEVICES=$GPU /media/lenovo/data2/greater-official/venv/bin/python main.py \
+PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:512 GREATER_LOGITS_BATCH=9 GREATER_GEN_FRACTION=0.125 GREATER_SHORTLIST=$SHORT CUDA_VISIBLE_DEVICES=$GPU /media/lenovo/data2/greater-official/venv/bin/python main.py \
   --config="./configs/local_llama3_1gpu.py" \
   --config.train_data="../data/BBH_graft/${TASK}.json" --config.test_data="../data/BBH_graft/${TASK}.json" \
   --config.result_prefix="$R/greater_rerun/$NAME" \
