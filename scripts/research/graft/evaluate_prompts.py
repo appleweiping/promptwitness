@@ -50,6 +50,9 @@ def main() -> None:
     parser.add_argument("--gen-server", help="host:port of a graft_genserver (engine 'server')")
     parser.add_argument("--gpu-memory-utilization", type=float, default=0.5)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--reroll-chunks", default="",
+                        help="comma-separated sizes: re-read the selected prompt's test questions in separate requests "
+                             "of this many (numerical re-rolls by batch shape; deterministic engine)")
     args = parser.parse_args()
 
     tokenizer = load_tokenizer(args.model_path)
@@ -102,7 +105,14 @@ def main() -> None:
             dev = [runner.evaluate(p, splits["dev"], "dev")["accuracy"] for p in pool] if len(pool) > 1 else [None]
             chosen = max(range(len(pool)), key=lambda i: dev[i] if dev[i] is not None else 0.0)
             test = runner.evaluate(pool[chosen], splits["test"], "test")
+            rerolls = []
+            for chunk in [int(c) for c in args.reroll_chunks.split(",") if c.strip()]:
+                rows = splits["test"]
+                correct = [c for b in range(0, len(rows), chunk)
+                           for c in runner.evaluate(pool[chosen], rows[b:b + chunk], "test_reroll")["correct"]]
+                rerolls.append({"chunk": chunk, "accuracy": sum(correct) / len(correct), "correct": correct})
             results[key] = {"task": task, "set": name, "candidates": len(pool), "dev": dev,
+                            "test_rerolls": rerolls,
                             "selected": chosen, "text": pool[chosen].document.messages[0].content,
                             "test_accuracy": test["accuracy"], "test_correct": test["correct"],
                             "test_truncated": test["truncated"], "cost": ledger.phases, "engine": args.engine,

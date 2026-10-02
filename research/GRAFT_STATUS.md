@@ -483,6 +483,17 @@ full; everything lives on `/media/lenovo/data2`.
     reasoning hits the budget on 97% (Llama-3 LD7-state) and 100% (Qwen3 LD7) of samples; the
     fixed-reasoning objective is negative also on low-truncation pools (Llama-3 LD3 0.3%: -0.41;
     TS7 14%: -0.66). Greedy held-out truncation is now recorded by `reroll_study` (block re-reads).
+59. **GPU ledger and queue (2026-10-02 ~05:30 UTC).** Queue log (GPU 1, since 2026-10-01 12:46):
+    15.9 h closed + 1.2 h open. Before the queue (2026-09-28 17:50 -> 2026-10-01 12:46) at most
+    66.9 h x 2 GPUs = 133.9 GPU-h (upper bound; GPU 0 was another user's for most of it). Total
+    GRAFT <= ~151 GPU-h, plus 3.8 GPU-h of earlier PromptWitness work: well inside the 1,000 GPU-h
+    cap; the queued plan (~150-250 h) keeps it under ~400. Queue: Stage C v2 seed 1 (running,
+    in-process engine) -> its dev selection + test read -> deterministic re-reads (3 models) ->
+    block re-rolls with numerical re-rolls (11 pools) -> official GReaTer TS5 gradient, random ->
+    their evaluation -> Stage C v2 seeds 2-3 -> evaluation -> GReaTer geometric shapes gradient,
+    random -> evaluation -> Qwen3 token H-dist pools. Breadth after Stage C v2 decides the arm
+    (if random-v50 ~ patch-v50, breadth uses random-v50, which needs no HF scoring model, so
+    Gemma-2 can run on the vLLM server alone).
 
 ## Next
 

@@ -12,7 +12,7 @@ TASKS="boolean_expressions causal_judgement date_understanding disambiguation_qa
 mkdir -p $R/eval2
 $V scripts/research/graft/evaluate_prompts.py --engine server --gen-server $GEN --model-path $MODEL --model-key $KEY \
   --data-dir $DATA --published $PUB --tasks $TASKS --sets zs_cot greater_init greater_published \
-  --max-new-tokens 4096 --output $R/eval2/baselines_$KEY.json > $R/eval2/baselines_$KEY.log 2>&1
+  --max-new-tokens 4096 --reroll-chunks ${RECHUNKS:-20,34,50} --output $R/eval2/baselines_$KEY.json > $R/eval2/baselines_$KEY.log 2>&1
 echo "BASELINES $KEY exit $? $(date -u +%FT%TZ)"
 RUNS=$(ls $R/stageC/runs/$KEY-*.json 2>/dev/null)
 if [ -n "$RUNS" ]; then
