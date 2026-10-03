@@ -531,6 +531,13 @@ full; everything lives on `/media/lenovo/data2`.
     was executed and audited by Opus 5.5 subagents. `reread_targets.py` + `cc/run_reread_validity.sh`
     re-score Table 1 against held-out targets re-read with the deterministic engine once the block
     re-rolls (`reroll3/`, 11 pools) exist; GReaTer TS5 gradient run is at step 90/106 (~11 min/step).
+63. **2026-10-03 23:18 UTC: official GReaTer, tracking-5, gradient shortlist, rep 1 finished** (106 steps,
+    65,291 s = 18.1 h, 313 candidate evaluations, exit 0; one GPU, memory-only patches). Best training
+    loss 0.405; final prompt (GReaTer-style "Use " + best control) in
+    `greater_rerun/llama3_tracking_shuffled_objects_five_objects_gradient.prompt.json`. Test accuracy is
+    measured by `job_greater_eval.sh` after the random-shortlist twin finishes. Queue now: Llama-3
+    baseline re-read (running) -> 11 block re-rolls -> TS5 random (18 h) -> evaluation -> Stage C v2
+    seeds 2-3 -> ...
 
 ## Next
 
