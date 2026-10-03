@@ -141,6 +141,27 @@ min, peak 33 GB of 48 GB. Shortlist ablation: `GREATER_SHORTLIST=random` draws t
 uniformly from the same model-proposed candidates. Runs queued (TS5, geometric shapes; gradient
 and random).
 
+## H. Stage C v2 seed 1 (end-to-end structural search; `eval2/stageC2_llama3.json`, `stageC2_s1_analysis*.json`)
+
+Llama-3-8B, 7 tasks (6 BBH + FOLIO), 12 rounds, K = 6 proposals per slot, shortlist 3, verification
+on all 50 training questions (random-v8: 8-question minibatches), deterministic in-process reader,
+dev selection among checkpoints, one 4,096-token test read + 3 numerical re-rolls (batch shapes
+20/34/50). SEED 1 ONLY -- preliminary; seeds 2-3 running.
+Test accuracy (full / clean): patch-v50 63.3 / 64.9; random-v50 61.6 / 63.0; random-v8 59.7 / 60.8;
+textgrad-v50 64.4 / 64.7. Per task (full): date 70/75/70/63; folio 57.1/61.1/56.7/62.1; formal
+fallacies 54/53/41/49; movie 47/47/55/45; navigate 70/80/78/77; object counting 88/72/69/89; TS5
+57/43/48/66 (patch/random-v50/random-v8/textgrad).
+Paired (full): patch-v50 - random-v50 +1.7 [conditional -2.4, +5.6; task-level -4.7, +8.4], W/T/L
+3/1/3; random-v50 - random-v8 +1.9 [-1.7, +5.8; -2.9, +6.2], 5/0/2; textgrad - random-v50 +2.9
+[-1.1, +6.7; -5.0, +11.7], 3/0/4. Clean: +1.9 (2/1/4), +2.2 (5/1/1), +1.7 (3/1/3).
+Cost (search + selection minutes per run): patch-v50 56, random-v50 26, random-v8 16, textgrad 32.
+Numerical noise floor of one test read (sd over base + 3 re-rolls, mean over runs): 0.8-2.0 points
+per task, mean 1.5.
+In-search diagnostics (`search_noise.py`, exploratory): unchanged incumbent re-read on the same 50
+rows changes with sd 2.1-2.8 points (nonzero in 38-62% of re-reads); accepted candidates lose on
+re-measurement: patch-v50 +2.2 (n = 27), random-v50 +2.1 (36), textgrad +1.4 (32); random-v8 +12.3
+(61) points.
+
 ## G. Pending (keep \todo)
 
 Stage C v2 (Llama-3, 7 tasks, patch-v50 / random-v50 / random-v8 / textgrad-v50, seeds 1-3,

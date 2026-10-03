@@ -514,6 +514,15 @@ full; everything lives on `/media/lenovo/data2`.
     Qwen3 token H-dist -> Qwen3 v1 re-selection. (vii) Paper: analysis framing drafted by a
     multi-agent pass (figures beta/verify_cost/reroll, tables hdist/reroll/readoff from the final
     artifacts; main text cut to 8 pages, page 9 reserved for end-to-end results); audit pending.
+61. **2026-10-03 ~05:30 UTC: Stage C v2 seed 1 evaluated (preliminary, one seed).** Llama-3 full test
+    mean over 7 tasks: patch-v50 63.3, random-v50 61.6, random-v8 59.7, textgrad-v50 64.4. Gradient vs
+    random shortlist under full verification: +1.7 [-2.4, +5.6], W/T/L 3/1/3, at 56 vs 26 minutes per
+    run; 50-row vs 8-row verification +1.9 [-1.7, +5.8], 5/0/2; textgrad +2.9 vs random-v50, 3/0/4.
+    Test-read numerical noise floor 1.5 points (sd over 4 reads). In-search acceptance gap +1.4 to +2.2
+    points (50 rows) vs +12.3 (8 rows). Fixed: `analyze_stagec.py` merged random-v50 and random-v8
+    (same recorded method) and keyed baselines by file stem. Paper audit applied (53 findings), draft
+    milestone `paper/drafts/graft_draft_2026-10-03.pdf`. Llama-3 baselines re-read running; then the
+    official GReaTer TS5 pair.
 
 ## Next
 
