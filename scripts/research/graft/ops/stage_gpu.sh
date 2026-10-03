@@ -24,7 +24,7 @@ if [ "$MEM" = "0" ]; then  # HF-only (Gemma-2: weights + eager attention leave n
 fi
 $VV -m promptwitness.graft_genserver --model-path $M --port $PORT --gpu-memory-utilization $MEM ${INPROC:+--inproc} > $LOG 2>&1 &
 SERVER=$!
-for i in $(seq 200); do grep -q READY $LOG && break; kill -0 $SERVER 2>/dev/null || break; sleep 3; done
+for i in $(seq 600); do grep -q READY $LOG && break; kill -0 $SERVER 2>/dev/null || break; sleep 3; done
 if ! grep -q READY $LOG; then echo "SERVER FAILED $KEY gpu$GPU"; exit 1; fi
 echo "SERVER READY $KEY gpu$GPU $(date -u +%FT%TZ)"
 $V scripts/research/graft/stage_queue.py $PLAN --out $OUT --data-dir $R/data/greater-42a22d9 --model $KEY --gen-server 127.0.0.1:$PORT

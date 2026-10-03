@@ -23,7 +23,7 @@ SLOG=$R/cc/logs/genserver-$KEY-gpu$GPU-$PORT.log
 setsid $VV -m promptwitness.graft_genserver --model-path $M --port $PORT --gpu-memory-utilization $MEM \
   --max-model-len ${MAXLEN:-4096} ${MAXSEQS:+--max-num-seqs $MAXSEQS} ${INPROC:+--inproc} $EXTRA > $SLOG 2>&1 &
 SERVER=$!
-for i in $(seq 200); do grep -q READY $SLOG && break; kill -0 $SERVER 2>/dev/null || break; sleep 3; done
+for i in $(seq 600); do grep -q READY $SLOG && break; kill -0 $SERVER 2>/dev/null || break; sleep 3; done
 if ! grep -q READY $SLOG; then
   echo "SERVER FAILED $KEY gpu$GPU"; kill -- -$SERVER 2>/dev/null; exit 1
 fi
