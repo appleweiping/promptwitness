@@ -523,6 +523,14 @@ full; everything lives on `/media/lenovo/data2`.
     (same recorded method) and keyed baselines by file stem. Paper audit applied (53 findings), draft
     milestone `paper/drafts/graft_draft_2026-10-03.pdf`. Llama-3 baselines re-read running; then the
     official GReaTer TS5 pair.
+62. **Model record (2026-10-03).** The first launch of review round 2 failed with a weekly rate limit
+    on Opus 5.5 (HTTP 429), before any review text; no round-2 result exists from that launch. The
+    user then switched the executor session to Sonnet 5.5; work from here (2026-10-03 ~21:00 UTC)
+    is executed by Sonnet 5.5. The round-2 reviewer is relaunched pinned to Opus 5.5 (same-family
+    subagent, as in round 1). Earlier work, including the paper rewrite and its adversarial audits,
+    was executed and audited by Opus 5.5 subagents. `reread_targets.py` + `cc/run_reread_validity.sh`
+    re-score Table 1 against held-out targets re-read with the deterministic engine once the block
+    re-rolls (`reroll3/`, 11 pools) exist; GReaTer TS5 gradient run is at step 90/106 (~11 min/step).
 
 ## Next
 
