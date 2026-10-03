@@ -62,9 +62,13 @@ def main() -> None:
     runs: dict = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
     cost: dict = defaultdict(list)
     truncation: dict = defaultdict(lambda: defaultdict(list))  # model -> task -> fractions
+    reroll_sd: dict = defaultdict(lambda: defaultdict(list))  # model -> task -> sd of test accuracy over re-rolls
     for entry in json.loads(args.selected.read_text(encoding="utf-8")).values():
         key = model_key(entry["model_path"])
         runs[key][entry["task"]][entry["method"]][entry["seed"]] = entry["test_correct"]
+        if entry.get("test_rerolls"):
+            reads = [entry["test_accuracy"]] + [r["accuracy"] for r in entry["test_rerolls"]]
+            reroll_sd[key][entry["task"]].append(statistics.pstdev(reads))
         cost[(key, entry["method"])].append((entry.get("search_seconds") or 0.0) + (entry.get("eval_seconds") or 0.0))
         truncation[key][entry["task"]].append(entry.get("test_truncated", 0) / max(1, len(entry["test_correct"])))
     if args.max_truncation is not None:
@@ -74,7 +78,7 @@ def main() -> None:
                     print(f"dropping {key}/{task}: max truncation {max(truncation[key][task]):.2f}")
                     del runs[key][task]
     for path in args.baselines:
-        key = path.stem
+        key = path.stem.removeprefix("baselines_")  # eval2/baselines_<model>.json
         for name, entry in json.loads(path.read_text(encoding="utf-8")).items():
             task, method = name.split("/")
             if method in FIXED and entry.get("test_correct") and task in runs.get(key, {}):
@@ -119,6 +123,13 @@ def main() -> None:
         print(f"{'mean':40s} " + " ".join(f"{100 * means[m]:10.1f}" for m in methods))
         model_out: dict = {"table": table, "means": means, "pairs": {}, "cost_minutes": {}}
         model_out["truncation"] = {t: max(truncation[key][t], default=0.0) for t in tasks}
+        if reroll_sd[key]:
+            # Numerical noise floor of one test read: sd of the selected prompt's accuracy over its base read
+            # and re-reads in other batch shapes (deterministic engine), averaged over runs.
+            model_out["reroll_sd"] = {t: statistics.mean(v) for t, v in reroll_sd[key].items()}
+            print("  test-read re-roll sd (points): " + ", ".join(
+                f"{t[:12]} {100 * s:.1f}" for t, s in sorted(model_out["reroll_sd"].items()))
+                  + f"; mean {100 * statistics.mean(model_out['reroll_sd'].values()):.1f}")
         for a, b in pairs_to_test:
             shared = [t for t in tasks if a in runs[key][t] and b in runs[key][t] and seed_pairs(runs[key][t], a, b)]
             if not shared:

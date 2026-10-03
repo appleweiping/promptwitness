@@ -494,6 +494,26 @@ full; everything lives on `/media/lenovo/data2`.
     random -> evaluation -> Qwen3 token H-dist pools. Breadth after Stage C v2 decides the arm
     (if random-v50 ~ patch-v50, breadth uses random-v50, which needs no HF scoring model, so
     Gemma-2 can run on the vLLM server alone).
+60. **2026-10-02 ~20:00 UTC: Stage C v2 seed 1 search complete (28 runs, in-process engine); its
+    evaluation failed once (operational) and is re-queued first; queue re-prioritized.**
+    (i) `job_select.sh` redirected its log into `eval2/`, which did not exist yet, so the first
+    selection job did nothing (2 min, misleading "exit 0"); fixed (`mkdir -p`), re-queued at the
+    front. (ii) Exploratory in-search diagnostic (`search_noise.py`, 19-28 runs): with 50-row
+    verification the unchanged incumbent's accuracy on the same rows changes between rounds with sd
+    2.0-2.8 points (it is read together with different candidates, i.e. a numerical re-roll inside
+    the loop); accepted candidates lose +1.4 to +2.3 points on re-measurement (acceptance gap); with
+    8-row minibatches the gap is +11.3 points. (iii) Allocation/acceptance simulation
+    (`racing_sim.py`, digest D2): adaptive allocation does not beat uniform verification; a 2-SE
+    acceptance margin limits harm. (iv) Re-rolls (batch shapes 20/34/50) added to every test read of
+    baselines, GReaTer prompts and Stage C selections. (v) Qwen3 baseline re-read is slow (long
+    reasoning at 4,096 tokens x 4 reads: ~10 min per task/prompt set); the Stage C v1 Qwen3
+    re-selection (64 runs) inside the same job was deferred by holding `stageC/runs` (renamed
+    `runs.hold`) and queued last with a restore step. (vi) New order: Stage C v2 selection -> Llama-3
+    baselines -> GReaTer TS5 gradient, random -> evaluation -> block re-rolls (11 pools) -> Stage C v2
+    seeds 2-3 -> selection -> Gemma-2 baselines -> GReaTer geometric shapes pair -> evaluation ->
+    Qwen3 token H-dist -> Qwen3 v1 re-selection. (vii) Paper: analysis framing drafted by a
+    multi-agent pass (figures beta/verify_cost/reroll, tables hdist/reroll/readoff from the final
+    artifacts; main text cut to 8 pages, page 9 reserved for end-to-end results); audit pending.
 
 ## Next
 
