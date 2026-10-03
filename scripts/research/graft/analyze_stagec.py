@@ -63,13 +63,17 @@ def main() -> None:
     cost: dict = defaultdict(list)
     truncation: dict = defaultdict(lambda: defaultdict(list))  # model -> task -> fractions
     reroll_sd: dict = defaultdict(lambda: defaultdict(list))  # model -> task -> sd of test accuracy over re-rolls
-    for entry in json.loads(args.selected.read_text(encoding="utf-8")).values():
+    for name, entry in json.loads(args.selected.read_text(encoding="utf-8")).items():
         key = model_key(entry["model_path"])
-        runs[key][entry["task"]][entry["method"]][entry["seed"]] = entry["test_correct"]
+        method = entry["method"]
+        if args.v2:  # the arm is in the run name (<model>-<task>-<arm>-s<seed>.json); random-v50 and -v8 share a method
+            stem = name.removesuffix(".json")
+            method = stem[len(f"{key}-{entry['task']}-"):stem.rindex("-s")]
+        runs[key][entry["task"]][method][entry["seed"]] = entry["test_correct"]
         if entry.get("test_rerolls"):
             reads = [entry["test_accuracy"]] + [r["accuracy"] for r in entry["test_rerolls"]]
             reroll_sd[key][entry["task"]].append(statistics.pstdev(reads))
-        cost[(key, entry["method"])].append((entry.get("search_seconds") or 0.0) + (entry.get("eval_seconds") or 0.0))
+        cost[(key, method)].append((entry.get("search_seconds") or 0.0) + (entry.get("eval_seconds") or 0.0))
         truncation[key][entry["task"]].append(entry.get("test_truncated", 0) / max(1, len(entry["test_correct"])))
     if args.max_truncation is not None:
         for key in list(runs):
