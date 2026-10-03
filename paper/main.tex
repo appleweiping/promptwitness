@@ -22,7 +22,7 @@
 \newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
 \providecommand{\R}{\mathbb{R}}
 
-\title{Score Prompt Edits by How They Reshape Reasoning:\\ Distributional Self-Optimization of Structured Prompts}
+\title{What Gradients over Reasoning Miss:\\ Prompt Edits Rewrite the Reasoning}
 
 \author{Anonymous authors\\Paper under double-blind review}
 
@@ -30,24 +30,24 @@
 \maketitle
 
 \begin{abstract}
-\greater{} showed that a small language model can optimize its own prompt with the gradient of the
-answer loss computed over its own reasoning, one token at a time. Prompts, however, are written and
-revised as structured documents. We lift this signal to structural edits---rewriting, deleting and
-inserting typed blocks of any length---with an exact calculus in which candidate blocks share one
-sequence behind attention gates and rotary slot offsets, so that every vertex is a real edited
-prompt. With the signal computable, preregistered experiments on three models show that it ranks
-LLM-proposed block edits in the \emph{wrong} direction (8 of 11 proposal pools; as a one-pass
-shortlist worse than random in 8 of 11), while fresh evaluation is positive. We trace the failure
-to what the gradient is taken over: an edit's effect on accuracy decomposes exactly into a change
-of the reasoning distribution and a change of how answers are read off a fixed reasoning, and the
-fixed-reasoning objective sees only the second, which on the models' own samples is a small
-fraction of the edits' effects, does not predict them, and on wrongly answered questions rewards
-reading against the reasoning. Edits move the reasoning distribution by about ten nats per
-reasoning, beyond what reweighting the model's own samples by exact likelihood ratios can cover:
-this principled repair fails a preregistered test \todo{final numbers}. What edits do must be
-observed on fresh reasoning, and verifying candidates on small minibatches chases noise;
-\todo{end-to-end: structural search with full verification vs \greater{}; gradient vs random
-shortlist inside official \greater{}}.
+\greater{} lets a small language model optimize its own prompt with the gradient of the answer
+loss over its own reasoning, generated once and held fixed. Does this signal predict what prompt
+edits do? We make the objective exact for edits that rewrite, delete or insert whole instructions,
+by superposing candidate blocks behind attention gates, and test it with three \mbox{8--9B} models
+on eleven pools of their own block edits, collected under a protocol fixed before their data. It
+ranks these edits in the \emph{wrong} direction (negative in $8$ of $11$ pools, pooled Spearman
+$-0.26$), while fresh greedy accuracy on a few questions points the right way. An exact
+decomposition explains why: edits act through the reasoning the model writes, whereas the objective
+sees only the change of the answer read off a given reasoning, a term that on the models' own
+samples averages at most $1.2$ accuracy points per edit against mean absolute held-out effects of
+$2.1$--$10.9$. Reweighting the model's samples by exact likelihood ratios fails its preregistered
+test, as a coverage argument predicts: edits move the reasoning distribution beyond what the
+samples cover. Even a single-token substitution changes the greedy reasoning on $79$--$93\%$ of
+questions (numerical re-rolls of the unchanged prompt: $58$--$85\%$). Edits must therefore be
+judged on fresh reasoning, where verification decides: in exploratory analyses, accepting the best
+candidate on $16$ or fewer generations lowers held-out accuracy, and a noise-calibrated acceptance
+margin limits this harm. \todo{end-to-end: structural search and official \greater{}, gradient vs.\
+random shortlist}.
 \end{abstract}
 
 \input{sections/intro}
@@ -55,11 +55,11 @@ shortlist inside official \greater{}}.
 \input{sections/calculus}
 \input{sections/diagnosis}
 \input{sections/theory}
-\input{sections/method}
 \input{sections/experiments}
 \input{sections/related}
 \input{sections/limitations}
 \input{sections/conclusion}
+\label{main-text-end}% records the page on which the main text (9-page limit) ends
 
 \subsection*{AI use statement}
 % Authors: verify and adapt this statement before submission.

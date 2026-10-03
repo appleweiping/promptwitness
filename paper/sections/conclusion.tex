@@ -1,3 +1,13 @@
 \section{Conclusion}
 \label{sec:conclusion}
-\todo{conclusion}
+
+Made exact for block edits, the fixed-reasoning signal of \greater{} ranks LLM-proposed edits in
+the wrong direction, while fresh greedy accuracy points the right way. Edits act through the
+reasoning the model writes: the read-off term the signal sees is small, reweighting the model's own
+samples failed its registered test as coverage predicts, and a single-token substitution changes the
+greedy reasoning on $79$--$93\%$ of questions (numerical re-rolls of the unchanged prompt:
+$58$--$85\%$). Edits must be judged on fresh reasoning, where the verification budget
+decides: in exploratory replays, accepting the best candidate on $16$ or fewer generations loses
+accuracy, and a two-standard-error margin limits the loss. \todo{end-to-end: structural search,
+official \greater{} gradient vs.\ random shortlist, breadth}. Building this rule into the search
+loop is the next step.

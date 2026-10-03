@@ -1,52 +1,36 @@
 \section{Exact structural edits in one sequence}
 \label{sec:calculus}
 
-\paragraph{Typed prompts and edits.} A prompt is a sequence of typed blocks $P=(b_1,\dots,b_m)$
-(task, strategy, procedure, output, input, example); editable blocks may be empty insertion
-slots. The edit space of slot $j$ is a candidate set $C_j$ (rewrites, or new blocks for an empty
-slot) plus deletion. Candidates are proposed by the task model itself from unlabeled training
-questions with type-conditioned operators (Appendix~\ref{app:details}).
-
-\paragraph{Superposed sequence.} For one question we build a single token sequence holding the
-incumbent prompt $P(x)$, the tokens of every candidate of every slot, and a scored tail (the
-fixed reasoning and answer of Eq.~\ref{eq:greater}, or a sampled reasoning, \S\ref{sec:method}).
-Candidate tokens of slot $j$ attend only to the prefix before slot $j$ and to their own earlier
-tokens; later tokens attend to the incumbent and to all candidates through gated attention
+A prompt is a sequence of typed blocks $P=(b_1,\dots,b_m)$ (task, strategy, procedure, output,
+input, example); editable blocks may be empty insertion slots. The edits of slot $j$ are deletion
+and a candidate set $C_j$ proposed by the task model itself from unlabeled training questions
+(Appendix~\ref{app:details}). For one question, a single token sequence holds the incumbent prompt
+$P(x)$, every candidate of every slot, and a scored tail (the fixed reasoning and answer of
+Eq.~\ref{eq:greater}, or a sampled reasoning). Candidate tokens of slot $j$ attend, through the same
+gates, to everything before slot $j$ (incumbent blocks and earlier slots' candidates) and to their
+own earlier tokens; later tokens attend to the incumbent and to all candidates through gated attention
 \begin{equation}
 a_{tu}=\frac{G_{tu}\exp(s_{tu}-m_t)}{\sum_{v}G_{tv}\exp(s_{tv}-m_t)},\qquad G_{tu}=g_{\sigma(u)},
 \label{eq:gate}
 \end{equation}
-where $\sigma(u)$ is the segment (incumbent block or candidate) of key $u$; because the gate
-multiplies after the max-shift, $g=0$ removes a key exactly. Each slot carries a continuous offset $\omega_j$ that moves every later
-token by $\Omega_t=\sum_j M_{tj}\omega_j$ positions, realized as an extra rotary rotation of
-queries and keys (rotary scores depend only on position differences).
+where $\sigma(u)$ is the segment (incumbent block or candidate) of key $u$; since the gate
+multiplies after the max-shift, $g=0$ removes a key exactly. A continuous offset $\omega_j$ per slot
+moves every later token by $\Omega_t=\sum_j M_{tj}\omega_j$ positions ($M_{tj}=1$ if token $t$
+follows slot $j$, else $0$), as an extra rotary rotation of queries and keys.
 
 \begin{proposition}[Exact vertices]
 \label{prop:vertices}
-At gates $1$ on incumbents and $0$ on candidates, and $\omega=0$, every prompt and tail token has
-its hidden states in $f_\theta(P(x)\oplus\text{tail})$. Choosing per slot one of
-\{keep, delete, candidate $c$\}, setting the chosen candidate's gate to $1$, the replaced
-incumbent's to $0$, and $\omega_j=|c|-|b_j|$ (or $-|b_j|$, or $|c|$ for an insertion), the
-superposed computation equals $f_\theta$ on the correspondingly edited prompt, for any number of
-simultaneous edits of any lengths.
+At gates $1$ on incumbents, $0$ on candidates and $\omega=0$, the superposed computation equals
+$f_\theta(P(x)\oplus\text{tail})$. Choosing per slot one of \{keep, delete, candidate $c$\}, with
+the chosen candidate's gate set to $1$, the replaced incumbent's to $0$ and $\omega_j$ to the
+length change ($|c|-|b_j|$, $-|b_j|$, or $|c|$ for an insertion), it equals $f_\theta$ on the
+edited prompt, for any number of simultaneous edits of any lengths.
 \end{proposition}
 
-The proof is by induction over layers (Appendix~\ref{app:proofs}); we verify it numerically in
-fp32 for Llama, Gemma-2 (with logit soft-capping) and Qwen3 architectures, including combined
-edits and tempered likelihoods (Appendix~\ref{app:tests}). The vertices of \greater{}'s one-hot
-relaxation are real tokens; ours are real structured prompts of any length.
-
-\paragraph{One pass for all candidates.} First-order gate derivatives saturate: the linear
-extrapolation of an attention row overshoots the actual change by the factor $1+S_c/Z_0$, the
-ratio of the candidate's attention mass to the existing mass, which is large for instruction
-blocks (Appendix~\ref{app:proofs}). \emph{Renormalized patching} instead recomputes, from the
-exact keys and values present in the superposed pass, each downstream attention output with slot
-$j$ swapped to an alternative $a$ (query rotated by the length change) and linearizes only the
-propagation through later layers,
-\begin{equation}
-\widehat{\Delta\ell}(a)=\sum_{\text{layers}}\sum_{t\text{ after slot }j}\big\langle\nabla_{o_t}\ell,\;o_t(a)-o_t(b_j)\big\rangle ,
-\label{eq:patch}
-\end{equation}
-the AtP$^*$ principle \citep{kramar2024atp} applied to prompt edits. One forward and one backward
-pass score every single-slot edit of a sequence; we use it to estimate the likelihood ratios of
-\S\ref{sec:method} and report its fidelity against exact scoring.
+The proof is by induction over layers (Appendix~\ref{app:proofs}, where Figure~\ref{fig:overview}
+contrasts the construction with \greater{}'s token-level relaxation); fp32 tests confirm it for
+Llama, Gemma-2 and Qwen3 architectures, including combined edits (Appendix~\ref{app:tests}).
+Because first-order gate derivatives saturate, a one-pass estimator, \emph{renormalized patching},
+recomputes downstream attention outputs with slot $j$ swapped and linearizes only later layers
+(Eq.~\ref{eq:patch}, Appendix~\ref{app:proofs}; the AtP$^*$ principle of
+\citealp{kramar2024atp}): one forward and one backward pass score every single-slot edit.

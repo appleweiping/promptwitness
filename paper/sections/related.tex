@@ -1,53 +1,49 @@
 \section{Related work}
 \label{sec:related}
 
-\paragraph{Gradient-based discrete prompt search.} AutoPrompt \citep{shin2020autoprompt}, GCG
-\citep{zou2023gcg}, PEZ \citep{wen2023hard} and \greater{} \citep{das2025greater} relax tokens into
-the vocabulary simplex or embedding space; \greater{} takes the gradient over the model's own
-reasoning so that small models can optimize themselves. In the attack setting, one-hot gradients
-are known to predict the actual loss change of a token swap poorly \citep{li2024fastergcg} and the
-cost is dominated by candidate evaluation \citep{zhao2024probe}. We show why the reasoning-based
-variant fails for structural edits---it differentiates the read-off of a fixed reasoning, not the
-distribution of reasoning---and how to score that distribution. Policy-gradient prompt learning
-\citep{deng2022rlprompt,diao2023bdpl} places a distribution over prompts and is black-box; chain of
-thought as a latent variable \citep{phan2023trice} is used to train models, not to score prompts.
+\paragraph{Gradient-based prompt optimization.} AutoPrompt \citep{shin2020autoprompt}, GCG
+\citep{zou2023gcg} and PEZ \citep{wen2023hard} rank token substitutions by task-loss gradients
+over relaxed prompt tokens; \greater{} \citep{das2025greater} takes this gradient after the model's
+own reasoning, so a small model can optimize its own prompt without a stronger critic. One-hot
+gradients poorly predict a token swap's loss change \citep{li2024fastergcg}, evaluation dominates
+search cost \citep{zhao2024probe}, and policy-gradient methods score sampled prompts by reward on
+fresh outputs \citep{deng2022rlprompt,diao2023bdpl}. Our exact objective still fails: the fixed
+reasoning, not the linearization, limits it.
 
-\paragraph{Evaluation- and feedback-driven optimization.} APE \citep{zhou2023ape}, OPRO
+\paragraph{LLM-proposed and structural prompt optimization.} Most optimizers let a language model
+propose candidates and decide by measured scores or critiques: APE \citep{zhou2023ape}, OPRO
 \citep{yang2024opro}, ProTeGi \citep{pryzant2023protegi}, EvoPrompt \citep{guo2024evoprompt},
-TextGrad \citep{yuksekgonul2024textgrad}, MIPRO \citep{opsahl2024mipro}, PromptWizard
-\citep{agarwal2025promptwizard} and GEPA \citep{agrawal2026gepa} propose candidates with an LLM and
-decide by measured scores or natural-language critiques; textual gradients improve prompts without
-behaving like gradients \citep{melcer2025textual}, and random search is a strong baseline
-\citep{lu2024strings}. Structure-aware variants edit sections or typed units: SAMMO
-\citep{schnabel2024sammo}, SPRIG \citep{zhang2024sprig}, section-local textual gradients
-\citep{sharma2026mpo}, SEPO \citep{ma2026sepo}, SAPO \citep{kulin2026sapo} and prompt codebooks
-\citep{nath2026codebooks}; GMPO, GradPO and PMPO use gradients or masking to \emph{locate} segments
-\citep{zhao2026gmpo,chakma2026gradpo,zhao2025pmpo}. Our setting is self-optimization of a small
-model with likelihood-based signals; SEPO, for instance, uses a much larger architect model.
+TextGrad \citep{yuksekgonul2025textgrad}, MIPRO in DSPy \citep{opsahl2024mipro,khattab2024dspy},
+PromptWizard \citep{agarwal2025promptwizard} and GEPA \citep{agrawal2026gepa}. Textual gradients
+improve prompts without behaving like gradients \citep{melcer2025textual}, random sampling is a
+strong baseline \citep{lu2024strings}, and small models are weak optimizers in OPRO's loop
+\citep{zhang2024revisiting}. Structure-aware variants edit sections or typed units (SAMMO, SPRIG,
+SEPO, section-local textual gradients, segment-level optimization, prompt codebooks;
+\citealp{schnabel2024sammo,zhang2024sprig,ma2026sepo,sharma2026mpo,kulin2026sapo,nath2026codebooks}),
+and GMPO, GradPO and PMPO locate segments by gradients or masking
+\citep{zhao2026gmpo,chakma2026gradpo,zhao2025pmpo}. Most judge edits on fresh outputs, often on
+minibatches \citep{opsahl2024mipro,agrawal2026gepa}; we ask which selection signal a fixed proposer
+needs, and how much verification.
 
-\paragraph{Noise in evaluating prompts.} Prompt formatting alone can move accuracy by tens of
-points \citep{sclar2024formatspread,su2025single}; greedy decoding is not reproducible across batch
-sizes and hardware \citep{yuan2025nondeterminism,atil2025nondeterminism,he2025nondeterminism}; prompt
-optimization gains shrink with scale \citep{zhou2025scale} and change model rankings
-\citep{sadjoli2025optimization}. Efficient prompt evaluation allocates evaluations adaptively
-\citep{shi2024triple,polo2024prompteval,schneider2025hbbops,nian2026sess}, p1 separates response noise
-from prompt quality \citep{gao2026p1}, and an edit-level analysis studies which edits help
-\citep{gong2026why}. We quantify verification noise in self-optimization loops and evaluate
-candidates through the model's own reasoning distribution instead of a single greedy trace.
+\paragraph{Evaluation noise and prompt sensitivity.} Formatting changes move accuracy by tens of
+points \citep{sclar2024formatspread,su2025single}; single-prompt evaluations rank models unreliably
+\citep{mizrahi2024multiprompt}, prompt optimization changes rankings
+\citep{sadjoli2025optimization} and its gains shrink with scale \citep{zhou2025scale}; greedy
+decoding varies with batch size, kernels and serving stack
+\citep{yuan2025nondeterminism,atil2025nondeterminism,he2025nondeterminism}. Budget-aware evaluation
+casts prompt selection as best-arm identification or multi-fidelity search
+\citep{shi2024triple,schneider2025hbbops}, estimates performance from few evaluations
+\citep{polo2024prompteval} or selects informative subsets \citep{nian2026sess}; p1 separates
+response noise from prompt-quality variance \citep{gao2026p1}, and \citet{gong2026why} ask which
+edits help. Here a single-token edit moves accuracy on average like a numerical re-roll, and an
+acceptance margin limits selection errors more than adaptive allocation does (exploratory).
 
-\paragraph{Counterfactual and off-policy evaluation of language-model outputs.} Gumbel-max
-structural causal models generate counterfactual strings
-\citep{ravfogel2025gumbel,chatzi2025counterfactual}, and sharing randomness across compared models
-reduces evaluation cost \citep{corvelobenz2025coupled}. Off-policy prompt optimization has used
-learned reward models from logged data \citep{sun2024promptoirl,kiyohara2025logged}. We use exact,
-white-box likelihood ratios of the model's own reasoning under candidate prompts.
-
-\paragraph{Attribution, parallel and block-wise contexts.} Attribution patching and AtP*
-\citep{syed2024atp,kramar2024atp}, ContextCite \citep{cohenwang2024contextcite}, AttriBoT
-\citep{liu2025attribot} and AT2 \citep{cohenwang2025at2} estimate the effect of context parts;
-parallel context windows \citep{ratner2023pcw}, superposition prompting \citep{merth2024superposition},
-Prompt Cache \citep{gim2024promptcache}, Block-Attention \citep{ma2025blockattention}, adaptive
-parallel encoding \citep{yang2025parallel} and EPIC \citep{hu2025epic} encode or cache blocks
-independently with approximate positional handling. Our superposed sequence differs in purpose and
-guarantee: candidate blocks compete for the same slot behind gates, and continuous slot offsets
-make every vertex \emph{exactly} the edited prompt, including length-changing and combined edits.
+\paragraph{Off-policy evaluation and importance sampling.} Importance sampling, the classical tool
+of off-policy evaluation \citep{precup2000eligibility}, needs about $\exp(\mathrm{KL})$ samples
+\citep{chatterjee2018sample}; Pareto smoothing diagnoses
+heavy-tailed weights \citep{vehtari2024psis}, and the effective sample size is a loose proxy for
+estimator quality \citep{elvira2022ess}; coupled randomness reduces the samples needed to compare
+models \citep{corvelobenz2025coupled}. Our exact likelihood ratios fail a preregistered test, as
+coverage predicts, and in exploratory replays common random numbers rank edits no better than
+independent seeds. Appendix~\ref{app:related} covers off-policy methods for language models,
+chain-of-thought faithfulness, attribution and block-wise contexts.

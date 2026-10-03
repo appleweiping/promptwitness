@@ -1,54 +1,50 @@
 \section{Introduction}
 \label{sec:intro}
 
-Automatic prompt optimization is most attractive where it is hardest: for small, locally deployed
-models that cannot rely on a stronger model to critique their prompts \citep{zhang2024revisiting}.
-\greater{} \citep{das2025greater} showed that such models can optimize their own prompts if the
-signal is a true gradient of the task loss computed \emph{over the model's own reasoning}: the
-model reasons under the current prompt, an extractor elicits its answer, and the gradient of the
-answer loss with respect to one-hot prompt tokens shortlists token substitutions, which are then
-verified by regenerating the reasoning.
+Automatic prompt optimization is most useful for small, locally deployed models that cannot rely on
+a stronger model to critique their prompts \citep{zhang2024revisiting}. \greater{}
+\citep{das2025greater} lets such a model optimize its own prompt: the gradient of the answer loss
+with respect to one-hot prompt tokens, taken over the model's reasoning generated once and then
+held \emph{fixed}, shortlists token substitutions, and regenerated reasoning decides which one is
+kept.
 
-Token coordinates are a poor match for how prompts are written and reviewed---as structured
-documents with a task, a strategy, a procedure and an output contract, edited by rewriting,
-deleting or inserting whole instructions. Lifting \greater{}'s signal to such edits poses a
-technical problem, since edits of different lengths have no one-hot relaxation, and a conceptual
-one: a structural edit changes the very reasoning the gradient is computed over. We solve the
-technical problem exactly and then show that the conceptual one is decisive---and that it has a
-principled fix.
+This gradient measures how an edit changes the answer read off a given reasoning, not how it
+changes the reasoning. Yet prompts are structured documents (task, strategy, procedure, output
+contract), revised by rewriting, deleting or inserting whole instructions precisely to change how
+the model reasons. Does a gradient over fixed reasoning predict what such edits do? We make
+\greater{}'s fixed-reasoning objective exact for block edits of any length, so that a failure of the
+signal cannot be a failure of a relaxation (\S\ref{sec:calculus}), and test it on eleven pools of
+block edits that Llama-3-8B, Qwen3-8B and Gemma-2-9B propose for their own prompts, collected under
+a protocol fixed before their data (the hypotheses registered for these pools, a fork margin and an
+answer-conditioned repair, both failed).
 
-\textbf{Contributions.}
-\begin{itemize}
-\item \emph{An exact calculus for structural edits} (\S\ref{sec:calculus}). All candidate rewrites
-of all blocks share one sequence in parallel slots behind attention gates, with continuous slot
-offsets realized as rotary rotations; every vertex---replacement, deletion, insertion and their
-combinations---is exactly a real edited prompt, and one forward/backward pass estimates the effect
-of every edit.
-\item \emph{A preregistered diagnosis} (\S\ref{sec:diagnosis}). Across three models and eleven
-proposal pools, \greater{}'s fixed-reasoning objective ranks LLM-proposed block edits in the wrong
-direction ($8$ of $11$ pools; as a one-pass shortlist worse than random in $8$ of $11$), while
-fresh evaluation is positive in $9$--$10$ of $11$. Under a deterministic reader, edits rewrite the
-reasoning they are scored on, and verifying candidates on small minibatches picks noise.
-\item \emph{A decomposition and a fix} (\S\ref{sec:theory}). An edit's effect on accuracy splits
-exactly into a reasoning-distribution term and an answer read-off term; the fixed-reasoning
-objective sees only the read-off term, which on the models' own samples is a small fraction of
-the edits' effects, does not predict them, and on wrongly answered questions rewards reading
-against one's own reasoning. Edits shift the reasoning distribution by about ten nats per
-reasoning, so the natural repair---reweighting the model's own samples by exact likelihood
-ratios---fails a preregistered test \todo{final 11-pool numbers}: what an edit does must be
-observed on fresh reasoning.
-\item \emph{End-to-end and at scale} (\S\ref{sec:experiments}). \todo{Stage C v2: dist vs
-\greater{}-lifted vs random vs textual gradients at matched verification; official \greater{} with
-gradient vs random shortlist; breadth over 21 BBH tasks, GSM8K and FOLIO.}
-\end{itemize}
+\textbf{The signal points the wrong way} (\S\ref{sec:diagnosis}). The fixed-reasoning objective
+correlates negatively with the held-out accuracy change in $8$ of $11$ pools (pooled Spearman
+$-0.26$, sign-flip $p=0.017$), while fresh greedy accuracy on $8$ of the same training questions is
+positive in $9$ ($+0.28$). Even a single-token substitution changes the greedy reasoning on
+$79$--$93\%$ of questions (numerical re-rolls of the unchanged prompt: $58$--$85\%$); its mean
+accuracy does not differ detectably from that of the re-rolls (permutation $p=0.07$--$0.88$;
+exploratory), although edits flip correctness on more questions in three of four pools.
 
-\begin{figure*}[t]
-\centering
-\resizebox{\textwidth}{!}{\input{figures/overview}}
-\caption{\textbf{From token coordinates to typed blocks.} (a) \greater{} relaxes one prompt token
-into the vocabulary simplex; its vertices are real tokens but every edit keeps the prompt's length
-and structure. (b) Candidate rewrites of every typed block sit in parallel slots behind attention
-gates, with continuous slot offsets realized as rotary rotations; every vertex is exactly a real
-edited prompt.}
-\label{fig:overview}
-\end{figure*}
+\textbf{Edits act on the reasoning, which the signal does not see} (\S\ref{sec:theory}). An edit's
+effect decomposes exactly into a distribution term, carried by the reasoning the model writes, and a
+read-off term, of which the objective is a soft version on one reasoning. On the models' own
+samples the read-off term averages at most $1.2$ accuracy points per edit against mean absolute
+held-out effects of $2.1$--$10.9$.
+
+\textbf{The principled repair fails its preregistered test} (\S\ref{sec:exp-validity}). Reweighting
+the incumbent's samples by exact likelihood ratios reaches a pooled Spearman of only $+0.03$ and a
+best-3 regret above a random shortlist's, as coverage predicts: importance sampling needs about
+$e^{\mathrm{KL}}$ samples \citep{chatterjee2018sample}; in $10$ of $11$ pools the median edit
+moves the distribution by more than $\log 16$ nats (in the direction the incumbent's samples can
+measure), and without tempering the median effective sample size is $1.4$--$5.1$ of $16$.
+
+\textbf{Verification decides} (\S\ref{sec:exp-verify}; exploratory). On fresh reasoning, ranking
+quality rises monotonically with the generations per candidate. Accepting the best candidate on
+$16$ or fewer generations lowers held-out accuracy, a winner's curse. In a replay at a fixed budget
+of candidate reads, adaptive allocation reduces this loss without removing it, whereas accepting only
+gains above two standard errors cuts the loss of uniform verification at up to $12$ questions per
+candidate from $1.1$--$1.9$ to $0.2$--$0.6$ points. In these single-round replays, verification and
+a calibrated acceptance rule pay off, and the fixed-reasoning shortlist does no better than a random
+one. \todo{end-to-end: structural search and official \greater{}, gradient vs.\
+random shortlist; breadth}.

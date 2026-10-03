@@ -23,12 +23,13 @@ from fidelity_study import spearman
 
 
 def label(stem: str) -> str:
+    """Pool label in the style of the paper's Table 1: task, then model initial (LD7-L, LD7-L$^\\ast$)."""
     model = {"llama3": "L", "qwen3": "Q", "gemma2": "G"}[stem.split("-")[0]]
     task = stem.split("-")[1]
     short = {"logical_deduction_seven_objects": "LD7", "logical_deduction_three_objects": "LD3",
              "tracking_shuffled_objects_seven_objects": "TS7", "tracking_shuffled_objects_three_objects": "TS3"}
     star = "$^\\ast$" if stem.endswith("state") else ""  # outside the f-string (Python < 3.12)
-    return f"{short.get(task, task)}, {model}{star}"
+    return f"{short.get(task, task)}-{model}{star}"
 
 
 def main() -> None:

@@ -25,7 +25,7 @@ training questions, target = change of greedy accuracy on 200 held-out questions
 reasoning budget). GReaTer objective (exact) negative in 8/11 pools, pooled Spearman -0.26,
 sign-flip p = 0.017; patched (one-pass) estimate negative 9/11, -0.20, p = 0.037; exact vs patched
 mean Spearman 0.79. Fresh greedy accuracy positive in 9/11 (8 rows, +0.28, p = 0.010) and 10/11
-(24 rows, +0.33, p = 0.004). Best-3 regret: patched 0.091 vs random 0.067 (worse in 8/11,
+(24 rows, +0.32, p = 0.004). Best-3 regret: patched 0.091 vs random 0.067 (worse in 8/11,
 p = 0.022); exact 0.075 (7/11, p = 0.14). Wrong-row rank-normalized analysis: negative for Llama-3
 (-0.25..-0.61, 5/5 pools), not for Qwen3 (+0.25, -0.04, +0.07).
 Pipeline simulation (`pipeline_regret.py`): verify-all on 8 rows -2.27 points, 16 rows -0.77,
@@ -82,6 +82,24 @@ coupled 12x2 +0.281/0.047/-0.33; G=48: coupled 24x2 +0.347/0.042/+0.88, indep 24
 Conclusions: at equal G greedy >= sampled; common-random-number coupling adds nothing over
 independent seeds; quality and realized gain rise monotonically with G; verify-all on <= 16
 generations lowers held-out accuracy on average.
+
+## D2. Allocation and acceptance at a fixed budget (exploratory; `dist-final/racing_sim.json`, `racing_sim.py`)
+
+Same 11 pools; budget B = candidate generations (incumbent reads shared, not counted); 400 random
+row orders; score = realized held-out change of the accepted edit (0 if none), points. Oracle best
+edit +5.50; mean edit -2.93. Rows per candidate capped at 24.
+B:        40     60     80    120    160    240    480
+uniform  -1.70  -1.90  -1.60  -1.66  -1.39  -1.09  +0.31
+shortlist(3 random) -1.05 -0.75 -0.75 -0.60 -0.79 -0.78 -0.72
+halving  -1.57  -1.07  -0.99  -1.01  -1.03  -0.68  -0.24
+racing   -1.83  -1.94  -1.68  -1.52  -1.50  -1.24  -1.09
+uniform, accept only if paired gain > 1 SE: -1.73 -1.49 -0.87 -1.04 -1.13 -0.96 -0.07
+uniform, accept only if paired gain > 2 SE: -0.45 -0.62 -0.35 -0.38 -0.24 -0.43 +0.86
+(SE = sqrt(flip rate / rows), flip rate = pool's fraction of (edit, row) pairs whose correctness
+differs from the incumbent's.) Reading: adaptive allocation (halving, racing) does not beat
+uniform verification at large budgets; a noise-calibrated acceptance margin (2 SE) is what limits
+harm at small budgets and raises the gain at the full budget. Sequential testing is therefore NOT
+supported as a fix by these data; a do-no-harm acceptance margin is.
 
 ## E. Determinism and numerical re-rolls (`reroll3/*.json`; deterministic in-process vLLM engine)
 

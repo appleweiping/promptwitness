@@ -1,0 +1,15 @@
+\setlength{\tabcolsep}{4pt}% local to the enclosing table environment
+\begin{tabular}{@{}lrrrrccrr@{}}
+\toprule
+ & \multicolumn{2}{c}{\makecell{Reasoning\\changed (\%)}} & \multicolumn{2}{c}{\makecell{Correctness\\flipped (\%)}} & \multicolumn{2}{c}{Accuracy (mean $\pm$ sd)} & \multicolumn{2}{c}{\makecell{Permutation\\$p$}} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(l){8-9}
+Pool & Edits & Re-rolls & Edits & Re-rolls & Edits & Re-rolls & Mean & Variance \\
+\midrule
+LD7-L & 87.5 & 69.1 & 20.3 & 14.4 & $0.462 \pm 0.022$ & $0.467 \pm 0.018$ & 0.65 & 0.72 \\
+TS7-L & 83.7 & 57.5 & 19.0 & 9.7 & $0.319 \pm 0.020$ & $0.301 \pm 0.022$ & 0.07 & 0.47 \\
+LD7-Q & 92.9 & 84.6 & 14.6 & 15.8 & $0.521 \pm 0.020$ & $0.517 \pm 0.009$ & 0.69 & 0.09 \\
+TS7-Q & 79.2 & 67.7 & 16.1 & 11.7 & $0.273 \pm 0.020$ & $0.271 \pm 0.009$ & 0.88 & 0.16 \\
+\midrule
+Pooled & & & & & & & 0.31 & 0.19 \\
+\bottomrule
+\end{tabular}

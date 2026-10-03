@@ -1,13 +1,28 @@
 \section{Limitations}
 \label{sec:limitations}
-The validity pools use multiple-choice deduction and tracking tasks and one proposal procedure;
-effects may differ for other answer types and proposal distributions, and the bootstrap intervals
-are conditional on the pools (pool-level tests are the primary inference). Correctness of a
-reasoning is judged by its extracted answer. The distributional score estimates accuracy under
-temperature sampling, while benchmarks report greedy accuracy; the two agree in direction here but
-need not in general. Importance weights over long reasoning are heavy-tailed; tempering trades
-bias for variance and the effective-sample-size rule is a heuristic. The exact calculus and the
-likelihood ratios require white-box access; the calculus assumes rotary position embeddings,
-softmax attention and edits that tokenize cleanly at block boundaries. All experiments ran on
-one or two shared 48\,GB GPUs with 8--9B models, which bounds seeds, tasks and model scale. Review
-during the research process was done by a model of the same family as the one that ran it.
+
+\paragraph{Tasks, budget and scale.} The pools come from two multiple-choice task families (logical
+deduction, tracking shuffled objects) and one proposal procedure; a closed answer set favours a
+stable read-off, which may be larger for free-form answers. At the validity budget of $384$ tokens,
+incumbent samples are truncated on $46\%$ (LD7-L), $97\%$ (LD7-L$^\ast$) and $100\%$ (LD7-Q), and the
+incumbent's greedy held-out reads on TS7-Q on $99.5\%$ (Table~\ref{tab:reroll}), so these read-off
+terms, divergences and that target concern unfinished reasoning; sample truncation was not measured
+on the other six pools. On pools with little truncation (LD3-L $0.3\%$, TS7-L $14\%$) the objective
+is negative as well ($-0.41$, $-0.66$). Models have 8--9B parameters and ran on one or two shared
+48\,GB GPUs: each pool is one proposal draw, Gemma-2-9B contributes one pool, the re-roll study
+covers two tasks and two models, and the verification analyses replay a single selection round,
+missing how selection errors compound, and set the acceptance margin from each pool's flip rate over
+all of its reads rather than within the budget. The calculus and the likelihood ratios need white-box access; the
+calculus was verified on four rotary-embedding architectures (insertions and combined edits on
+three), the likelihoods against a direct per-token computation.
+
+\paragraph{Engine and review.} The re-roll null is specific to one deterministic engine
+configuration and one perturbation (request sizes of $16$ to $100$ questions); batch-invariant
+kernels \citep{he2025nondeterminism} would give a different, possibly degenerate, null, so token
+edits are shown to move accuracy as much as this engine's numerics, not to be inert. The targets of
+Table~\ref{tab:validity} were read by a Hugging Face batched reader of unmeasured reproducibility,
+and the importance-sampling reads by an earlier engine configuration whose re-reads were not always
+token-identical (Appendix~\ref{app:reader}); \todo{block re-reads of these targets under the
+deterministic engine, with re-rolls and truncation}. The later analyses were reviewed only by
+fresh-context instances of the model family that ran the research, which cannot catch errors this
+family makes systematically.

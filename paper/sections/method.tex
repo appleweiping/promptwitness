@@ -1,38 +1,44 @@
-\section{Structural self-optimization}
-\label{sec:method}
+\section{Structural search: algorithm and reading}
+\label{app:search}
 
-\begin{algorithm}[t]
-\caption{Structural shortlist-then-verify search (one round); arms differ only in line 3}
+\begin{algorithm}[h]
+\caption{Structural shortlist-then-verify search (one round); patch-v50 and random-v50 differ only
+in line 3}
 \label{alg:search}
 \begin{algorithmic}[1]
 \Require model $f_\theta$, typed incumbent $P$, training questions $D$ ($|D|=50$), shortlist size $\mu$
 \State propose $K$ label-free candidates per slot with $f_\theta$ from unlabeled questions; keep edits
 that tokenize cleanly at block boundaries and preserve required literals
 \State compute the incumbent's greedy reasoning on $D$
-\State shortlist $\mu$ edits: \greater{}'s objective lifted to blocks (one pass, \S\ref{sec:calculus});
-exact fixed-reasoning loss; or uniformly at random
+\State shortlist $\mu$ edits by the fixed-reasoning objective lifted to blocks (one pass,
+\S\ref{sec:calculus}) or uniformly at random
 \State regenerate greedy reasoning on all of $D$ for the shortlisted edits
 \State accept the best if it makes fewer errors on $D$ than $P$ (ties: answer loss)
 \end{algorithmic}
 \end{algorithm}
 
-Algorithm~\ref{alg:search} lifts \greater{}'s loop to blocks. As in \greater{}, the model proposes
-candidates, a signal shortlists them, and fresh reasoning on all training questions decides; the
-model optimizes its own prompt and supervision enters only through correctness. The arms isolate
-the shortlist signal: \greater{}'s objective (patched, the one-pass estimate; exact, one pass per
-edit) and a uniformly random shortlist drawn from its own random stream (minibatches and proposals
-are identical across arms for a seed). A textual-gradient arm, in which the same model critiques
-failed training questions and rewrites each block, is a different method class, not a matched-pool
-control. A verification-noise control verifies on random $8$-question minibatches instead of all
-$50$ questions. Dev questions select among the incumbents at four evenly spaced rounds; the
-selected prompt is read once on test.
+Algorithm~\ref{alg:search} lifts \greater{}'s loop to blocks: the model proposes candidates, a
+signal shortlists them, and fresh reasoning on all training questions decides. The model optimizes
+its own prompt, and supervision enters only through the training labels: correctness, and the gold
+answer's loss in the patch shortlist and in tie-breaks. The arms of
+\S\ref{sec:exp-search} isolate the shortlist signal: the fixed-reasoning objective estimated in one
+pass (Eq.~\ref{eq:patch}), or a uniformly random shortlist drawn from its own random stream, so
+that minibatches and proposals are identical across arms for a seed. Two controls lie outside this
+comparison. A textual-gradient arm, in which the same model critiques failed training questions and
+rewrites each block, is a different method class, not a matched-pool control; a verification-noise
+control verifies on random $8$-question minibatches instead of all $50$ questions. Dev questions
+select among the incumbents at four evenly spaced rounds; the selected prompt is evaluated on test
+once (no selection on test), with three numerical re-rolls at request sizes $20$, $34$ and $50$.
 
-\paragraph{Reading.} Every prompt in a comparison is read by one engine with identical
-token-level rendering: greedy reasoning, the task-typed extractor inside the assistant turn and
-$16$ greedy answer tokens parsed by answer type. The engine is configured so that repeated reads
-are identical: no prefix caching, and the engine core runs in the calling process, so that every
-request of a call is enqueued before the first decoding step and batch composition does not depend
-on request timing. Four re-reads of the same prompt on $200$ questions are token-identical, at the
-evaluation and at the search configuration (Appendix~\ref{app:reader}); reasoning budgets
-are $1{,}024$ tokens during search and $4{,}096$ for dev selection and test, and truncation rates
-are reported.
+\paragraph{Reading.} One engine reads every prompt of a comparison with identical token-level
+rendering: greedy reasoning, the task-typed extractor inside the assistant turn and $16$ greedy
+answer tokens parsed by answer type (Appendix~\ref{app:details}). Repeated reads are
+token-identical. The engine runs without prefix caching and with its core in the calling process,
+so every request of a call is enqueued before the first decoding step and batch composition does
+not depend on request timing; four re-reads of one prompt on $200$ questions are identical at the
+evaluation and at the search memory configuration (Appendix~\ref{app:reader}). Reproducible reads
+are not batch-invariant (\S\ref{sec:diagnosis}), so every dev and test request holds exactly one
+prompt's questions in a fixed order. During search the three shortlisted candidates share one
+generation call and the training questions are reshuffled each round, so a verification read there
+repeats only for an identical request. Reasoning budgets are $1{,}024$ tokens during search and
+$4{,}096$ for dev selection and test; truncation rates are reported.

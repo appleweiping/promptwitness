@@ -22,9 +22,8 @@
 \node[alt] (a3) at (2.35, 1.45) {a};
 \draw[arr, red!55!black] ([xshift=3.5mm]lo.south west) -- ([xshift=3.5mm]a1.north west);
 \node[note] at (0, 2.35) {one-hot\\simplex over\\top-$k$ tokens};
-\node[note] at (0, 0.6) {vertices are real tokens, but\\length and structure are fixed};
 
-\draw[gray!50, dashed] (5.2, 0.2) -- (5.2, 5.2);
+\draw[gray!50, dashed] (5.2, 1.15) -- (5.2, 5.2);
 
 % ---------------- (b) GRAFT ----------------
 \node[anchor=west, font=\bfseries] at (5.45, 5.05) {(b) Typed blocks in superposition (\graft{})};
@@ -50,6 +49,5 @@
 \node[font=\footnotesize, text=orange!60!black, anchor=north] at (10.2, 1.5) {candidate gates $g_c=0$ (exact derivatives)};
 \node[note, text=purple!70!black] at (12.7, 2.55) {slot offsets\\$\omega_j$: extra\\RoPE rotation};
 \draw[->, >=latex, purple!70!black] (12.9, 3.25) -- (13.45, 3.25);
-\node[note] at (5.45, 0.75) {every vertex (replace, delete, insert, and combinations) is exactly a real edited prompt;};
-\node[note] at (5.45, 0.35) {one forward + backward pass scores all block edits (renormalized patching)};
+% The vertex and one-pass notes formerly drawn here are stated in the caption and in Section 3.
 \end{tikzpicture}

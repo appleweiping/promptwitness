@@ -1,0 +1,25 @@
+\begin{tabular}{@{}lr@{\hspace{3pt}}lrcrc@{}}
+\toprule
+ & \multicolumn{2}{c}{\makecell{Pooled Spearman\\{}[pool bootstrap]}} & \makecell{Best-3\\regret} & \makecell{Pools below\\random} & \makecell{Verify-all\\(points)} & \makecell{Pools\\$+$/$-$} \\
+\midrule
+\multicolumn{7}{@{}l}{\textit{Fixed reasoning}} \\
+\quad \greater{} objective (exact) & -0.258 & \scriptsize[-0.411, -0.095] & 0.075 & 4/11 & -5.00 & +1/-10 \\
+\quad Candidate reads, $\beta=0$ & +0.018 & \scriptsize[-0.108, +0.156] & 0.080 & 4/11 & -- & -- \\
+\midrule
+\multicolumn{7}{@{}l}{\textit{Reweighted own samples}} \\
+\quad SNIS, $\beta=1/4$ & +0.018 & \scriptsize[-0.193, +0.222] & 0.072 & 6/11 & -- & -- \\
+\quad SNIS, $\beta=1/2$ & +0.058 & \scriptsize[-0.146, +0.252] & 0.073 & 6/11 & -- & -- \\
+\quad SNIS, $\beta=1$ & +0.018 & \scriptsize[-0.177, +0.213] & 0.062 & 6/11 & -2.77 & +4/-7 \\
+\quad Primary, $\beta^\ast$ & +0.034 & \scriptsize[-0.185, +0.241] & 0.075 & 6/11 & -2.18 & +5/-6 \\
+\quad Incumbent reads, $\beta^\ast$ & +0.023 & \scriptsize[-0.212, +0.246] & 0.076 & 7/11 & -2.14 & +6/-5 \\
+\quad First-order score function & -0.098 & \scriptsize[-0.285, +0.066] & 0.089 & 3/11 & -8.45 & +2/-9 \\
+\quad KL gate$^\dagger$ & +0.218 & \scriptsize[+0.030, +0.382] & 0.052 & 8/11 & -- & -- \\
+\midrule
+\multicolumn{7}{@{}l}{\textit{Fresh reasoning}} \\
+\quad Greedy, 8 rows & +0.277 & \scriptsize[+0.122, +0.404] & 0.052 & 9/11 & -2.27 & +3/-4 \\
+\quad Greedy, 24 rows & +0.325 & \scriptsize[+0.173, +0.473] & 0.043 & 8/11 & +1.14 & +5/-4 \\
+\quad Sampled, $24\times4$ (coupled) & +0.413 & \scriptsize[+0.242, +0.572] & 0.035 & 9/11 & +1.00 & +5/-5 \\
+\midrule
+Random shortlist & 0 &  & 0.067 & -- & -- & -- \\
+\bottomrule
+\end{tabular}

@@ -1,5 +1,18 @@
-﻿\section{Proofs}
+\section{Exact calculus: illustration, proofs and the one-pass estimator}
 \label{app:proofs}
+
+\begin{figure}[h]
+\centering
+\resizebox{\textwidth}{!}{\input{figures/overview}}
+\caption{\textbf{The instrument.} (a) \greater{} relaxes one prompt token over its top-$k$
+substitutions; vertices keep the prompt's length and structure. (b) Candidate rewrites of each typed
+block sit in parallel slots behind attention gates, with slot offsets as rotary rotations; every
+vertex (replacement, deletion, insertion, combinations) is exactly an edited prompt
+(Proposition~\ref{prop:vertices}), and one forward and backward pass scores every single-slot edit
+(renormalized patching, Eq.~\ref{eq:patch}). Both hold the incumbent's reasoning $r$ fixed; edits
+act mainly by changing $r$ (\S\ref{sec:theory}).}
+\label{fig:overview}
+\end{figure}
 
 \paragraph{Setting.} We consider decoder-only transformers whose token mixing is
 causal softmax attention with rotary position embeddings, possibly with logit
@@ -10,7 +23,7 @@ incumbent's suffix tokens (edits violating this are excluded, which happens rare
 because blocks end at line breaks). Sliding windows are assumed to exceed the
 sequence length, which our implementation asserts.
 
-\paragraph{Proof of Proposition 1.} By induction over layers we show that every
+\paragraph{Proof of Proposition~\ref{prop:vertices}, base point.} By induction over layers we show that every
 non-candidate token $t$ has the hidden state of the reference computation on
 $P(x)\oplus r\oplus e\oplus y$. At the input, token identities and positions agree
 ($\Omega=0$). At a layer, the keys visible to $t$ are the non-candidate tokens that
@@ -20,7 +33,7 @@ denominator of Eq.~\ref{eq:gate}; the max-shift $m_t$ may include them but softm
 is shift-invariant. Keys and values of the former equal the reference ones by the
 induction hypothesis, and all other sublayers are tokenwise. \hfill$\square$
 
-\paragraph{Proof of Proposition 2.} Fix a choice $e_j\in\{\text{keep},\text{delete},c_j\}$
+\paragraph{Proof of Proposition~\ref{prop:vertices}, edited prompts.} Fix a choice $e_j\in\{\text{keep},\text{delete},c_j\}$
 per slot and let $P'$ be the edited prompt. Map every retained non-candidate token
 $t$ and every chosen candidate token to its counterpart in $P'$. Its position in
 $P'$ is its base position plus the cumulative length change of the edits before
@@ -31,8 +44,22 @@ exactly the tokens preceding it in $P'$: removed incumbents and unchosen
 candidates have gate $0$; a chosen candidate of slot $j$ sees the prefix before
 slot $j$ and the chosen candidates of earlier slots; a later token sees retained
 incumbents and chosen candidates. Rotary scores depend only on position
-differences, which agree with $P'$. The induction of Proposition~1 then applies
+differences, which agree with $P'$. The induction for the base point then applies
 verbatim to the mapped tokens, so the loss equals $\ell(P';x,y,r)$. \hfill$\square$
+
+\paragraph{Faithful reading.} The statement summarized in \S\ref{sec:theory}:
+
+\begin{proposition}[Faithful reading]
+\label{prop:faithful}
+If, for every candidate $P'$, the answer read under $P'$ equals the answer read under $P$ except
+on a set of reasonings of $\pi_P$-probability at most $\varepsilon$, then $|A|\le\varepsilon$ and
+$J(P')-J(P)=D\pm\varepsilon$. Moreover, on a question whose reasoning $r$ supports a wrong answer
+$a\neq y$, every decrease of the fixed-reasoning objective on $r$ raises the probability of reading
+an answer that the reasoning does not support, and a decrease by $\delta>0$ nats implies
+$q_{P'}(a\mid x,r)\le1-e^{\delta}q_P(y\mid x,r)$.
+\end{proposition}
+
+The proof is immediate from Eq.~\ref{eq:decomp} and $q_{P'}(a\mid x,r)+q_{P'}(y\mid x,r)\le1$.
 
 \paragraph{Saturation of gate derivatives.} For one attention row, write the
 current output as $o_0=N_0/Z_0$ with $N_0=\sum_{u\notin c}G_{tu}e^{s_{tu}-m}v_u$,
@@ -48,7 +75,45 @@ $1+S_c/Z_0$ in every head and layer, before any downstream nonlinearity. A
 candidate block that competes with an instruction block already holding most of a
 reading token's attention has $S_c/Z_0\gg1$, so raw gate derivatives are dominated
 by attention mass rather than by the effect of the edit. The renormalized estimator
-of Eq.~\ref{eq:patch} uses $o(1)-o(0)$ exactly.
+below uses $o(1)-o(0)$ exactly.
+
+\paragraph{Renormalized patching.} Instead of gate derivatives, the one-pass estimator recomputes,
+from the exact keys and values present in the superposed pass, each downstream attention output
+with slot $j$ swapped to an alternative $a$ (query rotated by the length change), and linearizes
+only the propagation through later layers:
+\begin{equation}
+\widehat{\Delta\ell}(a)=\sum_{\text{layers}}\sum_{t\text{ after slot }j}\big\langle\nabla_{o_t}\ell,\;o_t(a)-o_t(b_j)\big\rangle ,
+\label{eq:patch}
+\end{equation}
+the AtP$^*$ principle \citep{kramar2024atp} applied to prompt edits. One forward and one backward
+pass score every single-slot edit of a sequence. Its fidelity against exact scoring is reported in
+\S\ref{sec:diagnosis} (mean Spearman $0.79$ between patched and exact objectives over the eleven
+pools).
+
+\section{Related work: faithfulness, attribution and block-wise contexts}
+\label{app:related}
+\paragraph{Off-policy methods for language models.} Off-policy prompt optimization has learned
+reward models from logged data \citep{sun2024promptoirl} and smoothed weights over similar
+sentences \citep{kiyohara2025logged}; Gumbel-max causal models generate counterfactual text
+\citep{ravfogel2025gumbel,chatzi2025counterfactual}, and self-generated reasoning is a latent
+variable in training \citep{zelikman2022star,phan2023trice}.
+
+\paragraph{Faithfulness of chain-of-thought.} Explanations may not reflect how a model answers
+\citep{turpin2023unfaithful}, answers depend on the reasoning to a varying degree
+\citep{lanham2023faithfulness}, and a few forking, critical or decision tokens can decide the outcome
+\citep{bigelow2025forking,lin2024critical,shen2026decision}. The fixed-reasoning objective rewards
+unfaithful reads (Proposition~\ref{prop:faithful}), a channel too small to carry edit effects.
+
+\paragraph{Attribution and block-wise contexts.} Attribution patching and AtP$^*$ \citep{syed2024atp,kramar2024atp}, ContextCite \citep{cohenwang2024contextcite},
+AttriBoT \citep{liu2025attribot} and AT2 \citep{cohenwang2025at2} estimate the effect of parts of a
+context; parallel context windows \citep{ratner2023pcw}, superposition prompting
+\citep{merth2024superposition}, Prompt Cache \citep{gim2024promptcache}, Block-Attention
+\citep{ma2025blockattention}, adaptive parallel encoding \citep{yang2025parallel} and EPIC
+\citep{hu2025epic} encode or cache blocks independently with approximate positional handling. Our
+superposed sequence differs in purpose and guarantee: candidate blocks compete for the same slot
+behind gates, and continuous slot offsets make every vertex exactly the edited prompt, including
+length-changing and combined edits, which is what lets the fixed-reasoning objective be computed
+without approximation before it is tested.
 
 \section{Numerical verification}
 \label{app:tests}
@@ -63,7 +128,7 @@ objective, the decision margin and the tempered likelihood of a whole reasoning
 ($\tau=0.7$; base point and a vertex) match stock computations to $10^{-4}$, and renormalized
 patching reconstructs the base computation to $10^{-4}$. A control confirms that approximate
 right- and left-padded layouts are \emph{not} exact, so the tests detect the offset construction.
-The exact teacher-forced trace likelihoods used for the distributional scores are checked against a
+The exact teacher-forced likelihoods of whole reasonings used for the distributional scores are checked against a
 direct per-token computation. The tests are part of the released code.
 
 \section{Experimental details}
@@ -79,27 +144,36 @@ organization of facts, common mistake, comparison of options, restating facts, s
 hint, double-checking), sampled at temperature 0.8. Proposals are cleaned of preambles and
 type labels and must tokenize cleanly at block boundaries.
 
-\paragraph{Reader.} Greedy reasoning up to 1{,}024 tokens (384 in the validity studies,
-whose tasks need fewer), stopped at the chat template's end-of-turn tokens; the extractor
+\paragraph{Reader.} Greedy reasoning up to 1{,}024 tokens during search (384 in the validity
+studies, with the truncation rates of \S\ref{sec:limitations}; 4{,}096 for dev selection and test),
+stopped at the chat template's end-of-turn tokens; the extractor
 is appended inside the assistant turn (``Therefore, the final answer is ('' for
 multiple choice; ``(Yes or No) is:'' style for binary tasks; ``(a single integer) is:''
-for counting and arithmetic); 16 greedy answer tokens are parsed by answer type, tolerant
+for counting and arithmetic); 16 greedy answer tokens (8 in the v3 validity runs, which predate the
+reader fix) are parsed by answer type, tolerant
 of Markdown emphasis and \LaTeX{} wrappers such as \verb|\boxed{}|. Qwen3 runs in
 non-thinking mode. Rendered token ids are identical across the training-time and
 evaluation engines for all three models.
 
 \paragraph{Validity studies.} Per run: 2 training questions for proposals, 24 training
-rows for predictors, 6 sampled rationales per row (temperature 0.7) for forks, at most 3
-forks per row, and 200 held-out questions for the target; seeds 101 (v3), 202 with a
-non-initial state (v3), 303 (TS3). The paired bootstrap resamples training rows and
+questions for predictors, 6 sampled reasonings per question (temperature 0.7) for forks, at most 3
+forks per question, and 200 held-out questions for the target; seeds 101 (v3), 202 with a
+non-initial state (v3), 303 (TS3). The validity tasks (logical deduction and tracking shuffled
+objects with three and seven objects) are BBH tasks outside \greater{}'s 21; the benchmark of
+\S\ref{sec:experiments} contains the five-object variants of both families. The exact objective takes one
+pass per edited prompt. The paired bootstrap resamples training and
 held-out questions jointly for all predictors (2{,}000 replicates) and keeps the proposal
-pools fixed, so intervals are conditional on the pools.
+pools fixed, so intervals are conditional on the pools; they are bias-corrected in
+Table~\ref{tab:validity} and plain percentile intervals in Table~\ref{tab:validity-token}. The split-half
+reliability $\kappa$ of each held-out target bounds the attainable correlation, roughly by
+$\sqrt\kappa$ (Table~\ref{tab:validity}). The cost row of Table~\ref{tab:validity} counts seconds
+per pool on one A6000, including the sampling that the fork predictors share.
 
-\paragraph{Causal fork test.} For 32 training rows per run, forks are computed as in the
+\paragraph{Causal fork test.} For 32 training questions per run, forks are computed as in the
 validity study. For each fork we force the correct-branch and the incorrect-branch token
 after the shared prefix and sample six continuations each; the control forces, at a
 uniformly random position of the shared prefix, the actual token versus the model's most
-likely different token.
+likely different token. Results are in Table~\ref{tab:causal}.
 
 \section{Additional results}
 \label{app:results}
@@ -107,11 +181,108 @@ likely different token.
 \begin{table}[h]
 \centering
 \caption{\textbf{Token-level validity control:} single-token substitutions drawn from the
-model's top-10 next tokens ($^t$), same rows and held-out questions as the block runs
-LD7/TS7 with seed 101. Columns as in Table~\ref{tab:validity}.}
+model's top-10 next tokens ($^t$), same training and held-out questions as the block runs
+LD7/TS7 with seed 101. Columns as in Table~\ref{tab:validity}, except that the intervals are plain
+percentile bootstrap intervals. The same edits are re-read under the deterministic engine in
+Table~\ref{tab:reroll}.}
 \label{tab:validity-token}
 \resizebox{0.92\textwidth}{!}{\input{tables/validity_token}}
 \end{table}
+
+\subsection{Token edits and numerical re-rolls}
+\label{app:reroll}
+
+\begin{table}[h]
+\centering
+\caption{\textbf{Single-token edits versus numerical re-rolls of greedy decoding} (exploratory;
+$200$ held-out questions, $384$-token budget, deterministic engine). Edits: the $24$ single-token
+substitutions per pool of the token-level control (Table~\ref{tab:validity-token}). Re-rolls: the
+unchanged prompt read in separate requests of $16$, $25$, $40$, $64$ and $100$ questions; the
+accuracy columns and tests also count the base read (one request of all $200$ questions) as a
+re-roll. Reasoning changed, correctness flipped: mean share of questions whose greedy reasoning or
+correctness differs from the base read. sd: population standard deviation over reads. Permutation
+$p$: exact two-sided test over all $\binom{30}{6}$ relabelings of edits and re-rolls, for the
+difference of mean accuracies and the log ratio of accuracy variances; pooled: sum of per-pool
+standardized statistics, $2\times10^5$ joint relabelings. TS7-Q reads hit the budget on
+$99$--$100\%$ of questions.}
+\label{tab:reroll}
+\input{tables/reroll}
+\end{table}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{figures/reroll.pdf}
+\caption{\textbf{Single-token edits and numerical re-rolls move held-out accuracy by similar
+amounts} (exploratory). Each dot is one read on $200$ held-out questions: a single-token edit
+(blue) or the unchanged prompt read in requests of a different size (orange). Diamond and dashed
+line: the base read. Bars: means; the re-roll mean includes the base read. Every panel spans $13$
+accuracy points. $p$: exact two-sided permutation tests for the mean and the variance
+(Table~\ref{tab:reroll}).}
+\label{fig:reroll}
+\end{figure}
+
+\paragraph{Details.} Figure~\ref{fig:reroll} shows every read of Table~\ref{tab:reroll}; the two
+same-prompt re-reads per pool are token-identical to the base read. The tests compare the $24$
+edits of a pool with six re-rolls (five chunked reads and the base read). The spread test has
+little power with six re-rolls per pool: it does not detect a difference for Llama-3 ($p=0.72$,
+$0.47$), and for Qwen3, where edits spread about twice as wide as re-rolls, it reaches $p=0.03$ only
+for the two Qwen3 pools combined, a subset formed after seeing the data. Edits flip correctness on
+more questions than re-rolls in three of the four pools (exact $p<3\times10^{-4}$), and the
+additional flips cancel in accuracy.
+
+\paragraph{A single greedy read is one draw.} On LD7-L the base read lies $3.5$ points above all
+five chunked re-rolls ($0.505$ vs.\ $0.455$--$0.470$, sd $0.006$), so $23$ of $24$ edits score below
+it. Leaving the base read out of the null (five re-rolls, all $\binom{29}{5}$ relabelings) gives mean
+$p=0.86$, $0.22$, $0.67$, $0.75$ (pooled $0.22$) and variance $p=0.03$, $0.61$, $0.18$, $0.21$
+(pooled $0.03$) for LD7-L, TS7-L, LD7-Q and TS7-Q: LD7-L edits then spread more than the five
+tightly clustered re-rolls, and mean accuracies still agree. Edit accuracies spread close to or below what their
+pairwise disagreement implies if each disagreement's sign were a fair coin (sample sd $0.022$,
+$0.020$, $0.020$, $0.021$ against $0.024$, $0.024$, $0.020$, $0.021$); the Qwen3 re-rolls are
+tighter than their disagreement implies ($0.010$ against $0.019$ and $0.010$ against $0.017$), so
+the Qwen3 variance gap comes from the re-rolls rather than from unusually dispersed edits. First divergence
+is the position of the first differing reasoning token; when one reasoning is a prefix of the
+other, edits count the question at the shorter length and re-rolls leave it out, so the two
+groups' medians are not directly comparable and we report them for edits only. Truncation was
+recorded only for TS7-Q, where the base and re-roll reads hit the $384$-token budget on
+$99$--$100\%$ of questions, so answers there are read off unfinished reasoning; it was not recorded
+for the other three pools, whose incumbents' samples on the training questions are truncated at this
+budget on $46\%$ (LD7-L), $14\%$ (TS7-L) and $100\%$ (LD7-Q).
+
+\subsection{Read-off term per pool}
+
+\begin{table}[h]
+\centering
+\caption{\textbf{The read-off term is small and unpredictive} (Eq.~\ref{eq:decomp}; eleven
+pools; the incumbent's $16$ samples per training question, read under the incumbent and under
+each candidate). Read-off flips: fraction of (candidate, question, sample) triples whose hard read
+of the same reasoning changes; $|A|$: mean absolute read-off term per edit;
+$|\Delta_{\text{held-out}}|$, $|\Delta_{\text{fresh}}|$: mean absolute change of held-out greedy
+accuracy and of coupled fresh sampled accuracy on the training questions (accuracy points);
+$\rho$: Spearman between $A$ and the held-out change; KL: median over edits of
+$-\mathbb{E}_{\pi_P}\log w$ per reasoning (nats); sd$_x$: mean over edits of the within-question
+standard deviation of $\log w$. Rows as in Table~\ref{tab:validity}; TS3-G: $A=0$ for every edit,
+so $\rho$ is undefined.}
+\label{tab:readoff}
+\small
+\input{tables/readoff}
+\end{table}
+
+Table~\ref{tab:readoff} gives the per-pool values summarized in \S\ref{sec:theory}: read-off flips
+of $0.0$--$3.2\%$, $|A|$ of $0.0$--$1.2$ points against mean absolute held-out effects of
+$2.1$--$10.9$, and
+median divergences of $1.1$--$14.6$ nats per reasoning.
+
+\subsection{Wrongly answered training questions}
+\label{app:wrongrows}
+Splitting training questions by whether the incumbent answers them correctly, and ranking each
+question's loss changes across edits before averaging (which removes scale differences between
+questions), the negative correlation of the fixed-reasoning objective on wrongly answered questions
+persists for Llama-3 ($-0.25$ to $-0.61$ in all five pools) but not for Qwen3 ($+0.25$, $-0.04$,
+$+0.07$; its other two pools have one wrongly answered question each); Gemma-2's pool gives
+$-0.21$. This is consistent with the unfaithful-read mechanism of Proposition~\ref{prop:faithful}
+for Llama-3; it does not show how much of the failure that mechanism accounts for.
+
+\subsection{Failed repairs and an early pilot}
 
 \begin{table}[h]
 \centering
@@ -125,12 +296,12 @@ and the absolute change at a random position of the shared prefix
 \toprule
 Run & Forks & $\Delta P_{\text{fork}}$ & $|\Delta P_{\text{fork}}|$ & $|\Delta P_{\text{ctrl}}|$ \\
 \midrule
-LD7, Llama-3 & 41 & $+0.085$ & 0.199 & 0.191 \\
-LD3, Llama-3 & 41 & $+0.049$ & 0.203 & 0.246 \\
-TS7, Llama-3 & 47 & $+0.092$ & 0.220 & 0.234 \\
-LD7, Qwen3 & 17 & $-0.069$ & 0.186 & 0.144 \\
-LD3, Qwen3 & 11 & $+0.136$ & 0.258 & 0.146 \\
-TS7, Qwen3 & 33 & $-0.025$ & 0.157 & 0.181 \\
+LD7-L & 41 & $+0.085$ & 0.199 & 0.191 \\
+LD3-L & 41 & $+0.049$ & 0.203 & 0.246 \\
+TS7-L & 47 & $+0.092$ & 0.220 & 0.234 \\
+LD7-Q & 17 & $-0.069$ & 0.186 & 0.144 \\
+LD3-Q & 11 & $+0.136$ & 0.258 & 0.146 \\
+TS7-Q & 33 & $-0.025$ & 0.157 & 0.181 \\
 \midrule
 Pooled difference $|\Delta P_{\text{fork}}|-|\Delta P_{\text{ctrl}}|$ & \multicolumn{4}{r}{$-0.008$ [$-0.041,+0.026$]} \\
 \bottomrule
@@ -138,7 +309,7 @@ Pooled difference $|\Delta P_{\text{fork}}|-|\Delta P_{\text{ctrl}}|$ & \multico
 \end{table}
 
 \paragraph{Rationale-likelihood objective (pilot).} In an earlier pilot (validity v1; 8
-training rows, 60 held-out questions; Llama-3 on date understanding and formal fallacies,
+training questions, 60 held-out questions; Llama-3 on date understanding and formal fallacies,
 Gemma-2 on date understanding), the likelihood of a self-generated gold-consistent
 rationale (PMPO-style) correlated $0.25$, $-0.16$ and $-0.02$ with the held-out change,
 a correct-versus-incorrect rationale contrast $0.13$, $-0.22$, $-0.35$, and a policy-gradient
@@ -146,8 +317,8 @@ estimate $-0.30$ and $-0.49$; none was pursued. (The Gemma-2 pilot preceded a fi
 end-of-turn token in sampling and is reported for completeness only.)
 
 \paragraph{Answer-conditioned shortlist (H-cond).} Preregistered on the untouched task
-TS3 before its data existed: scoring edits by the answer-loss change only on rows the
-incumbent answers correctly does not improve best-3 regret over the all-row score ($+0.000$
+TS3 before its data existed: scoring edits by the answer-loss change only on training questions
+the incumbent answers correctly does not improve best-3 regret over the score on all questions ($+0.000$
 [$-0.025,+0.021$]) and is worse than the exact expectation of a uniformly random ranking
 ($-0.029$ [$-0.048,-0.002$]). H-cond is retired.
 
@@ -162,29 +333,112 @@ arrive: a first check (three reads, $200$ questions) was token-identical, but wi
 concurrency one of two re-reads changed the greedy reasoning on $55$--$66\%$ of questions. With the
 engine core in the calling process, so that all of a call's requests are enqueued before the first
 step, four re-reads of $200$ questions were token-identical both at the evaluation configuration
-($4{,}096$ tokens) and at the search configuration ($384$ tokens, a KV cache for about five
+($4{,}096$ tokens) and at the search memory configuration ($384$ tokens, a KV cache for about five
 $4{,}096$-token sequences, so that sequences are preempted and recomputed). All end-to-end
-evaluations, re-reads and re-roll measurements use this configuration; the validity studies
-(\S\ref{sec:diagnosis}) were read without prefix caching with the multiprocess engine
+evaluations, re-reads and re-roll measurements use this configuration, with one prompt's
+questions per request in a fixed order. The validity studies' held-out targets
+(\S\ref{sec:diagnosis}) were read by the Hugging Face model in the scoring process (batched greedy
+generation with left padding; re-read reproducibility not measured), and the H-dist samples and
+reads by the multiprocess vLLM engine without prefix caching (Gemma-2: Hugging Face)
 \todo{re-read the held-out targets of the eleven pools with the in-process engine and report
 the change of Table~\ref{tab:validity}}. Rendered token
 ids are identical between the training-time (Hugging Face) and evaluation engines for all three
-models. Reasoning budgets are $1{,}024$ tokens during search, $384$ in the validity studies (whose
-tasks need fewer) and $4{,}096$ for dev selection and test; truncation rates are reported.
+models. Reasoning budgets are $1{,}024$ tokens during search, $384$ in the validity studies and
+$4{,}096$ for dev selection and test; truncation rates are reported (for the validity studies in
+\S\ref{sec:limitations}).
+
+\paragraph{Numerical re-rolls.} A reproducible engine is not batch-invariant. Reading the
+unchanged incumbent in separate requests of $16$, $25$, $40$, $64$ or $100$ questions gives five
+reads that are each reproducible but differ from the single-request base read and from each other.
+In the four token pools the greedy reasoning differs from the base read on $67$--$71\%$ (LD7-L),
+$56$--$61\%$ (TS7-L), $83$--$86\%$ (LD7-Q) and $65$--$73\%$ (TS7-Q) of questions, correctness on
+$13$--$16\%$, $8$--$13\%$, $14$--$19\%$ and $10$--$13\%$, and accuracy over the six reads has
+standard deviation $0.018$, $0.022$, $0.009$ and $0.009$. Batch-invariant kernels
+\citep{he2025nondeterminism} would make these reads identical; we keep the engine and use its
+re-rolls as the null against which edit effects are measured (\S\ref{sec:diagnosis},
+Table~\ref{tab:reroll}).
 
 \section{Distributional scores: protocol}
 \label{app:dist}
-Per pool (the records of \S\ref{sec:diagnosis}): $S=16$ reasonings per training question under the
-incumbent, sampled at $\tau=0.7$ with no top-$k$/top-$p$ truncation (so that the proposal is the
-full tempered softmax), the validity studies' $384$-token budget, a fixed seed per (question,
-sample). For every candidate and sample, the tempered log-likelihood of the reasoning is computed by
-teacher forcing in bfloat16 with float32 softmax, adding $\log P(\text{stop})$ at the end of samples
-that stopped. Hard reads (greedy, $16$ tokens after the extractor) and soft reads (gold-answer
-probability) are recorded under the incumbent and under every candidate; four further samples per
-question under every prompt with the same seed per (question, sample) give a coupled fresh
-distributional evaluation. All estimators of Eq.~\ref{eq:snis} and the label-free $\beta$ rule are
-computed afterwards from the stored values; the predictors, targets and kill criterion were fixed
-before the data (Appendix~\ref{app:prereg}).
+Per pool (the records of \S\ref{sec:diagnosis}): $S=16$ reasonings for each of the $24$ training
+questions under the incumbent, sampled at $\tau=0.7$ with no top-$k$/top-$p$ truncation (so that
+the proposal is the full tempered softmax), the validity studies' $384$-token budget and a fixed
+seed per (question, sample). For every candidate and sample, the tempered log-likelihood of the
+reasoning is computed by teacher forcing in bfloat16 with float32 softmax, adding
+$\log P(\text{stop})$ at the end of samples that stopped. Hard reads (greedy, $16$ tokens after the
+extractor) and soft reads (gold-answer probability) are recorded under the incumbent and under
+every candidate; four further samples per question under every prompt, with the same seed per
+(question, sample), give the coupled fresh evaluation. No estimator generates reasoning under a
+candidate. All estimators of Eq.~\ref{eq:snis} are computed afterwards from the stored values.
+Tempering trades coverage for bias toward the fixed-reasoning family at $\beta=0$ (a smaller $\beta$
+targets the geometric mixture $\pi_P^{1-\beta}\pi_{P'}^{\beta}$), and self-normalization hides the
+failure of coverage: weights renormalized among samples that are all unlikely under the candidate
+look well-conditioned.
+
+\paragraph{Registered predictors.} Fixed before the data (Appendix~\ref{app:prereg}): the primary
+predictor (Eq.~\ref{eq:snis} with candidate reads at a label-free $\beta^\ast$), the $\beta$ curve
+$\{0,\tfrac14,\tfrac12,1\}$, soft reads, the first-order score-function estimate
+$\widehat{\operatorname{Cov}}(\log w,c)$, effective-sample-size diagnostics, the coupled fresh
+evaluation, the held-out targets and the kill criterion of \S\ref{sec:exp-validity}. The variant
+with incumbent reads (H-inc, the distribution term alone) was defined after the first pool and is
+confirmatory on pools $2$--$11$. $\beta^\ast$ is the largest $\beta\in\{1,\tfrac12,\tfrac14\}$
+whose median per-question effective sample size $(\sum_s w_s^\beta)^2/\sum_s w_s^{2\beta}$ over
+candidates is at least $S/4=4$ (else $\tfrac14$). It selected $\beta^\ast=\tfrac12$ in $8$ pools,
+$\tfrac14$ in $2$ (TS7-L, TS3-G) and $1$ in $1$ (LD7-Q$^\ast$); at $\beta=1$ the median effective
+sample size was $1.4$--$5.1$ of $16$. The label-free rule thus met its effective-sample-size
+threshold in every pool, while in ten of the eleven pools the median divergence ($3.9$--$14.6$ nats
+per reasoning) exceeded $\log 16$, the regime in which the coverage argument predicts failure with
+$16$ samples. Verify-all for a predictor accepts the edit with the
+largest positive predicted change and records its held-out change (zero if none is positive).
+
+\begin{table}[h]
+\centering
+\caption{\textbf{Registered H-dist test (11 pools): estimates from the incumbent's own samples do
+not predict the held-out change; fresh reasoning does.} Pooled Spearman: mean of the $11$ per-pool
+Spearman correlations, with a $95\%$ percentile bootstrap interval over pools (pools resampled with
+replacement, $20{,}000$ replicates), wider than the bias-corrected question-bootstrap intervals of
+the text. Pools below random: best-3 regret strictly below the exact random expectation. Verify-all:
+accept the edit with the highest positive predicted change (first listed among ties); mean realized
+held-out change (points), pools improved/worsened (--: not simulated). \greater{} objective: the
+fixed-reasoning objective (Eq.~\ref{eq:greater}) on the greedy reasoning. Rows: training questions;
+sampled $24\times4$: four samples on each of the $24$ questions, with the incumbent read on the same
+seeds. Candidate reads, $\beta=0$: the read-off term $A$ on the incumbent's samples. Primary: the
+registered predictor ($\beta^\ast$ without labels). Incumbent reads: the distribution term alone,
+all 11 pools (H-inc is confirmatory on pools 2--11). KL gate: primary if
+$\mathrm{KL}\le\tfrac12\log16$, else fresh greedy on $8$ questions; $^\dagger$added after five
+pools, before the Qwen3 and Gemma-2 data (a secondary analysis, Appendix~\ref{app:prereg}).
+Figure~\ref{fig:beta} plots the
+$\beta$ curves.}
+\label{tab:hdist}
+\small
+\input{tables/hdist}
+\end{table}
+
+\paragraph{Further results.} As an acceptance rule, SNIS at $\beta=1$ loses $2.77$ held-out points
+on average ($4$ pools improved, $7$ worsened; Table~\ref{tab:hdist}). The first-order score
+function, the small-$\beta$ limit, is worse than random (best-3 regret $0.089$; gain $-0.023$
+$[-0.041,-0.006]$). The primary score's agreement with the on-policy estimate of the same quantity
+from fresh samples is $-0.52$ to $+0.36$ per pool. Coupled sampled accuracy on $24$ questions
+$\times\,4$ samples has regret $0.035$ (gain over random $+0.031$ $[+0.026,+0.045]$, $9$ of $11$
+pools).
+
+\paragraph{Diagnostics added after five pools.} After the five Llama-3 pools and before any
+Qwen3 or Gemma-2 data, descriptive diagnostics were added for all eleven pools: split-half
+reliability of the primary score (samples $1$--$8$ against $9$--$16$), its agreement with the
+coupled fresh estimate, the on-policy read-off term (Table~\ref{tab:readoff}), the divergence
+$-\mathbb{E}_{\pi_P}\log w$ per reasoning, and a KL gate fixed from theory rather than data: an
+edit is scored off-policy only if this divergence is at most $\tfrac12\log S=1.39$ nats, and
+otherwise by fresh greedy accuracy on $8$ questions. The gate keeps $0$--$52\%$ of a pool's edits
+off-policy (median $10\%$) and reaches a pooled Spearman of $+0.218$, below fresh-8 alone
+($+0.277$). A numerical null re-scores the incumbent's samples with a different
+batch size; the standard deviation of the log-ratio between the two passes measures bfloat16 and
+padding noise. On the six pools sampled after the amendment it is $0.4$--$1.3$ nats per reasoning,
+against within-question standard deviations of $\log w$ of $3.4$--$6.2$ nats on the same pools.
+
+\paragraph{Intervals.} Bias-corrected bootstrap intervals resample training questions and
+held-out questions within each pool and are conditional on the pools. For the coupled fresh
+evaluation no replicate fell below the point estimate, so its interval ($[+0.415,+0.499]$)
+excludes the estimate ($+0.413$).
 
 \section{Pipeline simulation}
 \label{app:pipeline}
@@ -192,30 +446,176 @@ For each pool and a verification size $n\in\{8,16,24\}$, one round of the shortl
 loop is replayed from recorded per-question correctness: the edits are scored by a predictor on
 the $24$ training questions, the top three (or all edits) are verified by fresh greedy accuracy on
 the first $n$ training questions, and the best is accepted if it beats the incumbent on those
-questions (optionally by a margin of $1$--$3$ questions); the realized gain is the accepted edit's
-change on the $200$ held-out questions (zero if none is accepted). The random shortlist is scored
-by its exact expectation over all three-subsets.
+questions; the realized gain is the accepted edit's change on the $200$ held-out questions (zero if
+none is accepted). Ties among candidates go to the first-listed edit, as in the verify-all column of
+Table~\ref{tab:hdist}. The random shortlist is scored by its exact expectation over all
+three-subsets. With a shortlist of three verified on $8$ questions, the answer-loss shortlist
+realizes $-3.27$ (exact) and $-3.23$ (patched) points and a random shortlist $-1.34$; verifying all
+edits on $8$, $16$ and $24$ questions realizes $-2.27$, $-0.77$ and $+1.14$; the best edit of each
+pool would add $5.50$.
+
+\section{Verification at matched cost: protocol}
+\label{app:verify}
+
+\paragraph{Noise of a paired comparison.}\label{app:noise} Fresh reasoning measures an edit's whole
+effect, but greedy accuracy on $n$ questions is a noisy instrument even under a deterministic
+engine: numerical re-rolls of the unchanged incumbent rewrite much of its greedy reasoning and move
+its accuracy (\S\ref{sec:diagnosis}, Table~\ref{tab:reroll}). Counting flips gives the size of this
+noise: comparing two prompts on $n$ questions, the accuracy difference is $(g-h)/n$ for $g$ gained
+and $h$ lost questions, and if the $f=(g+h)/n$ flipped questions carry no systematic sign its
+variance is $f/n$. From the measured disagreement between single-token edits this predicts a
+standard deviation of $2.0$--$2.4$ points for their accuracies (observed: $2.0$--$2.2$).
+Single-token edits flip $15$--$20\%$ of questions (Table~\ref{tab:reroll}), so comparing an edit
+with the incumbent has a standard deviation of about $14$--$16$ points on $8$ questions, $5$--$6$ on
+$50$ and $3$ on $200$, against mean block-edit effects of $2.1$--$10.9$ points. Selecting the best
+of many candidates on such comparisons is a winner's curse: the largest verified gain is mostly
+noise, and accepting it lowers held-out accuracy (\S\ref{sec:exp-verify}).
+
+\paragraph{Protocol.} This analysis was added after the registered H-dist outcome and is exploratory. It uses the
+eleven pools' recorded per-question correctness on the $24$ training questions: greedy reads of
+every edit and of the incumbent, and four sampled reasonings per question and prompt at
+$\tau=0.7$ that share one seed per (question, sample) across prompts (Appendix~\ref{app:dist}).
+A verifier with $G$ generations per candidate predicts an edit's effect as the mean over questions
+of candidate minus incumbent correctness, in one of three forms:
+\emph{greedy} reads on $r$ questions ($G=r$, $r\in\{4,8,12,16,24\}$); \emph{coupled} sampled reads,
+$k$ samples on each of $r$ questions with the incumbent read on the same $k$ seeds (common random
+numbers; $G=rk$); and \emph{independent} sampled reads, as coupled but with the incumbent read on
+$k$ other seeds of the four ($k\le2$), so that candidate and incumbent reads are independent. The
+grid covers $rk\in\{4,8,12,16,24,48,96\}$ with $k\in\{1,2,4\}$ and $r\le24$; $G$ counts the
+candidate's generations, since the incumbent's reads are shared by all candidates. For every cell
+and pool, $400$ random draws of the $r$ questions (without replacement) and of the $k$ samples
+give the expected Spearman correlation with the held-out change, the best-3 regret and the
+realized held-out change of a verify-all step that accepts the edit with the largest predicted
+change if it is positive (ties in the prediction broken uniformly in both).
+
+\paragraph{Comparisons.} Pools are the units: coupled against greedy and coupled against
+independent verification at equal $G$ are compared with exact sign-flip tests over pools. Greedy
+verification has the higher mean Spearman at every equal $G$,
+and no coupled-versus-greedy or coupled-versus-independent difference in Spearman reaches
+$p<0.05$ (smallest $p=0.052$). Figure~\ref{fig:verify} plots the cells with one sample per question
+and the $24\times2$ and $24\times4$ cells; mixed layouts fall in between (coupled $12\times2$:
+$+0.281$). Because this analysis averages over question subsets while the pipeline simulation of
+Appendix~\ref{app:pipeline} verifies on the first $n$ questions, verify-all on $8$ greedy
+questions realizes $-1.45$ points here and $-2.27$ there (\S\ref{sec:exp-verify}).
+
+\paragraph{Allocation and acceptance at a fixed budget.} A second replay, specified after the
+results above and equally exploratory, uses the greedy reads of each pool's $K=20$ or $21$ edits
+and of the incumbent on the $24$ training questions. The budget $B$ counts candidate reads of one
+question; the incumbent's reads are shared and not counted. For every pool, budget and allocator,
+$400$ random orders of the $24$ questions are drawn and the allocator reads questions in that
+order. Unless a margin rule applies, it accepts its best candidate if the candidate's mean paired
+correctness difference from the incumbent, on the questions it was read on, is positive (ties among
+candidates broken uniformly). The score is the accepted edit's held-out change (zero if none),
+averaged over orders and then over pools; accepting the best edit of every pool would gain $5.50$
+points, and the mean edit changes held-out accuracy by $-2.93$. \emph{Uniform} verification reads
+all $K$ edits on the first $\min(24,\lfloor B/K\rfloor)$ questions. The \emph{random shortlist}
+reads three uniformly drawn edits on $\min(24,\lfloor B/3\rfloor)$ questions, the pattern of
+Algorithm~\ref{alg:search} with a random shortlist. \emph{Successive halving} reads all edits on
+$\max(1,\lfloor B/(K\lceil\log_2K\rceil)\rfloor)$ questions, keeps the better half by paired mean,
+doubles the number of questions (reusing those already read) and repeats while the budget allows.
+\emph{Racing} adds one question at a time to all surviving edits and, after $n$ questions, drops
+every edit whose paired mean lies more than $\sqrt{2f/n}$ below the leader's, until one edit
+remains, the budget is spent or all questions are read. Here $f$ is the pool's flip rate, the
+fraction of (edit, question) pairs whose correctness differs from the incumbent's ($0.06$--$0.41$
+across pools); it is computed once per pool from all recorded reads, where a verifier would
+estimate it from earlier rounds. The
+\emph{margin} rules verify uniformly but accept only if the paired gain exceeds $c\sqrt{f/n}$ with
+$c=1$ or $2$, the standard error of a mean of $n$ paired differences of which a fraction $f$ is
+non-zero (see the noise paragraph above); at $24$ questions the $2$-SE margin is $10$--$26$ accuracy points.
+
+\begin{table}[h]
+\centering
+\caption{\textbf{Held-out change (points) realized by one verification step at a fixed budget}
+(exploratory; 11 pools, 400 question orders each). $B$: candidate reads of one question, the
+incumbent's reads not counted. Rows per edit: training questions read per edit, $\lfloor
+B/K\rfloor$ for $K=20$--$21$ edits, at most $24$. Margin rules: uniform verification, accepting only if the paired gain exceeds $1$ or $2$
+standard errors $\sqrt{f/n}$. Best edit of each pool: $+5.50$; mean edit: $-2.93$.}
+\label{tab:margin}
+\small
+\input{tables/margin}
+\end{table}
+
+\paragraph{Results.} Below the full budget every allocator loses held-out accuracy
+(Table~\ref{tab:margin}). Successive halving and the random shortlist, which compare fewer
+candidates on more questions each, lose less than uniform verification there, but at $B=480$ only
+uniform verification gains among the four allocators without a margin ($+0.31$; halving $-0.24$,
+shortlist $-0.72$, racing $-1.09$). This
+uniform value differs from verify-all on $24$ greedy reads ($+0.41$, Figure~\ref{fig:verify})
+because the two pools with $21$ edits read $22$ questions and ties are drawn anew. The $2$-SE margin
+has the smallest loss at every budget below $480$, losing less than uniform verification in $6$ or
+$7$ of the $11$ pools at each of these budgets, and the largest gain at $B=480$. There every edit is
+read on all or nearly all questions, so each pool contributes essentially one decision: the margin
+leaves seven pools unchanged, in which uniform verification gained in two and lost in three, and
+one pool contributes $+10.5$ points under both rules. A $1$-SE margin is too small: it loses
+$0.87$--$1.73$ points below the full budget and $0.07$ at it.
+
+\input{sections/method}
+
+\section{Official \greater{} on one GPU}
+\label{app:greater}
+We run the official \greater{} code with Llama-3-8B on our $50$ training questions of each task,
+copied verbatim from \greater{}'s own data files in our seeded order, with $106$ steps, top-$k$
+$40$, top-$q$ $6$ and batch $64$. The released configuration loads the model twice, for a
+gradient worker and for a reasoning worker; we have one $48$\,GB GPU.
+Our patches change only where tensors live and when they are freed: (i) one local copy of the
+model serves both workers; (ii) the reasoning worker regenerates the training questions in calls
+of one eighth of them instead of one half, and every question is still evaluated; (iii) candidate
+logits (computed in \greater{}'s default batches of $9$) are freed before the next candidate is
+evaluated; (iv) the gradient
+worker's weights are frozen and its CUDA cache is emptied after each task. Freezing removes about
+$16$\,GB of weight gradients that \greater{}'s backward pass computed but never read; the gradient
+with respect to the one-hot prompt tokens, the only one used, is unchanged. The optimization
+algorithm, its hyperparameters, the evaluation of candidates by fresh reasoning and the selection
+rule are unchanged; smaller generation calls change batch shapes, which perturbs greedy decoding
+numerically as any change of batch size does (Appendix~\ref{app:reader}). A two-step smoke run
+took $31$ minutes with a peak of $33$\,GB. The patches are released with our code.
+
+\paragraph{Shortlist ablation.} One environment switch replaces the gradient ranking and nothing
+else: instead of the $q$ candidates with the largest gradient score among the model's $k$ proposed
+tokens, the shortlist is $q$ of the same $k$ proposals drawn uniformly at random, and the gradient
+is not computed. Regeneration, scoring by fresh reasoning and selection are identical in both
+arms. The ablation was registered before its runs (Appendix~\ref{app:prereg}).
+\todo{runs: tracking shuffled objects (five objects) and geometric shapes, gradient and random
+shortlist; test accuracy under the deterministic engine, full and clean subsets; wall time.}
 
 \section{Preregistration and amendments}
 \label{app:prereg}
 The experiment plan was fixed before any optimizer result and amended with dates and
-reasons: dev selection restricted to checkpoint incumbents; Stage C deferred until the
+reasons (Stage C is the end-to-end structural search of \S\ref{sec:exp-search}): dev selection
+restricted to checkpoint incumbents; Stage C deferred until the
 validity study; H-fork and its replication protocol frozen after one exploratory result;
 evaluation separated from search with one shared engine; a reader fix (\LaTeX{}-wrapped
 answers, answer length and reasoning budget) before any baseline or Stage C result; the
 Stage C variant set and its later re-scoping to 140 runs before any Stage C outcome;
 H-cond before its data; and the official \greater{} shortlist ablation before its runs.
 After an internal review found the generation engine nondeterministic (prefix caching) and a
-truncation artifact, every read was redone with a deterministic engine and a $4{,}096$-token budget,
+truncation artifact, the reading protocol was fixed for every later evaluation read (no prefix caching, one
+prompt's questions per request, a $4{,}096$-token budget for re-reads, dev selection and test),
 proposals cut at their token cap were discarded, pool-level tests became primary, and the
 distributional hypothesis H-dist with its kill criterion was fixed before any of its data; its
 incumbent-read variant H-inc was defined after the first of eleven pools and is tested on the other
 ten. The Stage C protocol was then revised to verify on all $50$ training questions (as \greater{}
-does) before any of its runs. The failed hypotheses (H-fork, H-cond) are reported as registered.
+does) before any of its runs. After five of the eleven H-dist pools, before any Qwen3 or Gemma-2
+data, descriptive diagnostics, a KL gate fixed from theory and a numerical null were added
+(Appendix~\ref{app:dist}), and the coverage prediction of \S\ref{sec:theory} was first written down.
+When a second source of nondeterminism appeared (request timing with a
+multiprocess engine core), all evaluation, re-read and re-roll jobs and the Stage C search moved to
+the in-process engine, and the one Stage C run made before the change was archived and re-run.
+After the registered H-dist and H-inc outcomes, four analyses were added and are labelled
+exploratory: verification at matched generation budgets, allocation and acceptance at a fixed
+budget (both Appendix~\ref{app:verify}; the latter is not logged in the plan), numerical re-rolls as
+the null for edit effects (\S\ref{sec:diagnosis}), and truncation of held-out reads and of the
+H-dist samples. The pool-level sign-flip tests of the validity study (\S\ref{sec:diagnosis}) were
+made primary after all eleven validity pools existed. The failed hypotheses (H-fork, H-cond, H-dist, H-inc) are reported as
+registered.
 Deviations: the v3 replication runs on a non-initial prompt state share their $200$ held-out
 questions with the initial-state run of the same task and model (the protocol asked for
 independent slices), and the bootstrap does not resample pools; under the stricter preregistered
 causal statistic (signed $\Delta P_{\text{fork}}-|\Delta P_{\text{ctrl}}|=-0.156$
-[$-0.203,-0.112$]) H-fork fails as under the lenient one.
+[$-0.203,-0.112$]) H-fork fails as under the lenient one. Table~\ref{tab:validity} reports best-3
+regret, registered for TS3, instead of the best-5 regret registered for the v3 pools; under best-5
+the patched objective's regret ($0.069$) also exceeds that of the random ranking then used
+($0.056$). The token-level re-roll study (Table~\ref{tab:reroll}) re-reads at the validity budget of
+$384$ tokens rather than the registered $4{,}096$, to match Table~\ref{tab:validity-token}.
 
 
