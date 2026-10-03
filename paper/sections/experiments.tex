@@ -110,9 +110,16 @@ arm, registered conditional on H-dist or H-inc, is not run. The registered compa
 seed within tasks, are patch-v50 vs.\ random-v50 (does the shortlist signal matter under full verification?) and
 random-v50 vs.\ random-v8 (does the verification budget matter?); the prompt selected on dev is
 evaluated on test once, with three numerical re-rolls (deterministic engine, $4{,}096$ tokens).
-\todo{Seeds 1--3: test accuracy per task
-and mean (full, clean); paired differences, conditional and task-level intervals, W/T/L;
-textgrad-v50 (seeds 1--2); truncation; GPU time, tokens; the seven tasks.}
+With seed 1 (seeds 2--3 running), mean test accuracy over the seven tasks is $63.3$ (patch-v50),
+$61.6$ (random-v50), $59.7$ (random-v8) and $64.4$ (textgrad-v50). The fixed-reasoning shortlist does
+not beat the random one ($+1.7$ points, conditional interval $[-2.4,+5.6]$, wins/ties/losses $3/1/3$)
+at more than twice the search cost ($56$ vs.\ $26$ minutes per run), and full verification beats
+$8$-question minibatches in $5$ of $7$ tasks ($+1.9$, $[-1.7,+5.8]$). Inside the search the same
+mechanisms appear: the unchanged incumbent, re-read on the same $50$ questions next to different
+candidates, moves by $2.1$--$2.8$ points (sd), and accepted candidates lose $1.4$--$2.2$ points when
+re-measured, against $12.3$ with $8$-question minibatches (exploratory). One test read carries a
+numerical noise floor of $1.5$ points (sd over re-rolls). \todo{seeds 2--3; comparison with the
+initial and published \greater{} prompts; truncation; tokens.}
 
 \subsection{Does \greater{} need its gradient?}
 \label{sec:exp-greater}
